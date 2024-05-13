@@ -1,0 +1,9 @@
+version: '3'
+
+services:
+  tic-tac-toe:
+    restart: always
+    image: ehage/vigilant-harvest-app:${VERSION_TAG}
+    container_name: vigilant-harvest-app
+    ports:
+      - '33458:80'
