@@ -14,7 +14,7 @@ export default defineConfig({
     }),
   ],
   define: { 'process.env': {} },
-  base: '/apps/vigilant-harvest-app',
+  base: '/apps/vigilant-harvest/',
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),
