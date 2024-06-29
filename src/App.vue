@@ -1,19 +1,21 @@
 <template>
   <v-app>
+    <AppBar/>
     <v-main>
-      <VigilantHarvestApp/>
+      <router-view></router-view>
     </v-main>
   </v-app>
 </template>
 
 <script>
-import VigilantHarvestApp from "@/components/VigilantHarvestApp.vue";
+
+import AppBar from "@/components/AppBar.vue";
 
 export default {
   name: 'App',
 
   components: {
-    VigilantHarvestApp,
+    AppBar
   },
 
   data: () => ({
