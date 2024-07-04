@@ -2,8 +2,8 @@
   <v-app>
     <AppBar/>
     <v-main>
-      <h2 v-if="sessionId">You have a sessionId, yay! {{sessionId}}</h2>
-      <h2 v-else>Hmm, don't see a sessionId</h2>
+      <h2 v-if="token">You have a token, yay! {{token}}</h2>
+      <h2 v-else>Hmm, don't see a token</h2>
       <router-view></router-view>
     </v-main>
   </v-app>
@@ -21,12 +21,12 @@ export default {
   },
 
   data: () => ({
-    sessionId: null,
+    token: null,
   }),
 
   created() {
     const urlParams = new URLSearchParams(window.location.search);
-    this.sessionId = urlParams.get('sessionId');
+    this.token = urlParams.get('session');
   }
 }
 </script>
