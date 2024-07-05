@@ -18,8 +18,5 @@ async function verifyToken(token) {
 }
 
 export default {
-    login,
-    loginToApplication,
-    logout,
     verifyToken,
 };
