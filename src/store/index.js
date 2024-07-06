@@ -10,7 +10,7 @@ export const useAuthenticationStore = defineStore('authentication', {
         async authenticate(token) {
             try {
                 this.loading = true;
-                await authenticationApi.verifyToken(token);
+                await authenticationApi.verifyApplicationToken(token);
                 storageUtils.setTokenInLocalStorage(token);
                 this.isAuthenticated = true;
                 this.showAppBar = true;

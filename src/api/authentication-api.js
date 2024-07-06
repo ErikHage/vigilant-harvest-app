@@ -2,9 +2,11 @@ import axios from "axios";
 
 import { feralAuthenticationServiceUrl } from "@/utils/constants";
 
-async function verifyToken(token) {
+async function verifyApplicationToken(token) {
     try {
-        await axios.post(`${feralAuthenticationServiceUrl.v0.auth}/tokens/verify`, {}, {
+        await axios.post(`${feralAuthenticationServiceUrl.v0.auth}/tokens/applications/verify`, {
+            appToken: token,
+        }, {
             headers: {
                 'x-feral-auth-token': token,
             },
@@ -18,5 +20,5 @@ async function verifyToken(token) {
 }
 
 export default {
-    verifyToken,
+    verifyApplicationToken,
 };

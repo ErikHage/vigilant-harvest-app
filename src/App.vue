@@ -40,7 +40,7 @@ export default {
 
   async mounted() {
     const urlParams = new URLSearchParams(window.location.search);
-    this.token = urlParams.get('session');
+    this.token = urlParams.get('authn');
 
     await this.authenticate(this.token);
 
