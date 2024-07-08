@@ -1,22 +1,20 @@
 import axios from "axios";
 
-import { feralAuthenticationServiceUrl } from "@/utils/constants";
+import { feralAuthenticationServiceUrl, applicationId } from "@/utils/constants";
 
-async function verifyApplicationToken(token) {
+async function verifyApplicationToken(appToken) {
     try {
-        await axios.post(`${feralAuthenticationServiceUrl.v0.auth}/tokens/applications/verify`, {
-            appToken: token,
-        }, {
-            headers: {
-                'x-feral-auth-token': token,
+        const response = await axios.post(
+            `${feralAuthenticationServiceUrl.v0.auth}/tokens/applications/${applicationId}/execute`,
+            {
+                appToken,
             },
-        });
+        );
+        return response.data.token;
     } catch (err) {
         console.log('token is invalid');
-        return false;
+        throw err;
     }
-
-    return true;
 }
 
 export default {

@@ -7,11 +7,12 @@ import authenticationApi from "@/api/authentication-api";
 
 export const useAuthenticationStore = defineStore('authentication', {
     actions: {
-        async authenticate(token) {
+        async authenticate(appToken) {
             try {
                 this.loading = true;
-                await authenticationApi.verifyApplicationToken(token);
-                storageUtils.setTokenInLocalStorage(token);
+                const actorToken = await authenticationApi.verifyApplicationToken(appToken);
+                console.log('got an actor token', actorToken);
+                storageUtils.setTokenInLocalStorage(actorToken);
                 this.isAuthenticated = true;
                 this.showAppBar = true;
                 this.loading = false;

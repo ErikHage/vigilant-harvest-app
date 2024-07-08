@@ -22,10 +22,6 @@ export default {
     AppBar
   },
 
-  data: () => ({
-    token: null,
-  }),
-
   computed: {
     ...mapState(useAuthenticationStore, [
       'isAuthenticated',
@@ -39,16 +35,7 @@ export default {
   },
 
   async mounted() {
-    const urlParams = new URLSearchParams(window.location.search);
-    this.token = urlParams.get('authn');
-
-    await this.authenticate(this.token);
-
-    if (this.isAuthenticated) {
-      this.$router.push('/dashboard');
-    } else {
-      // send to feral-auth login with a redirect app id for this app
-    }
+    // TODO check for existing token, or send to feral-auth login
   }
 }
 </script>
