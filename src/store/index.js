@@ -9,19 +9,19 @@ export const useAuthenticationStore = defineStore('authentication', {
     actions: {
         async authenticate(appToken) {
             try {
-                this.loading = true;
                 const actorToken = await authenticationApi.verifyApplicationToken(appToken);
                 console.log('got an actor token', actorToken);
                 storageUtils.setTokenInLocalStorage(actorToken);
                 this.isAuthenticated = true;
                 this.showAppBar = true;
-                this.loading = false;
             } catch (err) {
                 this.isAuthenticated = false;
-                this.loading = false;
                 console.log(err);
                 // TODO redirect to feral-auth login
             }
+        },
+        async verifyToken() {
+            this.isAuthenticated = await authenticationApi.verifyActorToken(storageUtils.tryToLoadTokenFromStorage());
         },
         async logout() {
             try {
@@ -35,7 +35,6 @@ export const useAuthenticationStore = defineStore('authentication', {
             }
             this.clearToken();
             this.showAppBar = false;
-            this.loading = false;
             this.isAuthenticated = false;
         },
         tokenPresent() {
@@ -49,7 +48,6 @@ export const useAuthenticationStore = defineStore('authentication', {
     state: () => {
         return {
             isAuthenticated: false,
-            loading: false,
             alertVisible: false,
             alertType: 'success',
             alertMessage: null,
