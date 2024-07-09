@@ -30,12 +30,34 @@ export default {
 
   methods: {
     ...mapActions(useAuthenticationStore, [
-      'authenticate',
-    ])
+      'tokenPresent',
+      'clearToken',
+      'verifyToken',
+      'setAlertMessage',
+    ]),
   },
 
   async mounted() {
-    // TODO check for existing token, or send to feral-auth login
+    // TODO check for existing token, redirect to dashboard if so
+    if (this.tokenPresent()) {
+      this.verifyToken()
+          .then(() => {
+            if (this.isAuthenticated) {
+              setTimeout(() => {
+                this.$router.push('/dashboard/applications');
+              }, 750);
+            } else {
+              this.clearToken();
+              this.$router.push('/');
+            }
+          })
+          .catch((err) => {
+            this.clearToken();
+            if (err.status === 401) {
+              this.$router.push('/');
+            }
+          });
+    }
   }
 }
 </script>

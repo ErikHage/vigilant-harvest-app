@@ -18,25 +18,40 @@ export default {
   methods: {
     ...mapActions(useAuthenticationStore, [
       'authenticate',
-    ])
+    ]),
+
+    maybeGetApplicationTokenQueryParam() {
+      const urlParams = new URLSearchParams(window.location.search);
+      console.log('authn query param: ', urlParams.get('authn'));
+      return urlParams.get('authn');
+    },
+
+    redirectToDashboard() {
+      console.log('redirecting to dashboard');
+      this.$router.push('/dashboard');
+    },
+
+    redirectToApp() {
+      console.log('redirecting to app');
+      this.$router.push('/');
+    },
   },
 
   async mounted() {
-    const urlParams = new URLSearchParams(window.location.search);
-    console.log('urlParams.get(\'authn\')', urlParams.get('authn'));
+    const maybeApplicationToken = this.maybeGetApplicationTokenQueryParam();
 
-    if (urlParams.get('authn') !== null) {
-      console.log('found application token, attempting to verify');
-      await this.authenticate(urlParams.get('authn'));
+    if (maybeApplicationToken) {
+      console.log('found application token');
+      await this.authenticate(maybeApplicationToken);
 
       if (this.isAuthenticated) {
-        this.$router.push('/dashboard');
+        this.redirectToDashboard();
       } else {
-        this.$router.push('/');
+        this.redirectToApp();
       }
     } else {
-      console.log('no application token, redirecting to login');
-      this.$router.push('/');
+      console.log('no application token');
+      this.redirectToApp();
     }
   }
 }

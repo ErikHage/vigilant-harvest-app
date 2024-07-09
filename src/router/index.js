@@ -46,8 +46,7 @@ router.beforeEach((to, from) => {
 
     if (requiresAuthenticated && !user.isAuthenticated) {
         console.log('sending you back to Login');
-        // TODO do we send back feral auth, or to App?
-        // return { name: 'Login' };
+        return { name: 'LandingPage' };
     }
 });
 
