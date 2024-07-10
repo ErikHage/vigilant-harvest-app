@@ -2,12 +2,12 @@ import axios from "axios";
 
 import { feralAuthenticationServiceUrl, applicationId } from "@/utils/constants";
 
-async function verifyApplicationToken(appToken) {
+async function verifySsoToken(ssoToken) {
     try {
         const response = await axios.post(
             `${feralAuthenticationServiceUrl.v0.auth}/tokens/applications/${applicationId}/execute`,
             {
-                appToken,
+                ssoToken,
             },
         );
         return response.data.token;
@@ -33,6 +33,6 @@ async function verifyActorToken(actorToken) {
 }
 
 export default {
-    verifyApplicationToken,
+    verifySsoToken,
     verifyActorToken,
 };

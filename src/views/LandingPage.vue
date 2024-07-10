@@ -20,10 +20,10 @@ export default {
       'authenticate',
     ]),
 
-    maybeGetApplicationTokenQueryParam() {
+    maybeGetSsoTokenQueryParam() {
       const urlParams = new URLSearchParams(window.location.search);
-      console.log('authn query param: ', urlParams.get('authn'));
-      return urlParams.get('authn');
+      console.log('sso query param: ', urlParams.get('sso'));
+      return urlParams.get('sso');
     },
 
     redirectToDashboard() {
@@ -38,11 +38,11 @@ export default {
   },
 
   async mounted() {
-    const maybeApplicationToken = this.maybeGetApplicationTokenQueryParam();
+    const maybeSsoToken = this.maybeGetSsoTokenQueryParam();
 
-    if (maybeApplicationToken) {
+    if (maybeSsoToken) {
       console.log('found application token');
-      await this.authenticate(maybeApplicationToken);
+      await this.authenticate(maybeSsoToken);
 
       if (this.isAuthenticated) {
         this.redirectToDashboard();
