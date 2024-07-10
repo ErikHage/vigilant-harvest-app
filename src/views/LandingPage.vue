@@ -41,7 +41,7 @@ export default {
     const maybeSsoToken = this.maybeGetSsoTokenQueryParam();
 
     if (maybeSsoToken) {
-      console.log('found application token');
+      console.log('found sso token');
       await this.authenticate(maybeSsoToken);
 
       if (this.isAuthenticated) {
@@ -50,7 +50,7 @@ export default {
         this.redirectToApp();
       }
     } else {
-      console.log('no application token');
+      console.log('no sso token');
       this.redirectToApp();
     }
   }
