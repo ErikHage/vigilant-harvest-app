@@ -5,8 +5,14 @@ import jwtUtils from "@/utils/jwt-utils";
 
 import authenticationApi from "@/api/authentication-api";
 
+const appId = '82d7d287-978b-4df1-bc3d-526838b2465b';
+
 export const useAuthenticationStore = defineStore('authentication', {
     actions: {
+        redirectForSso() {
+            // send to feral-auth with query param of application id "app=appId"
+            window.location.href = `http://localhost:5173/auth/?app=${appId}`;
+        },
         async authenticate(ssoToken) {
             try {
                 const actorToken = await authenticationApi.verifySsoToken(ssoToken);

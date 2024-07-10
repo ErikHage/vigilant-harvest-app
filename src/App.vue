@@ -34,22 +34,31 @@ export default {
       'clearToken',
       'verifyToken',
     ]),
+
+    redirectAfterVerify() {
+      if (this.isAuthenticated) {
+        this.$router.push('/dashboard');
+      } else {
+        this.clearToken();
+        this.$router.push('/login');
+      }
+    }
   },
 
   async mounted() {
-    if (this.tokenPresent()) {
-      this.verifyToken()
-          .then(() => {
-            if (this.isAuthenticated) {
-              this.$router.push('/dashboard');
-            } else {
-              this.clearToken();
-            }
-          })
-          .catch(() => {
-            this.clearToken();
-          });
+    const isTokenPresent = this.tokenPresent();
+
+    if (isTokenPresent) {
+      try {
+        await this.verifyToken();
+        this.redirectAfterVerify();
+      } catch (err) {
+        this.clearToken();
+        this.$router.push('/login');
+      }
+    } else {
+      this.$router.push('/login');
     }
-  }
+  },
 }
 </script>

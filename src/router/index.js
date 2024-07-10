@@ -1,12 +1,21 @@
 import { createRouter, createWebHistory } from 'vue-router';
 
-import PlantsPage from "@/views/PlantsPage.vue";
+import PlantsPage from "@/views/dashboard/PlantsPage.vue";
 import DashboardPage from "@/views/DashboardPage.vue";
 
 import { useAuthenticationStore } from "@/store";
 import LandingPage from "@/views/LandingPage.vue";
+import LoginPage from "@/views/LoginPage.vue";
 
 const routes = [
+    {
+        path: '/login',
+        name: 'LoginPage',
+        component: LoginPage,
+        meta: {
+            requiresAuthenticated: false,
+        },
+    },
     {
         path: '/landing',
         name: 'LandingPage',
