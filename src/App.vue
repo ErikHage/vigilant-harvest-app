@@ -56,7 +56,7 @@ export default {
   },
 
   async mounted() {
-    const maybeSsoToken = this.maybeGetSsoTokenQueryParam()
+    const maybeSsoToken = this.maybeGetSsoTokenQueryParam();
 
     if (maybeSsoToken) {
       this.redirectToLanding(maybeSsoToken);
