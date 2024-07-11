@@ -42,22 +42,38 @@ export default {
         this.clearToken();
         this.$router.push('/login');
       }
-    }
+    },
+
+    redirectToLanding(ssoToken) {
+      this.$router.push(`/landing?sso=${ssoToken}`);
+    },
+
+    maybeGetSsoTokenQueryParam() {
+      const urlParams = new URLSearchParams(window.location.search);
+      console.log('sso query param: ', urlParams.get('sso'));
+      return urlParams.get('sso');
+    },
   },
 
   async mounted() {
-    const isTokenPresent = this.tokenPresent();
+    const maybeSsoToken = this.maybeGetSsoTokenQueryParam()
 
-    if (isTokenPresent) {
-      try {
-        await this.verifyToken();
-        this.redirectAfterVerify();
-      } catch (err) {
-        this.clearToken();
+    if (maybeSsoToken) {
+      this.redirectToLanding(maybeSsoToken);
+    } else {
+      const isTokenPresent = this.tokenPresent();
+
+      if (isTokenPresent) {
+        try {
+          await this.verifyToken();
+          this.redirectAfterVerify();
+        } catch (err) {
+          this.clearToken();
+          this.$router.push('/login');
+        }
+      } else {
         this.$router.push('/login');
       }
-    } else {
-      this.$router.push('/login');
     }
   },
 }

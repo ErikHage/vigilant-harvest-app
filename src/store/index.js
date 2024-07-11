@@ -11,7 +11,7 @@ export const useAuthenticationStore = defineStore('authentication', {
     actions: {
         redirectForSso() {
             // send to feral-auth with query param of application id "app=appId"
-            window.location.href = `http://localhost:5173/auth/?app=${appId}`;
+            window.location.href = `http://localhost:5173/auth/login?app=${appId}`;
         },
         async authenticate(ssoToken) {
             try {
