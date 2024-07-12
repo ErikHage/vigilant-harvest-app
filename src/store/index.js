@@ -23,7 +23,7 @@ export const useAuthenticationStore = defineStore('authentication', {
             } catch (err) {
                 this.isAuthenticated = false;
                 console.log(err);
-                // TODO redirect to feral-auth login
+                // TODO redirect to login page
             }
         },
         async verifyToken() {
