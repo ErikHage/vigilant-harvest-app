@@ -73,6 +73,7 @@ export default {
   data: () => ({
     dialog: false,
     isEditMode: false,
+    currentlySelectedPlant: null,
     headers: [
       // { title: 'Id', key: 'plantId' }, // don't need to show this on table, maybe not the taxonomy either
       {title: 'Name', key: 'friendlyName'},
@@ -92,13 +93,16 @@ export default {
 
   computed: {
     ...mapState(usePlantsStore, [
-        'plants', 'alertType', 'alertMessage', 'alertVisible',
+        'plants', 'selectedPlant', 'alertType', 'alertMessage', 'alertVisible',
     ]),
   },
 
   methods: {
     ...mapActions(usePlantsStore, [
+        'upsertPlant',
         'fetchPlants',
+        'selectPlant',
+        'deletePlantById',
     ]),
 
     async refreshData() {

@@ -46,7 +46,6 @@ async function deletePlantById(actorToken, plantId) {
 
 export default {
     upsertPlant,
-    fetchPlantById,
     fetchPlants,
     deletePlantById,
 };

@@ -63,13 +63,12 @@ export default {
     if (isTokenPresent) {
       try {
         await this.verifyToken();
-        this.redirectToDashboard();
+        if (this.isAuthenticated) {
+          this.redirectToDashboard();
+        }
       } catch (err) {
         this.clearToken();
-        this.$router.push(views.login.path);
       }
-    } else {
-      this.$router.push(views.login.path);
     }
   }
 }
