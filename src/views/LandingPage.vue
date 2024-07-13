@@ -5,9 +5,16 @@
 import { mapActions, mapState } from "pinia";
 
 import { useAuthenticationStore } from "@/store";
+import { views } from "@/utils/constants";
 
 export default {
   name: 'LandingPage',
+
+  data() {
+    return {
+      ssoToken: null,
+    };
+  },
 
   computed: {
     ...mapState(useAuthenticationStore, [
@@ -22,36 +29,35 @@ export default {
 
     maybeGetSsoTokenQueryParam() {
       const urlParams = new URLSearchParams(window.location.search);
-      console.log('sso query param: ', urlParams.get('sso'));
       return urlParams.get('sso');
     },
 
     redirectToDashboard() {
       console.log('redirecting to dashboard');
-      this.$router.push('/dashboard');
+      this.$router.push(views.dashboard.path);
     },
 
-    redirectToApp() {
+    redirectToLogin() {
       console.log('redirecting to app');
-      this.$router.push('/');
+      this.$router.push(views.login.path);
     },
   },
 
   async mounted() {
-    const maybeSsoToken = this.maybeGetSsoTokenQueryParam();
+    this.ssoToken = this.maybeGetSsoTokenQueryParam();
 
-    if (maybeSsoToken) {
+    if (this.ssoToken) {
       console.log('found sso token');
-      await this.authenticate(maybeSsoToken);
+      await this.authenticate(this.ssoToken);
 
       if (this.isAuthenticated) {
         this.redirectToDashboard();
       } else {
-        this.redirectToApp();
+        this.redirectToLogin();
       }
     } else {
       console.log('no sso token');
-      this.redirectToApp();
+      this.redirectToLogin();
     }
   }
 }

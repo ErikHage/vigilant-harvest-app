@@ -1,40 +1,50 @@
 import { createRouter, createWebHistory } from 'vue-router';
 
+import { useAuthenticationStore } from "@/store";
+import { views } from '@/utils/constants';
+
 import PlantsPage from "@/views/dashboard/PlantsPage.vue";
 import DashboardPage from "@/views/DashboardPage.vue";
-
-import { useAuthenticationStore } from "@/store";
 import LandingPage from "@/views/LandingPage.vue";
 import LoginPage from "@/views/LoginPage.vue";
+import PublicPage from "@/views/PublicPage.vue";
 
 const routes = [
     {
-        path: '/login',
-        name: 'LoginPage',
+        path: views.public.path,
+        name: views.public.name,
+        component: PublicPage,
+        meta: {
+            requiresAuthenticated: false,
+        },
+    },
+    {
+        path: views.login.path,
+        name: views.login.name,
         component: LoginPage,
         meta: {
             requiresAuthenticated: false,
         },
     },
     {
-        path: '/landing',
-        name: 'LandingPage',
+        path: views.landing.path,
+        name: views.landing.name,
         component: LandingPage,
         meta: {
             requiresAuthenticated: false,
         },
     },
     {
-        path: '/dashboard',
-        name: 'DashboardPage',
+        path: views.dashboard.path,
+        name: views.dashboard.name,
         component: DashboardPage,
         meta: {
             requiresAuthenticated: true,
         },
         children: [
             {
-                path: 'plants',
-                name: 'PlantsPage',
+                path: views.dashboard.children.plants.path,
+                name: views.dashboard.children.plants.name,
                 component: PlantsPage,
                 meta: {
                     requiresAuthenticated: true,
