@@ -75,6 +75,14 @@ export const useAuthenticationStore = defineStore('authentication', {
 
 export const usePlantsStore = defineStore('plants', {
     actions: {
+        async upsertPlant(plant) {
+            try {
+                await plantsApi.upsertPlant(storageUtils.tryToLoadTokenFromStorage(), plant);
+            } catch (err) {
+                console.log(err);
+                this.setAlertMessage('error', 'error upserting plant');
+            }
+        },
         async fetchPlants() {
             try {
                 this.plants = await plantsApi.fetchPlants(storageUtils.tryToLoadTokenFromStorage());
@@ -82,6 +90,25 @@ export const usePlantsStore = defineStore('plants', {
                 console.log(err);
                 this.setAlertMessage('error', 'error fetching plants');
             }
+        },
+        async deletePlantById(plantId) {
+            try {
+                await plantsApi.deletePlantById(storageUtils.tryToLoadTokenFromStorage(), plantId);
+            } catch (err) {
+                console.log(err);
+                this.setAlertMessage('error', 'error deleting plant');
+            }
+        },
+        selectPlant(plantId) {
+            try {
+                this.selectedPlant = this.plants.find(plant => plant.plantId === plantId);
+            } catch (err) {
+                console.log(err);
+                this.setAlertMessage('error', 'error selecting plant');
+            }
+        },
+        clearSelectedPlant() {
+            this.selectedPlant = null;
         },
         setAlertMessage(type, message) {
             this.alertVisible = true;
@@ -95,6 +122,7 @@ export const usePlantsStore = defineStore('plants', {
     state: () => {
         return {
             plants: [],
+            selectedPlant: null,
             alertVisible: false,
             alertType: 'success',
             alertMessage: null,
