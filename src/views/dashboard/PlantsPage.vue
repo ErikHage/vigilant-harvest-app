@@ -12,7 +12,7 @@
           <v-card-text>
             <v-data-table
                 :headers="headers"
-                :items="tempPlantData"
+                :items="plants"
                 item-key="plantId"
                 class="elevation-1"
             >
@@ -52,6 +52,9 @@
 
 <script>
 
+import { mapActions, mapState } from "pinia";
+import { usePlantsStore } from "@/store";
+
 function getPlant(id, name) {
   return {
     plantId: id,
@@ -70,14 +73,6 @@ export default {
   data: () => ({
     dialog: false,
     isEditMode: false,
-    tempPlantData: [
-      getPlant('1', 'a'),
-      getPlant('2', 'b'),
-      getPlant('3', 'c'),
-      getPlant('4', 'd'),
-      getPlant('5', 'e'),
-      getPlant('6', 'f'),
-    ],
     headers: [
       // { title: 'Id', key: 'plantId' }, // don't need to show this on table, maybe not the taxonomy either
       {title: 'Name', key: 'friendlyName'},
@@ -95,11 +90,19 @@ export default {
     },
   }),
 
-  computed: {},
+  computed: {
+    ...mapState(usePlantsStore, [
+        'plants', 'alertType', 'alertMessage', 'alertVisible',
+    ]),
+  },
 
   methods: {
+    ...mapActions(usePlantsStore, [
+        'fetchPlants',
+    ]),
+
     async refreshData() {
-      // load plants
+      await this.fetchPlants();
     },
 
     resetForm() {

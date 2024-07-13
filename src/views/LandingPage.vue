@@ -38,7 +38,7 @@ export default {
     },
 
     redirectToLogin() {
-      console.log('redirecting to app');
+      console.log('redirecting to login');
       this.$router.push(views.login.path);
     },
   },

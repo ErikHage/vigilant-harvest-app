@@ -4,6 +4,7 @@ import storageUtils from "@/utils/storage-utils";
 import jwtUtils from "@/utils/jwt-utils";
 
 import authenticationApi from "@/api/authentication-api";
+import plantsApi from "@/api/plants-api";
 
 const appId = '82d7d287-978b-4df1-bc3d-526838b2465b';
 
@@ -69,5 +70,34 @@ export const useAuthenticationStore = defineStore('authentication', {
             }
             return null;
         },
+    },
+});
+
+export const usePlantsStore = defineStore('plants', {
+    actions: {
+        async fetchPlants() {
+            try {
+                this.plants = await plantsApi.fetchPlants(storageUtils.tryToLoadTokenFromStorage());
+            } catch (err) {
+                console.log(err);
+                this.setAlertMessage('error', 'error fetching plants');
+            }
+        },
+        setAlertMessage(type, message) {
+            this.alertVisible = true;
+            this.alertType = type;
+            this.alertMessage = message;
+            setTimeout(() => {
+                this.alertVisible = false;
+            }, 3000);
+        }
+    },
+    state: () => {
+        return {
+            plants: [],
+            alertVisible: false,
+            alertType: 'success',
+            alertMessage: null,
+        };
     },
 });

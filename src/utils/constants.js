@@ -7,6 +7,12 @@ export const feralAuthenticationServiceUrl = {
     },
 };
 
+export const vigilantHarvestServiceUrl = {
+    v0: {
+        api: 'http://localhost:8002/v0/api',
+    },
+};
+
 export const views = {
     public: {
         name: 'PublicPage',
