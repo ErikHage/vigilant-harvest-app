@@ -65,6 +65,8 @@ export default {
         await this.verifyToken();
         if (this.isAuthenticated) {
           this.redirectToDashboard();
+        } else {
+          this.clearToken();
         }
       } catch (err) {
         this.clearToken();
