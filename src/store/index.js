@@ -99,17 +99,6 @@ export const usePlantsStore = defineStore('plants', {
                 this.setAlertMessage('error', 'error deleting plant');
             }
         },
-        selectPlant(plantId) {
-            try {
-                this.selectedPlant = this.plants.find(plant => plant.plantId === plantId);
-            } catch (err) {
-                console.log(err);
-                this.setAlertMessage('error', 'error selecting plant');
-            }
-        },
-        clearSelectedPlant() {
-            this.selectedPlant = null;
-        },
         setAlertMessage(type, message) {
             this.alertVisible = true;
             this.alertType = type;
@@ -122,7 +111,6 @@ export const usePlantsStore = defineStore('plants', {
     state: () => {
         return {
             plants: [],
-            selectedPlant: null,
             alertVisible: false,
             alertType: 'success',
             alertMessage: null,

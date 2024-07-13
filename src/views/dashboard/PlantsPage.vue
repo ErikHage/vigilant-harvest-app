@@ -18,6 +18,7 @@
             >
               <template #item.actions="{ item }">
                 <v-icon small @click="openDialog(item)">mdi-pencil</v-icon>
+                <!-- TODO add delete button, with confirm dialog. only admin can see/use it -->
               </template>
             </v-data-table>
           </v-card-text>
@@ -55,16 +56,6 @@
 import { mapActions, mapState } from "pinia";
 import { usePlantsStore } from "@/store";
 
-function getPlant(id, name) {
-  return {
-    plantId: id,
-    family: 'something',
-    genus: 'something',
-    species: 'something',
-    friendlyName: name,
-  };
-}
-
 export default {
   name: 'PlantsPage',
 
@@ -73,14 +64,13 @@ export default {
   data: () => ({
     dialog: false,
     isEditMode: false,
-    currentlySelectedPlant: null,
     headers: [
       // { title: 'Id', key: 'plantId' }, // don't need to show this on table, maybe not the taxonomy either
-      {title: 'Name', key: 'friendlyName'},
-      {title: 'Family', key: 'family'},
-      {title: 'Genus', key: 'genus'},
-      {title: 'Species', key: 'species'},
-      {title: 'Actions', key: 'actions', sortable: false},
+      { title: 'Name', key: 'friendlyName' },
+      { title: 'Family', key: 'family' },
+      { title: 'Genus', key: 'genus' },
+      { title: 'Species', key: 'species' },
+      { title: 'Actions', key: 'actions', sortable: false },
     ],
     form: {
       plantId: '',
@@ -93,16 +83,16 @@ export default {
 
   computed: {
     ...mapState(usePlantsStore, [
-        'plants', 'selectedPlant', 'alertType', 'alertMessage', 'alertVisible',
+      'plants', 'alertType', 'alertMessage', 'alertVisible',
     ]),
   },
 
   methods: {
     ...mapActions(usePlantsStore, [
-        'upsertPlant',
-        'fetchPlants',
-        'selectPlant',
-        'deletePlantById',
+      'upsertPlant',
+      'fetchPlants',
+      'selectPlant',
+      'deletePlantById',
     ]),
 
     async refreshData() {
@@ -144,8 +134,9 @@ export default {
     },
 
     async savePlant() {
-      // todo - use upsert api
+      await this.upsertPlant(this.form);
       this.closeDialog();
+      await this.refreshData();
     }
   },
 
