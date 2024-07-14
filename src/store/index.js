@@ -5,6 +5,7 @@ import jwtUtils from "@/utils/jwt-utils";
 
 import authenticationApi from "@/api/authentication-api";
 import plantsApi from "@/api/plants-api";
+import plotsApi from "@/api/plots-api";
 
 const appId = '82d7d287-978b-4df1-bc3d-526838b2465b';
 
@@ -111,6 +112,51 @@ export const usePlantsStore = defineStore('plants', {
     state: () => {
         return {
             plants: [],
+            alertVisible: false,
+            alertType: 'success',
+            alertMessage: null,
+        };
+    },
+});
+
+export const usePlotsStore = defineStore('plots', {
+    actions: {
+        async upsertPlot(plot) {
+            try {
+                await plotsApi.upsertPlot(storageUtils.tryToLoadTokenFromStorage(), plot);
+            } catch (err) {
+                console.log(err);
+                this.setAlertMessage('error', 'error upserting plot');
+            }
+        },
+        async fetchPlots() {
+            try {
+                this.plots = await plotsApi.fetchPlots(storageUtils.tryToLoadTokenFromStorage());
+            } catch (err) {
+                console.log(err);
+                this.setAlertMessage('error', 'error fetching plots');
+            }
+        },
+        async deletePlotById(plotId) {
+            try {
+                await plotsApi.deletePlotById(storageUtils.tryToLoadTokenFromStorage(), plotId);
+            } catch (err) {
+                console.log(err);
+                this.setAlertMessage('error', 'error deleting plot');
+            }
+        },
+        setAlertMessage(type, message) {
+            this.alertVisible = true;
+            this.alertType = type;
+            this.alertMessage = message;
+            setTimeout(() => {
+                this.alertVisible = false;
+            }, 3000);
+        }
+    },
+    state: () => {
+        return {
+            plots: [],
             alertVisible: false,
             alertType: 'success',
             alertMessage: null,

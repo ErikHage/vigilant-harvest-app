@@ -8,6 +8,7 @@ import DashboardPage from "@/views/DashboardPage.vue";
 import LandingPage from "@/views/LandingPage.vue";
 import LoginPage from "@/views/LoginPage.vue";
 import PublicPage from "@/views/PublicPage.vue";
+import PlotsPage from "@/views/dashboard/PlotsPage.vue";
 
 const routes = [
     {
@@ -46,6 +47,14 @@ const routes = [
                 path: views.dashboard.children.plants.path,
                 name: views.dashboard.children.plants.name,
                 component: PlantsPage,
+                meta: {
+                    requiresAuthenticated: true,
+                },
+            },
+            {
+                path: views.dashboard.children.plots.path,
+                name: views.dashboard.children.plots.name,
+                component: PlotsPage,
                 meta: {
                     requiresAuthenticated: true,
                 },
