@@ -18,7 +18,7 @@ export default {
   name: "AppBar",
 
   data: () => ({
-    dashboardPath: views.dashboard.path,
+    dashboardPath: views.dashboard.children.default.path,
   }),
 
   methods: {

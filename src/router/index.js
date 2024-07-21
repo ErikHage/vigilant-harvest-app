@@ -44,6 +44,14 @@ const routes = [
         },
         children: [
             {
+                path: views.dashboard.children.default.path,
+                name: views.dashboard.children.default.name,
+                component: DashboardDefaultPage,
+                meta: {
+                    requiresAuthenticated: true,
+                },
+            },
+            {
                 path: views.dashboard.children.plants.path,
                 name: views.dashboard.children.plants.name,
                 component: PlantsPage,
@@ -68,12 +76,12 @@ const router = createRouter({
     routes
 });
 
-router.beforeEach((to, from) => {
+router.beforeEach((to /*, from */) => {
     const user = useAuthenticationStore();
     const requiresAuthenticated = to.matched.some(record => record.meta.requiresAuthenticated);
 
     if (requiresAuthenticated && !user.isAuthenticated) {
-        console.log('sending you back to Login');
+        console.log('sending you back to Landing');
         return { name: 'LandingPage' };
     }
 });
