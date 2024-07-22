@@ -6,14 +6,21 @@
           <v-card-title>
             <span class="headline">Manage Plantings</span>
             <v-spacer></v-spacer>
-            <v-select>
-<!--              TODO dropdown of year choice -->
-            </v-select>
-            <v-btn class="mr-2 mt-3" color="primary" @click="openDialog()">Add</v-btn>
-            <v-btn class="mt-3" color="primary" @click="refreshData">Refresh</v-btn>
+            <v-select
+                v-model="selectedYear"
+                :items="availableYears"
+                :item-title="(year) => year"
+                :item-value="(year) => year"
+                label="Select Year"
+                variant="solo"
+                @update:model-value="onSelectYearChange"
+            ></v-select>
+            <v-btn v-if="selectedYear != null" class="mr-2 mt-3" color="primary" @click="openDialog()">Add</v-btn>
+            <v-btn v-if="selectedYear != null" class="mt-3" color="primary" @click="refreshData">Refresh</v-btn>
           </v-card-title>
           <v-card-text>
             <v-data-table
+                v-if="selectedYear != null"
                 :headers="headers"
                 :items="plantings"
                 item-key="plantingId"
@@ -36,8 +43,9 @@
         </v-card-title>
         <v-card-text>
           <v-form ref="applicationForm">
-<!--            plant dropdown -->
-            <v-text-field v-model.number="form.numPlants" type="number" label="Number of Plants" required></v-text-field>
+            <!--            plant dropdown -->
+            <v-text-field v-model.number="form.numPlants" type="number" label="Number of Plants"
+                          required></v-text-field>
           </v-form>
         </v-card-text>
         <v-card-actions>
@@ -55,7 +63,7 @@
 <script>
 
 import { mapActions, mapState } from "pinia";
-import { usePlantsStore } from "@/store";
+import { usePlantingsStore, usePlantsStore } from "@/store";
 
 export default {
   name: 'PlantsPage',
@@ -63,6 +71,8 @@ export default {
   components: {},
 
   data: () => ({
+    availableYears: [2024, 2025],
+    selectedYear: null,
     dialog: false,
     isEditMode: false,
     headers: [
@@ -136,7 +146,11 @@ export default {
       await this.upsertPlanting(this.form);
       this.closeDialog();
       await this.refreshData();
-    }
+    },
+
+    async onSelectYearChange(year) {
+
+    },
   },
 
   mounted() {

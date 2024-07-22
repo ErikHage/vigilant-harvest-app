@@ -42,6 +42,10 @@ export const views = {
                 name: 'PlotsPage',
                 path: 'plots',
             },
+            plantings: {
+                name: 'PlantingsPage',
+                path: 'plantings',
+            },
         },
     },
 };

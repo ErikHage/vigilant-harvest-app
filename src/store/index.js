@@ -183,6 +183,10 @@ export const usePlantingsStore = defineStore('plantings', {
                 this.setAlertMessage('error', 'error fetching plantings by year');
             }
         },
+        async selectPlantingYear(year) {
+            this.plantingYear = year;
+            await this.fetchPlantingsByYear(this.plantingYear);
+        },
         setAlertMessage(type, message) {
             this.alertVisible = true;
             this.alertType = type;
@@ -194,6 +198,7 @@ export const usePlantingsStore = defineStore('plantings', {
     },
     state: () => {
         return {
+            plantingYear: null, // TODO maybe default to current year?
             plantings: [],
             alertVisible: false,
             alertType: 'success',
