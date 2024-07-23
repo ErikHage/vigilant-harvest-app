@@ -58,8 +58,8 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="blue darken-1" text @click="closeDialog">Cancel</v-btn>
-          <v-btn v-if="isEditMode" color="blue darken-1" text @click="savePlant">Update</v-btn>
-          <v-btn v-else color="blue darken-1" text @click="savePlant">Create</v-btn>
+          <v-btn v-if="isEditMode" color="blue darken-1" text @click="savePlanting">Update</v-btn>
+          <v-btn v-else color="blue darken-1" text @click="savePlanting">Create</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -111,14 +111,14 @@ export default {
 
     ...mapActions(usePlantingsStore, [
       'upsertPlanting',
-      'fetchPlantings',
+      'fetchPlantingsByYear',
       'selectPlantingYear',
     ]),
 
     async refreshData() {
+      await this.fetchPlants();
       if (this.selectedYear) {
-        await this.fetchPlantings(this.selectedYear);
-        await this.fetchPlants();
+        await this.fetchPlantingsByYear(this.selectedYear);
       }
     },
 
@@ -157,7 +157,7 @@ export default {
     },
 
     async onSelectYearChange(year) {
-
+      await this.selectPlantingYear(year);
     },
   },
 

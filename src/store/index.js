@@ -169,7 +169,10 @@ export const usePlantingsStore = defineStore('plantings', {
     actions: {
         async upsertPlanting(planting) {
             try {
-                await plantingsApi.upsertPlanting(storageUtils.tryToLoadTokenFromStorage(), planting);
+                await plantingsApi.upsertPlanting(storageUtils.tryToLoadTokenFromStorage(), {
+                    plantingYear: this.plantingYear,
+                    ...planting,
+                });
             } catch (err) {
                 console.log(err);
                 this.setAlertMessage('error', 'error upserting planting');
