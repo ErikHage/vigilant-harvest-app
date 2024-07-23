@@ -15,16 +15,21 @@
                 variant="solo"
                 @update:model-value="onSelectYearChange"
             ></v-select>
-            <v-btn v-if="selectedYear != null" class="mr-2 mt-3" color="primary" @click="openDialog()">Add</v-btn>
-            <v-btn v-if="selectedYear != null" class="mt-3" color="primary" @click="refreshData">Refresh</v-btn>
+          </v-card-title>
+        </v-card>
+      </v-col>
+      <v-col cols="12">
+        <v-card v-if="selectedYear != null">
+          <v-card-title>
+            <v-btn class="mr-2 mt-3" color="primary" @click="openDialog()">Add</v-btn>
+            <v-btn class="mt-3" color="primary" @click="refreshData">Refresh</v-btn>
           </v-card-title>
           <v-card-text>
             <v-data-table
-                v-if="selectedYear != null"
+                class="elevation-1 align-left"
                 :headers="headers"
-                :items="plantings"
+                :items="hydratedPlantings"
                 item-key="plantingId"
-                class="elevation-1"
             >
               <template #item.actions="{ item }">
                 <v-icon small @click="openDialog(item)">mdi-pencil</v-icon>
@@ -88,14 +93,14 @@ export default {
   components: {},
 
   data: () => ({
-    availableYears: [2024, 2025],
+    availableYears: [2024, 2025], // TODO source from backend
     selectedYear: null,
     dialog: false,
     isEditMode: false,
     headers: [
-      // { title: 'Id', key: 'plantingId' }, // don't need to show this on table
-      { title: 'PlantId', key: 'plantId' }, // TODO use plantName instead
-      { title: 'Number of Plants', key: 'numPlants' },
+      // { title: 'Id', key: 'plantingId', align: 'left', }, // probably don't need to show this on table
+      { title: 'Plant', key: 'plantName', align: 'start', },
+      { title: 'Count', key: 'numPlants', align: 'start', },
       { title: 'Actions', key: 'actions', sortable: false },
     ],
     form: {
@@ -107,12 +112,22 @@ export default {
 
   computed: {
     ...mapState(usePlantsStore, [
-      'plants',
+      'plants', 'plantsById',
     ]),
 
     ...mapState(usePlantingsStore, [
       'plantings', 'alertType', 'alertMessage', 'alertVisible',
     ]),
+
+    hydratedPlantings() {
+      return this.plantings.map(planting => {
+        const plant = this.plantsById[planting.plantId];
+        return {
+          ...planting,
+          plantName: plant.friendlyName,
+        };
+      });
+    },
   },
 
   methods: {
@@ -125,13 +140,6 @@ export default {
       'fetchPlantingsByYear',
       'selectPlantingYear',
     ]),
-
-    async refreshData() {
-      await this.fetchPlants();
-      if (this.selectedYear) {
-        await this.fetchPlantingsByYear(this.selectedYear);
-      }
-    },
 
     resetForm() {
       this.form = {
@@ -172,6 +180,13 @@ export default {
     async onSelectYearChange(year) {
       await this.selectPlantingYear(year);
     },
+
+    async refreshData() {
+      await this.fetchPlants();
+      if (this.selectedYear) {
+        await this.fetchPlantingsByYear(this.selectedYear);
+      }
+    },
   },
 
   mounted() {
@@ -179,3 +194,8 @@ export default {
   }
 }
 </script>
+<style scoped>
+.align-left {
+  text-align: left !important;
+}
+</style>

@@ -88,6 +88,10 @@ export const usePlantsStore = defineStore('plants', {
         async fetchPlants() {
             try {
                 this.plants = await plantsApi.fetchPlants(storageUtils.tryToLoadTokenFromStorage());
+                this.plantsById = this.plants.reduce((acc, plant) => {
+                    acc[plant.plantId] = plant;
+                    return acc;
+                }, {});
             } catch (err) {
                 console.log(err);
                 this.setAlertMessage('error', 'error fetching plants');
@@ -113,6 +117,7 @@ export const usePlantsStore = defineStore('plants', {
     state: () => {
         return {
             plants: [],
+            plantsById: {},
             alertVisible: false,
             alertType: 'success',
             alertMessage: null,
