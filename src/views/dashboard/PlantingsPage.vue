@@ -43,7 +43,14 @@
         </v-card-title>
         <v-card-text>
           <v-form ref="applicationForm">
-            <!--            plant dropdown -->
+            <v-select
+                v-model="form.plantId"
+                :items="plants"
+                :item-title="(plant) => plant.friendlyName"
+                :item-value="(plant) => plant.plantId"
+                label="Select Plant"
+                variant="solo"
+            ></v-select>
             <v-text-field v-model.number="form.numPlants" type="number" label="Number of Plants"
                           required></v-text-field>
           </v-form>
@@ -111,6 +118,7 @@ export default {
     async refreshData() {
       if (this.selectedYear) {
         await this.fetchPlantings(this.selectedYear);
+        await this.fetchPlants();
       }
     },
 
