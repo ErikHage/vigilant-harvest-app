@@ -43,6 +43,12 @@
         </v-card-title>
         <v-card-text>
           <v-form ref="applicationForm">
+            <v-text-field
+                v-model.number="form.plantingId"
+                type="text"
+                label="Planting Id"
+                readonly
+            ></v-text-field>
             <v-select
                 v-model="form.plantId"
                 :items="plants"
@@ -51,8 +57,12 @@
                 label="Select Plant"
                 variant="solo"
             ></v-select>
-            <v-text-field v-model.number="form.numPlants" type="number" label="Number of Plants"
-                          required></v-text-field>
+            <v-text-field
+                v-model.number="form.numPlants"
+                type="number"
+                label="Number of Plants"
+                required
+            ></v-text-field>
           </v-form>
         </v-card-text>
         <v-card-actions>
@@ -84,11 +94,12 @@ export default {
     isEditMode: false,
     headers: [
       // { title: 'Id', key: 'plantingId' }, // don't need to show this on table
-      { title: 'PlantId', key: 'plantId' },
+      { title: 'PlantId', key: 'plantId' }, // TODO use plantName instead
       { title: 'Number of Plants', key: 'numPlants' },
       { title: 'Actions', key: 'actions', sortable: false },
     ],
     form: {
+      plantingId: null,
       plantId: '',
       numPlants: 0,
     },
@@ -124,6 +135,7 @@ export default {
 
     resetForm() {
       this.form = {
+        plantingId: null,
         plantId: '',
         numPlants: 0,
       };
@@ -134,6 +146,7 @@ export default {
       if (planting !== undefined) {
         console.log('in edit mode if block');
         this.form = {
+          plantingId: planting.plantingId,
           plantId: planting.plantId,
           numPlants: planting.numPlants,
         };
