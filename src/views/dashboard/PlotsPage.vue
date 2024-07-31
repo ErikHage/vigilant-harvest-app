@@ -78,6 +78,7 @@ export default {
       { title: 'Length (in.)', key: 'lengthInInches' },
       { title: 'Width (in.)', key: 'widthInInches' },
       { title: 'Type', key: 'plotType' },
+      // TODO make this a checkbox or something, not the number it is now - also why is this not a boolean?
       { title: 'Active', key: 'isActive' },
       { title: 'Actions', key: 'actions', sortable: false },
     ],

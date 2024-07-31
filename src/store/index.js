@@ -138,6 +138,10 @@ export const usePlotsStore = defineStore('plots', {
         async fetchPlots() {
             try {
                 this.plots = await plotsApi.fetchPlots(storageUtils.tryToLoadTokenFromStorage());
+                this.plotsById = this.plots.reduce((acc, plot) => {
+                    acc[plot.plotId] = plot;
+                    return acc;
+                }, {});
             } catch (err) {
                 console.log(err);
                 this.setAlertMessage('error', 'error fetching plots');
@@ -163,6 +167,7 @@ export const usePlotsStore = defineStore('plots', {
     state: () => {
         return {
             plots: [],
+            plotsById: {},
             alertVisible: false,
             alertType: 'success',
             alertMessage: null,

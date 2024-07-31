@@ -62,6 +62,14 @@
                 label="Select Plant"
                 variant="solo"
             ></v-select>
+            <v-select
+                v-model="form.plotId"
+                :items="plots"
+                :item-title="(plot) => plot.friendlyName"
+                :item-value="(plot) => plot.plotId"
+                label="Select Plot"
+                variant="solo"
+            ></v-select>
             <v-text-field
                 v-model.number="form.numPlants"
                 type="number"
@@ -85,7 +93,7 @@
 <script>
 
 import { mapActions, mapState } from "pinia";
-import { usePlantingsStore, usePlantsStore } from "@/store";
+import { usePlantingsStore, usePlantsStore, usePlotsStore } from "@/store";
 
 export default {
   name: 'PlantsPage',
@@ -100,17 +108,23 @@ export default {
     headers: [
       // { title: 'Id', key: 'plantingId', align: 'left', }, // probably don't need to show this on table
       { title: 'Plant', key: 'plantName', align: 'start', },
+      { title: 'Plot', key: 'plotName', align: 'start', },
       { title: 'Count', key: 'numPlants', align: 'start', },
       { title: 'Actions', key: 'actions', sortable: false },
     ],
     form: {
       plantingId: null,
+      plotId: '',
       plantId: '',
       numPlants: 0,
     },
   }),
 
   computed: {
+    ...mapState(usePlotsStore, [
+       'plots', 'plotsById',
+    ]),
+
     ...mapState(usePlantsStore, [
       'plants', 'plantsById',
     ]),
@@ -122,15 +136,21 @@ export default {
     hydratedPlantings() {
       return this.plantings.map(planting => {
         const plant = this.plantsById[planting.plantId];
+        const plot = this.plotsById[planting.plotId];
         return {
           ...planting,
           plantName: plant.friendlyName,
+          plotName: plot.friendlyName,
         };
       });
     },
   },
 
   methods: {
+    ...mapActions(usePlotsStore, [
+      'fetchPlots',
+    ]),
+
     ...mapActions(usePlantsStore, [
       'fetchPlants',
     ]),
@@ -144,17 +164,18 @@ export default {
     resetForm() {
       this.form = {
         plantingId: null,
+        plotId: '',
         plantId: '',
         numPlants: 0,
       };
     },
 
     openDialog(planting) {
-      console.log("planting", planting);
       if (planting !== undefined) {
         console.log('in edit mode if block');
         this.form = {
           plantingId: planting.plantingId,
+          plotId: planting.plotId,
           plantId: planting.plantId,
           numPlants: planting.numPlants,
         };
@@ -183,6 +204,7 @@ export default {
 
     async refreshData() {
       await this.fetchPlants();
+      await this.fetchPlots();
       if (this.selectedYear) {
         await this.fetchPlantingsByYear(this.selectedYear);
       }
