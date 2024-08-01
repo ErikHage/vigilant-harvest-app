@@ -11,6 +11,7 @@ import PublicPage from "@/views/PublicPage.vue";
 import PlotsPage from "@/views/dashboard/PlotsPage.vue";
 import DashboardDefaultPage from "@/views/dashboard/DashboardDefaultPage.vue";
 import PlantingsPage from "@/views/dashboard/PlantingsPage.vue";
+import GardenPage from "@/views/dashboard/GardenPage.vue";
 
 const routes = [
     {
@@ -49,6 +50,14 @@ const routes = [
                 path: views.dashboard.children.default.path,
                 name: views.dashboard.children.default.name,
                 component: DashboardDefaultPage,
+                meta: {
+                    requiresAuthenticated: true,
+                },
+            },
+            {
+                path: views.dashboard.children.garden.path,
+                name: views.dashboard.children.garden.name,
+                component: GardenPage,
                 meta: {
                     requiresAuthenticated: true,
                 },

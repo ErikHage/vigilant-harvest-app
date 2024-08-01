@@ -1,6 +1,7 @@
 <template>
   <v-container>
     <v-app-bar app>
+      <v-btn to="/dashboard/garden">Garden</v-btn>
       <v-btn to="/dashboard/plants">Plants</v-btn>
       <v-btn to="/dashboard/plots">Plots</v-btn>
       <v-btn to="/dashboard/plantings">Plantings</v-btn>
