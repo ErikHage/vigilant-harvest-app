@@ -49,8 +49,12 @@ export default {
   }),
 
   methods: {
-    async onSelectYearChange(year) {
+    ...mapActions(usePlantingsStore, [
+      'selectPlantingYear',
+    ]),
 
+    async onSelectYearChange(year) {
+      await this.selectPlantingYear(year);
     },
 
     async refreshData() {
