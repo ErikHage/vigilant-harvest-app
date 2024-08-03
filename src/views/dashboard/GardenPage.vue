@@ -4,7 +4,6 @@
       <v-col cols="12">
         <v-card v-if="selectedYear == null">
           <v-card-title>
-            <v-spacer></v-spacer>
             <v-select
                 v-model="selectedYear"
                 :items="availableYears"
@@ -21,7 +20,7 @@
       <v-col cols="12">
         <v-card v-if="selectedYear != null">
           <v-card-title>
-            <span class="headline">Garden</span>
+            <span class="headline">Garden {{ this.selectedYear }}</span>
           </v-card-title>
           <v-card-text>
             coming soon - a view of all your plots and plantings for a given year!
