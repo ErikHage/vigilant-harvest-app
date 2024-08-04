@@ -25,20 +25,22 @@
           <h2>Garden {{ this.selectedYear }}</h2>
         </div>
         <v-row>
-        <v-col cols="6" v-for="hydratedPlot in hydratedPlots">
-          <v-card>
-            <v-card-title>
-              {{ hydratedPlot.friendlyName }}
-            </v-card-title>
-            <v-card-text>
-              <v-card v-for="planting in hydratedPlot.plantings">
-                <v-card-text>
-                  {{ planting.plant.friendlyName }} [ {{ planting.numPlants }} ]
-                </v-card-text>
-              </v-card>
-            </v-card-text>
-          </v-card>
-        </v-col>
+          <v-col cols="6"
+                 v-if="!loading"
+                 v-for="hydratedPlot in hydratedPlots">
+            <v-card>
+              <v-card-title>
+                {{ hydratedPlot.friendlyName }}
+              </v-card-title>
+              <v-card-text>
+                <v-card v-for="planting in hydratedPlot.plantings">
+                  <v-card-text>
+                    {{ planting.plant.friendlyName }} [ {{ planting.numPlants }} ]
+                  </v-card-text>
+                </v-card>
+              </v-card-text>
+            </v-card>
+          </v-col>
         </v-row>
       </v-col>
     </v-row>
@@ -97,11 +99,7 @@ export default {
         return acc;
       }, {});
 
-      const toList = Object.values(mappedPlots);
-
-      // TODO why is sorting failing? do we need to wait for data to be populated?
-      // return toList.sort(sorting.sortByPlotFriendlyName);
-      return toList;
+      return Object.values(mappedPlots).sort(sorting.sortByPlotFriendlyName);
     },
   },
 
