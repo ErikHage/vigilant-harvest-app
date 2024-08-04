@@ -97,7 +97,11 @@ export default {
         return acc;
       }, {});
 
-      return Object.values(mappedPlots).sort(sorting.sortByPlotFriendlyName);
+      const toList = Object.values(mappedPlots);
+
+      // TODO why is sorting failing? do we need to wait for data to be populated?
+      // return toList.sort(sorting.sortByPlotFriendlyName);
+      return toList;
     },
   },
 
