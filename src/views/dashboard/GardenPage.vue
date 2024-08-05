@@ -51,7 +51,7 @@
 <script>
 
 import { mapActions, mapState } from "pinia";
-import { usePlantingsStore, usePlantsStore, usePlotsStore } from "@/store";
+import { useCommonStore, useHarvestsStore, usePlantingsStore, usePlantsStore, usePlotsStore } from "@/store";
 import sorting from "@/utils/sorting";
 
 export default {
@@ -60,12 +60,16 @@ export default {
   components: {},
 
   data: () => ({
-    availableYears: [2024, 2025], // TODO source from backend
     selectedYear: null,
     loading: false,
   }),
 
   computed: {
+    ...mapState(useCommonStore, [
+      'availableYears',
+      'plantingYear',
+    ]),
+
     ...mapState(usePlotsStore, [
       'plots', 'plotsById',
     ]),
@@ -76,6 +80,10 @@ export default {
 
     ...mapState(usePlantingsStore, [
       'plantings',
+    ]),
+
+    ...mapState(useHarvestsStore, [
+      'harvestSummaries',
     ]),
 
     hydratedPlots() {
@@ -104,6 +112,10 @@ export default {
   },
 
   methods: {
+    ...mapActions(useCommonStore, [
+      'selectPlantingYear',
+    ]),
+
     ...mapActions(usePlotsStore, [
       'fetchPlots',
     ]),
@@ -114,7 +126,11 @@ export default {
 
     ...mapActions(usePlantingsStore, [
       'fetchPlantingsByYear',
-      'selectPlantingYear',
+    ]),
+
+    ...mapActions(useHarvestsStore, [
+      'upsertHarvest',
+      'fetchHarvestSummariesByYear',
     ]),
 
     async onSelectYearChange(year) {
@@ -129,6 +145,7 @@ export default {
         await this.fetchPlots();
         await this.fetchPlants();
         await this.fetchPlantingsByYear(this.selectedYear);
+        await this.fetchHarvestSummariesByYear(this.selectedYear);
       }
     },
   },

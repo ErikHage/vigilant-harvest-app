@@ -7,8 +7,26 @@ import authenticationApi from "@/api/authentication-api";
 import plantsApi from "@/api/plants-api";
 import plotsApi from "@/api/plots-api";
 import plantingsApi from "@/api/plantings-api";
+import harvestsApi from "@/api/harvests-api";
 
 const appId = '82d7d287-978b-4df1-bc3d-526838b2465b';
+
+export const useCommonStore = defineStore('common', {
+    actions: {
+        async selectPlantingYear(year) {
+            this.plantingYear = year;
+        },
+    },
+    state: () => {
+        return {
+            availableYears: [2024, 2025],
+            plantingYear: null,
+            // alertVisible: false, // TODO migrate error stuff here
+            // alertType: 'success',
+            // alertMessage: null,
+        };
+    },
+});
 
 export const useAuthenticationStore = defineStore('authentication', {
     actions: {
@@ -179,10 +197,7 @@ export const usePlantingsStore = defineStore('plantings', {
     actions: {
         async upsertPlanting(planting) {
             try {
-                await plantingsApi.upsertPlanting(storageUtils.tryToLoadTokenFromStorage(), {
-                    plantingYear: this.plantingYear,
-                    ...planting,
-                });
+                await plantingsApi.upsertPlanting(storageUtils.tryToLoadTokenFromStorage(), planting);
             } catch (err) {
                 console.log(err);
                 this.setAlertMessage('error', 'error upserting planting');
@@ -196,9 +211,45 @@ export const usePlantingsStore = defineStore('plantings', {
                 this.setAlertMessage('error', 'error fetching plantings by year');
             }
         },
-        async selectPlantingYear(year) {
-            this.plantingYear = year;
-            await this.fetchPlantingsByYear(this.plantingYear);
+        setAlertMessage(type, message) {
+            this.alertVisible = true;
+            this.alertType = type;
+            this.alertMessage = message;
+            setTimeout(() => {
+                this.alertVisible = false;
+            }, 3000);
+        }
+    },
+    state: () => {
+        return {
+            plantings: [],
+            alertVisible: false,
+            alertType: 'success',
+            alertMessage: null,
+        };
+    },
+});
+
+export const useHarvestsStore = defineStore('harvests', {
+    actions: {
+        async upsertHarvest(harvest) {
+            try {
+                await harvestsApi.upsertHarvest(storageUtils.tryToLoadTokenFromStorage(), {
+                    plantingYear: this.plantingYear,
+                    ...harvest,
+                });
+            } catch (err) {
+                console.log(err);
+                this.setAlertMessage('error', 'error upserting harvest');
+            }
+        },
+        async fetchHarvestSummariesByYear(plantingYear) {
+            try {
+                this.harvestSummaries = await harvestsApi.fetchHarvestSummary(storageUtils.tryToLoadTokenFromStorage(), plantingYear);
+            } catch (err) {
+                console.log(err);
+                this.setAlertMessage('error', 'error fetching harvest summaries by year');
+            }
         },
         setAlertMessage(type, message) {
             this.alertVisible = true;
@@ -211,8 +262,7 @@ export const usePlantingsStore = defineStore('plantings', {
     },
     state: () => {
         return {
-            plantingYear: null, // TODO maybe default to current year?
-            plantings: [],
+            harvestSummaries: [],
             alertVisible: false,
             alertType: 'success',
             alertMessage: null,

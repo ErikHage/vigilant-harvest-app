@@ -7,7 +7,6 @@
             <span class="headline">Manage Plantings</span>
             <v-spacer></v-spacer>
             <v-select
-                v-model="selectedYear"
                 :items="availableYears"
                 :item-title="(year) => year"
                 :item-value="(year) => year"
@@ -19,7 +18,7 @@
         </v-card>
       </v-col>
       <v-col cols="12">
-        <v-card v-if="selectedYear != null">
+        <v-card v-if="plantingYear != null">
           <v-card-title>
             <v-btn class="mr-2 mt-3" color="primary" @click="openDialog()">Add</v-btn>
             <v-btn class="mt-3" color="primary" @click="refreshData">Refresh</v-btn>
@@ -93,16 +92,14 @@
 <script>
 
 import { mapActions, mapState } from "pinia";
-import { usePlantingsStore, usePlantsStore, usePlotsStore } from "@/store";
+import { useCommonStore, usePlantingsStore, usePlantsStore, usePlotsStore } from "@/store";
 
 export default {
-  name: 'PlantsPage',
+  name: 'PlantingsPage',
 
   components: {},
 
   data: () => ({
-    availableYears: [2024, 2025], // TODO source from backend
-    selectedYear: null,
     dialog: false,
     isEditMode: false,
     headers: [
@@ -121,6 +118,10 @@ export default {
   }),
 
   computed: {
+    ...mapState(useCommonStore, [
+      'availableYears', 'plantingYear',
+    ]),
+
     ...mapState(usePlotsStore, [
        'plots', 'plotsById',
     ]),
@@ -147,6 +148,10 @@ export default {
   },
 
   methods: {
+    ...mapActions(useCommonStore, [
+      'selectPlantingYear',
+    ]),
+
     ...mapActions(usePlotsStore, [
       'fetchPlots',
     ]),
@@ -158,7 +163,6 @@ export default {
     ...mapActions(usePlantingsStore, [
       'upsertPlanting',
       'fetchPlantingsByYear',
-      'selectPlantingYear',
     ]),
 
     resetForm() {
@@ -193,20 +197,24 @@ export default {
     },
 
     async savePlanting() {
-      await this.upsertPlanting(this.form);
+      await this.upsertPlanting({
+        plantingYear: this.plantingYear,
+        ...this.form,
+      });
       this.closeDialog();
       await this.refreshData();
     },
 
     async onSelectYearChange(year) {
       await this.selectPlantingYear(year);
+      await this.refreshData();
     },
 
     async refreshData() {
       await this.fetchPlants();
       await this.fetchPlots();
-      if (this.selectedYear) {
-        await this.fetchPlantingsByYear(this.selectedYear);
+      if (this.plantingYear) {
+        await this.fetchPlantingsByYear(this.plantingYear);
       }
     },
   },
