@@ -142,7 +142,7 @@ export default {
         await this.fetchPlots();
         await this.fetchPlants();
         await this.fetchPlantingsByYear(this.plantingYear);
-        // await this.fetchHarvestSummariesByYear(this.plantingYear);
+        await this.fetchHarvestSummariesByYear(this.plantingYear);
       }
     },
   },

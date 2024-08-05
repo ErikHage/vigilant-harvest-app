@@ -246,6 +246,7 @@ export const useHarvestsStore = defineStore('harvests', {
         async fetchHarvestSummariesByYear(plantingYear) {
             try {
                 this.harvestSummaries = await harvestsApi.fetchHarvestSummary(storageUtils.tryToLoadTokenFromStorage(), plantingYear);
+                console.log('harvestSummaries', this.harvestSummaries);
             } catch (err) {
                 console.log(err);
                 this.setAlertMessage('error', 'error fetching harvest summaries by year');
