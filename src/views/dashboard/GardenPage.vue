@@ -34,7 +34,15 @@
               <v-card-text>
                 <v-card v-for="planting in hydratedPlot.plantings">
                   <v-card-text>
-                    {{ planting.plant.friendlyName }} [ {{ planting.numPlants }} ]
+                    <span>{{ planting.plant.friendlyName }}</span>
+                    <v-chip class="ml-2 mr-2"
+                            color="green">
+                      {{ planting.numPlants }} &nbsp; <v-icon>mdi-leaf</v-icon>
+                    </v-chip>
+                    <v-chip v-if="planting.harvestQuantity > 0"
+                            color="yellow">
+                      {{ planting.harvestQuantity }} &nbsp; <v-icon>mdi-basket-fill</v-icon>
+                    </v-chip>
                   </v-card-text>
                 </v-card>
               </v-card-text>
@@ -80,7 +88,7 @@ export default {
     ]),
 
     ...mapState(useHarvestsStore, [
-      'harvestSummaries',
+      'harvestCounts',
     ]),
 
     hydratedPlots() {
@@ -99,6 +107,7 @@ export default {
         acc[planting.plotId].plantings.push({
           ...planting,
           plant,
+          harvestQuantity: this.harvestCounts[planting.plantingId] ?? 0,
         });
 
         return acc;
