@@ -1,11 +1,10 @@
 <template>
   <v-container>
-    <v-row class="text-center" v-if="selectedYear == null">
+    <v-row class="text-center" v-if="plantingYear == null">
       <v-col cols="12">
         <v-card>
           <v-card-title>
             <v-select
-                v-model="selectedYear"
                 :items="availableYears"
                 :item-title="(year) => year"
                 :item-value="(year) => year"
@@ -18,11 +17,11 @@
       </v-col>
     </v-row>
 
-    <v-row v-if="selectedYear != null">
+    <v-row v-if="plantingYear != null">
       <v-col cols="12">
         <div>
           <!-- TODO make this a better looking and centered title -->
-          <h2>Garden {{ this.selectedYear }}</h2>
+          <h2>Garden {{ this.plantingYear }}</h2>
         </div>
         <v-row>
           <v-col cols="6"
@@ -60,14 +59,12 @@ export default {
   components: {},
 
   data: () => ({
-    selectedYear: null,
     loading: false,
   }),
 
   computed: {
     ...mapState(useCommonStore, [
-      'availableYears',
-      'plantingYear',
+      'availableYears', 'plantingYear',
     ]),
 
     ...mapState(usePlotsStore, [
@@ -141,11 +138,11 @@ export default {
     },
 
     async refreshData() {
-      if (this.selectedYear) {
+      if (this.plantingYear) {
         await this.fetchPlots();
         await this.fetchPlants();
-        await this.fetchPlantingsByYear(this.selectedYear);
-        await this.fetchHarvestSummariesByYear(this.selectedYear);
+        await this.fetchPlantingsByYear(this.plantingYear);
+        // await this.fetchHarvestSummariesByYear(this.plantingYear);
       }
     },
   },
