@@ -20,8 +20,8 @@
     <v-row v-if="plantingYear != null">
       <v-col cols="12">
         <div>
-          <!-- TODO make this a better looking and centered title -->
-          <h2>Garden {{ this.plantingYear }}</h2>
+          <h2 class="mb-2">Garden {{ this.plantingYear }}</h2>
+          <v-btn class="mb-3" color="blue darken-1" text @click="openDialog">Add Harvests</v-btn>
         </div>
         <v-row>
           <v-col cols="6"
@@ -37,11 +37,13 @@
                     <span>{{ planting.plant.friendlyName }}</span>
                     <v-chip class="ml-2 mr-2"
                             color="green">
-                      {{ planting.numPlants }} &nbsp; <v-icon>mdi-leaf</v-icon>
+                      {{ planting.numPlants }} &nbsp;
+                      <v-icon>mdi-leaf</v-icon>
                     </v-chip>
                     <v-chip v-if="planting.harvestQuantity > 0"
                             color="yellow">
-                      {{ planting.harvestQuantity }} &nbsp; <v-icon>mdi-basket-fill</v-icon>
+                      {{ planting.harvestQuantity }} &nbsp;
+                      <v-icon>mdi-basket-fill</v-icon>
                     </v-chip>
                   </v-card-text>
                 </v-card>
@@ -51,6 +53,31 @@
         </v-row>
       </v-col>
     </v-row>
+
+    <v-dialog v-model="dialog" max-width="500px" persistent v-if="!loading">
+      <v-card>
+        <v-card-title>
+          <span class="headline">Add Harvests</span>
+        </v-card-title>
+        <v-card-text>
+          <v-form ref="addHarvestsForm">
+            <div v-for="harvestFormRecord in Object.values(harvestsForm)">
+              <span>{{ harvestFormRecord.plotName }} | {{ harvestFormRecord.plantName }}</span>
+              <v-text-field v-model.number="harvestsForm[harvestFormRecord.plantingId].quantity"
+                            type="number"
+                            label="Quantity"
+                            required
+              ></v-text-field>
+            </div>
+          </v-form>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue darken-1" text @click="closeDialog">Cancel</v-btn>
+          <v-btn color="blue darken-1" text @click="saveHarvests">Save</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
   </v-container>
 </template>
@@ -68,6 +95,8 @@ export default {
 
   data: () => ({
     loading: false,
+    dialog: false,
+    harvestsForm: {},
   }),
 
   computed: {
@@ -135,7 +164,7 @@ export default {
     ]),
 
     ...mapActions(useHarvestsStore, [
-      'upsertHarvest',
+      'insertHarvests',
       'fetchHarvestSummariesByYear',
     ]),
 
@@ -144,6 +173,53 @@ export default {
       await this.selectPlantingYear(year);
       await this.refreshData();
       this.loading = false;
+    },
+
+    openDialog() {
+      if (!this.loading) {
+        const tempPlots = this.hydratedPlots;
+
+        for (let i = 0; i < tempPlots.length; i++) {
+          const plot = tempPlots[i];
+          for (let j = 0; j < plot.plantings.length; j++) {
+            const tempPlanting = plot.plantings[j];
+            this.harvestsForm[tempPlanting.plantingId] = {
+              plantingId: tempPlanting.plantingId,
+              plotName: plot.friendlyName,
+              plantName: tempPlanting.plant.friendlyName,
+              quantity: 0,
+            }
+          }
+        }
+
+        console.log('harvestsForm', this.harvestsForm);
+
+        this.dialog = true;
+      }
+    },
+
+    closeDialog() {
+      this.dialog = false;
+      this.harvestsForm = {};
+    },
+
+    async saveHarvests() {
+      const mappedHarvests = Object.values(this.harvestsForm)
+          .filter(h => h.quantity > 0)
+          .map(h => ({
+            plantingYear: this.plantingYear,
+            plantingId: h.plantingId,
+            quantity: h.quantity,
+          }));
+
+      if (mappedHarvests.length > 0) {
+        await this.insertHarvests(mappedHarvests);
+      } else {
+        console.log('no harvests entered, skipping save');
+      }
+
+      this.closeDialog();
+      await this.refreshData();
     },
 
     async refreshData() {
