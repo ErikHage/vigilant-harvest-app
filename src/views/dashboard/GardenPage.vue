@@ -54,20 +54,36 @@
       </v-col>
     </v-row>
 
-    <v-dialog v-model="dialog" max-width="500px" persistent v-if="!loading">
+    <v-dialog v-model="dialog" max-width="800px" persistent v-if="!loading">
       <v-card>
         <v-card-title>
           <span class="headline">Add Harvests</span>
         </v-card-title>
         <v-card-text>
           <v-form ref="addHarvestsForm">
-            <div v-for="harvestFormRecord in Object.values(harvestsForm)">
-              <span>{{ harvestFormRecord.plotName }} | {{ harvestFormRecord.plantName }}</span>
-              <v-text-field v-model.number="harvestsForm[harvestFormRecord.plantingId].quantity"
-                            type="number"
-                            label="Quantity"
-                            required
-              ></v-text-field>
+            <v-select
+                :items="plots"
+                :item-title="(plot) => plot.friendlyName"
+                :item-value="(plot) => plot.plotId"
+                label="Select Plot"
+                variant="solo"
+                @update:model-value="onDialogSelectPlotChange"
+            ></v-select>
+            <div v-if="selectedPlot"
+                 v-for="harvestFormRecord in Object.values(harvestsForm).filter(isRecordInSelectedPlot)"
+                 :key="harvestFormRecord.plantingId">
+              <v-row no-gutters>
+                <v-col cols="8">
+                  <span class="headline">{{ harvestFormRecord.plotName }}: {{ harvestFormRecord.plantName }}</span>
+                </v-col>
+                <v-col cols="4">
+                  <v-text-field v-model.number="harvestsForm[harvestFormRecord.plantingId].quantity"
+                                type="number"
+                                label="Quantity"
+                                required
+                  ></v-text-field>
+                </v-col>
+              </v-row>
             </div>
           </v-form>
         </v-card-text>
@@ -96,6 +112,7 @@ export default {
   data: () => ({
     loading: false,
     dialog: false,
+    selectedPlot: null,
     harvestsForm: {},
   }),
 
@@ -184,6 +201,7 @@ export default {
           for (let j = 0; j < plot.plantings.length; j++) {
             const tempPlanting = plot.plantings[j];
             this.harvestsForm[tempPlanting.plantingId] = {
+              plotId: plot.plotId,
               plantingId: tempPlanting.plantingId,
               plotName: plot.friendlyName,
               plantName: tempPlanting.plant.friendlyName,
@@ -192,15 +210,22 @@ export default {
           }
         }
 
-        console.log('harvestsForm', this.harvestsForm);
-
         this.dialog = true;
       }
+    },
+
+    onDialogSelectPlotChange(plotId) {
+      this.selectedPlot = plotId;
+    },
+
+    isRecordInSelectedPlot(harvestFormRecord) {
+      return this.selectedPlot === harvestFormRecord.plotId;
     },
 
     closeDialog() {
       this.dialog = false;
       this.harvestsForm = {};
+      this.selectedPlot = null;
     },
 
     async saveHarvests() {
@@ -231,9 +256,5 @@ export default {
       }
     },
   },
-
-  async mounted() {
-    // load available years
-  }
 }
 </script>
