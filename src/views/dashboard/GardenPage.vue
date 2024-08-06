@@ -89,8 +89,30 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="blue darken-1" text @click="closeDialog">Cancel</v-btn>
-          <v-btn color="blue darken-1" text @click="saveHarvests">Save</v-btn>
+          <v-btn color="red darken-1" text @click="closeDialog">Cancel</v-btn>
+          <v-btn color="blue darken-1" text @click="confirmHarvests">Save</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog v-model="harvestsConfirmDialog" max-width="800px" persistent>
+      <v-card>
+        <v-card-title>
+          <span class="headline">Confirm Harvests</span>
+        </v-card-title>
+        <v-card-text>
+          <div v-for="harvestFormRecord in Object.values(harvestsForm).filter(harvest => harvest.quantity > 0)"
+               :key="harvestFormRecord.plantingId">
+            <span class="headline">{{ harvestFormRecord.plotName }}: {{ harvestFormRecord.plantName }}</span>
+            &nbsp;
+            <v-chip color="yellow">+{{ harvestFormRecord.quantity }}</v-chip>
+          </div>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="red darken-1" text @click="closeConfirmDialog">Cancel</v-btn>
+          <v-btn color="blue darken-1" text @click="goBackToHarvestDialog">Back</v-btn>
+          <v-btn color="blue darken-1" text @click="saveHarvests">Confirm</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -111,9 +133,12 @@ export default {
 
   data: () => ({
     loading: false,
+
     dialog: false,
     selectedPlot: null,
     harvestsForm: {},
+
+    harvestsConfirmDialog: false,
   }),
 
   computed: {
@@ -223,9 +248,21 @@ export default {
     },
 
     closeDialog() {
+      this.clearHarvestFormState();
+    },
+
+    confirmHarvests() {
       this.dialog = false;
-      this.harvestsForm = {};
-      this.selectedPlot = null;
+      this.harvestsConfirmDialog = true;
+    },
+
+    goBackToHarvestDialog() {
+      this.harvestsConfirmDialog = false;
+      this.dialog = true;
+    },
+
+    closeConfirmDialog() {
+      this.clearHarvestFormState();
     },
 
     async saveHarvests() {
@@ -243,8 +280,16 @@ export default {
         console.log('no harvests entered, skipping save');
       }
 
-      this.closeDialog();
+      this.closeConfirmDialog();
+      this.clearHarvestFormState();
       await this.refreshData();
+    },
+
+    clearHarvestFormState() {
+      this.dialog = false;
+      this.harvestsConfirmDialog = false;
+      this.harvestsForm = {};
+      this.selectedPlot = null;
     },
 
     async refreshData() {
