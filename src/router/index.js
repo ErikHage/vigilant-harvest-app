@@ -3,15 +3,15 @@ import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthenticationStore } from "@/store";
 import { views } from '@/utils/constants';
 
-import PlantsPage from "@/views/dashboard/PlantsPage.vue";
-import DashboardPage from "@/views/DashboardPage.vue";
-import LandingPage from "@/views/LandingPage.vue";
-import LoginPage from "@/views/LoginPage.vue";
-import PublicPage from "@/views/PublicPage.vue";
-import PlotsPage from "@/views/dashboard/PlotsPage.vue";
-import DashboardDefaultPage from "@/views/dashboard/DashboardDefaultPage.vue";
-import PlantingsPage from "@/views/dashboard/PlantingsPage.vue";
-import GardenPage from "@/views/dashboard/GardenPage.vue";
+import PlantsPage from "@/components/views/dashboard/PlantsPage.vue";
+import DashboardPage from "@/components/views/DashboardPage.vue";
+import LandingPage from "@/components/views/LandingPage.vue";
+import LoginPage from "@/components/views/LoginPage.vue";
+import PublicPage from "@/components/views/PublicPage.vue";
+import PlotsPage from "@/components/views/dashboard/PlotsPage.vue";
+import DashboardDefaultPage from "@/components/views/dashboard/DashboardDefaultPage.vue";
+import PlantingsPage from "@/components/views/dashboard/PlantingsPage.vue";
+import GardenPage from "@/components/views/dashboard/GardenPage.vue";
 
 const routes = [
     {
