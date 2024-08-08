@@ -13,8 +13,11 @@ const appId = '82d7d287-978b-4df1-bc3d-526838b2465b';
 
 export const useCommonStore = defineStore('common', {
     actions: {
-        async selectPlantingYear(year) {
+        selectPlantingYear(year) {
             this.plantingYear = year;
+        },
+        clearPlantingYear() {
+            this.plantingYear = null;
         },
     },
     state: () => {

@@ -2,20 +2,14 @@
   <v-container>
     <v-row class="text-center">
       <v-col cols="12">
-        <v-card>
-          <v-card-title>
-            <span class="headline">Manage Plantings</span>
-            <v-spacer></v-spacer>
-            <v-select
-                :items="availableYears"
-                :item-title="(year) => year"
-                :item-value="(year) => year"
-                label="Select Year"
-                variant="solo"
-                @update:model-value="onSelectYearChange"
-            ></v-select>
-          </v-card-title>
-        </v-card>
+        <span class="headline">Manage Plantings</span>
+      </v-col>
+      <v-col cols="12">
+        <planting-year-select-card
+            :available-years="availableYears"
+            :on-select-year-change="onSelectYearChange"
+            :on-select-year-clear="onSelectYearClear"
+            :selected-year="plantingYear" />
       </v-col>
       <v-col cols="12">
         <v-card v-if="plantingYear != null">
@@ -93,11 +87,14 @@
 
 import { mapActions, mapState } from "pinia";
 import { useCommonStore, usePlantingsStore, usePlantsStore, usePlotsStore } from "@/store";
+import PlantingYearSelectCard from "@/components/PlantingYearSelectCard.vue";
 
 export default {
   name: 'PlantingsPage',
 
-  components: {},
+  components: {
+    PlantingYearSelectCard,
+  },
 
   data: () => ({
     dialog: false,
@@ -150,6 +147,7 @@ export default {
   methods: {
     ...mapActions(useCommonStore, [
       'selectPlantingYear',
+      'clearPlantingYear',
     ]),
 
     ...mapActions(usePlotsStore, [
@@ -207,6 +205,11 @@ export default {
 
     async onSelectYearChange(year) {
       await this.selectPlantingYear(year);
+      await this.refreshData();
+    },
+
+    async onSelectYearClear() {
+      await this.clearPlantingYear();
       await this.refreshData();
     },
 
