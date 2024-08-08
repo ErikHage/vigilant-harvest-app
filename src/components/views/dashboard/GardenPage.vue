@@ -212,7 +212,7 @@ export default {
 
     async onSelectYearChange(year) {
       this.loading = true;
-      await this.selectPlantingYear(year);
+      this.selectPlantingYear(year);
       await this.refreshData();
       this.loading = false;
     },

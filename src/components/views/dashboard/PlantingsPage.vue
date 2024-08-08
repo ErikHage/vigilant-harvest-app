@@ -204,12 +204,12 @@ export default {
     },
 
     async onSelectYearChange(year) {
-      await this.selectPlantingYear(year);
+      this.selectPlantingYear(year);
       await this.refreshData();
     },
 
     async onSelectYearClear() {
-      await this.clearPlantingYear();
+      this.clearPlantingYear();
       await this.refreshData();
     },
 
