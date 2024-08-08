@@ -1,26 +1,21 @@
 <template>
   <v-container>
-    <v-row class="text-center" v-if="plantingYear == null">
+    <v-row class="text-center">
       <v-col cols="12">
-        <v-card>
-          <v-card-title>
-            <v-select
-                :items="availableYears"
-                :item-title="(year) => year"
-                :item-value="(year) => year"
-                label="Select Year"
-                variant="solo"
-                @update:model-value="onSelectYearChange"
-            ></v-select>
-          </v-card-title>
-        </v-card>
+        <h2 class="mb-2">Garden Overview</h2>
+      </v-col>
+      <v-col cols="12">
+        <planting-year-select-card
+            :available-years="availableYears"
+            :on-select-year-change="onSelectYearChange"
+            :on-select-year-clear="onSelectYearClear"
+            :selected-year="plantingYear" />
       </v-col>
     </v-row>
 
     <v-row v-if="plantingYear != null">
       <v-col cols="12">
         <div>
-          <h2 class="mb-2">Garden {{ this.plantingYear }}</h2>
           <v-btn class="mb-3" color="blue darken-1" text @click="openDialog">Add Harvests</v-btn>
         </div>
         <v-row>
@@ -125,11 +120,12 @@
 import { mapActions, mapState } from "pinia";
 import { useCommonStore, useHarvestsStore, usePlantingsStore, usePlantsStore, usePlotsStore } from "@/store";
 import sorting from "@/utils/sorting";
+import PlantingYearSelectCard from "@/components/PlantingYearSelectCard.vue";
 
 export default {
   name: 'GardenPage',
 
-  components: {},
+  components: { PlantingYearSelectCard },
 
   data: () => ({
     loading: false,
@@ -191,6 +187,7 @@ export default {
   methods: {
     ...mapActions(useCommonStore, [
       'selectPlantingYear',
+      'clearPlantingYear',
     ]),
 
     ...mapActions(usePlotsStore, [
@@ -215,6 +212,11 @@ export default {
       this.selectPlantingYear(year);
       await this.refreshData();
       this.loading = false;
+    },
+
+    async onSelectYearClear() {
+      this.clearPlantingYear();
+      await this.refreshData();
     },
 
     openDialog() {
