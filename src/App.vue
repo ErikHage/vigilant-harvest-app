@@ -11,7 +11,7 @@
 
 import { mapActions, mapState } from "pinia";
 
-import AppBar from "@/components/AppBar.vue";
+import AppBar from "@/components/layout/AppBar.vue";
 
 import { useAuthenticationStore } from "@/store";
 
