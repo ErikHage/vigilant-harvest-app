@@ -2,12 +2,14 @@
   <v-container>
     <v-row class="text-center">
       <v-col cols="12">
+        <page-title title="Manage Plants"/>
+        <v-spacer></v-spacer>
+        <v-btn class="mr-2 mt-3" color="primary" @click="openDialog()">Add</v-btn>
+        <v-btn class="mt-3" color="primary" @click="refreshData">Refresh</v-btn>
+      </v-col>
+      <v-col cols="12">
         <v-card>
           <v-card-title>
-            <span class="headline">Manage Plants</span>
-            <v-spacer></v-spacer>
-            <v-btn class="mr-2 mt-3" color="primary" @click="openDialog()">Add</v-btn>
-            <v-btn class="mt-3" color="primary" @click="refreshData">Refresh</v-btn>
           </v-card-title>
           <v-card-text>
             <v-data-table
@@ -55,11 +57,12 @@
 
 import { mapActions, mapState } from "pinia";
 import { usePlantsStore } from "@/store";
+import PageTitle from "@/components/layout/PageTitle.vue";
 
 export default {
   name: 'PlantsPage',
 
-  components: {},
+  components: { PageTitle },
 
   data: () => ({
     dialog: false,
