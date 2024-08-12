@@ -2,22 +2,20 @@
   <v-container>
     <v-row class="text-center">
       <v-col cols="12">
-        <h2 class="mb-2">Garden Overview</h2>
-      </v-col>
-      <v-col cols="12">
+        <page-title title="Garden Overview"/>
+        <v-spacer></v-spacer>
         <planting-year-select-card
             :available-years="availableYears"
             :on-select-year-change="onSelectYearChange"
             :on-select-year-clear="onSelectYearClear"
             :selected-year="plantingYear" />
+        <v-spacer></v-spacer>
+        <v-btn v-if="plantingYear != null" class="mt-3" color="blue darken-1" @click="openDialog">Add Harvests</v-btn>
       </v-col>
     </v-row>
 
     <v-row v-if="plantingYear != null">
       <v-col cols="12">
-        <div>
-          <v-btn class="mb-3" color="blue darken-1" text @click="openDialog">Add Harvests</v-btn>
-        </div>
         <v-row>
           <v-col cols="6"
                  v-if="!loading"
@@ -121,11 +119,12 @@ import { mapActions, mapState } from "pinia";
 import { useCommonStore, useHarvestsStore, usePlantingsStore, usePlantsStore, usePlotsStore } from "@/store";
 import sorting from "@/utils/sorting";
 import PlantingYearSelectCard from "@/components/PlantingYearSelectCard.vue";
+import PageTitle from "@/components/layout/PageTitle.vue";
 
 export default {
   name: 'GardenPage',
 
-  components: { PlantingYearSelectCard },
+  components: { PageTitle, PlantingYearSelectCard },
 
   data: () => ({
     loading: false,
