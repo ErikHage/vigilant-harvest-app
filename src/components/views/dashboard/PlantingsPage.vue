@@ -2,21 +2,19 @@
   <v-container>
     <v-row class="text-center">
       <v-col cols="12">
-        <span class="headline">Manage Plantings</span>
-      </v-col>
-      <v-col cols="12">
+        <page-title title="Manage Plantings"/>
+        <v-spacer></v-spacer>
         <planting-year-select-card
             :available-years="availableYears"
             :on-select-year-change="onSelectYearChange"
             :on-select-year-clear="onSelectYearClear"
             :selected-year="plantingYear" />
+        <v-spacer></v-spacer>
+        <v-btn v-if="plantingYear != null" class="mr-2 mt-3" color="primary" @click="openDialog()">Add</v-btn>
+        <v-btn v-if="plantingYear != null" class="mt-3" color="primary" @click="refreshData">Refresh</v-btn>
       </v-col>
       <v-col cols="12">
         <v-card v-if="plantingYear != null">
-          <v-card-title>
-            <v-btn class="mr-2 mt-3" color="primary" @click="openDialog()">Add</v-btn>
-            <v-btn class="mt-3" color="primary" @click="refreshData">Refresh</v-btn>
-          </v-card-title>
           <v-card-text>
             <v-data-table
                 class="elevation-1 align-left"
@@ -88,11 +86,13 @@
 import { mapActions, mapState } from "pinia";
 import { useCommonStore, usePlantingsStore, usePlantsStore, usePlotsStore } from "@/store";
 import PlantingYearSelectCard from "@/components/PlantingYearSelectCard.vue";
+import PageTitle from "@/components/layout/PageTitle.vue";
 
 export default {
   name: 'PlantingsPage',
 
   components: {
+    PageTitle,
     PlantingYearSelectCard,
   },
 
