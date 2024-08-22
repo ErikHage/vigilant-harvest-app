@@ -9,11 +9,7 @@
 
 <script>
 
-import { mapActions, mapState } from "pinia";
-
 import AppBar from "@/components/layout/AppBar.vue";
-
-import { useAuthenticationStore } from "@/store";
 
 export default {
   name: 'App',
