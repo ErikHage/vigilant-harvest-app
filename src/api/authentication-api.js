@@ -5,7 +5,7 @@ import { feralAuthenticationServiceUrl, applicationId } from "@/utils/constants"
 async function verifySsoToken(ssoToken) {
     try {
         const response = await axios.post(
-            `${feralAuthenticationServiceUrl.v0.auth}/tokens/sso/execute`,
+            `${feralAuthenticationServiceUrl.v0}/tokens/sso/execute`,
             {
                 applicationId,
                 ssoToken,
@@ -20,7 +20,7 @@ async function verifySsoToken(ssoToken) {
 
 async function verifyActorToken(actorToken) {
     try {
-        await axios.post(`${feralAuthenticationServiceUrl.v0.auth}/tokens/verify`, {}, {
+        await axios.post(`${feralAuthenticationServiceUrl.v0}/tokens/verify`, {}, {
             headers: {
                 'x-feral-auth-token': actorToken,
             },

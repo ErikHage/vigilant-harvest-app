@@ -4,7 +4,7 @@ import { vigilantHarvestServiceUrl } from "@/utils/constants";
 
 async function insertHarvests(actorToken, harvests) {
     try {
-        const response = await axios.put(`${vigilantHarvestServiceUrl.v0.api}/harvests`, { harvests }, {
+        const response = await axios.put(`${vigilantHarvestServiceUrl.v0}/harvests`, { harvests }, {
             headers: {
                 'x-feral-auth-token': actorToken,
             },
@@ -18,7 +18,7 @@ async function insertHarvests(actorToken, harvests) {
 
 async function fetchHarvestSummary(actorToken, plantingYear) {
     try {
-        const response = await axios.get(`${vigilantHarvestServiceUrl.v0.api}/harvests/summary`, {
+        const response = await axios.get(`${vigilantHarvestServiceUrl.v0}/harvests/summary`, {
             params: {
                 plantingYear,
             },

@@ -4,7 +4,7 @@ import { vigilantHarvestServiceUrl } from "@/utils/constants";
 
 async function upsertPlot(actorToken, plot) {
     try {
-        const response = await axios.put(`${vigilantHarvestServiceUrl.v0.api}/plots`, plot, {
+        const response = await axios.put(`${vigilantHarvestServiceUrl.v0}/plots`, plot, {
             headers: {
                 'x-feral-auth-token': actorToken,
             },
@@ -18,7 +18,7 @@ async function upsertPlot(actorToken, plot) {
 
 async function fetchPlots(actorToken) {
     try {
-        const response = await axios.get(`${vigilantHarvestServiceUrl.v0.api}/plots`, {
+        const response = await axios.get(`${vigilantHarvestServiceUrl.v0}/plots`, {
             headers: {
                 'x-feral-auth-token': actorToken,
             },
@@ -32,7 +32,7 @@ async function fetchPlots(actorToken) {
 
 async function deletePlotById(actorToken, plotId) {
     try {
-        const response = await axios.delete(`${vigilantHarvestServiceUrl.v0.api}/plots/${plotId}`, {
+        const response = await axios.delete(`${vigilantHarvestServiceUrl.v0}/plots/${plotId}`, {
             headers: {
                 'x-feral-auth-token': actorToken,
             },
