@@ -5,7 +5,7 @@
     </v-app-bar>
     <div class="text-center mb-4">
       <v-img
-          src="/src/assets/ai-owl.jpg"
+          src="/apps/vigilant-harvest/assets/ai-owl.jpg"
           alt="Logo"
           contain
           max-width="500"
