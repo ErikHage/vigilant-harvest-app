@@ -9,7 +9,7 @@ import plotsApi from "@/api/plots-api";
 import plantingsApi from "@/api/plantings-api";
 import harvestsApi from "@/api/harvests-api";
 
-import { applicationId } from "@/utils/constants";
+import { applicationId, feralAuthenticationAppUrl } from "@/utils/constants";
 
 export const useCommonStore = defineStore('common', {
     actions: {
@@ -35,7 +35,7 @@ export const useAuthenticationStore = defineStore('authentication', {
     actions: {
         redirectForSso() {
             // send to feral-auth with query param of application id "app=appId"
-            window.location.href = `http://localhost:5173/auth/login?app=${applicationId}`;
+            window.location.href = `${feralAuthenticationAppUrl}/login?app=${applicationId}`;
         },
         async authenticate(ssoToken) {
             try {

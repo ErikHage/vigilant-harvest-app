@@ -1,5 +1,7 @@
 export const applicationId = import.meta.env.VITE_APPLICATION_ID;
 
+export const feralAuthenticationAppUrl = import.meta.env.VITE_AUTH_APP_BASE_URL;
+
 export const feralAuthenticationServiceUrl = {
     v0: import.meta.env.VITE_AUTH_SERVICE_V0_BASE_URL,
 };
