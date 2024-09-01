@@ -4,7 +4,7 @@
       <v-col cols="12" sm="8" md="4">
         <div class="text-center mb-4">
           <v-img
-              src="/apps/vigilant-harvest/assets/ai-owl.jpg"
+              :src="getAssetPath('ai-owl.jpg')"
               alt="Logo"
               contain
               max-width="250"
@@ -28,6 +28,7 @@ import { mapActions, mapState } from "pinia";
 
 import { useAuthenticationStore } from "@/store";
 import { views } from "@/utils/constants";
+import { getAssetPath } from "@/utils/assets";
 
 export default {
   name: 'LoginPage',
@@ -39,6 +40,7 @@ export default {
   },
 
   methods: {
+    getAssetPath,
     ...mapActions(useAuthenticationStore, [
       'redirectForSso',
       'clearToken',

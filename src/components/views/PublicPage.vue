@@ -5,7 +5,7 @@
     </v-app-bar>
     <div class="text-center mb-4">
       <v-img
-          src="/apps/vigilant-harvest/assets/ai-owl.jpg"
+          :src="getAssetPath('ai-owl.jpg')"
           alt="Logo"
           contain
           max-width="500"
@@ -20,6 +20,7 @@
 import { views } from "@/utils/constants";
 import { mapState } from "pinia";
 import { useAuthenticationStore } from "@/store";
+import { getAssetPath } from "@/utils/assets";
 
 export default {
   name: 'PublicPage',
@@ -35,6 +36,7 @@ export default {
   },
 
   methods: {
+    getAssetPath
 
   },
 }
