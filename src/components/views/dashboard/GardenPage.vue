@@ -9,7 +9,10 @@
             :on-select-year-change="onSelectYearChange"
             :on-select-year-clear="onSelectYearClear"
             :selected-year="plantingYear" />
+        <br />
+        <span><strong>Harvest Date:</strong> {{ this.selectedHarvestDate.toDateString() }}</span>
         <v-spacer></v-spacer>
+        <v-btn v-if="plantingYear != null" class="mt-3 mr-3" color="orange darken-1" @click="openHarvestDateOverrideDialog">Override Date</v-btn>
         <v-btn v-if="plantingYear != null" class="mt-3" color="blue darken-1" @click="openDialog">Add Harvests</v-btn>
       </v-col>
     </v-row>
@@ -27,12 +30,13 @@
               <v-card-text>
                 <v-card v-for="planting in hydratedPlot.plantings">
                   <v-card-text>
-                    <span>{{ planting.plant.friendlyName }}</span>
                     <v-chip class="ml-2 mr-2"
                             color="green">
                       {{ planting.numPlants }} &nbsp;
                       <v-icon>mdi-leaf</v-icon>
                     </v-chip>
+                    <span>{{ planting.plant.friendlyName }}</span>
+                    &nbsp;
                     <v-chip v-if="planting.harvestQuantity > 0"
                             color="yellow">
                       {{ planting.harvestQuantity }} &nbsp;
@@ -47,10 +51,34 @@
       </v-col>
     </v-row>
 
+    <v-dialog v-model="overrideHarvestDateDialog" max-width="500px" persistent v-if="!loading">
+      <v-card>
+        <v-card-title>
+          <span class="headline">Override Harvest Date</span>
+        </v-card-title>
+        <v-card-text>
+          <v-form ref="addHarvestsForm">
+            <v-date-picker
+                v-model="selectedHarvestDate"
+                label="Select Date"
+                required
+                locale="en"
+                full-width
+            ></v-date-picker>
+          </v-form>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="red darken-1" text @click="closeHarvestDateOverrideDialog">Cancel</v-btn>
+          <v-btn color="blue darken-1" text @click="confirmHarvestDateOverrideDialog">Ok</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <v-dialog v-model="dialog" max-width="800px" persistent v-if="!loading">
       <v-card>
         <v-card-title>
-          <span class="headline">Add Harvests</span>
+          <span class="headline">Add Harvests [{{ this.selectedHarvestDate.toDateString() }}]</span>
         </v-card-title>
         <v-card-text>
           <v-form ref="addHarvestsForm">
@@ -91,7 +119,7 @@
     <v-dialog v-model="harvestsConfirmDialog" max-width="800px" persistent>
       <v-card>
         <v-card-title>
-          <span class="headline">Confirm Harvests</span>
+          <span class="headline">Confirm Harvests [{{ this.selectedHarvestDate.toDateString() }}]</span>
         </v-card-title>
         <v-card-text>
           <div v-for="harvestFormRecord in Object.values(harvestsForm).filter(harvest => harvest.quantity > 0)"
@@ -128,6 +156,9 @@ export default {
 
   data: () => ({
     loading: false,
+
+    overrideHarvestDateDialog: false,
+    selectedHarvestDate: new Date(),
 
     dialog: false,
     selectedPlot: null,
@@ -248,6 +279,19 @@ export default {
       return this.selectedPlot === harvestFormRecord.plotId;
     },
 
+    openHarvestDateOverrideDialog() {
+      this.overrideHarvestDateDialog = true;
+    },
+
+    confirmHarvestDateOverrideDialog() {
+      this.overrideHarvestDateDialog = false;
+    },
+
+    closeHarvestDateOverrideDialog() {
+      this.selectedHarvestDate = new Date();
+      this.overrideHarvestDateDialog = false;
+    },
+
     closeDialog() {
       this.clearHarvestFormState();
     },
@@ -273,6 +317,7 @@ export default {
             plantingYear: this.plantingYear,
             plantingId: h.plantingId,
             quantity: h.quantity,
+            harvestDate: this.selectedHarvestDate,
           }));
 
       if (mappedHarvests.length > 0) {
