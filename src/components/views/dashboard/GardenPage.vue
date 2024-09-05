@@ -10,14 +10,16 @@
             :on-select-year-clear="onSelectYearClear"
             :selected-year="plantingYear" />
         <br />
-        <span v-if="plantingYear != null"><strong>Harvest Date:</strong> {{ this.selectedHarvestDate.toDateString() }}</span>
+        <span v-if="isPlantingYearSelected">
+          <strong>Harvest Date:</strong> {{ this.selectedHarvestDate.toDateString() }}
+        </span>
         <v-spacer></v-spacer>
-        <v-btn v-if="plantingYear != null" class="mt-3 mr-3" color="orange darken-1" @click="openHarvestDateOverrideDialog">Override Date</v-btn>
-        <v-btn v-if="plantingYear != null" class="mt-3" color="blue darken-1" @click="openDialog">Add Harvests</v-btn>
+        <v-btn v-if="isPlantingYearSelected" class="mt-3 mr-3" color="orange darken-1" @click="openHarvestDateOverrideDialog">Override Date</v-btn>
+        <v-btn v-if="isPlantingYearSelected" class="mt-3" color="blue darken-1" @click="openDialog">Add Harvests</v-btn>
       </v-col>
     </v-row>
 
-    <v-row v-if="plantingYear != null">
+    <v-row v-if="isPlantingYearSelected">
       <v-col cols="12">
         <v-row>
           <v-col cols="6"
@@ -212,6 +214,10 @@ export default {
 
       return Object.values(mappedPlots).sort(sorting.sortByPlotFriendlyName);
     },
+
+    isPlantingYearSelected() {
+      return this.plantingYear != null;
+    }
   },
 
   methods: {
