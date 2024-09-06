@@ -10,11 +10,11 @@
             :on-select-year-clear="onSelectYearClear"
             :selected-year="plantingYear" />
         <v-spacer></v-spacer>
-        <v-btn v-if="plantingYear != null" class="mr-2 mt-3" color="primary" @click="openDialog()">Add</v-btn>
-        <v-btn v-if="plantingYear != null" class="mt-3" color="primary" @click="refreshData">Refresh</v-btn>
+        <v-btn v-if="isPlantingYearSelected" class="mr-2 mt-3" color="primary" @click="openDialog()">Add</v-btn>
+        <v-btn v-if="isPlantingYearSelected" class="mt-3" color="primary" @click="refreshData">Refresh</v-btn>
       </v-col>
       <v-col cols="12">
-        <v-card v-if="plantingYear != null">
+        <v-card v-if="isPlantingYearSelected">
           <v-card-text>
             <v-data-table
                 class="elevation-1 align-left"
@@ -142,6 +142,10 @@ export default {
         };
       });
     },
+
+    isPlantingYearSelected() {
+      return this.plantingYear != null;
+    }
   },
 
   methods: {
