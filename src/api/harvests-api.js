@@ -33,7 +33,22 @@ async function fetchHarvestSummary(actorToken, plantingYear) {
     }
 }
 
+async function searchHarvests(actorToken, skip, limit) {
+    try {
+        const response = await axios.get(`${vigilantHarvestServiceUrl.v0}/harvests?skip=${skip}&limit=${limit}`, {
+            headers: {
+                'x-feral-auth-token': actorToken,
+            },
+        });
+        return response.data;
+    } catch (err) {
+        console.log('error searching harvests');
+        throw err;
+    }
+}
+
 export default {
     insertHarvests,
     fetchHarvestSummary,
+    searchHarvests,
 };
