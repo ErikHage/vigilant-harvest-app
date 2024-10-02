@@ -261,6 +261,22 @@ export const useHarvestsStore = defineStore('harvests', {
                 this.setAlertMessage('error', 'error fetching harvest summaries by year');
             }
         },
+        async searchHarvests(page, pageSize) {
+            try {
+                const harvests = await harvestsApi
+                    .searchHarvests(storageUtils.tryToLoadTokenFromStorage(), page - 1, pageSize);
+                console.log('harvests', harvests);
+                this.harvestsPage = {
+                    data: harvests,
+                    page,
+                    pageSize,
+                };
+            } catch (err) {
+                console.log(err);
+                this.setAlertMessage('error',
+                    `error searching harvests page ${page}, pageSize ${pageSize}`);
+            }
+        },
         setAlertMessage(type, message) {
             this.alertVisible = true;
             this.alertType = type;
@@ -272,6 +288,7 @@ export const useHarvestsStore = defineStore('harvests', {
     },
     state: () => {
         return {
+            harvestsPage: {},
             harvestSummaries: [],
             harvestCounts: {},
             alertVisible: false,
