@@ -26,7 +26,7 @@
 <script>
 
 import { mapActions, mapState } from "pinia";
-import { useCommonStore } from "@/store";
+import { useCommonStore, useHarvestsStore } from "@/store";
 import PlantingYearSelectCard from "@/components/PlantingYearSelectCard.vue";
 import PageTitle from "@/components/layout/PageTitle.vue";
 
@@ -38,11 +38,18 @@ export default {
     PlantingYearSelectCard,
   },
 
-  data: () => ({}),
+  data: () => ({
+    currentPage: 1,
+    pageSize: 25,
+  }),
 
   computed: {
     ...mapState(useCommonStore, [
       'availableYears', 'plantingYear',
+    ]),
+
+    ...mapState(useHarvestsStore, [
+      'harvestsPage',
     ]),
 
     isPlantingYearSelected() {
@@ -56,6 +63,10 @@ export default {
       'clearPlantingYear',
     ]),
 
+    ...mapActions(useHarvestsStore, [
+      'searchHarvests',
+    ]),
+
     async onSelectYearChange(year) {
       this.selectPlantingYear(year);
       await this.refreshData();
@@ -66,8 +77,13 @@ export default {
       await this.refreshData();
     },
 
-    async refreshData() {
+    async loadHarvestsPage(page) {
+      await this.searchHarvests(this.pageSize);
+      this.currentPage = page;
+    },
 
+    async refreshData() {
+      await this.loadHarvestsPage(this.currentPage);
     },
   },
 
