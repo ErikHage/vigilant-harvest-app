@@ -5,6 +5,7 @@
       <v-btn to="/dashboard/plants">Plants</v-btn>
       <v-btn to="/dashboard/plots">Plots</v-btn>
       <v-btn to="/dashboard/plantings">Plantings</v-btn>
+      <v-btn to="/dashboard/harvests">Harvests</v-btn>
     </v-app-bar>
     <v-row class="text-center">
       <router-view/>
