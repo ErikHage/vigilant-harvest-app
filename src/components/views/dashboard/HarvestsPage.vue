@@ -78,7 +78,7 @@ export default {
     },
 
     async loadHarvestsPage(page) {
-      await this.searchHarvests(this.pageSize);
+      await this.searchHarvests(this.plantingYear, this.pageSize);
       this.currentPage = page;
     },
 
