@@ -33,9 +33,9 @@ async function fetchHarvestSummary(actorToken, plantingYear) {
     }
 }
 
-async function searchHarvests(actorToken, year, skip, limit) {
+async function searchHarvests(actorToken, year) {
     try {
-        const response = await axios.get(`${vigilantHarvestServiceUrl.v0}/harvests?year=${year}&skip=${skip}&limit=${limit}`, {
+        const response = await axios.get(`${vigilantHarvestServiceUrl.v0}/harvests?year=${year}`, {
             headers: {
                 'x-feral-auth-token': actorToken,
             },

@@ -39,8 +39,6 @@ export default {
   },
 
   data: () => ({
-    currentPage: 1,
-    pageSize: 25,
   }),
 
   computed: {
@@ -49,7 +47,7 @@ export default {
     ]),
 
     ...mapState(useHarvestsStore, [
-      'harvestsPage',
+      'harvests'
     ]),
 
     isPlantingYearSelected() {
@@ -77,13 +75,12 @@ export default {
       await this.refreshData();
     },
 
-    async loadHarvestsPage(page) {
-      await this.searchHarvests(this.plantingYear, this.pageSize);
-      this.currentPage = page;
+    async loadHarvestsPage() {
+      await this.searchHarvests(this.plantingYear);
     },
 
     async refreshData() {
-      await this.loadHarvestsPage(this.currentPage);
+      await this.loadHarvestsPage();
     },
   },
 
