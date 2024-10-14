@@ -39,6 +39,13 @@ export default {
   },
 
   data: () => ({
+    headers: [
+      // { title: 'Id', key: 'harvestId' }, // don't need to show this on table
+      { title: 'Planting Id', key: 'plantingId' }, // TODO expand this to planting name
+      { title: 'Quantity', key: 'quantity' },
+      { title: 'Harvest Date', key: 'harvestDate' },
+      { title: 'Actions', key: 'actions', sortable: false },
+    ],
   }),
 
   computed: {
