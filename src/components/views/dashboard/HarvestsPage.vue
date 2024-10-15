@@ -15,7 +15,18 @@
       <v-col cols="12">
         <v-card v-if="isPlantingYearSelected">
           <v-card-text>
-<!--            TODO add harvests [data?] table-->
+            <v-data-table
+                :headers="headers"
+                :items="harvests"
+                item-key="harvestId"
+                class="elevation-1"
+            >
+              <template #item.actions="{ item }">
+<!--               TODO <v-icon small @click="openDialog(item)">mdi-pencil</v-icon>-->
+                <!-- TODO add delete button, with confirm dialog. only admin can see/use it -->
+              </template>
+            </v-data-table>
+
           </v-card-text>
         </v-card>
       </v-col>
