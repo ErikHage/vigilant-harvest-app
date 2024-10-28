@@ -101,10 +101,6 @@ export default {
       await this.loadHarvestsPage();
     },
   },
-
-  mounted() {
-    this.refreshData();
-  }
 }
 </script>
 <style scoped>
