@@ -17,7 +17,7 @@
           <v-card-text>
             <v-data-table
                 :headers="headers"
-                :items="harvests"
+                :items="hydratedHarvests"
                 item-key="harvestId"
                 class="elevation-1"
             >
@@ -37,7 +37,7 @@
 <script>
 
 import { mapActions, mapState } from "pinia";
-import { useCommonStore, useHarvestsStore } from "@/store";
+import { useCommonStore, useHarvestsStore, usePlantingsStore, usePlantsStore } from "@/store";
 import PlantingYearSelectCard from "@/components/PlantingYearSelectCard.vue";
 import PageTitle from "@/components/layout/PageTitle.vue";
 
@@ -50,9 +50,9 @@ export default {
   },
 
   data: () => ({
+    hydratedHarvests: [],
     headers: [
-      // { title: 'Id', key: 'harvestId' }, // don't need to show this on table
-      { title: 'Planting Id', key: 'plantingId' }, // TODO expand this to planting name
+      { title: 'Plant', key: 'plantName' },
       { title: 'Quantity', key: 'quantity' },
       { title: 'Harvest Date', key: 'harvestDate' },
       { title: 'Actions', key: 'actions', sortable: false },
@@ -62,6 +62,14 @@ export default {
   computed: {
     ...mapState(useCommonStore, [
       'availableYears', 'plantingYear',
+    ]),
+
+    ...mapState(usePlantsStore, [
+      'plantsById',
+    ]),
+
+    ...mapState(usePlantingsStore, [
+      'plantingsById',
     ]),
 
     ...mapState(useHarvestsStore, [
@@ -77,6 +85,14 @@ export default {
     ...mapActions(useCommonStore, [
       'selectPlantingYear',
       'clearPlantingYear',
+    ]),
+
+    ...mapActions(usePlantsStore, [
+      'fetchPlants',
+    ]),
+
+    ...mapActions(usePlantingsStore, [
+      'fetchPlantingsByYear',
     ]),
 
     ...mapActions(useHarvestsStore, [
@@ -95,12 +111,22 @@ export default {
 
     async loadHarvestsPage() {
       await this.searchHarvests(this.plantingYear);
+      await this.fetchPlantingsByYear(this.plantingYear);
+
+      this.hydratedHarvests = this.harvests.map(harvest => ({
+        ...harvest,
+        plantName: this.plantsById[this.plantingsById[harvest.plantingId].plantId].friendlyName,
+      }));
     },
 
     async refreshData() {
       await this.loadHarvestsPage();
     },
   },
+
+  async mounted() {
+    await this.fetchPlants();
+  }
 }
 </script>
 <style scoped>
