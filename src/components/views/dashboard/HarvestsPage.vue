@@ -20,6 +20,7 @@
                 :items="hydratedHarvests"
                 item-key="harvestId"
                 class="elevation-1"
+                density="compact"
             >
               <template #item.actions="{ item }">
 <!--               TODO <v-icon small @click="openDialog(item)">mdi-pencil</v-icon>-->
