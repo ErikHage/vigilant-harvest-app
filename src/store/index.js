@@ -268,10 +268,8 @@ export const useHarvestsStore = defineStore('harvests', {
         },
         async searchHarvests(year) {
             try {
-                const harvests = await harvestsApi
+                this.harvests = await harvestsApi
                     .searchHarvests(storageUtils.tryToLoadTokenFromStorage(), year);
-                console.log('harvests', harvests);
-                this.harvests = harvests;
             } catch (err) {
                 console.log(err);
                 this.setAlertMessage('error', 'error searching harvests page');

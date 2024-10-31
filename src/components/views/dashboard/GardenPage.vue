@@ -158,6 +158,7 @@ export default {
 
   data: () => ({
     loading: false,
+    initialized: false,
 
     overrideHarvestDateDialog: false,
     selectedHarvestDate: new Date(),
@@ -191,28 +192,32 @@ export default {
     ]),
 
     hydratedPlots() {
-      const mappedPlots = this.plantings.reduce((acc, planting) => {
-        if (!acc[planting.plotId]) {
-          const plot = this.plotsById[planting.plotId];
+      if (this.isPlantingYearSelected && this.initialized) {
+        const mappedPlots = this.plantings.reduce((acc, planting) => {
+          if (!acc[planting.plotId]) {
+            const plot = this.plotsById[planting.plotId];
 
-          acc[planting.plotId] = {
-            ...plot,
-            plantings: [],
-          };
-        }
+            acc[planting.plotId] = {
+              ...plot,
+              plantings: [],
+            };
+          }
 
-        const plant = this.plantsById[planting.plantId];
+          const plant = this.plantsById[planting.plantId];
 
-        acc[planting.plotId].plantings.push({
-          ...planting,
-          plant,
-          harvestQuantity: this.harvestCounts[planting.plantingId] ?? 0,
-        });
+          acc[planting.plotId].plantings.push({
+            ...planting,
+            plant,
+            harvestQuantity: this.harvestCounts[planting.plantingId] ?? 0,
+          });
 
-        return acc;
-      }, {});
+          return acc;
+        }, {});
 
-      return Object.values(mappedPlots).sort(sorting.sortByPlotFriendlyName);
+        return Object.values(mappedPlots).sort(sorting.sortByPlotFriendlyName);
+      } else {
+        return {};
+      }
     },
 
     isPlantingYearSelected() {
@@ -349,13 +354,20 @@ export default {
     },
 
     async refreshData() {
-      if (this.plantingYear) {
+      if (this.isPlantingYearSelected) {
         await this.fetchPlots();
         await this.fetchPlants();
         await this.fetchPlantingsByYear(this.plantingYear);
         await this.fetchHarvestSummariesByYear(this.plantingYear);
+        this.initialized = true;
       }
     },
   },
+
+  async mounted() {
+    if (this.isPlantingYearSelected) {
+      await this.refreshData();
+    }
+  }
 }
 </script>

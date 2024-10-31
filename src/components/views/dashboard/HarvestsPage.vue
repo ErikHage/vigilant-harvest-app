@@ -127,6 +127,10 @@ export default {
 
   async mounted() {
     await this.fetchPlants();
+
+    if (this.isPlantingYearSelected) {
+      await this.refreshData();
+    }
   }
 }
 </script>
