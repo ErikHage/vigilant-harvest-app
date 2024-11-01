@@ -2,7 +2,7 @@
   <v-app-bar app>
     <v-toolbar-title>Vigilant Harvest</v-toolbar-title>
     <v-spacer></v-spacer>
-    <div v-if="showAppBar() === true">
+    <div v-if="showAppBar === true">
       <v-btn :to="dashboardPath">Dashboard</v-btn>
       <v-btn @click="logoutUser">Logout</v-btn>
     </div>
@@ -11,7 +11,7 @@
 
 <script>
 import { mapActions, mapState } from "pinia";
-import { useAuthenticationStore } from "@/store";
+import { useAuthenticationStore, useCommonStore } from "@/store";
 import { views } from "@/utils/constants";
 
 export default {
@@ -21,14 +21,20 @@ export default {
     dashboardPath: views.dashboard.path,
   }),
 
-  methods: {
-    ...mapActions(useAuthenticationStore, {
-      logout: 'logout',
-    }),
+  computed: {
+    ...mapState(useAuthenticationStore, [
+      'showAppBar',
+    ]),
 
-    ...mapState(useAuthenticationStore, {
-      showAppBar: (state) => state.showAppBar,
-    }),
+    ...mapState(useCommonStore, [
+      'plantingYear',
+    ]),
+  },
+
+  methods: {
+    ...mapActions(useAuthenticationStore, [
+      'logout',
+    ]),
 
     async logoutUser() {
       await this.logout();

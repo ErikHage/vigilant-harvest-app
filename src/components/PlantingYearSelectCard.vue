@@ -15,7 +15,7 @@
       :items="availableYears"
       :item-title="(year) => year"
       :item-value="(year) => year"
-      label="Select Year"
+      label="Select Planting Year"
       variant="solo"
       @update:model-value="onSelectYearChange"
   ></v-select>

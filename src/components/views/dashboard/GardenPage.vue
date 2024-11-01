@@ -4,22 +4,14 @@
       <v-col cols="12">
         <page-title title="Garden Overview"/>
         <v-spacer></v-spacer>
-        <planting-year-select-card
-            :available-years="availableYears"
-            :on-select-year-change="onSelectYearChange"
-            :on-select-year-clear="onSelectYearClear"
-            :selected-year="plantingYear" />
-        <br />
-        <span v-if="isPlantingYearSelected">
-          <strong>Harvest Date:</strong> {{ this.selectedHarvestDateString }}
-        </span>
+        <strong>Harvest Date:</strong> {{ this.selectedHarvestDateString }}
         <v-spacer></v-spacer>
-        <v-btn v-if="isPlantingYearSelected" class="mt-3 mr-3" color="orange darken-1" @click="openHarvestDateOverrideDialog">Override Date</v-btn>
-        <v-btn v-if="isPlantingYearSelected" class="mt-3" color="blue darken-1" @click="openDialog">Add Harvests</v-btn>
+        <v-btn class="mt-3 mr-3" color="orange darken-1" @click="openHarvestDateOverrideDialog">Override Date</v-btn>
+        <v-btn class="mt-3" color="blue darken-1" @click="openDialog">Add Harvests</v-btn>
       </v-col>
     </v-row>
 
-    <v-row v-if="isPlantingYearSelected">
+    <v-row>
       <v-col cols="12">
         <v-row>
           <v-col cols="6"
@@ -148,13 +140,12 @@
 import { mapActions, mapState } from "pinia";
 import { useCommonStore, useHarvestsStore, usePlantingsStore, usePlantsStore, usePlotsStore } from "@/store";
 import sorting from "@/utils/sorting";
-import PlantingYearSelectCard from "@/components/PlantingYearSelectCard.vue";
 import PageTitle from "@/components/layout/PageTitle.vue";
 
 export default {
   name: 'GardenPage',
 
-  components: { PageTitle, PlantingYearSelectCard },
+  components: { PageTitle },
 
   data: () => ({
     loading: false,
@@ -172,7 +163,7 @@ export default {
 
   computed: {
     ...mapState(useCommonStore, [
-      'availableYears', 'plantingYear',
+      'plantingYear',
     ]),
 
     ...mapState(usePlotsStore, [
@@ -192,7 +183,7 @@ export default {
     ]),
 
     hydratedPlots() {
-      if (this.isPlantingYearSelected && this.initialized) {
+      if (this.initialized) {
         const mappedPlots = this.plantings.reduce((acc, planting) => {
           if (!acc[planting.plotId]) {
             const plot = this.plotsById[planting.plotId];
@@ -220,21 +211,12 @@ export default {
       }
     },
 
-    isPlantingYearSelected() {
-      return this.plantingYear != null;
-    },
-
     selectedHarvestDateString() {
       return this.selectedHarvestDate.toDateString();
     }
   },
 
   methods: {
-    ...mapActions(useCommonStore, [
-      'selectPlantingYear',
-      'clearPlantingYear',
-    ]),
-
     ...mapActions(usePlotsStore, [
       'fetchPlots',
     ]),
@@ -354,20 +336,18 @@ export default {
     },
 
     async refreshData() {
-      if (this.isPlantingYearSelected) {
-        await this.fetchPlots();
-        await this.fetchPlants();
-        await this.fetchPlantingsByYear(this.plantingYear);
-        await this.fetchHarvestSummariesByYear(this.plantingYear);
-        this.initialized = true;
-      }
+      console.log("refreshing data");
+      await this.fetchPlots();
+      await this.fetchPlants();
+      await this.fetchPlantingsByYear(this.plantingYear);
+      await this.fetchHarvestSummariesByYear(this.plantingYear);
+      this.initialized = true;
     },
   },
 
   async mounted() {
-    if (this.isPlantingYearSelected) {
-      await this.refreshData();
-    }
+    console.log("mounted");
+    await this.refreshData();
   }
 }
 </script>

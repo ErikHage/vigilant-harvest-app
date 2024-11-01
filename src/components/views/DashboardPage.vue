@@ -1,12 +1,6 @@
 <template>
   <v-container>
-    <v-app-bar app>
-      <v-btn to="/dashboard/garden">Garden</v-btn>
-      <v-btn to="/dashboard/plants">Plants</v-btn>
-      <v-btn to="/dashboard/plots">Plots</v-btn>
-      <v-btn to="/dashboard/plantings">Plantings</v-btn>
-      <v-btn to="/dashboard/harvests">Harvests</v-btn>
-    </v-app-bar>
+    <dashboard-app-bar :is-planting-year-selected="plantingYear != null"/>
     <v-row class="text-center">
       <router-view/>
     </v-row>
@@ -15,9 +9,19 @@
 
 <script>
 
+import DashboardAppBar from "@/components/layout/DashboardAppBar.vue";
+import { mapState } from "pinia";
+import { useCommonStore } from "@/store";
+
 export default {
   name: 'DashboardPage',
 
-  methods: {},
+  components: { DashboardAppBar },
+
+  computed: {
+    ...mapState(useCommonStore, [
+        'plantingYear',
+    ]),
+  },
 }
 </script>

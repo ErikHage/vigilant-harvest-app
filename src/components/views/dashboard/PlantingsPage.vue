@@ -4,17 +4,11 @@
       <v-col cols="12">
         <page-title title="Manage Plantings"/>
         <v-spacer></v-spacer>
-        <planting-year-select-card
-            :available-years="availableYears"
-            :on-select-year-change="onSelectYearChange"
-            :on-select-year-clear="onSelectYearClear"
-            :selected-year="plantingYear" />
-        <v-spacer></v-spacer>
-        <v-btn v-if="isPlantingYearSelected" class="mr-2 mt-3" color="primary" @click="openDialog()">Add</v-btn>
-        <v-btn v-if="isPlantingYearSelected" class="mt-3" color="primary" @click="refreshData">Refresh</v-btn>
+        <v-btn class="mr-2 mt-3" color="primary" @click="openDialog()">Add</v-btn>
+        <v-btn class="mt-3" color="primary" @click="refreshData">Refresh</v-btn>
       </v-col>
       <v-col cols="12">
-        <v-card v-if="isPlantingYearSelected">
+        <v-card>
           <v-card-text>
             <v-data-table
                 class="elevation-1 align-left"
@@ -116,7 +110,7 @@ export default {
 
   computed: {
     ...mapState(useCommonStore, [
-      'availableYears', 'plantingYear',
+      'plantingYear',
     ]),
 
     ...mapState(usePlotsStore, [
@@ -132,32 +126,19 @@ export default {
     ]),
 
     hydratedPlantings() {
-      if (!this.plantingYear) {
-        return this.plantings.map(planting => {
-          const plant = this.plantsById[planting.plantId];
-          const plot = this.plotsById[planting.plotId];
-          return {
-            ...planting,
-            plantName: plant.friendlyName,
-            plotName: plot.friendlyName,
-          };
-        });
-      } else {
-        return [];
-      }
+      return this.plantings.map(planting => {
+        const plant = this.plantsById[planting.plantId];
+        const plot = this.plotsById[planting.plotId];
+        return {
+          ...planting,
+          plantName: plant.friendlyName,
+          plotName: plot.friendlyName,
+        };
+      });
     },
-
-    isPlantingYearSelected() {
-      return this.plantingYear != null;
-    }
   },
 
   methods: {
-    ...mapActions(useCommonStore, [
-      'selectPlantingYear',
-      'clearPlantingYear',
-    ]),
-
     ...mapActions(usePlotsStore, [
       'fetchPlots',
     ]),
@@ -211,22 +192,10 @@ export default {
       await this.refreshData();
     },
 
-    async onSelectYearChange(year) {
-      this.selectPlantingYear(year);
-      await this.refreshData();
-    },
-
-    async onSelectYearClear() {
-      this.clearPlantingYear();
-      await this.refreshData();
-    },
-
     async refreshData() {
       await this.fetchPlants();
       await this.fetchPlots();
-      if (this.plantingYear) {
-        await this.fetchPlantingsByYear(this.plantingYear);
-      }
+      await this.fetchPlantingsByYear(this.plantingYear);
     },
   },
 

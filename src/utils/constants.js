@@ -29,8 +29,8 @@ export const views = {
         path: '/dashboard',
         children: {
             default: {
-                name: 'Default',
-                path: '/',
+                name: 'DashboardDefaultPage',
+                path: '',
             },
             garden: {
                 name: 'Garden',

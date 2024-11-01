@@ -4,16 +4,10 @@
       <v-col cols="12">
         <page-title title="Review Harvests"/>
         <v-spacer></v-spacer>
-        <planting-year-select-card
-            :available-years="availableYears"
-            :on-select-year-change="onSelectYearChange"
-            :on-select-year-clear="onSelectYearClear"
-            :selected-year="plantingYear" />
-        <v-spacer></v-spacer>
-        <v-btn v-if="isPlantingYearSelected" class="mt-3" color="primary" @click="refreshData">Refresh</v-btn>
+        <v-btn class="mt-3" color="primary" @click="refreshData">Refresh</v-btn>
       </v-col>
       <v-col cols="12">
-        <v-card v-if="isPlantingYearSelected">
+        <v-card>
           <v-card-text>
             <v-data-table
                 :headers="headers"
@@ -23,7 +17,7 @@
                 density="compact"
             >
               <template #item.actions="{ item }">
-<!--               TODO <v-icon small @click="openDialog(item)">mdi-pencil</v-icon>-->
+                <!--               TODO <v-icon small @click="openDialog(item)">mdi-pencil</v-icon>-->
                 <!-- TODO add delete button, with confirm dialog. only admin can see/use it -->
               </template>
             </v-data-table>
@@ -62,7 +56,7 @@ export default {
 
   computed: {
     ...mapState(useCommonStore, [
-      'availableYears', 'plantingYear',
+      'plantingYear',
     ]),
 
     ...mapState(usePlantsStore, [
@@ -76,18 +70,9 @@ export default {
     ...mapState(useHarvestsStore, [
       'harvests'
     ]),
-
-    isPlantingYearSelected() {
-      return this.plantingYear != null;
-    }
   },
 
   methods: {
-    ...mapActions(useCommonStore, [
-      'selectPlantingYear',
-      'clearPlantingYear',
-    ]),
-
     ...mapActions(usePlantsStore, [
       'fetchPlants',
     ]),
@@ -110,7 +95,8 @@ export default {
       await this.refreshData();
     },
 
-    async loadHarvestsPage() {
+    async refreshData() {
+      await this.fetchPlants();
       await this.searchHarvests(this.plantingYear);
       await this.fetchPlantingsByYear(this.plantingYear);
 
@@ -119,18 +105,10 @@ export default {
         plantName: this.plantsById[this.plantingsById[harvest.plantingId].plantId].friendlyName,
       }));
     },
-
-    async refreshData() {
-      await this.loadHarvestsPage();
-    },
   },
 
   async mounted() {
-    await this.fetchPlants();
-
-    if (this.isPlantingYearSelected) {
-      await this.refreshData();
-    }
+    await this.refreshData();
   }
 }
 </script>
