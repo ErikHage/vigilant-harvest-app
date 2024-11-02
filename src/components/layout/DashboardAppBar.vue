@@ -17,12 +17,11 @@ export default {
   props: [ 'isPlantingYearSelected' ],
 
   data: () => ({
-    dashboardPath: views.dashboard.path,
-    gardenPagePath: this.dashboardPath + "/" + views.dashboard.children.garden.path,
-    plantsPagePath: this.dashboardPath + "/" + views.dashboard.children.plants.path,
-    plotsPagePath: this.dashboardPath + "/" + views.dashboard.children.plots.path,
-    plantingsPagePath: this.dashboardPath + "/" + views.dashboard.children.plantings.path,
-    harvestsPagePath: this.dashboardPath + "/" + views.dashboard.children.harvests.path,
+    gardenPagePath: views.dashboard.path + "/" + views.dashboard.children.garden.path,
+    plantsPagePath: views.dashboard.path + "/" + views.dashboard.children.plants.path,
+    plotsPagePath: views.dashboard.path + "/" + views.dashboard.children.plots.path,
+    plantingsPagePath: views.dashboard.path + "/" + views.dashboard.children.plantings.path,
+    harvestsPagePath: views.dashboard.path + "/" + views.dashboard.children.harvests.path,
   }),
 
   computed: {
