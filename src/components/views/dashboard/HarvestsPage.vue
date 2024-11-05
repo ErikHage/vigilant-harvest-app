@@ -6,25 +6,21 @@
         <v-spacer></v-spacer>
         <v-btn class="mt-3" color="primary" @click="refreshData">Refresh</v-btn>
       </v-col>
-      <v-col cols="12">
-        <v-card>
+      <v-col cols="3"></v-col>
+      <v-col cols="6">
+        <!-- TODO make a custom component with better style -->
+        <v-card class="harvest-card" v-for="harvestDate in harvestDates" >
+          <v-card-title class="">
+            {{ formatHarvestDate(harvestDate) }}
+          </v-card-title>
           <v-card-text>
-            <v-data-table
-                :headers="headers"
-                :items="hydratedHarvests"
-                item-key="harvestId"
-                class="elevation-1"
-                density="compact"
-            >
-              <template #item.actions="{ item }">
-                <!--               TODO <v-icon small @click="openDialog(item)">mdi-pencil</v-icon>-->
-                <!-- TODO add delete button, with confirm dialog. only admin can see/use it -->
-              </template>
-            </v-data-table>
-
+            <div v-for="harvest in hydratedHarvestsByDate[harvestDate]">
+              {{ harvest.quantity }} - {{ harvest.plantName }}
+            </div>
           </v-card-text>
         </v-card>
       </v-col>
+      <v-col cols="3"></v-col>
     </v-row>
   </v-container>
 </template>
@@ -33,7 +29,6 @@
 
 import { mapActions, mapState } from "pinia";
 import { useCommonStore, useHarvestsStore, usePlantingsStore, usePlantsStore } from "@/store";
-import PlantingYearSelectCard from "@/components/PlantingYearSelectCard.vue";
 import PageTitle from "@/components/layout/PageTitle.vue";
 
 export default {
@@ -41,11 +36,11 @@ export default {
 
   components: {
     PageTitle,
-    PlantingYearSelectCard,
   },
 
   data: () => ({
-    hydratedHarvests: [],
+    harvestDates: [],
+    hydratedHarvestsByDate: {},
     headers: [
       { title: 'Plant', key: 'plantName' },
       { title: 'Quantity', key: 'quantity' },
@@ -85,25 +80,35 @@ export default {
       'searchHarvests',
     ]),
 
-    async onSelectYearChange(year) {
-      this.selectPlantingYear(year);
-      await this.refreshData();
-    },
-
-    async onSelectYearClear() {
-      this.clearPlantingYear();
-      await this.refreshData();
-    },
-
     async refreshData() {
       await this.fetchPlants();
       await this.searchHarvests(this.plantingYear);
       await this.fetchPlantingsByYear(this.plantingYear);
 
-      this.hydratedHarvests = this.harvests.map(harvest => ({
-        ...harvest,
-        plantName: this.plantsById[this.plantingsById[harvest.plantingId].plantId].friendlyName,
-      }));
+      this.hydratedHarvestsByDate = this.harvests
+          .map(harvest => {
+            console.log('mapping', harvest);
+            return {
+              ...harvest,
+              plantName: this.plantsById[this.plantingsById[harvest.plantingId].plantId].friendlyName,
+            };
+          })
+          .reduce((acc, hydratedHarvest) => {
+            console.log('reducing', hydratedHarvest)
+            if (!acc[hydratedHarvest.harvestDate]) {
+              acc[hydratedHarvest.harvestDate] = [];
+            }
+            acc[hydratedHarvest.harvestDate].push(hydratedHarvest);
+            return acc;
+          }, {});
+
+      this.harvestDates = Object.keys(this.hydratedHarvestsByDate).sort();
+    },
+
+    formatHarvestDate(dateTimeString) {
+      const date = new Date(dateTimeString);
+      const options = { month: 'short', day: 'numeric' };
+      return date.toLocaleDateString('en-US', options);
     },
   },
 
@@ -113,5 +118,7 @@ export default {
 }
 </script>
 <style scoped>
-
+  .harvest-card {
+    margin-bottom: 5px;
+  }
 </style>
