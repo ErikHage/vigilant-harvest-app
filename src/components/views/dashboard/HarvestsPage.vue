@@ -8,17 +8,7 @@
       </v-col>
       <v-col cols="3"></v-col>
       <v-col cols="6">
-        <!-- TODO make a custom component with better style -->
-        <v-card class="harvest-card" v-for="harvestDate in harvestDates" >
-          <v-card-title class="">
-            {{ formatHarvestDate(harvestDate) }}
-          </v-card-title>
-          <v-card-text>
-            <div v-for="harvest in hydratedHarvestsByDate[harvestDate]">
-              {{ harvest.quantity }} - {{ harvest.plantName }}
-            </div>
-          </v-card-text>
-        </v-card>
+        <harvests-list :harvest-dates="harvestDates" :hydrated-harvests-by-date="hydratedHarvestsByDate"/>
       </v-col>
       <v-col cols="3"></v-col>
     </v-row>
@@ -30,12 +20,14 @@
 import { mapActions, mapState } from "pinia";
 import { useCommonStore, useHarvestsStore, usePlantingsStore, usePlantsStore } from "@/store";
 import PageTitle from "@/components/layout/PageTitle.vue";
+import HarvestsList from "@/components/harvests/HarvestsList.vue";
 
 export default {
   name: 'HarvestsPage',
 
   components: {
     PageTitle,
+    HarvestsList,
   },
 
   data: () => ({
@@ -104,12 +96,6 @@ export default {
 
       this.harvestDates = Object.keys(this.hydratedHarvestsByDate).sort();
     },
-
-    formatHarvestDate(dateTimeString) {
-      const date = new Date(dateTimeString);
-      const options = { month: 'short', day: 'numeric' };
-      return date.toLocaleDateString('en-US', options);
-    },
   },
 
   async mounted() {
@@ -118,7 +104,5 @@ export default {
 }
 </script>
 <style scoped>
-  .harvest-card {
-    margin-bottom: 5px;
-  }
+
 </style>
