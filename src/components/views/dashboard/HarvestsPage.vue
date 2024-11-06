@@ -79,22 +79,29 @@ export default {
 
       this.hydratedHarvestsByDate = this.harvests
           .map(harvest => {
-            console.log('mapping', harvest);
             return {
               ...harvest,
               plantName: this.plantsById[this.plantingsById[harvest.plantingId].plantId].friendlyName,
             };
           })
           .reduce((acc, hydratedHarvest) => {
-            console.log('reducing', hydratedHarvest)
-            if (!acc[hydratedHarvest.harvestDate]) {
-              acc[hydratedHarvest.harvestDate] = [];
+            let hDate = this.formatHarvestDate(hydratedHarvest.harvestDate);
+
+            if (!acc[hDate]) {
+              acc[hDate] = [];
             }
-            acc[hydratedHarvest.harvestDate].push(hydratedHarvest);
+
+            acc[hDate].push(hydratedHarvest);
             return acc;
           }, {});
 
       this.harvestDates = Object.keys(this.hydratedHarvestsByDate).sort();
+    },
+
+    formatHarvestDate(dateTimeString) {
+      const date = new Date(dateTimeString);
+      const options = { month: 'short', day: 'numeric' };
+      return date.toLocaleDateString('en-US', options);
     },
   },
 
