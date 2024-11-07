@@ -85,13 +85,13 @@ export default {
             };
           })
           .reduce((acc, hydratedHarvest) => {
-            let hDate = this.formatHarvestDate(hydratedHarvest.harvestDate);
+            let harvestDate = this.formatHarvestDate(hydratedHarvest.harvestDate);
 
-            if (!acc[hDate]) {
-              acc[hDate] = [];
+            if (!acc[harvestDate]) {
+              acc[harvestDate] = [];
             }
 
-            acc[hDate].push(hydratedHarvest);
+            acc[harvestDate].push(hydratedHarvest);
             return acc;
           }, {});
 
