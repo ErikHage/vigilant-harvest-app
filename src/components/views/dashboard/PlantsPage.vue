@@ -9,8 +9,6 @@
       </v-col>
       <v-col cols="12">
         <v-card>
-          <v-card-title>
-          </v-card-title>
           <v-card-text>
             <v-data-table
                 :headers="headers"
