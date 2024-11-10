@@ -6,11 +6,11 @@
         <v-spacer></v-spacer>
         <v-btn class="mt-3" color="primary" @click="refreshData">Refresh</v-btn>
       </v-col>
-      <v-col cols="3"></v-col>
-      <v-col cols="6">
+      <v-col cols="4"></v-col>
+      <v-col cols="4">
         <harvests-list :harvest-dates="harvestDates" :hydrated-harvests-by-date="hydratedHarvestsByDate"/>
       </v-col>
-      <v-col cols="3"></v-col>
+      <v-col cols="4"></v-col>
     </v-row>
   </v-container>
 </template>
