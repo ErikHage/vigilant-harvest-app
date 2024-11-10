@@ -126,15 +126,18 @@ export default {
     ]),
 
     hydratedPlantings() {
-      return this.plantings.map(planting => {
-        const plant = this.plantsById[planting.plantId];
-        const plot = this.plotsById[planting.plotId];
-        return {
-          ...planting,
-          plantName: plant.friendlyName,
-          plotName: plot.friendlyName,
-        };
-      });
+      if (this.plantings.length > 0 && this.plots.length > 0) {
+        return this.plantings.map(planting => {
+          const plant = this.plantsById[planting.plantId];
+          const plot = this.plotsById[planting.plotId];
+          return {
+            ...planting,
+            plantName: plant.friendlyName,
+            plotName: plot.friendlyName,
+          };
+        });
+      }
+      return [];
     },
   },
 
