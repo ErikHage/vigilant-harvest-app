@@ -85,7 +85,7 @@ export default {
             };
           })
           .reduce((acc, hydratedHarvest) => {
-            let harvestDate = this.formatHarvestDate(hydratedHarvest.harvestDate);
+            let harvestDate = hydratedHarvest.harvestDate;
 
             if (!acc[harvestDate]) {
               acc[harvestDate] = [];
@@ -95,13 +95,7 @@ export default {
             return acc;
           }, {});
 
-      this.harvestDates = Object.keys(this.hydratedHarvestsByDate).sort();
-    },
-
-    formatHarvestDate(dateTimeString) {
-      const date = new Date(dateTimeString);
-      const options = { month: 'short', day: 'numeric' };
-      return date.toLocaleDateString('en-US', options);
+      this.harvestDates = Object.keys(this.hydratedHarvestsByDate).sort().reverse();
     },
   },
 
