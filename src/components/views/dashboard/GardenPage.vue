@@ -230,7 +230,7 @@ export default {
     ]),
 
     ...mapActions(useHarvestsStore, [
-      'insertHarvests',
+      'upsertHarvests',
       'fetchHarvestSummariesByYear',
     ]),
 
@@ -318,7 +318,7 @@ export default {
           }));
 
       if (mappedHarvests.length > 0) {
-        await this.insertHarvests(mappedHarvests);
+        await this.upsertHarvests(mappedHarvests);
       } else {
         console.log('no harvests entered, skipping save');
       }

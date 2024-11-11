@@ -2,7 +2,7 @@ import axios from "axios";
 
 import { vigilantHarvestServiceUrl } from "@/utils/constants";
 
-async function insertHarvests(actorToken, harvests) {
+async function upsertHarvests(actorToken, harvests) {
     try {
         const response = await axios.put(`${vigilantHarvestServiceUrl.v0}/harvests`, { harvests }, {
             headers: {
@@ -48,7 +48,7 @@ async function searchHarvests(actorToken, year) {
 }
 
 export default {
-    insertHarvests,
+    upsertHarvests,
     fetchHarvestSummary,
     searchHarvests,
 };

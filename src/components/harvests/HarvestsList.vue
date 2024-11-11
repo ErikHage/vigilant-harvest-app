@@ -54,7 +54,6 @@
       },
 
       handleEditClicked(harvests) {
-        console.log('handleEditClicked', harvests);
         this.onEdit(harvests);
       },
 

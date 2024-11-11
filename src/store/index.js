@@ -240,13 +240,13 @@ export const usePlantingsStore = defineStore('plantings', {
 
 export const useHarvestsStore = defineStore('harvests', {
     actions: {
-        async insertHarvests(harvests) {
+        async upsertHarvests(harvests) {
             try {
                 const harvestsWithYear = harvests.map(harvest => ({
                     plantingYear: this.plantingYear,
                     ...harvest,
                 }));
-                await harvestsApi.insertHarvests(storageUtils.tryToLoadTokenFromStorage(), harvestsWithYear);
+                await harvestsApi.upsertHarvests(storageUtils.tryToLoadTokenFromStorage(), harvestsWithYear);
             } catch (err) {
                 console.log(err);
                 this.setAlertMessage('error', 'error inserting harvests');

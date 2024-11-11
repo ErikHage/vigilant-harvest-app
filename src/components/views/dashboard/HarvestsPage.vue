@@ -86,6 +86,7 @@ export default {
 
     ...mapActions(useHarvestsStore, [
       'searchHarvests',
+      'upsertHarvests',
     ]),
 
     async refreshData() {
@@ -115,18 +116,15 @@ export default {
     },
 
     showEditHarvestsDialog(harvests) {
-      console.log('called showEditHarvestsDialog', harvests);
       this.selectedHarvests = harvests;
       this.editHarvestsDialog = true;
     },
 
     async updateHarvests(harvests) {
-      console.log('called updateHarvests', harvests);
       this.onCloseEditHarvestsDialog();
     },
 
     onCloseEditHarvestsDialog() {
-      console.log('called onCloseEditHarvestsDialog');
       this.selectedHarvests = [];
       this.editHarvestsDialog = false;
     },
