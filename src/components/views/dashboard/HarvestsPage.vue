@@ -8,11 +8,23 @@
       </v-col>
       <v-col cols="4"></v-col>
       <v-col cols="4">
-        <harvests-list :harvest-dates="harvestDates" :hydrated-harvests-by-date="hydratedHarvestsByDate"/>
+        <harvests-list
+            :harvest-dates="harvestDates"
+            :hydrated-harvests-by-date="hydratedHarvestsByDate"
+            :on-edit="showEditHarvestsDialog"
+        />
       </v-col>
       <v-col cols="4"></v-col>
     </v-row>
   </v-container>
+
+  <edit-harvests-dialog
+      :show="editHarvestsDialog"
+      :harvests="selectedHarvests"
+      :on-submit="updateHarvests"
+      :on-cancel="onCloseEditHarvestsDialog"
+  />
+
 </template>
 
 <script>
@@ -21,6 +33,7 @@ import { mapActions, mapState } from "pinia";
 import { useCommonStore, useHarvestsStore, usePlantingsStore, usePlantsStore } from "@/store";
 import PageTitle from "@/components/layout/PageTitle.vue";
 import HarvestsList from "@/components/harvests/HarvestsList.vue";
+import EditHarvestsDialog from "@/components/harvests/EditHarvestsDialog.vue";
 
 export default {
   name: 'HarvestsPage',
@@ -28,11 +41,14 @@ export default {
   components: {
     PageTitle,
     HarvestsList,
+    EditHarvestsDialog,
   },
 
   data: () => ({
+    editHarvestsDialog: false,
     harvestDates: [],
     hydratedHarvestsByDate: {},
+    selectedHarvests: [],
     headers: [
       { title: 'Plant', key: 'plantName' },
       { title: 'Quantity', key: 'quantity' },
@@ -96,6 +112,23 @@ export default {
           }, {});
 
       this.harvestDates = Object.keys(this.hydratedHarvestsByDate).sort().reverse();
+    },
+
+    showEditHarvestsDialog(harvests) {
+      console.log('called showEditHarvestsDialog', harvests);
+      this.selectedHarvests = harvests;
+      this.editHarvestsDialog = true;
+    },
+
+    async updateHarvests(harvests) {
+      console.log('called updateHarvests', harvests);
+      this.onCloseEditHarvestsDialog();
+    },
+
+    onCloseEditHarvestsDialog() {
+      console.log('called onCloseEditHarvestsDialog');
+      this.selectedHarvests = [];
+      this.editHarvestsDialog = false;
     },
   },
 
