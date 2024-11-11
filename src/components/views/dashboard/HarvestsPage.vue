@@ -121,6 +121,7 @@ export default {
     },
 
     async updateHarvests(harvests) {
+      await this.upsertHarvests(harvests);
       this.onCloseEditHarvestsDialog();
     },
 
