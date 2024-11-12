@@ -1,7 +1,18 @@
 <template>
   <v-app-bar app>
     <v-toolbar-title>Vigilant Harvest</v-toolbar-title>
+
     <v-spacer></v-spacer>
+
+    <v-toolbar-title
+        class="planting-year"
+        v-if="showPlantingYear"
+    >
+      {{plantingYear}}
+    </v-toolbar-title>
+
+    <v-spacer></v-spacer>
+
     <div v-if="showAppBar === true">
       <v-btn :to="dashboardPath">Dashboard</v-btn>
       <v-btn @click="logoutUser">Logout</v-btn>
@@ -29,6 +40,10 @@ export default {
     ...mapState(useCommonStore, [
       'plantingYear',
     ]),
+
+    showPlantingYear() {
+      return this.showAppBar && this.plantingYear !== null;
+    },
   },
 
   methods: {
@@ -45,5 +60,8 @@ export default {
 </script>
 
 <style scoped>
-
+.planting-year {
+  color: forestgreen;
+  font-weight: bolder;
+}
 </style>
