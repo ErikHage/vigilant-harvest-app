@@ -17,29 +17,7 @@
           <v-col cols="6"
                  v-if="!loading"
                  v-for="hydratedPlot in hydratedPlots">
-            <v-card>
-              <v-card-title>
-                {{ hydratedPlot.friendlyName }}
-              </v-card-title>
-              <v-card-text>
-                <v-card v-for="planting in hydratedPlot.plantings">
-                  <v-card-text>
-                    <v-chip class="ml-2 mr-2"
-                            color="green">
-                      {{ planting.numPlants }} &nbsp;
-                      <v-icon>mdi-leaf</v-icon>
-                    </v-chip>
-                    <span>{{ planting.plant.friendlyName }}</span>
-                    &nbsp;
-                    <v-chip v-if="planting.harvestQuantity > 0"
-                            color="yellow">
-                      {{ planting.harvestQuantity }} &nbsp;
-                      <v-icon>mdi-basket-fill</v-icon>
-                    </v-chip>
-                  </v-card-text>
-                </v-card>
-              </v-card-text>
-            </v-card>
+            <harvest-summary :hydrated-plot="hydratedPlot"/>
           </v-col>
         </v-row>
       </v-col>
@@ -141,11 +119,15 @@ import { mapActions, mapState } from "pinia";
 import { useCommonStore, useHarvestsStore, usePlantingsStore, usePlantsStore, usePlotsStore } from "@/store";
 import sorting from "@/utils/sorting";
 import PageTitle from "@/components/layout/PageTitle.vue";
+import HarvestSummary from "@/components/harvests/HarvestSummary.vue";
 
 export default {
   name: 'GardenPage',
 
-  components: { PageTitle },
+  components: {
+    HarvestSummary,
+    PageTitle,
+  },
 
   data: () => ({
     loading: false,
