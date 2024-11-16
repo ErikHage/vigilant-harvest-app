@@ -1,29 +1,20 @@
 <template>
   <v-container>
-    <v-row class="text-center">
-      <v-col cols="12">
+    <v-row>
+      <v-col cols="12" class="text-center">
         <page-title title="Manage Plots"/>
         <v-spacer></v-spacer>
         <v-btn class="mr-2 mt-3" color="primary" @click="openDialog()">Add</v-btn>
         <v-btn class="mt-3" color="primary" @click="refreshData">Refresh</v-btn>
       </v-col>
-      <v-col cols="12">
-        <v-card>
-          <v-card-text>
-            <v-data-table
-                :headers="headers"
-                :items="plots"
-                item-key="plotId"
-                class="elevation-1"
-            >
-              <template #item.actions="{ item }">
-                <v-icon small @click="openDialog(item)">mdi-pencil</v-icon>
-                <!-- TODO add delete button, with confirm dialog. only admin can see/use it -->
-              </template>
-            </v-data-table>
-          </v-card-text>
-        </v-card>
+      <v-col cols="2"></v-col>
+      <v-col cols="8">
+        <plots-table
+          :plots="plots"
+          :on-edit-clicked="openDialog"
+        />
       </v-col>
+      <v-col cols="2"></v-col>
     </v-row>
 
     <v-dialog v-model="dialog" max-width="500px" persistent>
@@ -66,27 +57,19 @@
 import {mapActions, mapState} from "pinia";
 import {usePlotsStore} from "@/store";
 import PageTitle from "@/components/layout/PageTitle.vue";
+import PlotsTable from "@/components/plots/PlotsTable.vue";
 
 export default {
   name: 'PlotsPage',
 
   components: {
+    PlotsTable,
     PageTitle,
   },
 
   data: () => ({
     dialog: false,
     isEditMode: false,
-    headers: [
-      // { title: 'Id', key: 'plotId' }, // don't need to show this on table
-      {title: 'Name', key: 'friendlyName'},
-      {title: 'Length (in.)', key: 'lengthInInches'},
-      {title: 'Width (in.)', key: 'widthInInches'},
-      {title: 'Type', key: 'plotType'},
-      // TODO make this a checkbox or something, not the number it is now - also why is this not a boolean?
-      {title: 'Active', key: 'isActive'},
-      {title: 'Actions', key: 'actions', sortable: false},
-    ],
     form: {
       plotId: '',
       friendlyName: '',
