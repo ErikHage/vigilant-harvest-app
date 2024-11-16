@@ -1,7 +1,7 @@
 <template>
   <v-container>
-    <v-row class="text-center">
-      <v-col cols="12">
+    <v-row>
+      <v-col cols="12" class="text-center">
         <page-title title="Garden Overview"/>
         <v-spacer></v-spacer>
         <strong>Harvest Date:</strong> {{ this.selectedHarvestDateString }}
