@@ -1,7 +1,7 @@
 <template>
   <v-container>
     <dashboard-app-bar :is-planting-year-selected="plantingYear != null"/>
-    <v-row class="text-center">
+    <v-row>
       <router-view/>
     </v-row>
   </v-container>
