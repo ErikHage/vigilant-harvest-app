@@ -1,29 +1,22 @@
 <template>
   <v-container>
-    <v-row class="text-center">
-      <v-col cols="12">
+    <v-row>
+      <v-col cols="12" class="text-center">
         <page-title title="Manage Plantings"/>
         <v-spacer></v-spacer>
         <v-btn class="mr-2 mt-3" color="primary" @click="openDialog()">Add</v-btn>
         <v-btn class="mt-3" color="primary" @click="refreshData">Refresh</v-btn>
       </v-col>
-      <v-col cols="12">
-        <v-card>
-          <v-card-text>
-            <v-data-table
-                class="elevation-1 align-left"
-                :headers="headers"
-                :items="hydratedPlantings"
-                item-key="plantingId"
-            >
-              <template #item.actions="{ item }">
-                <v-icon small @click="openDialog(item)">mdi-pencil</v-icon>
-                <!-- TODO add delete button, with confirm dialog. only admin can see/use it -->
-              </template>
-            </v-data-table>
-          </v-card-text>
-        </v-card>
+      <v-col cols="2"></v-col>
+      <v-col cols="8">
+        <plantings-table
+          :plots-map="plotsById"
+          :plants-map="plantsById"
+          :plantings="plantings"
+          :on-edit-clicked="openDialog"
+        />
       </v-col>
+      <v-col cols="2"></v-col>
     </v-row>
 
     <v-dialog v-model="dialog" max-width="500px" persistent>
@@ -81,11 +74,13 @@ import { mapActions, mapState } from "pinia";
 import { useCommonStore, usePlantingsStore, usePlantsStore, usePlotsStore } from "@/store";
 import PlantingYearSelectCard from "@/components/PlantingYearSelectCard.vue";
 import PageTitle from "@/components/layout/PageTitle.vue";
+import PlantingsTable from "@/components/plantings/PlantingsTable.vue";
 
 export default {
   name: 'PlantingsPage',
 
   components: {
+    PlantingsTable,
     PageTitle,
     PlantingYearSelectCard,
   },
@@ -93,13 +88,6 @@ export default {
   data: () => ({
     dialog: false,
     isEditMode: false,
-    headers: [
-      // { title: 'Id', key: 'plantingId', align: 'left', }, // probably don't need to show this on table
-      { title: 'Plant', key: 'plantName', align: 'start', },
-      { title: 'Plot', key: 'plotName', align: 'start', },
-      { title: 'Count', key: 'numPlants', align: 'start', },
-      { title: 'Actions', key: 'actions', sortable: false },
-    ],
     form: {
       plantingId: null,
       plotId: '',
@@ -124,21 +112,6 @@ export default {
     ...mapState(usePlantingsStore, [
       'plantings', 'alertType', 'alertMessage', 'alertVisible',
     ]),
-
-    hydratedPlantings() {
-      if (this.plantings.length > 0 && this.plots.length > 0) {
-        return this.plantings.map(planting => {
-          const plant = this.plantsById[planting.plantId];
-          const plot = this.plotsById[planting.plotId];
-          return {
-            ...planting,
-            plantName: plant.friendlyName,
-            plotName: plot.friendlyName,
-          };
-        });
-      }
-      return [];
-    },
   },
 
   methods: {
