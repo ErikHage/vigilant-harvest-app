@@ -17,37 +17,12 @@
       <v-col cols="2"></v-col>
     </v-row>
 
-    <v-dialog v-model="dialog" max-width="500px" persistent>
-      <v-card>
-        <v-card-title>
-          <span class="headline">{{ isEditMode ? 'Edit Plot' : 'Add Plot' }}</span>
-        </v-card-title>
-        <v-card-text>
-          <v-form ref="applicationForm">
-            <v-text-field v-model="form.friendlyName" label="Name" required></v-text-field>
-            <v-text-field v-model.number="form.lengthInInches" type="number" label="Length (inches)"
-                          required></v-text-field>
-            <v-text-field v-model.number="form.widthInInches" type="number" label="Width (inches)"
-                          required></v-text-field>
-            <v-select
-                v-model="form.plotType"
-                :items="plotTypes"
-                item-title="item"
-                item-value="item"
-                label="Plot Type"
-                variant="solo"
-                return-object
-            ></v-select>
-          </v-form>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="blue darken-1" text @click="closeDialog">Cancel</v-btn>
-          <v-btn v-if="isEditMode" color="blue darken-1" text @click="savePlot">Update</v-btn>
-          <v-btn v-else color="blue darken-1" text @click="savePlot">Create</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <upsert-plot-dialog
+      :show="dialog"
+      :plot="selectedPlot"
+      :on-submit="savePlot"
+      :on-cancel="closeDialog"
+    />
 
   </v-container>
 </template>
@@ -58,32 +33,20 @@ import {mapActions, mapState} from "pinia";
 import {usePlotsStore} from "@/store";
 import PageTitle from "@/components/layout/PageTitle.vue";
 import PlotsTable from "@/components/plots/PlotsTable.vue";
+import UpsertPlotDialog from "@/components/plots/UpsertPlotDialog.vue";
 
 export default {
   name: 'PlotsPage',
 
   components: {
+    UpsertPlotDialog,
     PlotsTable,
     PageTitle,
   },
 
   data: () => ({
     dialog: false,
-    isEditMode: false,
-    form: {
-      plotId: '',
-      friendlyName: '',
-      lengthInInches: 0,
-      widthInInches: 0,
-      plotType: '',
-      isActive: false,
-    },
-    plotTypes: [
-      'Bed',
-      'Raised Bed',
-      'Planter',
-      'Tree',
-    ],
+    selectedPlot: null,
   }),
 
   computed: {
@@ -103,45 +66,22 @@ export default {
       await this.fetchPlots();
     },
 
-    resetForm() {
-      this.form = {
-        plotId: '',
-        friendlyName: '',
-        lengthInInches: 0,
-        widthInInches: 0,
-        plotType: '',
-        isActive: false,
-      };
-    },
-
     openDialog(plot) {
-      console.log("plot", plot);
       if (plot !== undefined) {
-        console.log('in edit mode if block');
-        this.form = {
-          plotId: plot.plotId,
-          friendlyName: plot.friendlyName,
-          widthInInches: plot.widthInInches,
-          lengthInInches: plot.lengthInInches,
-          plotType: plot.plotType,
-          isActive: plot.isActive,
-        };
-        this.isEditMode = true;
+        this.selectedPlot = plot;
       } else {
-        console.log('in non-edit mode if block');
-        this.resetForm();
-        this.isEditMode = false;
+        this.selectedPlot = null;
       }
       this.dialog = true;
     },
 
     closeDialog() {
       this.dialog = false;
+      this.selectedPlot = null;
     },
 
-    async savePlot() {
-      console.log('saving plot', this.form);
-      await this.upsertPlot(this.form);
+    async savePlot(plot) {
+      await this.upsertPlot(plot);
       this.closeDialog();
       await this.refreshData();
     }
