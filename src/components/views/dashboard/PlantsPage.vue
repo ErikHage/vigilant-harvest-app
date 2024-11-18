@@ -17,28 +17,12 @@
       <v-col cols="2"></v-col>
     </v-row>
 
-    <v-dialog v-model="dialog" max-width="500px" persistent>
-      <v-card>
-        <v-card-title>
-          <span class="headline">{{ isEditMode ? 'Edit Plant' : 'Add Plant' }}</span>
-        </v-card-title>
-        <v-card-text>
-          <v-form ref="applicationForm">
-            <v-text-field v-model="form.friendlyName" label="Name" required></v-text-field>
-            <v-text-field v-model="form.family" label="Family" required></v-text-field>
-            <v-text-field v-model="form.genus" label="Genus" required></v-text-field>
-            <v-text-field v-model="form.species" label="Species" required></v-text-field>
-          </v-form>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="blue darken-1" text @click="closeDialog">Cancel</v-btn>
-          <v-btn v-if="isEditMode" color="blue darken-1" text @click="savePlant">Update</v-btn>
-          <v-btn v-else color="blue darken-1" text @click="savePlant">Create</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
+    <upsert-plant-dialog
+        :show="dialog"
+        :plant="selectedPlant"
+        :on-submit="savePlant"
+        :on-cancel="closeDialog"
+    />
   </v-container>
 </template>
 
@@ -48,25 +32,22 @@ import { mapActions, mapState } from "pinia";
 import { usePlantsStore } from "@/store";
 import PageTitle from "@/components/layout/PageTitle.vue";
 import PlantsTable from "@/components/plants/PlantsTable.vue";
+import UpsertPlantDialog from "@/components/plants/UpsertPlantDialog.vue";
+import UpsertPlotDialog from "@/components/plots/UpsertPlotDialog.vue";
 
 export default {
   name: 'PlantsPage',
 
   components: {
+    UpsertPlotDialog,
+    UpsertPlantDialog,
     PageTitle,
     PlantsTable,
   },
 
   data: () => ({
     dialog: false,
-    isEditMode: false,
-    form: {
-      plantId: '',
-      friendlyName: '',
-      family: '',
-      genus: '',
-      species: '',
-    },
+    selectedPlant: null,
   }),
 
   computed: {
@@ -87,32 +68,11 @@ export default {
       await this.fetchPlants();
     },
 
-    resetForm() {
-      this.form = {
-        plantId: '',
-        friendlyName: '',
-        family: '',
-        genus: '',
-        species: '',
-      };
-    },
-
     openDialog(plant) {
-      console.log("plant", plant);
       if (plant !== undefined) {
-        console.log('in edit mode if block');
-        this.form = {
-          plantId: plant.plantId,
-          friendlyName: plant.friendlyName,
-          family: plant.family,
-          genus: plant.genus,
-          species: plant.species,
-        };
-        this.isEditMode = true;
+        this.selectedPlant = plant;
       } else {
-        console.log('in non-edit mode if block');
-        this.resetForm();
-        this.isEditMode = false;
+        this.selectedPlant = null;
       }
       this.dialog = true;
     },
