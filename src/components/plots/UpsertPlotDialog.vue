@@ -90,7 +90,7 @@ export default {
     },
 
     isEditMode() {
-      return this.plot === null;
+      return this.plot !== null;
     }
   },
 
