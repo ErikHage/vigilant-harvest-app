@@ -23,29 +23,13 @@
       </v-col>
     </v-row>
 
-    <v-dialog v-model="overrideHarvestDateDialog" max-width="500px" persistent v-if="!loading">
-      <v-card>
-        <v-card-title>
-          <span class="headline">Override Harvest Date</span>
-        </v-card-title>
-        <v-card-text>
-          <v-form ref="addHarvestsForm">
-            <v-date-picker
-                v-model="selectedHarvestDate"
-                label="Select Date"
-                required
-                locale="en"
-                full-width
-            ></v-date-picker>
-          </v-form>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="red darken-1" text @click="closeHarvestDateOverrideDialog">Cancel</v-btn>
-          <v-btn color="blue darken-1" text @click="confirmHarvestDateOverrideDialog">Ok</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <date-picker-dialog
+        :show="overrideHarvestDateDialog"
+        title="Override Harvest Date"
+        :date="selectedHarvestDate"
+        :on-submit="confirmHarvestDateOverrideDialog"
+        :on-cancel="closeHarvestDateOverrideDialog"
+    />
 
     <v-dialog v-model="dialog" max-width="800px" persistent v-if="!loading">
       <v-card>
@@ -120,11 +104,13 @@ import { useCommonStore, useHarvestsStore, usePlantingsStore, usePlantsStore, us
 import sorting from "@/utils/sorting";
 import PageTitle from "@/components/layout/PageTitle.vue";
 import HarvestSummary from "@/components/harvests/HarvestSummary.vue";
+import DatePickerDialog from "@/components/utils/DatePickerDialog.vue";
 
 export default {
   name: 'GardenPage',
 
   components: {
+    DatePickerDialog,
     HarvestSummary,
     PageTitle,
   },
@@ -262,7 +248,8 @@ export default {
       this.overrideHarvestDateDialog = true;
     },
 
-    confirmHarvestDateOverrideDialog() {
+    confirmHarvestDateOverrideDialog(date) {
+      this.selectedHarvestDate = date;
       this.overrideHarvestDateDialog = false;
     },
 
@@ -318,7 +305,6 @@ export default {
     },
 
     async refreshData() {
-      console.log("refreshing data");
       await this.fetchPlots();
       await this.fetchPlants();
       await this.fetchPlantingsByYear(this.plantingYear);
@@ -328,7 +314,6 @@ export default {
   },
 
   async mounted() {
-    console.log("mounted");
     await this.refreshData();
   }
 }
