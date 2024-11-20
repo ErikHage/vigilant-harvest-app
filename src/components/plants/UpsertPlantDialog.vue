@@ -84,10 +84,10 @@ export default {
     resetForm() {
       this.plantCopy = {
         plantId: '',
-            friendlyName: '',
-            family: '',
-            genus: '',
-            species: '',
+        friendlyName: '',
+        family: '',
+        genus: '',
+        species: '',
       };
     },
 
