@@ -20,11 +20,9 @@
 
 <script>
 
-import {mapActions, mapState} from "pinia";
+import {mapActions} from "pinia";
 import {usePlotsStore} from "@/store";
 import PageTitle from "@/components/layout/PageTitle.vue";
-import PlotsTable from "@/components/plots/PlotsTable.vue";
-import UpsertPlotDialog from "@/components/plots/UpsertPlotDialog.vue";
 
 export default {
   name: 'StatsPage',
