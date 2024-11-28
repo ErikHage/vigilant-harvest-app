@@ -9,7 +9,7 @@
       <v-col cols="2"></v-col>
       <v-col cols="8">
 
-<!--        DATA HERE -->
+        <!--        DATA HERE -->
 
       </v-col>
       <v-col cols="2"></v-col>
@@ -20,8 +20,8 @@
 
 <script>
 
-import {mapActions} from "pinia";
-import {usePlotsStore} from "@/store";
+import { mapActions, mapState } from "pinia";
+import { useCommonStore, usePlotsStore } from "@/store";
 import PageTitle from "@/components/layout/PageTitle.vue";
 
 export default {
@@ -31,8 +31,13 @@ export default {
     PageTitle,
   },
 
-  data: () => ({
-  }),
+  data: () => ({}),
+
+  computed: {
+    ...mapState(useCommonStore, [
+      'plantingYear',
+    ]),
+  },
 
   methods: {
     ...mapActions(usePlotsStore, [
@@ -42,6 +47,7 @@ export default {
     ]),
 
     async refreshData() {
+
     },
   },
 
