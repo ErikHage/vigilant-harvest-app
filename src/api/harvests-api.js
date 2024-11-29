@@ -47,8 +47,23 @@ async function searchHarvests(actorToken, year) {
     }
 }
 
+async function fetchHarvestStats(actorToken, year) {
+    try {
+        const response = await axios.get(`${vigilantHarvestServiceUrl.v0}/harvests/stats?year=${year}`, {
+            headers: {
+                'x-feral-auth-token': actorToken,
+            },
+        });
+        return response.data;
+    } catch (err) {
+        console.log('error fetching harvest stats');
+        throw err;
+    }
+}
+
 export default {
     upsertHarvests,
     fetchHarvestSummary,
     searchHarvests,
+    fetchHarvestStats,
 };

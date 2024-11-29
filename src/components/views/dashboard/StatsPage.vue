@@ -21,7 +21,7 @@
 <script>
 
 import { mapActions, mapState } from "pinia";
-import { useCommonStore, useHarvestsStore, usePlotsStore } from "@/store";
+import { useCommonStore, useHarvestsStore } from "@/store";
 import PageTitle from "@/components/layout/PageTitle.vue";
 
 export default {
@@ -37,15 +37,19 @@ export default {
     ...mapState(useCommonStore, [
       'plantingYear',
     ]),
+
+    ...mapState(useHarvestsStore, [
+      'harvestStats',
+    ]),
   },
 
   methods: {
     ...mapActions(useHarvestsStore, [
-      'searchHarvests',
+      'fetchHarvestStats',
     ]),
 
     async refreshData() {
-      await this.searchHarvests(this.plantingYear);
+      await this.fetchHarvestStats(this.plantingYear);
     },
   },
 
