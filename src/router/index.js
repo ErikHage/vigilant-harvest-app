@@ -13,6 +13,7 @@ import DashboardDefaultPage from "@/components/views/dashboard/DashboardDefaultP
 import PlantingsPage from "@/components/views/dashboard/PlantingsPage.vue";
 import GardenPage from "@/components/views/dashboard/GardenPage.vue";
 import HarvestsPage from "@/components/views/dashboard/HarvestsPage.vue";
+import StatsPage from "@/components/views/dashboard/StatsPage.vue";
 
 const routes = [
     {
@@ -95,7 +96,14 @@ const routes = [
                     requiresAuthenticated: true,
                 },
             },
-
+            {
+                path: views.dashboard.children.stats.path,
+                name: views.dashboard.children.stats.name,
+                component: StatsPage,
+                meta: {
+                    requiresAuthenticated: true,
+                },
+            },
         ],
     },
 ];

@@ -52,6 +52,10 @@ export const views = {
                 name: 'HarvestsPage',
                 path: 'harvests',
             },
+            stats: {
+                name: 'StatsPage',
+                path: 'stats',
+            },
         },
     },
 };
