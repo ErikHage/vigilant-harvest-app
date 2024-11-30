@@ -5,6 +5,7 @@
     <v-btn :to="plotsPagePath">Plots</v-btn>
     <v-btn v-if="showYearSpecificViews" :to="plantingsPagePath">Plantings</v-btn>
     <v-btn v-if="showYearSpecificViews" :to="harvestsPagePath">Harvests</v-btn>
+    <v-btn v-if="showYearSpecificViews" :to="statsPagePath">Stats</v-btn>
   </v-app-bar>
 </template>
 
@@ -22,6 +23,7 @@ export default {
     plotsPagePath: views.dashboard.path + "/" + views.dashboard.children.plots.path,
     plantingsPagePath: views.dashboard.path + "/" + views.dashboard.children.plantings.path,
     harvestsPagePath: views.dashboard.path + "/" + views.dashboard.children.harvests.path,
+    statsPagePath: views.dashboard.path + "/" + views.dashboard.children.stats.path,
   }),
 
   computed: {
