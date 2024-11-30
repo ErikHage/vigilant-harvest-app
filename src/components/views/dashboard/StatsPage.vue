@@ -9,7 +9,22 @@
       <v-col cols="2"></v-col>
       <v-col cols="8">
 
-        <!--        DATA HERE -->
+        <v-card>
+
+          <v-card-text>
+
+            <v-table>
+              <tbody>
+              <tr>
+                <th>Number of Harvest Days</th>
+                <td>{{ harvestStats.numberOfHarvests }}</td>
+              </tr>
+              </tbody>
+            </v-table>
+
+          </v-card-text>
+
+        </v-card>
 
       </v-col>
       <v-col cols="2"></v-col>
