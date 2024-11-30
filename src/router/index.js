@@ -86,7 +86,8 @@ const routes = [
                 meta: {
                     requiresAuthenticated: true,
                 },
-            },            {
+            },
+            {
                 path: views.dashboard.children.harvests.path,
                 name: views.dashboard.children.harvests.name,
                 component: HarvestsPage,
