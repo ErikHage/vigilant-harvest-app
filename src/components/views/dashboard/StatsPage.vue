@@ -16,8 +16,20 @@
             <v-table>
               <tbody>
               <tr>
+                <th>First Harvest</th>
+                <td>{{ formattedStats.firstHarvestDate }}</td>
+              </tr>
+              <tr>
+                <th>Last Harvest</th>
+                <td>{{ formattedStats.lastHarvestDate }}</td>
+              </tr>
+              <tr>
+                <th>Number of Days</th>
+                <td>{{ formattedStats.numberOfDays }}</td>
+              </tr>
+              <tr>
                 <th>Number of Harvest Days</th>
-                <td>{{ harvestStats.numberOfHarvests }}</td>
+                <td>{{ formattedStats.numberOfHarvests }}</td>
               </tr>
               </tbody>
             </v-table>
@@ -56,6 +68,18 @@ export default {
     ...mapState(useHarvestsStore, [
       'harvestStats',
     ]),
+
+    formattedStats() {
+      return {
+        ...this.harvestStats,
+        firstHarvestDate: this.harvestStats.firstHarvestDate
+            ? new Date(this.harvestStats.firstHarvestDate).toDateString()
+            : '---',
+        lastHarvestDate: this.harvestStats.lastHarvestDate
+            ? new Date(this.harvestStats.lastHarvestDate).toDateString()
+            : '---',
+      };
+    }
   },
 
   methods: {
