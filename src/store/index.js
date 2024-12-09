@@ -10,9 +10,19 @@ import plantingsApi from "@/api/plantings-api";
 import harvestsApi from "@/api/harvests-api";
 
 import { applicationId, feralAuthenticationAppUrl } from "@/utils/constants";
+import plantingYearsApi from "@/api/planting-years-api";
 
 export const useCommonStore = defineStore('common', {
     actions: {
+        async fetchPlantingYears() {
+            try {
+                this.plantingYears = await plantingYearsApi.fetchPlantingYears(storageUtils.tryToLoadTokenFromStorage());
+                this.availableYears = this.plantingYears.map((plantingYear) => plantingYear.plantingYear);
+            } catch (err) {
+                console.log(err);
+                this.setAlertMessage('error', 'error fetching plants');
+            }
+        },
         selectPlantingYear(year) {
             this.plantingYear = year;
         },
@@ -22,7 +32,8 @@ export const useCommonStore = defineStore('common', {
     },
     state: () => {
         return {
-            availableYears: [2024, 2025],
+            plantingYears: [],
+            availableYears: [],
             plantingYear: null,
             // alertVisible: false, // TODO migrate error stuff here
             // alertType: 'success',

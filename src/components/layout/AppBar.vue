@@ -51,11 +51,19 @@ export default {
       'logout',
     ]),
 
+    ...mapActions(useCommonStore, [
+      'fetchPlantingYears',
+    ]),
+
     async logoutUser() {
       await this.logout();
       this.$router.push(views.login.path);
     }
   },
+
+  async mounted() {
+    await this.fetchPlantingYears();
+  }
 }
 </script>
 

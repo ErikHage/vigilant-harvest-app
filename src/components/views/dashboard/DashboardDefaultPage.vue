@@ -19,7 +19,7 @@
         :available-years="availableYears"
         :on-select-year-change="onSelectYearChange"
         :on-select-year-clear="onSelectYearClear"
-        :selected-year="plantingYear" />
+        :selected-year="plantingYear"/>
 
   </v-container>
 </template>
