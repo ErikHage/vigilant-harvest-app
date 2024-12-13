@@ -54,6 +54,8 @@
                 label="Number of Plants"
                 required
             ></v-text-field>
+            <span>Notes:</span>
+            <p>{{ form.notes }}</p>
           </v-form>
         </v-card-text>
         <v-card-actions>
@@ -93,6 +95,8 @@ export default {
       plotId: '',
       plantId: '',
       numPlants: 0,
+      notes: null,
+      newNotes: null,
     },
   }),
 
@@ -145,6 +149,8 @@ export default {
           plotId: planting.plotId,
           plantId: planting.plantId,
           numPlants: planting.numPlants,
+          notes: planting.notes,
+          newNotes: null,
         };
         this.isEditMode = true;
       } else {
@@ -161,8 +167,12 @@ export default {
 
     async savePlanting() {
       await this.upsertPlanting({
+        plantingId: this.form.plantingId,
         plantingYear: this.plantingYear,
-        ...this.form,
+        plotId: this.form.plotId,
+        plantId: this.form.plantId,
+        numPlants: this.form.numPlants,
+        notes: this.form.newNotes,
       });
       this.closeDialog();
       await this.refreshData();
