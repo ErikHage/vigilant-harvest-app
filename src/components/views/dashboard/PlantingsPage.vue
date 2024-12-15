@@ -54,8 +54,26 @@
                 label="Number of Plants"
                 required
             ></v-text-field>
-            <span>Notes:</span>
-            <p>{{ form.notes }}</p>
+            <v-text-field
+                v-model="newNote"
+                label="Add a new note"
+                outlined
+            >
+              <template #append-inner>
+                <v-btn
+                    color="default"
+                    @click="addNote"
+                    :disabled="!newNote.trim()"
+                >
+                  <v-icon>mdi-plus</v-icon>
+                </v-btn>
+              </template>
+            </v-text-field>
+            <ul v-if="form.notes.length > 0">
+              <li v-for="note in form.notes">
+                {{ note }}
+              </li>
+            </ul>
           </v-form>
         </v-card-text>
         <v-card-actions>
@@ -90,13 +108,13 @@ export default {
   data: () => ({
     dialog: false,
     isEditMode: false,
+    newNote: '',
     form: {
       plantingId: null,
       plotId: '',
       plantId: '',
       numPlants: 0,
-      notes: null,
-      newNotes: null,
+      notes: [],
     },
   }),
 
@@ -150,15 +168,22 @@ export default {
           plantId: planting.plantId,
           numPlants: planting.numPlants,
           notes: planting.notes,
-          newNotes: null,
         };
         this.isEditMode = true;
+        this.newNote = '';
       } else {
         console.log('in non-edit mode if block');
         this.resetForm();
         this.isEditMode = false;
       }
       this.dialog = true;
+    },
+
+    addNote() {
+      if (this.newNote.trim()) {
+        this.form.notes.push(this.newNote.trim());
+        this.newNote = '';
+      }
     },
 
     closeDialog() {
@@ -172,7 +197,7 @@ export default {
         plotId: this.form.plotId,
         plantId: this.form.plantId,
         numPlants: this.form.numPlants,
-        notes: this.form.newNotes,
+        notes: this.form.notes,
       });
       this.closeDialog();
       await this.refreshData();
