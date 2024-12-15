@@ -56,8 +56,7 @@
             ></v-text-field>
             <v-text-field
                 v-model="newNote"
-                label="Add a new note"
-                outlined
+                label="Add note"
             >
               <template #append-inner>
                 <v-btn
@@ -69,11 +68,16 @@
                 </v-btn>
               </template>
             </v-text-field>
-            <ul v-if="form.notes.length > 0">
-              <li v-for="note in form.notes">
-                {{ note }}
-              </li>
-            </ul>
+            <v-card v-if="form.notes.length > 0">
+              <v-card-text>
+                <ul>
+                  <li v-for="note in form.notes"
+                      class="note-list-item">
+                    {{ note }}
+                  </li>
+                </ul>
+              </v-card-text>
+            </v-card>
           </v-form>
         </v-card-text>
         <v-card-actions>
@@ -216,7 +220,4 @@ export default {
 }
 </script>
 <style scoped>
-.align-left {
-  text-align: left !important;
-}
 </style>
