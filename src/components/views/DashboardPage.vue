@@ -10,7 +10,7 @@
 <script>
 
 import DashboardAppBar from "@/components/layout/DashboardAppBar.vue";
-import { mapState } from "pinia";
+import { mapActions, mapState } from "pinia";
 import { useCommonStore } from "@/store";
 
 export default {
@@ -23,5 +23,15 @@ export default {
         'plantingYear',
     ]),
   },
+
+  methods: {
+    ...mapActions(useCommonStore, [
+      'fetchPlantingYears',
+    ]),
+  },
+
+  async mounted() {
+    await this.fetchPlantingYears();
+  }
 }
 </script>
