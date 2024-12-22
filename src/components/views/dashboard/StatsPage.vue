@@ -42,6 +42,43 @@
       <v-col cols="2"></v-col>
     </v-row>
 
+    <v-row>
+      <v-col cols="2"></v-col>
+      <v-col cols="8">
+
+        <v-card v-for="plantingStatGroup in Object.values(stats.plantingStats)">
+          <v-card-title>
+<!--            Hydrate with planting name -->
+            Planting Id: {{ plantingStatGroup.plantingId }}
+          </v-card-title>
+          <v-card-text>
+            <v-table>
+              <tbody>
+              <tr>
+                <th>First Harvest</th>
+                <td>{{ this.formatDate(plantingStatGroup.firstHarvest) }}</td>
+              </tr>
+              <tr>
+                <th>Last Harvest</th>
+                <td>{{ this.formatDate(plantingStatGroup.lastHarvest) }}</td>
+              </tr>
+              <tr>
+                <th>Total Harvested</th>
+                <td>{{ stats.totalQuantity }}</td>
+              </tr>
+              <tr>
+                <th>Average Harvest per Day</th>
+                <td>{{ stats.averageHarvestPerDay }}</td>
+              </tr>
+              </tbody>
+            </v-table>
+          </v-card-text>
+        </v-card>
+
+      </v-col>
+      <v-col cols="2"></v-col>
+    </v-row>
+
   </v-container>
 </template>
 
