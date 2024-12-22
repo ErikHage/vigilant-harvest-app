@@ -17,19 +17,19 @@
               <tbody>
               <tr>
                 <th>First Harvest</th>
-                <td>{{ formattedStats.firstHarvestDate }}</td>
+                <td>{{ this.formatDate(this.stats.firstHarvestDate) }}</td>
               </tr>
               <tr>
                 <th>Last Harvest</th>
-                <td>{{ formattedStats.lastHarvestDate }}</td>
+                <td>{{ this.formatDate(this.stats.lastHarvestDate) }}</td>
               </tr>
               <tr>
                 <th>Number of Days</th>
-                <td>{{ formattedStats.numberOfDays }}</td>
+                <td>{{ stats.numberOfDays }}</td>
               </tr>
               <tr>
                 <th>Number of Harvest Days</th>
-                <td>{{ formattedStats.numberOfHarvests }}</td>
+                <td>{{ stats.numberOfHarvests }}</td>
               </tr>
               </tbody>
             </v-table>
@@ -69,15 +69,9 @@ export default {
       'harvestStats',
     ]),
 
-    formattedStats() {
+    stats() {
       return {
         ...this.harvestStats,
-        firstHarvestDate: this.harvestStats.firstHarvestDate
-            ? new Date(this.harvestStats.firstHarvestDate).toDateString()
-            : '---',
-        lastHarvestDate: this.harvestStats.lastHarvestDate
-            ? new Date(this.harvestStats.lastHarvestDate).toDateString()
-            : '---',
       };
     }
   },
@@ -90,6 +84,10 @@ export default {
     async refreshData() {
       await this.fetchHarvestStats(this.plantingYear);
     },
+
+    formatDate(date) {
+      return date ? new Date(date).toDateString() : '---';
+    }
   },
 
   mounted() {
