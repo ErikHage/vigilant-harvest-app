@@ -46,7 +46,7 @@
       <v-col cols="2"></v-col>
       <v-col cols="8">
 
-        <v-card v-for="plantingStatGroup in Object.values(stats.plantingStats)">
+        <v-card v-for="plantingStatGroup in plantingStats">
           <v-card-title>
 <!--            Hydrate with planting name -->
             Planting Id: {{ plantingStatGroup.plantingId }}
@@ -64,11 +64,11 @@
               </tr>
               <tr>
                 <th>Total Harvested</th>
-                <td>{{ stats.totalQuantity }}</td>
+                <td>{{ plantingStatGroup.totalQuantity }}</td>
               </tr>
               <tr>
                 <th>Average Harvest per Day</th>
-                <td>{{ stats.averageHarvestPerDay }}</td>
+                <td>{{ plantingStatGroup.averageHarvestPerDay }}</td>
               </tr>
               </tbody>
             </v-table>
@@ -110,7 +110,14 @@ export default {
       return {
         ...this.harvestStats,
       };
-    }
+    },
+
+    plantingStats() {
+      if (this.harvestStats && this.harvestStats.plantingStats) {
+        return Object.values(this.harvestStats.plantingStats);
+      }
+      return [];
+    },
   },
 
   methods: {
