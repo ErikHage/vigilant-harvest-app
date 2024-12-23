@@ -48,8 +48,8 @@
 
         <v-card v-for="plantingStatGroup in plantingStats">
           <v-card-title>
-<!--            Hydrate with planting name -->
-            Planting Id: {{ plantingStatGroup.plantingId }}
+            <h3>{{ plantingStatGroup.plantName }}</h3>
+            <span>[ {{ plantingStatGroup.plantingId }} ]</span>
           </v-card-title>
           <v-card-text>
             <v-table>
