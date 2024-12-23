@@ -49,7 +49,7 @@
         <v-card v-for="plantingStatGroup in plantingStats">
           <v-card-title>
             <h3>{{ plantingStatGroup.plantName }}</h3>
-            <span>[ {{ plantingStatGroup.plantingId }} ]</span>
+            <span class="subtitle">{{ plantingStatGroup.plantingId }}</span>
           </v-card-title>
           <v-card-text>
             <v-table>
@@ -139,3 +139,10 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.subtitle {
+  font-size: small;
+  color: grey;
+}
+</style>
