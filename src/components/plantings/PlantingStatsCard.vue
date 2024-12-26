@@ -49,5 +49,8 @@ export default {
 </script>
 
 <style scoped>
-
+.subtitle {
+  font-size: small;
+  color: grey;
+}
 </style>

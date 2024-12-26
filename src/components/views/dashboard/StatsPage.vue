@@ -46,34 +46,12 @@
       <v-col cols="2"></v-col>
       <v-col cols="8">
 
-        <v-card v-for="plantingStatGroup in plantingStats">
-          <v-card-title>
-            <h3>{{ plantingStatGroup.plantName }}</h3>
-            <span class="subtitle">{{ plantingStatGroup.plantingId }}</span>
-          </v-card-title>
-          <v-card-text>
-            <v-table>
-              <tbody>
-              <tr>
-                <th>First Harvest</th>
-                <td>{{ this.formatDate(plantingStatGroup.firstHarvest) }}</td>
-              </tr>
-              <tr>
-                <th>Last Harvest</th>
-                <td>{{ this.formatDate(plantingStatGroup.lastHarvest) }}</td>
-              </tr>
-              <tr>
-                <th>Total Harvested</th>
-                <td>{{ plantingStatGroup.totalQuantity }}</td>
-              </tr>
-              <tr>
-                <th>Average Harvest per Day</th>
-                <td>{{ plantingStatGroup.averageHarvestPerDay }}</td>
-              </tr>
-              </tbody>
-            </v-table>
-          </v-card-text>
-        </v-card>
+        <div v-for="plantingStatGroup in plantingStats">
+          <planting-stats-card
+              class="planting-stats-card"
+              :planting-stats="plantingStatGroup"
+          />
+        </div>
 
       </v-col>
       <v-col cols="2"></v-col>
@@ -87,11 +65,13 @@
 import { mapActions, mapState } from "pinia";
 import { useCommonStore, useHarvestsStore } from "@/store";
 import PageTitle from "@/components/layout/PageTitle.vue";
+import PlantingStatsCard from "@/components/plantings/PlantingStatsCard.vue";
 
 export default {
   name: 'StatsPage',
 
   components: {
+    PlantingStatsCard,
     PageTitle,
   },
 
@@ -141,8 +121,7 @@ export default {
 </script>
 
 <style scoped>
-.subtitle {
-  font-size: small;
-  color: grey;
+.planting-stats-card {
+  margin-bottom: 5px;
 }
 </style>
