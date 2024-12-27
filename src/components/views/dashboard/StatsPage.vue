@@ -6,37 +6,12 @@
         <page-title title="Stats"/>
         <v-spacer></v-spacer>
       </v-col>
+
       <v-col cols="2"></v-col>
       <v-col cols="8">
 
-        <v-card>
-
-          <v-card-text>
-
-            <v-table>
-              <tbody>
-              <tr>
-                <th>First Harvest</th>
-                <td>{{ this.formatDate(this.stats.firstHarvestDate) }}</td>
-              </tr>
-              <tr>
-                <th>Last Harvest</th>
-                <td>{{ this.formatDate(this.stats.lastHarvestDate) }}</td>
-              </tr>
-              <tr>
-                <th>Number of Days</th>
-                <td>{{ stats.numberOfDays }}</td>
-              </tr>
-              <tr>
-                <th>Number of Harvest Days</th>
-                <td>{{ stats.numberOfHarvests }}</td>
-              </tr>
-              </tbody>
-            </v-table>
-
-          </v-card-text>
-
-        </v-card>
+        <harvest-stats-card
+            :harvest-stats="stats"/>
 
       </v-col>
       <v-col cols="2"></v-col>
@@ -66,11 +41,13 @@ import { mapActions, mapState } from "pinia";
 import { useCommonStore, useHarvestsStore } from "@/store";
 import PageTitle from "@/components/layout/PageTitle.vue";
 import PlantingStatsCard from "@/components/plantings/PlantingStatsCard.vue";
+import HarvestStatsCard from "@/components/harvests/HarvestStatsCard.vue";
 
 export default {
   name: 'StatsPage',
 
   components: {
+    HarvestStatsCard,
     PlantingStatsCard,
     PageTitle,
   },
