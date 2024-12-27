@@ -21,10 +21,19 @@
       <v-col cols="2"></v-col>
       <v-col cols="8">
 
-        <div v-for="plantingStatGroup in plantingStats">
+        <v-select
+            :items="plantingStats"
+            :item-title="(plantingStats) => plantingStats.plantName"
+            label="Select Planting Year"
+            variant="solo"
+            return-object
+            @update:model-value="onSelectPlantingStatChange"
+        />
+
+        <div v-if="selectedPlantingStat !== null">
           <planting-stats-card
               class="planting-stats-card"
-              :planting-stats="plantingStatGroup"
+              :planting-stats="selectedPlantingStat"
           />
         </div>
 
@@ -52,7 +61,9 @@ export default {
     PageTitle,
   },
 
-  data: () => ({}),
+  data: () => ({
+    selectedPlantingStat: null,
+  }),
 
   computed: {
     ...mapState(useCommonStore, [
@@ -88,7 +99,11 @@ export default {
 
     formatDate(date) {
       return date ? new Date(date).toDateString() : '---';
-    }
+    },
+
+    onSelectPlantingStatChange(plantingStat) {
+      this.selectedPlantingStat = plantingStat;
+    },
   },
 
   mounted() {
