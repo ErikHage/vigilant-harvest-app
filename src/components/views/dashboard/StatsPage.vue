@@ -24,8 +24,9 @@
         <v-select
             :items="plantingStats"
             :item-title="(plantingStats) => plantingStats.plantName"
-            label="Select Planting Year"
+            label="Select Planting To View Stats"
             variant="solo"
+            clearable
             return-object
             @update:model-value="onSelectPlantingStatChange"
         />
