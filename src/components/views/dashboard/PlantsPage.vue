@@ -33,13 +33,11 @@ import { usePlantsStore } from "@/store";
 import PageTitle from "@/components/layout/PageTitle.vue";
 import PlantsTable from "@/components/plants/PlantsTable.vue";
 import UpsertPlantDialog from "@/components/plants/UpsertPlantDialog.vue";
-import UpsertPlotDialog from "@/components/plots/UpsertPlotDialog.vue";
 
 export default {
   name: 'PlantsPage',
 
   components: {
-    UpsertPlotDialog,
     UpsertPlantDialog,
     PageTitle,
     PlantsTable,
