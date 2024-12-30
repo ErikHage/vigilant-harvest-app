@@ -32,6 +32,10 @@
                 label="Planting Id"
                 readonly
             ></v-text-field>
+            <v-text-field
+                v-model="form.name"
+                label="Name"
+                required></v-text-field>
             <v-select
                 v-model="form.plantId"
                 :items="plants"
@@ -68,7 +72,7 @@
                 </v-btn>
               </template>
             </v-text-field>
-            <v-card v-if="form.notes.length > 0">
+            <v-card v-if="form.notes?.length > 0">
               <v-card-text>
                 <ul>
                   <li v-for="note in form.notes"
@@ -115,6 +119,7 @@ export default {
     newNote: '',
     form: {
       plantingId: null,
+      name: '',
       plotId: '',
       plantId: '',
       numPlants: 0,
@@ -157,17 +162,19 @@ export default {
     resetForm() {
       this.form = {
         plantingId: null,
+        name: '',
         plotId: '',
         plantId: '',
         numPlants: 0,
+        notes: [],
       };
     },
 
     openDialog(planting) {
       if (planting !== undefined) {
-        console.log('in edit mode if block');
         this.form = {
           plantingId: planting.plantingId,
+          name: planting.name,
           plotId: planting.plotId,
           plantId: planting.plantId,
           numPlants: planting.numPlants,
@@ -176,7 +183,6 @@ export default {
         this.isEditMode = true;
         this.newNote = '';
       } else {
-        console.log('in non-edit mode if block');
         this.resetForm();
         this.isEditMode = false;
       }
@@ -197,6 +203,7 @@ export default {
     async savePlanting() {
       await this.upsertPlanting({
         plantingId: this.form.plantingId,
+        name: this.form.name,
         plantingYear: this.plantingYear,
         plotId: this.form.plotId,
         plantId: this.form.plantId,
