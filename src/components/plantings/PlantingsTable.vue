@@ -30,6 +30,7 @@
 
     data: () => ({
       headers: [
+        { title: 'Name', key: 'name', align: 'start', },
         { title: 'Plant', key: 'plantName', align: 'start', },
         { title: 'Plot', key: 'plotName', align: 'start', },
         { title: 'Count', key: 'numPlants', align: 'start', },
