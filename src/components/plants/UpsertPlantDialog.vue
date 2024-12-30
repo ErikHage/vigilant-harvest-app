@@ -93,7 +93,7 @@ export default {
 
     async handleSavePlant() {
       await this.onSubmit(this.plantCopy);
-      this.resetForm()
+      this.resetForm();
     },
 
     handleOnCancel() {
