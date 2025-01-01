@@ -77,10 +77,11 @@ export default {
 
     closeDialog() {
       this.dialog = false;
+      this.selectedPlant = null;
     },
 
-    async savePlant() {
-      await this.upsertPlant(this.form);
+    async savePlant(plant) {
+      await this.upsertPlant(plant);
       this.closeDialog();
       await this.refreshData();
     }
