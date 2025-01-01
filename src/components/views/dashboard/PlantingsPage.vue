@@ -19,79 +19,14 @@
       <v-col cols="2"></v-col>
     </v-row>
 
-    <v-dialog v-model="dialog" max-width="500px" persistent>
-      <v-card>
-        <v-card-title>
-          <span class="headline">{{ isEditMode ? 'Edit Planting' : 'Add Planting' }}</span>
-        </v-card-title>
-        <v-card-text>
-          <v-form ref="applicationForm">
-            <v-text-field
-                v-model.number="form.plantingId"
-                type="text"
-                label="Planting Id"
-                readonly
-            ></v-text-field>
-            <v-text-field
-                v-model="form.name"
-                label="Name"
-                required></v-text-field>
-            <v-select
-                v-model="form.plantId"
-                :items="plants"
-                :item-title="(plant) => plant.friendlyName"
-                :item-value="(plant) => plant.plantId"
-                label="Select Plant"
-                variant="solo"
-            ></v-select>
-            <v-select
-                v-model="form.plotId"
-                :items="plots"
-                :item-title="(plot) => plot.friendlyName"
-                :item-value="(plot) => plot.plotId"
-                label="Select Plot"
-                variant="solo"
-            ></v-select>
-            <v-text-field
-                v-model.number="form.numPlants"
-                type="number"
-                label="Number of Plants"
-                required
-            ></v-text-field>
-            <v-text-field
-                v-model="newNote"
-                label="Add note"
-            >
-              <template #append-inner>
-                <v-btn
-                    color="default"
-                    @click="addNote"
-                    :disabled="!newNote.trim()"
-                >
-                  <v-icon>mdi-plus</v-icon>
-                </v-btn>
-              </template>
-            </v-text-field>
-            <v-card v-if="form.notes?.length > 0">
-              <v-card-text>
-                <ul>
-                  <li v-for="note in form.notes"
-                      class="note-list-item">
-                    {{ note }}
-                  </li>
-                </ul>
-              </v-card-text>
-            </v-card>
-          </v-form>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="blue darken-1" text @click="closeDialog">Cancel</v-btn>
-          <v-btn v-if="isEditMode" color="blue darken-1" text @click="savePlanting">Update</v-btn>
-          <v-btn v-else color="blue darken-1" text @click="savePlanting">Create</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <upsert-planting-dialog
+      :show="dialog"
+      :planting="selectedPlanting"
+      :plants="plants"
+      :plots="plots"
+      :on-submit="savePlanting"
+      :on-cancel="closeDialog"
+    />
 
   </v-container>
 </template>
@@ -103,11 +38,13 @@ import { useCommonStore, usePlantingsStore, usePlantsStore, usePlotsStore } from
 import PlantingYearSelectCard from "@/components/PlantingYearSelectCard.vue";
 import PageTitle from "@/components/layout/PageTitle.vue";
 import PlantingsTable from "@/components/plantings/PlantingsTable.vue";
+import UpsertPlantingDialog from "@/components/plantings/UpsertPlantingDialog.vue";
 
 export default {
   name: 'PlantingsPage',
 
   components: {
+    UpsertPlantingDialog,
     PlantingsTable,
     PageTitle,
     PlantingYearSelectCard,
@@ -115,16 +52,7 @@ export default {
 
   data: () => ({
     dialog: false,
-    isEditMode: false,
-    newNote: '',
-    form: {
-      plantingId: null,
-      name: '',
-      plotId: '',
-      plantId: '',
-      numPlants: 0,
-      notes: [],
-    },
+    selectedPlanting: null,
   }),
 
   computed: {
@@ -159,56 +87,24 @@ export default {
       'fetchPlantingsByYear',
     ]),
 
-    resetForm() {
-      this.form = {
-        plantingId: null,
-        name: '',
-        plotId: '',
-        plantId: '',
-        numPlants: 0,
-        notes: [],
-      };
-    },
-
     openDialog(planting) {
       if (planting !== undefined) {
-        this.form = {
-          plantingId: planting.plantingId,
-          name: planting.name,
-          plotId: planting.plotId,
-          plantId: planting.plantId,
-          numPlants: planting.numPlants,
-          notes: planting.notes,
-        };
-        this.isEditMode = true;
-        this.newNote = '';
+        this.selectedPlanting = planting;
       } else {
-        this.resetForm();
-        this.isEditMode = false;
+        this.selectedPlanting = null;
       }
       this.dialog = true;
     },
 
-    addNote() {
-      if (this.newNote.trim()) {
-        this.form.notes.push(this.newNote.trim());
-        this.newNote = '';
-      }
-    },
-
     closeDialog() {
       this.dialog = false;
+      this.selectedPlanting = null;
     },
 
-    async savePlanting() {
+    async savePlanting(planting) {
       await this.upsertPlanting({
-        plantingId: this.form.plantingId,
-        name: this.form.name,
+        ...planting,
         plantingYear: this.plantingYear,
-        plotId: this.form.plotId,
-        plantId: this.form.plantId,
-        numPlants: this.form.numPlants,
-        notes: this.form.notes,
       });
       this.closeDialog();
       await this.refreshData();

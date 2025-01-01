@@ -81,6 +81,8 @@ export default {
   props: {
     show: Boolean,
     planting: Object,
+    plants: Array,
+    plots: Array,
     onSubmit: Function,
     onCancel: Function,
   },
@@ -89,7 +91,12 @@ export default {
     return {
       newNote: '',
       plantingCopy: {
-        // TODO
+        plantingId: null,
+        name: '',
+        plotId: '',
+        plantId: '',
+        numPlants: 0,
+        notes: [],
       },
     };
   },
@@ -118,9 +125,21 @@ export default {
   },
 
   methods: {
+    addNote() {
+      if (this.newNote.trim()) {
+        this.plantingCopy.notes.push(this.newNote.trim());
+        this.newNote = '';
+      }
+    },
+
     resetForm() {
       this.plantingCopy = {
-      // TODO
+        plantingId: null,
+        name: '',
+        plotId: '',
+        plantId: '',
+        numPlants: 0,
+        notes: [],
       };
     },
 
