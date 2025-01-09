@@ -3,13 +3,14 @@ import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthenticationStore } from "@/store";
 import { views } from '@/utils/constants';
 
-import PlantsPage from "@/components/views/dashboard/plants/PlantsPage.vue";
-import DashboardPage from "@/components/views/DashboardPage.vue";
+import PublicPage from "@/components/views/PublicPage.vue";
 import LandingPage from "@/components/views/LandingPage.vue";
 import LoginPage from "@/components/views/LoginPage.vue";
-import PublicPage from "@/components/views/PublicPage.vue";
-import PlotsPage from "@/components/views/dashboard/PlotsPage.vue";
+import DashboardPage from "@/components/views/DashboardPage.vue";
 import DashboardDefaultPage from "@/components/views/dashboard/DashboardDefaultPage.vue";
+import PlantsPage from "@/components/views/dashboard/plants/PlantsPage.vue";
+import PlantDetailsPage from "@/components/views/dashboard/plants/PlantDetailsPage.vue";
+import PlotsPage from "@/components/views/dashboard/PlotsPage.vue";
 import PlantingsPage from "@/components/views/dashboard/PlantingsPage.vue";
 import GardenPage from "@/components/views/dashboard/GardenPage.vue";
 import HarvestsPage from "@/components/views/dashboard/HarvestsPage.vue";
@@ -68,6 +69,14 @@ const routes = [
                 path: views.dashboard.children.plants.path,
                 name: views.dashboard.children.plants.name,
                 component: PlantsPage,
+                meta: {
+                    requiresAuthenticated: true,
+                },
+            },
+            {
+                path: views.dashboard.children.plants.details.path,
+                name: views.dashboard.children.plants.details.name,
+                component: PlantDetailsPage,
                 meta: {
                     requiresAuthenticated: true,
                 },

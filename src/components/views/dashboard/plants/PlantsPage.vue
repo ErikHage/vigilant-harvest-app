@@ -11,7 +11,7 @@
       <v-col cols="8">
         <plants-table
           :plants="plants"
-          :on-edit-clicked="openDialog"
+          :on-view-clicked="navigateToPlantDetails"
         />
       </v-col>
       <v-col cols="2"></v-col>
@@ -64,6 +64,10 @@ export default {
 
     async refreshData() {
       await this.fetchPlants();
+    },
+
+    navigateToPlantDetails(plant) {
+      this.$router.push({ name: 'PlantDetailsPage', params: { plantId: plant.plantId } })
     },
 
     openDialog(plant) {

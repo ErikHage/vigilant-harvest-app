@@ -129,6 +129,14 @@ export const usePlantsStore = defineStore('plants', {
                 this.setAlertMessage('error', 'error fetching plants');
             }
         },
+        async fetchPlantById(plantId) {
+            try {
+                this.plantsById[plantId] = await plantsApi.fetchPlantById(storageUtils.tryToLoadTokenFromStorage(), plantId);
+            } catch (err) {
+                console.log(err);
+                this.setAlertMessage('error', 'error fetching plant');
+            }
+        },
         async deletePlantById(plantId) {
             try {
                 await plantsApi.deletePlantById(storageUtils.tryToLoadTokenFromStorage(), plantId);

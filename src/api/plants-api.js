@@ -30,6 +30,20 @@ async function fetchPlants(actorToken) {
     }
 }
 
+async function fetchPlantById(actorToken, plantId) {
+    try {
+        const response = await axios.get(`${vigilantHarvestServiceUrl.v0}/plants/${plantId}`, {
+            headers: {
+                'x-feral-auth-token': actorToken,
+            },
+        });
+        return response.data;
+    } catch (err) {
+        console.log('error fetching plant by id');
+        throw err;
+    }
+}
+
 async function deletePlantById(actorToken, plantId) {
     try {
         const response = await axios.delete(`${vigilantHarvestServiceUrl.v0}/plants/${plantId}`, {
@@ -47,5 +61,6 @@ async function deletePlantById(actorToken, plantId) {
 export default {
     upsertPlant,
     fetchPlants,
+    fetchPlantById,
     deletePlantById,
 };
