@@ -3,7 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthenticationStore } from "@/store";
 import { views } from '@/utils/constants';
 
-import PlantsPage from "@/components/views/dashboard/PlantsPage.vue";
+import PlantsPage from "@/components/views/dashboard/plants/PlantsPage.vue";
 import DashboardPage from "@/components/views/DashboardPage.vue";
 import LandingPage from "@/components/views/LandingPage.vue";
 import LoginPage from "@/components/views/LoginPage.vue";
