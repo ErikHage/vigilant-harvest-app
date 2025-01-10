@@ -8,10 +8,60 @@
       <v-progress-circular size="100" width="10" color="green" indeterminate/>
     </v-row>
 
-    <v-row v-if="plant !== null">
-      <v-col>
-        <plant-details :plant="plant"/>
+    <v-row>
+      <v-col cols="12" class="text-center">
+        <page-title :title="plant.friendlyName"/>
+        <v-spacer></v-spacer>
+        <span>todo: category</span>
       </v-col>
+      <v-col cols="2"></v-col>
+      <v-col cols="4">
+        <v-card>
+          <v-card-title>Taxonomy</v-card-title>
+          <v-card-text>
+            <v-table density="compact">
+              <tbody>
+              <tr>
+                <th>Family</th>
+                <td>{{ plant.family }}</td>
+              </tr>
+              <tr>
+                <th>Genus</th>
+                <td>{{ plant.genus }}</td>
+              </tr>
+              <tr>
+                <th>Species</th>
+                <td>{{ plant.species }}</td>
+              </tr>
+              </tbody>
+            </v-table>
+          </v-card-text>
+        </v-card>
+      </v-col>
+      <v-col cols="4">
+        <v-card>
+          <v-card-title>Metadata</v-card-title>
+          <v-card-text>
+            <v-table density="compact">
+              <tbody>
+              <tr>
+                <th>Id</th>
+                <td>{{ plant.plantId }}</td>
+              </tr>
+              <tr>
+                <th>Created At</th>
+                <td>{{ createdAt }}</td>
+              </tr>
+              <tr>
+                <th>Last Updated</th>
+                <td>{{ lastModifiedAt }}</td>
+              </tr>
+              </tbody>
+            </v-table>
+          </v-card-text>
+        </v-card>
+      </v-col>
+      <v-col cols="2"></v-col>
     </v-row>
   </v-container>
 </template>
@@ -20,7 +70,6 @@
 import { mapActions, mapState } from "pinia";
 import { usePlantsStore } from "@/store";
 import PageTitle from "@/components/layout/PageTitle.vue";
-import PlantDetails from "@/components/views/dashboard/plants/PlantDetails.vue";
 import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
 
 export default {
@@ -28,7 +77,6 @@ export default {
 
   components: {
     FadeOutAlert,
-    PlantDetails,
     PageTitle,
   },
 
@@ -48,6 +96,14 @@ export default {
     plant() {
       return this.plantsById ? this.plantsById[this.plantId] : null;
     },
+
+    createdAt() {
+      return this.plant ? new Date(this.plant.dateCreated).toLocaleString() : '--';
+    },
+
+    lastModifiedAt() {
+      return this.plant ? new Date(this.plant.dateModified).toLocaleString() : '--';
+    }
   },
 
   methods: {
