@@ -131,10 +131,13 @@ export const usePlantsStore = defineStore('plants', {
         },
         async fetchPlantById(plantId) {
             try {
+                this.loading = true;
                 this.plantsById[plantId] = await plantsApi.fetchPlantById(storageUtils.tryToLoadTokenFromStorage(), plantId);
             } catch (err) {
                 console.log(err);
                 this.setAlertMessage('error', 'error fetching plant');
+            } finally {
+                this.loading = false;
             }
         },
         async deletePlantById(plantId) {
@@ -152,10 +155,11 @@ export const usePlantsStore = defineStore('plants', {
             setTimeout(() => {
                 this.alertVisible = false;
             }, 3000);
-        }
+        },
     },
     state: () => {
         return {
+            loading: false,
             plants: [],
             plantsById: {},
             alertVisible: false,
