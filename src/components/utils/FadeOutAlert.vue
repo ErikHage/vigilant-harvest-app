@@ -1,6 +1,10 @@
 <template>
   <transition name="fade">
-    <v-alert v-if="isVisible" :type="alertType" class="mt-3">{{ message }}</v-alert>
+    <v-alert
+        v-if="isVisible"
+        :type="alertType"
+        class="mt-3">{{ message }}
+    </v-alert>
   </transition>
 </template>
 
@@ -8,7 +12,18 @@
 export default {
   name: "FadeOutAlert",
 
-  props: ['isVisible', 'alertType', 'message'],
+  props: {
+    isVisible: {
+      type: Boolean,
+      default: false,
+    },
+    alertType: {
+      type: String | undefined,
+    },
+    message: {
+      type: String,
+    },
+  }
 }
 </script>
 
