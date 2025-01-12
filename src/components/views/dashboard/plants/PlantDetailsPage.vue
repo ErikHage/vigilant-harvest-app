@@ -20,20 +20,26 @@
 
         <v-row>
           <v-col cols="12" class="text-center">
-            <page-title :title="plantCopy.friendlyName"/>
+            <page-title :title="plant.friendlyName"/>
             <v-spacer/>
+            <span>{{ plant.category }}</span>
+          </v-col>
+
+          <v-col cols="12" class="text-center">
             <v-btn
                 class="mr-4"
                 size="small"
                 color="blue darken-1"
                 :disabled="!updateButtonEnabled"
-                @click="updatePlant">Update
+                @click="updatePlant"
+            >Update
             </v-btn>
             <v-btn
                 size="small"
                 color="gray darken-1"
                 :disabled="!updateButtonEnabled"
-                @click="refreshData">Reset
+                @click="refreshData"
+            >Reset
             </v-btn>
           </v-col>
 
@@ -54,7 +60,8 @@
               <v-card-title>Details</v-card-title>
               <v-card-text>
                 <v-text-field v-model="plantCopy.friendlyName" label="Name" variant="solo" density="compact" required/>
-                <!--                <v-text-field v-model="plantCopy.category" label="Category" variant="solo" density="compact" required></v-text-field> -->
+                <v-text-field v-model="plantCopy.category" label="Category" variant="solo" density="compact"
+                              required></v-text-field>
               </v-card-text>
             </v-card>
           </v-col>
@@ -62,9 +69,12 @@
             <v-card>
               <v-card-title>Taxonomy</v-card-title>
               <v-card-text>
-                <v-text-field v-model="plantCopy.family" label="Family" variant="solo" density="compact" required/>
-                <v-text-field v-model="plantCopy.genus" label="Genus" variant="solo" density="compact" required/>
-                <v-text-field v-model="plantCopy.species" label="Species" variant="solo" density="compact" required/>
+                <v-text-field v-model="plantCopy.taxonomy.family" label="Family" variant="solo" density="compact"
+                              required/>
+                <v-text-field v-model="plantCopy.taxonomy.genus" label="Genus" variant="solo" density="compact"
+                              required/>
+                <v-text-field v-model="plantCopy.taxonomy.species" label="Species" variant="solo" density="compact"
+                              required/>
               </v-card-text>
             </v-card>
           </v-col>
@@ -96,7 +106,9 @@ export default {
         show: false,
         message: '',
       },
-      plantCopy: {},
+      plantCopy: {
+        taxonomy: {},
+      },
     };
   },
 
@@ -126,11 +138,12 @@ export default {
     },
 
     updateButtonEnabled() {
-      return this.plant.friendlyName !== this.plantCopy.friendlyName?.trim()
-          || this.plant.family !== this.plantCopy.family?.trim()
-          || this.plant.genus !== this.plantCopy.genus?.trim()
-          || this.plant.species !== this.plantCopy.species?.trim();
-    }
+      return this.plant.friendlyName !== this.sanitize(this.plantCopy.friendlyName)
+          || this.plant.category !== this.sanitize(this.plantCopy.category)
+          || this.plant.taxonomy.family !== this.sanitize(this.plantCopy.taxonomy.family)
+          || this.plant.taxonomy.genus !== this.sanitize(this.plantCopy.taxonomy.genus)
+          || this.plant.taxonomy.species !== this.sanitize(this.plantCopy.taxonomy.species);
+    },
   },
 
   methods: {
@@ -141,16 +154,22 @@ export default {
 
     async refreshData() {
       await this.fetchPlantById(this.plantId);
-      this.plantCopy = { ...this.plantsById[this.plantId] };
+      this.plantCopy = JSON.parse(JSON.stringify(this.plantsById[this.plantId]));
     },
 
     async updatePlant() {
       await this.upsertPlant({
         plantId: this.plantCopy.plantId,
-        friendlyName: this.plantCopy.friendlyName?.trim(),
-        family: this.plantCopy.family?.trim(),
-        genus: this.plantCopy.genus?.trim(),
-        species: this.plantCopy.species?.trim(),
+        category: this.sanitize(this.plantCopy.category),
+        friendlyName: this.sanitize(this.plantCopy.friendlyName),
+        seedSource: '',
+        tags: [],
+        description: '',
+        taxonomy: {
+          family: this.sanitize(this.plantCopy.taxonomy.family),
+          genus: this.sanitize(this.plantCopy.taxonomy.genus),
+          species: this.sanitize(this.plantCopy.taxonomy.species),
+        },
       });
       await this.refreshData();
 
@@ -159,6 +178,10 @@ export default {
         message: 'Updated successfully!',
       };
     },
+
+    sanitize(value) {
+      return value?.trim();
+    }
   },
 
   mounted() {

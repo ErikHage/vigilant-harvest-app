@@ -29,7 +29,8 @@
     data: () => ({
       headers: [
         { title: 'Name', key: 'friendlyName', align: 'start' },
-        { title: 'Species', key: 'species' },
+        { title: 'Category', key: 'category' },
+        { title: 'Species', key: 'taxonomy.species' },
         { title: '', key: 'actions', sortable: false },
       ],
     }),
