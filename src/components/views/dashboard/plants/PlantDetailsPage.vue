@@ -60,8 +60,7 @@
               <v-card-title>Details</v-card-title>
               <v-card-text>
                 <v-text-field v-model="plantCopy.friendlyName" label="Name" variant="solo" density="compact" required/>
-                <v-text-field v-model="plantCopy.category" label="Category" variant="solo" density="compact"
-                              required></v-text-field>
+                <v-text-field v-model="plantCopy.category" label="Category" variant="solo" density="compact" required/>
               </v-card-text>
             </v-card>
           </v-col>
