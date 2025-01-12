@@ -61,6 +61,10 @@
               <v-card-text>
                 <v-text-field v-model="plantCopy.friendlyName" label="Name" variant="solo" density="compact" required/>
                 <v-text-field v-model="plantCopy.category" label="Category" variant="solo" density="compact" required/>
+                <v-text-field v-model="plantCopy.seedSource" label="Seed Source" variant="solo" density="compact" required/>
+                <!-- TODO: make description a dialog -->
+                <v-text-field v-model="plantCopy.description" label="Description" variant="solo" density="compact" required/>
+                <!-- TODO: add tag selection as a dialog, multi-select -->
               </v-card-text>
             </v-card>
           </v-col>
@@ -139,6 +143,8 @@ export default {
     updateButtonEnabled() {
       return this.plant.friendlyName !== this.sanitize(this.plantCopy.friendlyName)
           || this.plant.category !== this.sanitize(this.plantCopy.category)
+          || this.plant.seedSource !== this.sanitize(this.plantCopy.seedSource)
+          || this.plant.description !== this.sanitize(this.plantCopy.description)
           || this.plant.taxonomy.family !== this.sanitize(this.plantCopy.taxonomy.family)
           || this.plant.taxonomy.genus !== this.sanitize(this.plantCopy.taxonomy.genus)
           || this.plant.taxonomy.species !== this.sanitize(this.plantCopy.taxonomy.species);
@@ -161,9 +167,9 @@ export default {
         plantId: this.plantCopy.plantId,
         category: this.sanitize(this.plantCopy.category),
         friendlyName: this.sanitize(this.plantCopy.friendlyName),
-        seedSource: '',
+        seedSource: this.sanitize(this.plantCopy.seedSource),
         tags: [],
-        description: '',
+        description: this.sanitize(this.plantCopy.description),
         taxonomy: {
           family: this.sanitize(this.plantCopy.taxonomy.family),
           genus: this.sanitize(this.plantCopy.taxonomy.genus),
