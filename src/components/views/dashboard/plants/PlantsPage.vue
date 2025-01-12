@@ -10,16 +10,15 @@
       <v-col cols="2"></v-col>
       <v-col cols="8">
         <plants-table
-          :plants="plants"
-          :on-view-clicked="navigateToPlantDetails"
+            :plants="plants"
+            :on-view-clicked="navigateToPlantDetails"
         />
       </v-col>
       <v-col cols="2"></v-col>
     </v-row>
 
-    <upsert-plant-dialog
+    <add-plant-dialog
         :show="dialog"
-        :plant="selectedPlant"
         :on-submit="savePlant"
         :on-cancel="closeDialog"
     />
@@ -32,25 +31,27 @@ import { mapActions, mapState } from "pinia";
 import { usePlantsStore } from "@/store";
 import PageTitle from "@/components/layout/PageTitle.vue";
 import PlantsTable from "@/components/plants/PlantsTable.vue";
-import UpsertPlantDialog from "@/components/plants/UpsertPlantDialog.vue";
+import AddPlantDialog from "@/components/plants/AddPlantDialog.vue";
 
 export default {
   name: 'PlantsPage',
 
   components: {
-    UpsertPlantDialog,
+    AddPlantDialog,
     PageTitle,
     PlantsTable,
   },
 
   data: () => ({
     dialog: false,
-    selectedPlant: null,
   }),
 
   computed: {
     ...mapState(usePlantsStore, [
-      'plants', 'alertType', 'alertMessage', 'alertVisible',
+      'plants',
+      'alertType',
+      'alertMessage',
+      'alertVisible',
     ]),
   },
 
@@ -58,8 +59,6 @@ export default {
     ...mapActions(usePlantsStore, [
       'upsertPlant',
       'fetchPlants',
-      'selectPlant',
-      'deletePlantById',
     ]),
 
     async refreshData() {
@@ -67,21 +66,20 @@ export default {
     },
 
     navigateToPlantDetails(plant) {
-      this.$router.push({ name: 'PlantDetailsPage', params: { plantId: plant.plantId } })
+      this.$router.push({
+        name: 'PlantDetailsPage',
+        params: {
+          plantId: plant.plantId,
+        },
+      });
     },
 
-    openDialog(plant) {
-      if (plant !== undefined) {
-        this.selectedPlant = plant;
-      } else {
-        this.selectedPlant = null;
-      }
+    openDialog() {
       this.dialog = true;
     },
 
     closeDialog() {
       this.dialog = false;
-      this.selectedPlant = null;
     },
 
     async savePlant(plant) {
