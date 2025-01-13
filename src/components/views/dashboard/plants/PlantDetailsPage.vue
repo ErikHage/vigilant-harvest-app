@@ -72,12 +72,20 @@
             <v-card>
               <v-card-title>Taxonomy</v-card-title>
               <v-card-text>
-                <v-text-field v-model="plantCopy.taxonomy.family" label="Family" variant="solo" density="compact"
-                              required/>
-                <v-text-field v-model="plantCopy.taxonomy.genus" label="Genus" variant="solo" density="compact"
-                              required/>
-                <v-text-field v-model="plantCopy.taxonomy.species" label="Species" variant="solo" density="compact"
-                              required/>
+                <v-text-field v-model="plantCopy.taxonomy.family" label="Family" variant="solo" density="compact" required/>
+                <v-text-field v-model="plantCopy.taxonomy.genus" label="Genus" variant="solo" density="compact" required/>
+                <v-text-field v-model="plantCopy.taxonomy.species" label="Species" variant="solo" density="compact" required/>
+              </v-card-text>
+            </v-card>
+          </v-col>
+          <v-col cols="6">
+            <v-card>
+              <v-card-title>Sowing</v-card-title>
+              <v-card-text>
+                <v-text-field v-model="plantCopy.sowing.indoor" label="Indoor Sow" variant="solo" density="compact" required/>
+                <v-text-field v-model="plantCopy.sowing.direct" label="Direct Sow" variant="solo" density="compact" required/>
+                <v-text-field v-model="plantCopy.sowing.germinationDaysRange" label="Germination Days" variant="solo" density="compact" required/>
+                <v-text-field v-model="plantCopy.sowing.germinationTempRange" label="Germination Temp" variant="solo" density="compact" required/>
               </v-card-text>
             </v-card>
           </v-col>
@@ -148,7 +156,11 @@ export default {
           || this.plant.description !== this.sanitize(this.plantCopy.description)
           || this.plant.taxonomy.family !== this.sanitize(this.plantCopy.taxonomy.family)
           || this.plant.taxonomy.genus !== this.sanitize(this.plantCopy.taxonomy.genus)
-          || this.plant.taxonomy.species !== this.sanitize(this.plantCopy.taxonomy.species);
+          || this.plant.taxonomy.species !== this.sanitize(this.plantCopy.taxonomy.species)
+          || this.plant.sowing.indoor !== this.sanitize(this.plantCopy.sowing.indoor)
+          || this.plant.sowing.direct !== this.sanitize(this.plantCopy.sowing.direct)
+          || this.plant.sowing.germinationDaysRange !== this.sanitize(this.plantCopy.sowing.germinationDaysRange)
+          || this.plant.sowing.germinationTempRange !== this.sanitize(this.plantCopy.sowing.germinationTempRange);
     },
   },
 
@@ -175,6 +187,12 @@ export default {
           family: this.sanitize(this.plantCopy.taxonomy.family),
           genus: this.sanitize(this.plantCopy.taxonomy.genus),
           species: this.sanitize(this.plantCopy.taxonomy.species),
+        },
+        sowing: {
+          indoor: this.sanitize(this.plantCopy.sowing.indoor),
+          direct: this.sanitize(this.plantCopy.sowing.direct),
+          germinationDaysRange: this.sanitize(this.plantCopy.sowing.germinationDaysRange),
+          germinationTempRange: this.sanitize(this.plantCopy.sowing.germinationTempRange),
         },
       });
       await this.refreshData();
