@@ -111,6 +111,7 @@ export default {
       },
       plantCopy: {
         taxonomy: {},
+        sowing: {},
       },
     };
   },
