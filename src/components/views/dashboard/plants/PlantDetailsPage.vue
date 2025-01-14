@@ -89,6 +89,17 @@
               </v-card-text>
             </v-card>
           </v-col>
+          <v-col cols="6">
+            <v-card>
+              <v-card-title>Planting</v-card-title>
+              <v-card-text>
+                <v-text-field v-model.number="plantCopy.planting.depthInInches" type="number" label="Planting Depth (in.)" variant="solo" density="compact" required/>
+                <v-text-field v-model.number="plantCopy.planting.plantSpacingInches" type="number" label="Plant Spacing (in.)" variant="solo" density="compact" required/>
+                <v-text-field v-model.number="plantCopy.planting.rowSpacingInches" type="number" label="Row Spacing (in.)" variant="solo" density="compact" required/>
+                <v-text-field v-model="plantCopy.planting.instructions" label="Instructions" variant="solo" density="compact" required/>
+              </v-card-text>
+            </v-card>
+          </v-col>
         </v-row>
 
       </v-col>
@@ -120,6 +131,7 @@ export default {
       plantCopy: {
         taxonomy: {},
         sowing: {},
+        planting: {},
       },
     };
   },
@@ -160,7 +172,11 @@ export default {
           || this.plant.sowing.indoor !== this.sanitize(this.plantCopy.sowing.indoor)
           || this.plant.sowing.direct !== this.sanitize(this.plantCopy.sowing.direct)
           || this.plant.sowing.germinationDaysRange !== this.sanitize(this.plantCopy.sowing.germinationDaysRange)
-          || this.plant.sowing.germinationTempRange !== this.sanitize(this.plantCopy.sowing.germinationTempRange);
+          || this.plant.sowing.germinationTempRange !== this.sanitize(this.plantCopy.sowing.germinationTempRange)
+          || this.plant.planting.depthInInches !== this.plantCopy.planting.depthInInches
+          || this.plant.planting.plantSpacingInches !== this.plantCopy.planting.plantSpacingInches
+          || this.plant.planting.rowSpacingInches !== this.plantCopy.planting.rowSpacingInches
+          || this.plant.planting.instructions !== this.sanitize(this.plantCopy.planting.instructions);
     },
   },
 
@@ -193,6 +209,12 @@ export default {
           direct: this.sanitize(this.plantCopy.sowing.direct),
           germinationDaysRange: this.sanitize(this.plantCopy.sowing.germinationDaysRange),
           germinationTempRange: this.sanitize(this.plantCopy.sowing.germinationTempRange),
+        },
+        planting: {
+          depthInInches: this.plantCopy.planting.depthInInches,
+          plantSpacingInches: this.plantCopy.planting.plantSpacingInches,
+          rowSpacingInches: this.plantCopy.planting.rowSpacingInches,
+          instructions: this.sanitize(this.plantCopy.planting.instructions),
         },
       });
       await this.refreshData();
