@@ -114,6 +114,16 @@
               </v-card-text>
             </v-card>
           </v-col>
+          <v-col cols="6">
+            <v-card>
+              <v-card-title>Harvesting</v-card-title>
+              <v-card-text>
+                <v-text-field v-model="plantCopy.harvesting.fruitSize" label="Fruit Size" variant="solo" density="compact" required/>
+                <v-text-field v-model="plantCopy.harvesting.shelfStability" label="Shelf Stability" variant="solo" density="compact" required/>
+                <v-text-field v-model="plantCopy.harvesting.harvestInstructions" label="Instructions" variant="solo" density="compact" required/>
+              </v-card-text>
+            </v-card>
+          </v-col>
         </v-row>
 
       </v-col>
@@ -153,6 +163,7 @@ export default {
         sowing: {},
         planting: {},
         growing: {},
+        harvesting: {},
       },
     };
   },
@@ -202,7 +213,10 @@ export default {
           || this.plant.growing.daysToMaturity !== this.plantCopy.growing.daysToMaturity
           || this.plant.growing.isClimbing !== this.plantCopy.growing.isClimbing
           || this.plant.growing.climbingHeightFeet !== this.plantCopy.growing.climbingHeightFeet
-          || this.plant.growing.plantSize !== this.sanitize(this.plantCopy.growing.plantSize);
+          || this.plant.growing.plantSize !== this.sanitize(this.plantCopy.growing.plantSize)
+          || this.plant.harvesting.fruitSize !== this.sanitize(this.plantCopy.harvesting.fruitSize)
+          || this.plant.harvesting.shelfStability !== this.sanitize(this.plantCopy.harvesting.shelfStability)
+          || this.plant.harvesting.harvestInstructions !== this.sanitize(this.plantCopy.harvesting.harvestInstructions);
     },
   },
 
@@ -248,6 +262,11 @@ export default {
           isClimbing: this.plantCopy.growing.isClimbing,
           climbingHeightFeet: this.plantCopy.growing.climbingHeightFeet,
           plantSize: this.sanitize(this.plantCopy.growing.plantSize),
+        },
+        harvesting: {
+          fruitSize: this.sanitize(this.plantCopy.harvesting.fruitSize),
+          shelfStability: this.sanitize(this.plantCopy.harvesting.shelfStability),
+          harvestInstructions: this.sanitize(this.plantCopy.harvesting.harvestInstructions),
         },
       });
       await this.refreshData();
