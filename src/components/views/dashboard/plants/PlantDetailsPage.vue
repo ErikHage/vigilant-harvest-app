@@ -100,6 +100,20 @@
               </v-card-text>
             </v-card>
           </v-col>
+          <v-col cols="6">
+            <v-card>
+              <v-card-title>Growing</v-card-title>
+              <v-card-text>
+                <v-select v-model="plantCopy.growing.requiredSun" label="Required Sun" variant="solo" density="compact" :items="sunOptions" required/>
+                <v-text-field v-model.number="plantCopy.growing.daysToMaturity" type="number" label="Days to Maturity" variant="solo" density="compact" required/>
+                <div class="d-flex">
+                  <v-checkbox class="pr-5" v-model.number="plantCopy.growing.isClimbing" label="Is Climbing" variant="solo" density="compact" required/>
+                  <v-text-field v-if="plantCopy.growing.isClimbing" v-model.number="plantCopy.growing.climbingHeightFeet" type="number" label="Climbing Height (ft.)" variant="solo" density="compact" required/>
+                </div>
+                <v-text-field v-model="plantCopy.growing.plantSize" label="Plant Size" variant="solo" density="compact" required/>
+              </v-card-text>
+            </v-card>
+          </v-col>
         </v-row>
 
       </v-col>
@@ -124,6 +138,12 @@ export default {
 
   data() {
     return {
+      sunOptions: [
+        'Full Sun (>= 6 hours)',
+        'Part Sun (4-6 hours)',
+        'Part Shade (2-4 hours)',
+        'Full Shade (< 2 hours)',
+      ],
       snackbar: {
         show: false,
         message: '',
@@ -132,6 +152,7 @@ export default {
         taxonomy: {},
         sowing: {},
         planting: {},
+        growing: {},
       },
     };
   },
@@ -176,7 +197,12 @@ export default {
           || this.plant.planting.depthInInches !== this.plantCopy.planting.depthInInches
           || this.plant.planting.plantSpacingInches !== this.plantCopy.planting.plantSpacingInches
           || this.plant.planting.rowSpacingInches !== this.plantCopy.planting.rowSpacingInches
-          || this.plant.planting.instructions !== this.sanitize(this.plantCopy.planting.instructions);
+          || this.plant.planting.instructions !== this.sanitize(this.plantCopy.planting.instructions)
+          || this.plant.growing.requiredSun !== this.sanitize(this.plantCopy.growing.requiredSun)
+          || this.plant.growing.daysToMaturity !== this.plantCopy.growing.daysToMaturity
+          || this.plant.growing.isClimbing !== this.plantCopy.growing.isClimbing
+          || this.plant.growing.climbingHeightFeet !== this.plantCopy.growing.climbingHeightFeet
+          || this.plant.growing.plantSize !== this.sanitize(this.plantCopy.growing.plantSize);
     },
   },
 
@@ -215,6 +241,13 @@ export default {
           plantSpacingInches: this.plantCopy.planting.plantSpacingInches,
           rowSpacingInches: this.plantCopy.planting.rowSpacingInches,
           instructions: this.sanitize(this.plantCopy.planting.instructions),
+        },
+        growing: {
+          requiredSun: this.sanitize(this.plantCopy.growing.requiredSun),
+          daysToMaturity: this.plantCopy.growing.daysToMaturity,
+          isClimbing: this.plantCopy.growing.isClimbing,
+          climbingHeightFeet: this.plantCopy.growing.climbingHeightFeet,
+          plantSize: this.sanitize(this.plantCopy.growing.plantSize),
         },
       });
       await this.refreshData();
