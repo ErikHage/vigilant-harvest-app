@@ -55,11 +55,11 @@
             <v-card>
               <v-card-title>Details</v-card-title>
               <v-card-text>
-                <v-text-field v-model="plantCopy.friendlyName" label="Name" variant="solo" density="compact" required/>
-                <v-text-field v-model="plantCopy.category" label="Category" variant="solo" density="compact" required/>
-                <v-text-field v-model="plantCopy.seedSource" label="Seed Source" variant="solo" density="compact" required/>
+                <v-text-field v-model="plantCopy.friendlyName" label="Name" variant="solo" density="compact"/>
+                <v-text-field v-model="plantCopy.category" label="Category" variant="solo" density="compact"/>
+                <v-text-field v-model="plantCopy.seedSource" label="Seed Source" variant="solo" density="compact"/>
                 <!-- TODO: make description a dialog -->
-                <v-text-field v-model="plantCopy.description" label="Description" variant="solo" density="compact" required/>
+                <v-text-field v-model="plantCopy.description" label="Description" variant="solo" density="compact"/>
                 <!-- TODO: add tag selection as a dialog, multi-select -->
               </v-card-text>
             </v-card>
@@ -68,9 +68,9 @@
             <v-card>
               <v-card-title>Taxonomy</v-card-title>
               <v-card-text>
-                <v-text-field v-model="plantCopy.taxonomy.family" label="Family" variant="solo" density="compact" required/>
-                <v-text-field v-model="plantCopy.taxonomy.genus" label="Genus" variant="solo" density="compact" required/>
-                <v-text-field v-model="plantCopy.taxonomy.species" label="Species" variant="solo" density="compact" required/>
+                <v-text-field v-model="plantCopy.taxonomy.family" label="Family" variant="solo" density="compact"/>
+                <v-text-field v-model="plantCopy.taxonomy.genus" label="Genus" variant="solo" density="compact"/>
+                <v-text-field v-model="plantCopy.taxonomy.species" label="Species" variant="solo" density="compact"/>
               </v-card-text>
             </v-card>
           </v-col>
@@ -78,10 +78,10 @@
             <v-card>
               <v-card-title>Sowing</v-card-title>
               <v-card-text>
-                <v-text-field v-model="plantCopy.sowing.indoor" label="Indoor Sow" variant="solo" density="compact" required/>
-                <v-text-field v-model="plantCopy.sowing.direct" label="Direct Sow" variant="solo" density="compact" required/>
-                <v-text-field v-model="plantCopy.sowing.germinationDaysRange" label="Germination Days" variant="solo" density="compact" required/>
-                <v-text-field v-model="plantCopy.sowing.germinationTempRange" label="Germination Temp" variant="solo" density="compact" required/>
+                <v-text-field v-model="plantCopy.sowing.indoor" label="Indoor Sow" variant="solo" density="compact"/>
+                <v-text-field v-model="plantCopy.sowing.direct" label="Direct Sow" variant="solo" density="compact"/>
+                <v-text-field v-model="plantCopy.sowing.germinationDaysRange" label="Germination Days" variant="solo" density="compact"/>
+                <v-text-field v-model="plantCopy.sowing.germinationTempRange" label="Germination Temp" variant="solo" density="compact"/>
               </v-card-text>
             </v-card>
           </v-col>
@@ -89,10 +89,10 @@
             <v-card>
               <v-card-title>Planting</v-card-title>
               <v-card-text>
-                <v-text-field v-model.number="plantCopy.planting.depthInInches" type="number" label="Planting Depth (in.)" variant="solo" density="compact" required/>
-                <v-text-field v-model.number="plantCopy.planting.plantSpacingInches" type="number" label="Plant Spacing (in.)" variant="solo" density="compact" required/>
-                <v-text-field v-model.number="plantCopy.planting.rowSpacingInches" type="number" label="Row Spacing (in.)" variant="solo" density="compact" required/>
-                <v-text-field v-model="plantCopy.planting.instructions" label="Instructions" variant="solo" density="compact" required/>
+                <v-text-field v-model.number="plantCopy.planting.depthInInches" type="number" label="Planting Depth (in.)" variant="solo" density="compact"/>
+                <v-text-field v-model.number="plantCopy.planting.plantSpacingInches" type="number" label="Plant Spacing (in.)" variant="solo" density="compact"/>
+                <v-text-field v-model.number="plantCopy.planting.rowSpacingInches" type="number" label="Row Spacing (in.)" variant="solo" density="compact"/>
+                <v-text-field v-model="plantCopy.planting.instructions" label="Instructions" variant="solo" density="compact"/>
               </v-card-text>
             </v-card>
           </v-col>
@@ -100,13 +100,13 @@
             <v-card>
               <v-card-title>Growing</v-card-title>
               <v-card-text>
-                <v-select v-model="plantCopy.growing.requiredSun" label="Required Sun" variant="solo" density="compact" :items="sunOptions" required/>
-                <v-text-field v-model.number="plantCopy.growing.daysToMaturity" type="number" label="Days to Maturity" variant="solo" density="compact" required/>
+                <v-select v-model="plantCopy.growing.requiredSun" label="Required Sun" variant="solo" density="compact" :items="sunOptions"/>
+                <v-text-field v-model.number="plantCopy.growing.daysToMaturity" type="number" label="Days to Maturity" variant="solo" density="compact"/>
                 <div class="d-flex">
-                  <v-checkbox class="pr-5" v-model.number="plantCopy.growing.isClimbing" label="Is Climbing" variant="solo" density="compact" required/>
-                  <v-text-field v-if="plantCopy.growing.isClimbing" v-model.number="plantCopy.growing.climbingHeightFeet" type="number" label="Climbing Height (ft.)" variant="solo" density="compact" required/>
+                  <v-checkbox class="pr-5" v-model.number="plantCopy.growing.isClimbing" label="Is Climbing" variant="solo" density="compact"/>
+                  <v-text-field v-if="plantCopy.growing.isClimbing" v-model.number="plantCopy.growing.climbingHeightFeet" type="number" label="Climbing Height (ft.)" variant="solo" density="compact"/>
                 </div>
-                <v-text-field v-model="plantCopy.growing.plantSize" label="Plant Size" variant="solo" density="compact" required/>
+                <v-text-field v-model="plantCopy.growing.plantSize" label="Plant Size" variant="solo" density="compact"/>
               </v-card-text>
             </v-card>
           </v-col>
@@ -114,9 +114,9 @@
             <v-card>
               <v-card-title>Harvesting</v-card-title>
               <v-card-text>
-                <v-text-field v-model="plantCopy.harvesting.fruitSize" label="Fruit Size" variant="solo" density="compact" required/>
-                <v-text-field v-model="plantCopy.harvesting.shelfStability" label="Shelf Stability" variant="solo" density="compact" required/>
-                <v-text-field v-model="plantCopy.harvesting.harvestInstructions" label="Instructions" variant="solo" density="compact" required/>
+                <v-text-field v-model="plantCopy.harvesting.fruitSize" label="Fruit Size" variant="solo" density="compact"/>
+                <v-text-field v-model="plantCopy.harvesting.shelfStability" label="Shelf Stability" variant="solo" density="compact"/>
+                <v-text-field v-model="plantCopy.harvesting.harvestInstructions" label="Instructions" variant="solo" density="compact"/>
               </v-card-text>
             </v-card>
           </v-col>
