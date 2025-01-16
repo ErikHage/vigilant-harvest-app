@@ -193,29 +193,29 @@ export default {
       console.log('original', this.plant);
       console.log('current', this.plantCopy);
 
-      return this.plant.friendlyName !== this.sanitize(this.plantCopy.friendlyName)
-          || this.plant.category !== this.sanitize(this.plantCopy.category)
-          || this.plant.seedSource !== this.sanitize(this.plantCopy.seedSource)
-          || this.plant.description !== this.sanitize(this.plantCopy.description)
-          || this.plant.taxonomy.family !== this.sanitize(this.plantCopy.taxonomy.family)
-          || this.plant.taxonomy.genus !== this.sanitize(this.plantCopy.taxonomy.genus)
-          || this.plant.taxonomy.species !== this.sanitize(this.plantCopy.taxonomy.species)
-          || this.plant.sowing.indoor !== this.sanitize(this.plantCopy.sowing.indoor)
-          || this.plant.sowing.direct !== this.sanitize(this.plantCopy.sowing.direct)
-          || this.plant.sowing.germinationDaysRange !== this.sanitize(this.plantCopy.sowing.germinationDaysRange)
-          || this.plant.sowing.germinationTempRange !== this.sanitize(this.plantCopy.sowing.germinationTempRange)
+      return this.textFieldEdited(this.plant.friendlyName, this.plantCopy.friendlyName)
+          || this.textFieldEdited(this.plant.category, this.plantCopy.category)
+          || this.textFieldEdited(this.plant.seedSource, this.plantCopy.seedSource)
+          || this.textFieldEdited(this.plant.description, this.plantCopy.description)
+          || this.textFieldEdited(this.plant.taxonomy.family, this.plantCopy.taxonomy.family)
+          || this.textFieldEdited(this.plant.taxonomy.genus, this.plantCopy.taxonomy.genus)
+          || this.textFieldEdited(this.plant.taxonomy.species, this.plantCopy.taxonomy.species)
+          || this.textFieldEdited(this.plant.sowing.indoor, this.plantCopy.sowing.indoor)
+          || this.textFieldEdited(this.plant.sowing.direct, this.plantCopy.sowing.direct)
+          || this.textFieldEdited(this.plant.sowing.germinationDaysRange, this.plantCopy.sowing.germinationDaysRange)
+          || this.textFieldEdited(this.plant.sowing.germinationTempRange, this.plantCopy.sowing.germinationTempRange)
           || this.plant.planting.depthInInches !== this.plantCopy.planting.depthInInches
           || this.plant.planting.plantSpacingInches !== this.plantCopy.planting.plantSpacingInches
           || this.plant.planting.rowSpacingInches !== this.plantCopy.planting.rowSpacingInches
           || this.textFieldEdited(this.plant.planting.instructions, this.plantCopy.planting.instructions)
-          || this.plant.growing.requiredSun !== this.sanitize(this.plantCopy.growing.requiredSun)
+          || this.textFieldEdited(this.plant.growing.requiredSun, this.plantCopy.growing.requiredSun)
           || this.plant.growing.daysToMaturity !== this.plantCopy.growing.daysToMaturity
           || this.plant.growing.isClimbing !== this.plantCopy.growing.isClimbing
           || this.plant.growing.climbingHeightFeet !== this.plantCopy.growing.climbingHeightFeet
-          || this.plant.growing.plantSize !== this.sanitize(this.plantCopy.growing.plantSize)
-          || this.plant.harvesting.fruitSize !== this.sanitize(this.plantCopy.harvesting.fruitSize)
-          || this.plant.harvesting.shelfStability !== this.sanitize(this.plantCopy.harvesting.shelfStability)
-          || this.plant.harvesting.harvestInstructions !== this.sanitize(this.plantCopy.harvesting.harvestInstructions);
+          || this.textFieldEdited(this.plant.growing.plantSize, this.plantCopy.growing.plantSize)
+          || this.textFieldEdited(this.plant.harvesting.fruitSize, this.plantCopy.harvesting.fruitSize)
+          || this.textFieldEdited(this.plant.harvesting.shelfStability, this.plantCopy.harvesting.shelfStability)
+          || this.textFieldEdited(this.plant.harvesting.harvestInstructions, this.plantCopy.harvesting.harvestInstructions);
     },
   },
 
