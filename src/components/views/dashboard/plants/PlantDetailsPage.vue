@@ -8,11 +8,7 @@
           <fade-out-alert :is-visible="alertVisible" :alert-type="alertType" :message="alertMessage"/>
         </v-row>
 
-        <v-snackbar
-            v-model="snackbar.show"
-            timeout="2000"
-        >{{ snackbar.message }}
-        </v-snackbar>
+        <v-snackbar v-model="snackbar.show" timeout="2000">{{ snackbar.message }}</v-snackbar>
 
         <v-row v-if="loading" class="mt-10 d-flex justify-center">
           <v-progress-circular size="100" width="10" color="green" indeterminate/>
