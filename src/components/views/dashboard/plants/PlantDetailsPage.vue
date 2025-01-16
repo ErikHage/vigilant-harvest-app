@@ -190,6 +190,9 @@ export default {
     },
 
     updateButtonEnabled() {
+      console.log('original', this.plant);
+      console.log('current', this.plantCopy);
+
       return this.plant.friendlyName !== this.sanitize(this.plantCopy.friendlyName)
           || this.plant.category !== this.sanitize(this.plantCopy.category)
           || this.plant.seedSource !== this.sanitize(this.plantCopy.seedSource)
@@ -204,7 +207,7 @@ export default {
           || this.plant.planting.depthInInches !== this.plantCopy.planting.depthInInches
           || this.plant.planting.plantSpacingInches !== this.plantCopy.planting.plantSpacingInches
           || this.plant.planting.rowSpacingInches !== this.plantCopy.planting.rowSpacingInches
-          || this.plant.planting.instructions !== this.sanitize(this.plantCopy.planting.instructions)
+          || this.textFieldEdited(this.plant.planting.instructions, this.plantCopy.planting.instructions)
           || this.plant.growing.requiredSun !== this.sanitize(this.plantCopy.growing.requiredSun)
           || this.plant.growing.daysToMaturity !== this.plantCopy.growing.daysToMaturity
           || this.plant.growing.isClimbing !== this.plantCopy.growing.isClimbing
@@ -273,9 +276,16 @@ export default {
       };
     },
 
+    textFieldEdited(originalValue, currentValue) {
+      return originalValue !== this.sanitize(currentValue);
+    },
+
     sanitize(value) {
+      if (value === null) {
+        return null;
+      }
       return value?.trim();
-    }
+    },
   },
 
   mounted() {
