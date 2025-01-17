@@ -25,14 +25,14 @@
             <v-btn
                 class="mr-4"
                 size="small"
-                color="blue darken-1"
+                color="primary"
                 :disabled="!updateButtonEnabled"
                 @click="updatePlant"
             >Update
             </v-btn>
             <v-btn
                 size="small"
-                color="gray darken-1"
+                color="warning"
                 :disabled="!updateButtonEnabled"
                 @click="refreshData"
             >Reset
@@ -45,6 +45,10 @@
                 <v-text-field v-model="plantId" label="Id" variant="solo" density="compact" disabled/>
                 <v-text-field v-model="createdAt" label="Created At" variant="solo" density="compact" disabled/>
                 <v-text-field v-model="lastModifiedAt" label="Last Updated" variant="solo" density="compact" disabled/>
+                <v-label class="mx-2" >Description</v-label>
+                <text-box-dialog button-text="Edit" title="Description"
+                                 subtitle="describe the plant" :on-submit="updateDescription" :value="plantCopy.description"/>
+                <pre class="ml-2 mt-2">{{ plantCopy.description }}</pre>
               </v-card-text>
             </v-card>
           </v-col>
@@ -58,8 +62,6 @@
                 <v-text-field v-model="plantCopy.friendlyName" label="Name" variant="solo" density="compact"/>
                 <v-text-field v-model="plantCopy.category" label="Category" variant="solo" density="compact"/>
                 <v-text-field v-model="plantCopy.seedSource" label="Seed Source" variant="solo" density="compact"/>
-                <!-- TODO: make description a dialog -->
-                <v-text-field v-model="plantCopy.description" label="Description" variant="solo" density="compact"/>
                 <!-- TODO: add tag selection as a dialog, multi-select -->
               </v-card-text>
             </v-card>
@@ -133,11 +135,13 @@ import { mapActions, mapState } from "pinia";
 import { usePlantsStore } from "@/store";
 import PageTitle from "@/components/layout/PageTitle.vue";
 import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
+import TextBoxDialog from "@/components/utils/TextBoxDialog.vue";
 
 export default {
   name: "PlantDetailsPage",
 
   components: {
+    TextBoxDialog,
     FadeOutAlert,
     PageTitle,
   },
@@ -228,6 +232,10 @@ export default {
     async refreshData() {
       await this.fetchPlantById(this.plantId);
       this.plantCopy = JSON.parse(JSON.stringify(this.plantsById[this.plantId]));
+    },
+
+    updateDescription(description) {
+      this.plantCopy.description = description;
     },
 
     async updatePlant() {
