@@ -62,7 +62,11 @@
                 <v-text-field v-model="plantCopy.friendlyName" label="Name" variant="solo" density="compact"/>
                 <v-text-field v-model="plantCopy.category" label="Category" variant="solo" density="compact"/>
                 <v-text-field v-model="plantCopy.seedSource" label="Seed Source" variant="solo" density="compact"/>
-                <!-- TODO: add tag selection as a dialog, multi-select -->
+                <v-label class="mx-2">Tags</v-label>
+                <plant-tags-dialog :on-submit="updateTags" :tags="plantCopy.tags"/>
+                <v-chip-group column>
+                  <v-chip v-for="tag in plantCopy.tags" disabled>{{ tag }}</v-chip>
+                </v-chip-group>
               </v-card-text>
             </v-card>
           </v-col>
@@ -136,11 +140,13 @@ import { usePlantsStore } from "@/store";
 import PageTitle from "@/components/layout/PageTitle.vue";
 import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
 import TextBoxDialog from "@/components/utils/TextBoxDialog.vue";
+import PlantTagsDialog from "@/components/plants/PlantTagsDialog.vue";
 
 export default {
   name: "PlantDetailsPage",
 
   components: {
+    PlantTagsDialog,
     TextBoxDialog,
     FadeOutAlert,
     PageTitle,
@@ -194,13 +200,11 @@ export default {
     },
 
     updateButtonEnabled() {
-      console.log('original', this.plant);
-      console.log('current', this.plantCopy);
-
       return this.textFieldEdited(this.plant.friendlyName, this.plantCopy.friendlyName)
           || this.textFieldEdited(this.plant.category, this.plantCopy.category)
           || this.textFieldEdited(this.plant.seedSource, this.plantCopy.seedSource)
           || this.textFieldEdited(this.plant.description, this.plantCopy.description)
+          || this.plant.tags?.join(",") !== this.plantCopy.tags?.join(",")
           || this.textFieldEdited(this.plant.taxonomy.family, this.plantCopy.taxonomy.family)
           || this.textFieldEdited(this.plant.taxonomy.genus, this.plantCopy.taxonomy.genus)
           || this.textFieldEdited(this.plant.taxonomy.species, this.plantCopy.taxonomy.species)
@@ -238,13 +242,18 @@ export default {
       this.plantCopy.description = description;
     },
 
+    updateTags(tags) {
+      console.log("updated tags:", tags);
+      this.plantCopy.tags = [ ...tags, ];
+    },
+
     async updatePlant() {
       await this.upsertPlant({
         plantId: this.plantCopy.plantId,
         category: this.sanitize(this.plantCopy.category),
         friendlyName: this.sanitize(this.plantCopy.friendlyName),
         seedSource: this.sanitize(this.plantCopy.seedSource),
-        tags: [],
+        tags: this.plantCopy.tags,
         description: this.sanitize(this.plantCopy.description),
         taxonomy: {
           family: this.sanitize(this.plantCopy.taxonomy.family),
