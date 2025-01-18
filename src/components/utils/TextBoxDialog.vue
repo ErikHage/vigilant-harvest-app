@@ -86,7 +86,7 @@ export default {
   },
 
   watch: {
-    textValue: {
+    value: {
       immediate: true,
       handler(newTextValue) {
         this.textValue = newTextValue;
