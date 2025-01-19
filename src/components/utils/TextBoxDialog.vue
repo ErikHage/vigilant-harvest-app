@@ -3,11 +3,21 @@
     <template v-slot:activator="{ props: activatorProps }">
       <v-btn
           v-bind="activatorProps"
+          v-if="buttonText !== null"
           size="small"
-          color="info"
+          color="black"
           :text="buttonText"
           @click="show = true"
       ></v-btn>
+      <v-btn
+          v-bind="activatorProps"
+          v-else
+          class="py-1 px-2"
+          size="xs"
+          color="black"
+          :text="buttonText"
+          @click="show = true"
+      ><v-icon>mdi-pencil</v-icon></v-btn>
     </template>
 
     <v-card>
@@ -45,7 +55,7 @@ export default {
   props: {
     buttonText: {
       type: String,
-      default: () => '...',
+      default: () => null,
     },
     title: {
       type: String,

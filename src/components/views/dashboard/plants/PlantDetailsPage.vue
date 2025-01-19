@@ -46,8 +46,10 @@
                 <v-text-field v-model="createdAt" label="Created At" variant="solo" density="compact" disabled/>
                 <v-text-field v-model="lastModifiedAt" label="Last Updated" variant="solo" density="compact" disabled/>
                 <v-label class="mx-2" >Description</v-label>
-                <text-box-dialog button-text="Edit" title="Description"
-                                 subtitle="describe the plant" :on-submit="updateDescription" :value="plantCopy.description"/>
+                <text-box-dialog title="Description"
+                                 subtitle="describe the plant"
+                                 :on-submit="updateDescription"
+                                 :value="plantCopy.description"/>
                 <pre class="ml-2 mt-2">{{ plantCopy.description }}</pre>
               </v-card-text>
             </v-card>

@@ -3,11 +3,11 @@
     <template v-slot:activator="{ props: activatorProps }">
       <v-btn
           v-bind="activatorProps"
-          size="small"
-          color="info"
-          text="Edit"
+          class="py-1 px-2"
+          size="xs"
+          color="black"
           @click="show = true"
-      ></v-btn>
+      ><v-icon>mdi-pencil</v-icon></v-btn>
     </template>
 
     <v-card>
