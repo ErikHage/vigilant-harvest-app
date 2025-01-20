@@ -9,12 +9,13 @@ import LoginPage from "@/components/views/LoginPage.vue";
 import DashboardPage from "@/components/views/DashboardPage.vue";
 import DashboardDefaultPage from "@/components/views/dashboard/DashboardDefaultPage.vue";
 import PlantsPage from "@/components/views/dashboard/plants/PlantsPage.vue";
-import PlantDetailsPage from "@/components/views/dashboard/plants/PlantDetailsPage.vue";
+import PlantEditPage from "@/components/views/dashboard/plants/PlantEditPage.vue";
 import PlotsPage from "@/components/views/dashboard/plots/PlotsPage.vue";
 import PlantingsPage from "@/components/views/dashboard/plantings/PlantingsPage.vue";
 import GardenPage from "@/components/views/dashboard/garden/GardenPage.vue";
 import HarvestsPage from "@/components/views/dashboard/harvests/HarvestsPage.vue";
 import StatsPage from "@/components/views/dashboard/stats/StatsPage.vue";
+import PlantDetailsPage from "@/components/views/dashboard/plants/PlantDetailsPage.vue";
 
 const routes = [
     {
@@ -77,6 +78,14 @@ const routes = [
                 path: views.dashboard.children.plants.details.path,
                 name: views.dashboard.children.plants.details.name,
                 component: PlantDetailsPage,
+                meta: {
+                    requiresAuthenticated: true,
+                },
+            },
+            {
+                path: views.dashboard.children.plants.edit.path,
+                name: views.dashboard.children.plants.edit.name,
+                component: PlantEditPage,
                 meta: {
                     requiresAuthenticated: true,
                 },

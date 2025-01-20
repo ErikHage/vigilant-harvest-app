@@ -12,6 +12,7 @@
         <plants-table
             :plants="plants"
             :on-view-clicked="navigateToPlantDetails"
+            :on-edit-clicked="navigateToPlantEdit"
         />
       </v-col>
       <v-col cols="2"></v-col>
@@ -68,6 +69,15 @@ export default {
     navigateToPlantDetails(plant) {
       this.$router.push({
         name: 'PlantDetailsPage',
+        params: {
+          plantId: plant.plantId,
+        },
+      });
+    },
+
+    navigateToPlantEdit(plant) {
+      this.$router.push({
+        name: 'PlantEditPage',
         params: {
           plantId: plant.plantId,
         },

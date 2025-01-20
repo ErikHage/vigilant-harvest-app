@@ -41,7 +41,11 @@ export const views = {
                 path: 'plants',
                 details: {
                     name: 'PlantDetailsPage',
-                    path: 'plants/:plantId',
+                    path: 'plants/:plantId/details',
+                },
+                edit: {
+                    name: 'PlantEditPage',
+                    path: 'plants/:plantId/edit',
                 },
             },
             plots: {
