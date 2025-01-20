@@ -9,7 +9,7 @@
           density="compact"
       >
         <template #item.actions="{ item }">
-          <v-icon small @click="onViewClicked(item)">mdi-magnify</v-icon>
+          <v-icon small @click="onViewClicked(item)">mdi-pencil</v-icon>
           <!-- TODO add delete button, with confirm dialog. only admin can see/use it -->
         </template>
       </v-data-table>
