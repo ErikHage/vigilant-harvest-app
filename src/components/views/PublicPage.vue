@@ -36,8 +36,7 @@ export default {
   },
 
   methods: {
-    getAssetPath
-
+    getAssetPath,
   },
 }
 </script>
