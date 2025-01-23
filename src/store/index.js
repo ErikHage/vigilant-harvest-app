@@ -42,7 +42,7 @@ export const useCommonStore = defineStore('common', {
         return {
             plantingYears: [],
             availableYears: [],
-            plantingYear: null,
+            plantingYear: new Date().getFullYear(),
             alertVisible: false,
             alertType: 'success',
             alertMessage: null,
