@@ -20,7 +20,7 @@ export const useCommonStore = defineStore('common', {
                 this.availableYears = this.plantingYears.map((plantingYear) => plantingYear.plantingYear);
             } catch (err) {
                 console.log(err);
-                this.setAlertMessage('error', 'error fetching plants');
+                this.setAlertMessage('error', 'error fetching planting years');
             }
         },
         selectPlantingYear(year) {
@@ -29,15 +29,23 @@ export const useCommonStore = defineStore('common', {
         clearPlantingYear() {
             this.plantingYear = null;
         },
+        setAlertMessage(type, message) {
+            this.alertVisible = true;
+            this.alertType = type;
+            this.alertMessage = message;
+            setTimeout(() => {
+                this.alertVisible = false;
+            }, 3000);
+        },
     },
     state: () => {
         return {
             plantingYears: [],
             availableYears: [],
             plantingYear: null,
-            // alertVisible: false, // TODO migrate error stuff here
-            // alertType: 'success',
-            // alertMessage: null,
+            alertVisible: false,
+            alertType: 'success',
+            alertMessage: null,
         };
     },
 });
