@@ -44,10 +44,14 @@
                 :item-value="(plot) => plot.plotId"
                 label="Select Plot"
                 variant="solo"
+                return-object
                 @update:model-value="onDialogSelectPlotChange"
             ></v-select>
+            <div v-if="selectedPlot && filteredHarvestFormRecords.length === 0">
+              <span>There are no plantings to harvest in {{ selectedPlot.friendlyName }}</span>
+            </div>
             <div v-if="selectedPlot"
-                 v-for="harvestFormRecord in Object.values(harvestsForm).filter(isRecordInSelectedPlot)"
+                 v-for="harvestFormRecord in filteredHarvestFormRecords"
                  :key="harvestFormRecord.plantingId">
               <v-row no-gutters>
                 <v-col cols="8">
@@ -67,7 +71,7 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="red darken-1" text @click="closeDialog">Cancel</v-btn>
-          <v-btn color="blue darken-1" text @click="confirmHarvests">Save</v-btn>
+          <v-btn color="blue darken-1" text @click="confirmHarvests" :disabled="this.harvestsEntered.length === 0">Save</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -78,7 +82,7 @@
           <span class="headline">Confirm Harvests [{{ this.selectedHarvestDate.toDateString() }}]</span>
         </v-card-title>
         <v-card-text>
-          <div v-for="harvestFormRecord in Object.values(harvestsForm).filter(harvest => harvest.quantity > 0)"
+          <div v-for="harvestFormRecord in harvestsEntered"
                :key="harvestFormRecord.plantingId">
             <span class="headline">{{ harvestFormRecord.plotName }}: {{ harvestFormRecord.plantName }}</span>
             &nbsp;
@@ -179,6 +183,14 @@ export default {
       }
     },
 
+    filteredHarvestFormRecords() {
+      return Object.values(this.harvestsForm).filter(this.isRecordInSelectedPlot);
+    },
+
+    harvestsEntered() {
+      return Object.values(this.harvestsForm).filter(harvest => harvest.quantity > 0);
+    },
+
     selectedHarvestDateString() {
       return this.selectedHarvestDate.toDateString();
     }
@@ -236,12 +248,12 @@ export default {
       }
     },
 
-    onDialogSelectPlotChange(plotId) {
-      this.selectedPlot = plotId;
+    onDialogSelectPlotChange(plot) {
+      this.selectedPlot = plot;
     },
 
     isRecordInSelectedPlot(harvestFormRecord) {
-      return this.selectedPlot === harvestFormRecord.plotId;
+      return this.selectedPlot?.plotId === harvestFormRecord.plotId;
     },
 
     openHarvestDateOverrideDialog() {
