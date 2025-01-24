@@ -36,7 +36,7 @@
                 <v-tab value="harvesting">Harvesting</v-tab>
               </v-tabs>
 
-              <v-card-text>
+              <v-card-text class="mt-5">
                 <v-tabs-window v-model="tab">
                   <v-tabs-window-item value="details">
                     <v-table>
