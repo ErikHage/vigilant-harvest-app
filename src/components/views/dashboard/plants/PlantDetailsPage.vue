@@ -51,7 +51,15 @@
                       </tr>
                       <tr>
                         <th class="details-header shrink-column">Tags</th>
-                        <td>{{ plant.tags }}</td>
+                        <td>
+                          <v-chip
+                              v-for="tag in plant.tags"
+                              class="mr-2"
+                              color="success"
+                          >
+                            {{ tag }}
+                          </v-chip>
+                        </td>
                       </tr>
                       <tr>
                         <th class="details-header shrink-column">Description</th>
