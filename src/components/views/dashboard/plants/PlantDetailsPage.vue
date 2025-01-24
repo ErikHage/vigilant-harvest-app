@@ -70,7 +70,22 @@
                   </v-tabs-window-item>
 
                   <v-tabs-window-item value="taxonomy">
-                    Taxonomy
+                    <v-table>
+                      <tbody>
+                      <tr>
+                        <th class="details-header shrink-column">Family</th>
+                        <td>{{ plant.taxonomy.family }}</td>
+                      </tr>
+                      <tr>
+                        <th class="details-header shrink-column">Genus</th>
+                        <td>{{ plant.taxonomy.genus }}</td>
+                      </tr>
+                      <tr>
+                        <th class="details-header shrink-column">Species</th>
+                        <td>{{ plant.taxonomy.species }}</td>
+                      </tr>
+                      </tbody>
+                    </v-table>
                   </v-tabs-window-item>
 
                   <v-tabs-window-item value="sowing">
