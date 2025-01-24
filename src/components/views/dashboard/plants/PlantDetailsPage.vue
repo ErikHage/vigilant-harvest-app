@@ -39,7 +39,26 @@
               <v-card-text>
                 <v-tabs-window v-model="tab">
                   <v-tabs-window-item value="details">
-                    Details
+                    <v-table>
+                      <tbody>
+                      <tr>
+                        <th class="details-header shrink-column">PlantId</th>
+                        <td>{{ plant.plantId }}</td>
+                      </tr>
+                      <tr>
+                        <th class="details-header shrink-column">Seed Source</th>
+                        <td>{{ plant.seedSource }}</td>
+                      </tr>
+                      <tr>
+                        <th class="details-header shrink-column">Tags</th>
+                        <td>{{ plant.tags }}</td>
+                      </tr>
+                      <tr>
+                        <th class="details-header shrink-column">Description</th>
+                        <td class="multiline-cell">{{ plant.description }}</td>
+                      </tr>
+                      </tbody>
+                    </v-table>
                   </v-tabs-window-item>
 
                   <v-tabs-window-item value="taxonomy">
@@ -134,5 +153,14 @@ export default {
 </script>
 
 <style scoped>
-
+.details-header {
+  font-weight: bold;
+}
+.shrink-column {
+  white-space: nowrap;
+  width: 1%;
+}
+.multiline-cell {
+  white-space: pre;
+}
 </style>
