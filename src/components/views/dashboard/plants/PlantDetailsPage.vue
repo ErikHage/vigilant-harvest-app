@@ -19,6 +19,53 @@
             <span>{{ plant.category }}</span>
           </v-col>
         </v-row>
+
+        <v-row>
+          <v-col cols="12">
+            <v-card>
+              <v-tabs
+                  v-model="tab"
+                  align-tabs="center"
+                  fixed-tabs
+              >
+                <v-tab value="details">Details</v-tab>
+                <v-tab value="taxonomy">Taxonomy</v-tab>
+                <v-tab value="sowing">Sowing</v-tab>
+                <v-tab value="planting">Planting</v-tab>
+                <v-tab value="growing">Growing</v-tab>
+                <v-tab value="harvesting">Harvesting</v-tab>
+              </v-tabs>
+
+              <v-card-text>
+                <v-tabs-window v-model="tab">
+                  <v-tabs-window-item value="details">
+                    Details
+                  </v-tabs-window-item>
+
+                  <v-tabs-window-item value="taxonomy">
+                    Taxonomy
+                  </v-tabs-window-item>
+
+                  <v-tabs-window-item value="sowing">
+                    Sowing
+                  </v-tabs-window-item>
+
+                  <v-tabs-window-item value="planting">
+                    Planting
+                  </v-tabs-window-item>
+
+                  <v-tabs-window-item value="growing">
+                    Growing
+                  </v-tabs-window-item>
+
+                  <v-tabs-window-item value="harvesting">
+                    Harvesting
+                  </v-tabs-window-item>
+                </v-tabs-window>
+              </v-card-text>
+            </v-card>
+          </v-col>
+        </v-row>
       </v-col>
     </v-row>
   </v-container>
@@ -36,6 +83,12 @@ export default {
   components: {
     FadeOutAlert,
     PageTitle,
+  },
+
+  data() {
+    return {
+      tab: null,
+    };
   },
 
   computed: {
