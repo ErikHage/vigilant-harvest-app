@@ -89,7 +89,26 @@
                   </v-tabs-window-item>
 
                   <v-tabs-window-item value="sowing">
-                    Sowing
+                    <v-table>
+                      <tbody>
+                      <tr>
+                        <th class="details-header shrink-column">Indoors</th>
+                        <td>{{ plant.sowing.indoor }}</td>
+                      </tr>
+                      <tr>
+                        <th class="details-header shrink-column">Direct</th>
+                        <td>{{ plant.sowing.direct}}</td>
+                      </tr>
+                      <tr>
+                        <th class="details-header shrink-column">Germination Time</th>
+                        <td>{{ plant.sowing.germinationDaysRange }}</td>
+                      </tr>
+                      <tr>
+                        <th class="details-header shrink-column">Germination Temperature</th>
+                        <td>{{ plant.sowing.germinationTempRange }}</td>
+                      </tr>
+                      </tbody>
+                    </v-table>
                   </v-tabs-window-item>
 
                   <v-tabs-window-item value="planting">
