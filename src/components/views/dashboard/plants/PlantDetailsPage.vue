@@ -112,7 +112,26 @@
                   </v-tabs-window-item>
 
                   <v-tabs-window-item value="planting">
-                    Planting
+                    <v-table>
+                      <tbody>
+                      <tr>
+                        <th class="details-header shrink-column">Planting Depth</th>
+                        <td>{{ plant.planting.depthInInches }}</td>
+                      </tr>
+                      <tr>
+                        <th class="details-header shrink-column">Plant Spacing (in)</th>
+                        <td>{{ plant.planting.plantSpacingInches}}</td>
+                      </tr>
+                      <tr>
+                        <th class="details-header shrink-column">Row Spacing (in)</th>
+                        <td>{{ plant.planting.rowSpacingInches }}</td>
+                      </tr>
+                      <tr>
+                        <th class="details-header shrink-column">Instructions</th>
+                        <td>{{ plant.planting.instructions }}</td>
+                      </tr>
+                      </tbody>
+                    </v-table>
                   </v-tabs-window-item>
 
                   <v-tabs-window-item value="growing">
