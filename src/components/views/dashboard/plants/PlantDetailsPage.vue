@@ -55,30 +55,7 @@
                   </v-tabs-window-item>
 
                   <v-tabs-window-item value="growing">
-                    <v-table>
-                      <tbody>
-                      <tr>
-                        <th class="details-header shrink-column">Sun</th>
-                        <td>{{ plant.growing.requiredSun }}</td>
-                      </tr>
-                      <tr>
-                        <th class="details-header shrink-column">Days to Maturity</th>
-                        <td>{{ plant.growing.daysToMaturity}}</td>
-                      </tr>
-                      <tr>
-                        <th class="details-header shrink-column">Climbing</th>
-                        <td>{{ plant.growing.isClimbing }}</td>
-                      </tr>
-                      <tr v-if="plant.growing.isClimbing">
-                        <th class="details-header shrink-column">Climbing Height</th>
-                        <td>{{ plant.growing.climbingHeightFeet }}</td>
-                      </tr>
-                      <tr>
-                        <th class="details-header shrink-column">Mature Size</th>
-                        <td>{{ plant.growing.plantSize }}</td>
-                      </tr>
-                      </tbody>
-                    </v-table>
+                    <plant-growing-tab :plant="plant"/>
                   </v-tabs-window-item>
 
                   <v-tabs-window-item value="harvesting">
@@ -118,11 +95,13 @@ import PlantDetailsTab from "@/components/plants/PlantDetailsTab.vue";
 import PlantTaxonomyTab from "@/components/plants/PlantTaxonomyTab.vue";
 import PlantSowingTab from "@/components/plants/PlantSowingTab.vue";
 import PlantPlantingTab from "@/components/plants/PlantPlantingTab.vue";
+import PlantGrowingTab from "@/components/plants/PlantGrowingTab.vue";
 
 export default {
   name: "PlantDetailsPage",
 
   components: {
+    PlantGrowingTab,
     PlantPlantingTab,
     PlantSowingTab,
     PlantTaxonomyTab,
