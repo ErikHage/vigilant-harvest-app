@@ -72,10 +72,10 @@
 </template>
 
 <script>
-import PageTitle from "@/components/layout/PageTitle.vue";
-import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
 import { mapActions, mapState } from "pinia";
 import { usePlantsStore } from "@/store";
+import PageTitle from "@/components/layout/PageTitle.vue";
+import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
 import PlantDetailsTab from "@/components/plants/PlantDetailsTab.vue";
 import PlantTaxonomyTab from "@/components/plants/PlantTaxonomyTab.vue";
 import PlantSowingTab from "@/components/plants/PlantSowingTab.vue";
@@ -119,14 +119,6 @@ export default {
     plant() {
       return this.plantsById ? this.plantsById[this.plantId] : null;
     },
-
-    createdAt() {
-      return this.plantCopy ? new Date(this.plantCopy.dateCreated).toLocaleString() : '--';
-    },
-
-    lastModifiedAt() {
-      return this.plantCopy ? new Date(this.plantCopy.dateModified).toLocaleString() : '--';
-    },
   },
 
   methods: {
@@ -146,14 +138,5 @@ export default {
 </script>
 
 <style scoped>
-.details-header {
-  font-weight: bold;
-}
-.shrink-column {
-  white-space: nowrap;
-  width: 1%;
-}
-.multiline-cell {
-  white-space: pre;
-}
+
 </style>

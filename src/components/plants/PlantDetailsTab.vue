@@ -2,8 +2,16 @@
   <v-table>
     <tbody>
     <tr>
-      <th class="details-header shrink-column">PlantId</th>
+      <th class="details-header shrink-column">Plant Id</th>
       <td>{{ plant.plantId }}</td>
+    </tr>
+    <tr>
+      <th class="details-header shrink-column">Created At</th>
+      <td>{{ createdAt }}</td>
+    </tr>
+    <tr>
+      <th class="details-header shrink-column">Last Modified At</th>
+      <td>{{ lastModifiedAt }}</td>
     </tr>
     <tr>
       <th class="details-header shrink-column">Seed Source</th>
@@ -35,6 +43,16 @@ export default {
 
   props: {
     plant: Object,
+  },
+
+  computed: {
+    createdAt() {
+      return this.plant ? new Date(this.plant.dateCreated).toLocaleString() : '--';
+    },
+
+    lastModifiedAt() {
+      return this.plant ? new Date(this.plant.dateModified).toLocaleString() : '--';
+    },
   },
 }
 </script>
