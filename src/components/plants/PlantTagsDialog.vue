@@ -53,6 +53,7 @@ export default {
   data() {
     return {
       availableTags: [
+          'Container Friendly',
           'Cold Tolerant',
           'Determinate',
           'Indeterminate',
