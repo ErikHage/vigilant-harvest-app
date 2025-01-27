@@ -39,34 +39,7 @@
               <v-card-text class="mt-5">
                 <v-tabs-window v-model="tab">
                   <v-tabs-window-item value="details">
-                    <v-table>
-                      <tbody>
-                      <tr>
-                        <th class="details-header shrink-column">PlantId</th>
-                        <td>{{ plant.plantId }}</td>
-                      </tr>
-                      <tr>
-                        <th class="details-header shrink-column">Seed Source</th>
-                        <td>{{ plant.seedSource }}</td>
-                      </tr>
-                      <tr>
-                        <th class="details-header shrink-column">Tags</th>
-                        <td>
-                          <v-chip
-                              v-for="tag in plant.tags"
-                              class="mr-2"
-                              color="success"
-                          >
-                            {{ tag }}
-                          </v-chip>
-                        </td>
-                      </tr>
-                      <tr>
-                        <th class="details-header shrink-column">Description</th>
-                        <td class="multiline-cell">{{ plant.description }}</td>
-                      </tr>
-                      </tbody>
-                    </v-table>
+                    <plant-details-tab :plant="plant"/>
                   </v-tabs-window-item>
 
                   <v-tabs-window-item value="taxonomy">
@@ -194,11 +167,13 @@ import PageTitle from "@/components/layout/PageTitle.vue";
 import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
 import { mapActions, mapState } from "pinia";
 import { usePlantsStore } from "@/store";
+import PlantDetailsTab from "@/components/plants/PlantDetailsTab.vue";
 
 export default {
   name: "PlantDetailsPage",
 
   components: {
+    PlantDetailsTab,
     FadeOutAlert,
     PageTitle,
   },
