@@ -47,26 +47,7 @@
                   </v-tabs-window-item>
 
                   <v-tabs-window-item value="sowing">
-                    <v-table>
-                      <tbody>
-                      <tr>
-                        <th class="details-header shrink-column">Indoors</th>
-                        <td>{{ plant.sowing.indoor }}</td>
-                      </tr>
-                      <tr>
-                        <th class="details-header shrink-column">Direct</th>
-                        <td>{{ plant.sowing.direct}}</td>
-                      </tr>
-                      <tr>
-                        <th class="details-header shrink-column">Germination Time</th>
-                        <td>{{ plant.sowing.germinationDaysRange }}</td>
-                      </tr>
-                      <tr>
-                        <th class="details-header shrink-column">Germination Temperature</th>
-                        <td>{{ plant.sowing.germinationTempRange }}</td>
-                      </tr>
-                      </tbody>
-                    </v-table>
+                    <plant-sowing-tab :plant="plant"/>
                   </v-tabs-window-item>
 
                   <v-tabs-window-item value="planting">
@@ -154,11 +135,13 @@ import { mapActions, mapState } from "pinia";
 import { usePlantsStore } from "@/store";
 import PlantDetailsTab from "@/components/plants/PlantDetailsTab.vue";
 import PlantTaxonomyTab from "@/components/plants/PlantTaxonomyTab.vue";
+import PlantSowingTab from "@/components/plants/PlantSowingTab.vue";
 
 export default {
   name: "PlantDetailsPage",
 
   components: {
+    PlantSowingTab,
     PlantTaxonomyTab,
     PlantDetailsTab,
     FadeOutAlert,
