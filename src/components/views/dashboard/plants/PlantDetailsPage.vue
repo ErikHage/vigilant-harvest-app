@@ -51,26 +51,7 @@
                   </v-tabs-window-item>
 
                   <v-tabs-window-item value="planting">
-                    <v-table>
-                      <tbody>
-                      <tr>
-                        <th class="details-header shrink-column">Planting Depth</th>
-                        <td>{{ plant.planting.depthInInches }}</td>
-                      </tr>
-                      <tr>
-                        <th class="details-header shrink-column">Plant Spacing (in)</th>
-                        <td>{{ plant.planting.plantSpacingInches}}</td>
-                      </tr>
-                      <tr>
-                        <th class="details-header shrink-column">Row Spacing (in)</th>
-                        <td>{{ plant.planting.rowSpacingInches }}</td>
-                      </tr>
-                      <tr>
-                        <th class="details-header shrink-column">Instructions</th>
-                        <td>{{ plant.planting.instructions }}</td>
-                      </tr>
-                      </tbody>
-                    </v-table>
+                    <plant-planting-tab :plant="plant"/>
                   </v-tabs-window-item>
 
                   <v-tabs-window-item value="growing">
@@ -136,11 +117,13 @@ import { usePlantsStore } from "@/store";
 import PlantDetailsTab from "@/components/plants/PlantDetailsTab.vue";
 import PlantTaxonomyTab from "@/components/plants/PlantTaxonomyTab.vue";
 import PlantSowingTab from "@/components/plants/PlantSowingTab.vue";
+import PlantPlantingTab from "@/components/plants/PlantPlantingTab.vue";
 
 export default {
   name: "PlantDetailsPage",
 
   components: {
+    PlantPlantingTab,
     PlantSowingTab,
     PlantTaxonomyTab,
     PlantDetailsTab,
