@@ -43,22 +43,7 @@
                   </v-tabs-window-item>
 
                   <v-tabs-window-item value="taxonomy">
-                    <v-table>
-                      <tbody>
-                      <tr>
-                        <th class="details-header shrink-column">Family</th>
-                        <td>{{ plant.taxonomy.family }}</td>
-                      </tr>
-                      <tr>
-                        <th class="details-header shrink-column">Genus</th>
-                        <td>{{ plant.taxonomy.genus }}</td>
-                      </tr>
-                      <tr>
-                        <th class="details-header shrink-column">Species</th>
-                        <td>{{ plant.taxonomy.species }}</td>
-                      </tr>
-                      </tbody>
-                    </v-table>
+                    <plant-taxonomy-tab :plant="plant"/>
                   </v-tabs-window-item>
 
                   <v-tabs-window-item value="sowing">
@@ -168,11 +153,13 @@ import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
 import { mapActions, mapState } from "pinia";
 import { usePlantsStore } from "@/store";
 import PlantDetailsTab from "@/components/plants/PlantDetailsTab.vue";
+import PlantTaxonomyTab from "@/components/plants/PlantTaxonomyTab.vue";
 
 export default {
   name: "PlantDetailsPage",
 
   components: {
+    PlantTaxonomyTab,
     PlantDetailsTab,
     FadeOutAlert,
     PageTitle,
