@@ -162,7 +162,22 @@
                   </v-tabs-window-item>
 
                   <v-tabs-window-item value="harvesting">
-                    Harvesting
+                    <v-table>
+                      <tbody>
+                      <tr>
+                        <th class="details-header shrink-column">Fruit Size</th>
+                        <td>{{ plant.harvesting.fruitSize }}</td>
+                      </tr>
+                      <tr>
+                        <th class="details-header shrink-column">Shelf Stability</th>
+                        <td>{{ plant.harvesting.shelfStability}}</td>
+                      </tr>
+                      <tr>
+                        <th class="details-header shrink-column">Instructions</th>
+                        <td>{{ plant.harvesting.harvestInstructions }}</td>
+                      </tr>
+                      </tbody>
+                    </v-table>
                   </v-tabs-window-item>
                 </v-tabs-window>
               </v-card-text>
