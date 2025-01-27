@@ -15,7 +15,7 @@
     </tr>
     <tr>
       <th class="details-header shrink-column">Instructions</th>
-      <td>{{ plant.planting.instructions }}</td>
+      <td class="multiline-cell">{{ plant.planting.instructions }}</td>
     </tr>
     </tbody>
   </v-table>
