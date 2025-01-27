@@ -59,22 +59,7 @@
                   </v-tabs-window-item>
 
                   <v-tabs-window-item value="harvesting">
-                    <v-table>
-                      <tbody>
-                      <tr>
-                        <th class="details-header shrink-column">Fruit Size</th>
-                        <td>{{ plant.harvesting.fruitSize }}</td>
-                      </tr>
-                      <tr>
-                        <th class="details-header shrink-column">Shelf Stability</th>
-                        <td>{{ plant.harvesting.shelfStability}}</td>
-                      </tr>
-                      <tr>
-                        <th class="details-header shrink-column">Instructions</th>
-                        <td>{{ plant.harvesting.harvestInstructions }}</td>
-                      </tr>
-                      </tbody>
-                    </v-table>
+                    <plant-harvesting-tab :plant="plant"/>
                   </v-tabs-window-item>
                 </v-tabs-window>
               </v-card-text>
@@ -96,11 +81,13 @@ import PlantTaxonomyTab from "@/components/plants/PlantTaxonomyTab.vue";
 import PlantSowingTab from "@/components/plants/PlantSowingTab.vue";
 import PlantPlantingTab from "@/components/plants/PlantPlantingTab.vue";
 import PlantGrowingTab from "@/components/plants/PlantGrowingTab.vue";
+import PlantHarvestingTab from "@/components/plants/PlantHarvestingTab.vue";
 
 export default {
   name: "PlantDetailsPage",
 
   components: {
+    PlantHarvestingTab,
     PlantGrowingTab,
     PlantPlantingTab,
     PlantSowingTab,
