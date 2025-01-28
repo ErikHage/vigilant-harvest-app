@@ -63,7 +63,6 @@
               <v-card-text>
                 <v-text-field v-model="plantCopy.friendlyName" label="Name" variant="solo" density="compact"/>
                 <v-text-field v-model="plantCopy.category" label="Category" variant="solo" density="compact"/>
-                <v-text-field v-model="plantCopy.seedSource" label="Seed Source" variant="solo" density="compact"/>
                 <v-label class="mx-2">Tags</v-label>
                 <plant-tags-dialog :on-submit="updateTags" :tags="plantCopy.tags"/>
                 <v-chip-group column>

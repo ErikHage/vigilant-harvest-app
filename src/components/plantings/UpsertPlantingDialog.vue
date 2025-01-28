@@ -39,6 +39,10 @@
               required
           ></v-text-field>
           <v-text-field
+              v-model="plantingCopy.seedSource"
+              label="Seed Source"
+              required></v-text-field>
+          <v-text-field
               v-model="plantingCopy.lotNumber"
               label="Lot#"
               required></v-text-field>
@@ -100,6 +104,7 @@ export default {
         plotId: '',
         plantId: '',
         numPlants: 0,
+        seedSource: null,
         lotNumber: null,
         notes: [],
       },
@@ -144,6 +149,7 @@ export default {
         plotId: '',
         plantId: '',
         numPlants: 0,
+        seedSource: null,
         lotNumber: null,
         notes: [],
       };

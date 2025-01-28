@@ -14,10 +14,6 @@
       <td>{{ lastModifiedAt }}</td>
     </tr>
     <tr>
-      <th class="details-header shrink-column">Seed Source</th>
-      <td>{{ plant.seedSource }}</td>
-    </tr>
-    <tr>
       <th class="details-header shrink-column">Tags</th>
       <td>
         <v-chip
