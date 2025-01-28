@@ -32,8 +32,8 @@
       plants: {
         type: Array,
       },
-      filters: {
-        type: Object,
+      filter: {
+        type: String,
       },
       onViewClicked: {
         type: Function,
@@ -45,7 +45,10 @@
 
     computed: {
       filteredPlants() {
-        return this.plants;
+        if (this.filter === null) {
+          return this.plants;
+        }
+        return this.plants.filter(plant => `${plant.friendlyName} ${plant.category}`.includes(this.filter));
       }
     },
   }

@@ -3,17 +3,31 @@
     <v-row>
       <v-col cols="12" class="text-center">
         <page-title title="Manage Plants"/>
-        <v-spacer></v-spacer>
-        <v-btn class="mr-2 mt-3" color="primary" @click="openDialog()">Add</v-btn>
-        <v-btn class="mt-3" color="primary" @click="refreshData">Refresh</v-btn>
       </v-col>
       <v-col cols="2"></v-col>
       <v-col cols="8">
-        <plants-table
-            :plants="plants"
-            :on-view-clicked="navigateToPlantDetails"
-            :on-edit-clicked="navigateToPlantEdit"
-        />
+        <v-sheet class="pa-4">
+          <div class="d-flex">
+            <v-text-field
+                v-model="searchFilter"
+                label="Search..."
+                class="search-bar"
+                variant="solo"
+                density="compact"
+                clearable
+            />
+
+            <v-btn class="mx-4" color="primary" @click="openDialog()">Add</v-btn>
+            <v-btn color="warning" @click="refreshData">Refresh</v-btn>
+          </div>
+
+          <plants-table
+              :plants="plants"
+              :filter="searchFilter"
+              :on-view-clicked="navigateToPlantDetails"
+              :on-edit-clicked="navigateToPlantEdit"
+          />
+        </v-sheet>
       </v-col>
       <v-col cols="2"></v-col>
     </v-row>
@@ -45,6 +59,7 @@ export default {
 
   data: () => ({
     dialog: false,
+    searchFilter: null,
   }),
 
   computed: {
@@ -104,3 +119,10 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.search-bar {
+  flex: 1;
+  margin-right: 16px;
+}
+</style>
