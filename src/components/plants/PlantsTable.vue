@@ -48,7 +48,7 @@
         if (this.filter === null) {
           return this.plants;
         }
-        return this.plants.filter(plant => `${plant.friendlyName} ${plant.category}`.includes(this.filter));
+        return this.plants.filter(plant => `${plant.friendlyName} ${plant.category}`.toUpperCase().includes(this.filter.toUpperCase()));
       }
     },
   }
