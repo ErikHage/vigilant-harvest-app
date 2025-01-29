@@ -99,7 +99,12 @@
                 <v-text-field v-model.number="plantCopy.planting.depthInInches" type="number" label="Planting Depth (in.)" variant="solo" density="compact"/>
                 <v-text-field v-model.number="plantCopy.planting.plantSpacingInches" type="number" label="Plant Spacing (in.)" variant="solo" density="compact"/>
                 <v-text-field v-model.number="plantCopy.planting.rowSpacingInches" type="number" label="Row Spacing (in.)" variant="solo" density="compact"/>
-                <v-text-field v-model="plantCopy.planting.instructions" label="Instructions" variant="solo" density="compact"/>
+                <v-label class="mx-2" >Instructions</v-label>
+                <text-box-dialog title="Planting Instructions"
+                                 subtitle="describe the planting procedure"
+                                 :on-submit="updatePlantingInstructions"
+                                 :value="plantCopy.planting.instructions"/>
+                <p class="mx-5 mt-2 respect-formatting">{{ plantCopy.planting.instructions }}</p>
               </v-card-text>
             </v-card>
           </v-col>
@@ -241,6 +246,10 @@ export default {
 
     updateDescription(description) {
       this.plantCopy.description = description;
+    },
+
+    updatePlantingInstructions(instructions) {
+      this.plantCopy.planting.instructions = instructions;
     },
 
     updateTags(tags) {
