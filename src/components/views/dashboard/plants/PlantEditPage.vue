@@ -50,7 +50,7 @@
                                  subtitle="describe the plant"
                                  :on-submit="updateDescription"
                                  :value="plantCopy.description"/>
-                <pre class="ml-2 mt-2">{{ plantCopy.description }}</pre>
+                <p class="mx-5 mt-2 respect-formatting">{{ plantCopy.description }}</p>
               </v-card-text>
             </v-card>
           </v-col>
@@ -311,3 +311,9 @@ export default {
   },
 }
 </script>
+
+<style scoped>
+.respect-formatting {
+  white-space: pre;
+}
+</style>
