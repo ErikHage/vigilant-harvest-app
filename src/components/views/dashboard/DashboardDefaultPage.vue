@@ -15,11 +15,15 @@
 
     <br/>
 
-    <planting-year-select-card
-        :available-years="availableYears"
-        :on-select-year-change="onSelectYearChange"
-        :on-select-year-clear="onSelectYearClear"
-        :selected-year="plantingYear"/>
+    <v-row>
+      <v-col cols="12">
+        <planting-year-select-card
+            :available-years="availableYears"
+            :on-select-year-change="onSelectYearChange"
+            :on-select-year-clear="onSelectYearClear"
+            :selected-year="plantingYear"/>
+      </v-col>
+    </v-row>
 
   </v-container>
 </template>
