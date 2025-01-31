@@ -10,21 +10,24 @@
           <span :class="flashClass">Currently Selected: {{ selectedYear }}</span>
         </v-text-field>
       </div>
-      <v-select
-          v-model="newSelectedYear"
-          :items="availableYears"
-          :item-title="(year) => year"
-          :item-value="(year) => year"
-          label="Select Planting Year"
-          density="compact"
-          variant="solo"
-      ></v-select>
-      <v-btn
-          color="primary"
-          :disabled="!isNewValueSelected"
-          @click="handleSelectYear"
-      >Update
-      </v-btn>
+      <div class="d-flex">
+        <v-btn
+            class="mr-4"
+            color="primary"
+            :disabled="!isNewValueSelected"
+            @click="handleSelectYear"
+        >Set
+        </v-btn>
+        <v-select
+            v-model="newSelectedYear"
+            :items="availableYears"
+            :item-title="(year) => year"
+            :item-value="(year) => year"
+            label="Select Planting Year"
+            density="compact"
+            variant="solo"
+        ></v-select>
+      </div>
     </v-card-text>
   </v-card>
 </template>
