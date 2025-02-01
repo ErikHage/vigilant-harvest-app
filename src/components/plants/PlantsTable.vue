@@ -4,8 +4,20 @@
       <v-table density="compact" height="60vh">
         <thead>
         <tr>
-          <th>Name <v-icon @click="sortByName">mdi-sort</v-icon></th>
-          <th>Category <v-icon @click="sortByCategory">mdi-sort</v-icon></th>
+          <th>
+            Name&nbsp;
+            <v-icon
+                :color="getSortIconColor('friendlyName')"
+                @click="sortByProperty('friendlyName')">{{ nameSortIcon }}
+            </v-icon>
+          </th>
+          <th>
+            Category&nbsp;
+            <v-icon
+                :color="getSortIconColor('category')"
+                @click="sortByProperty('category')">{{ categorySortIcon }}
+            </v-icon>
+          </th>
           <th></th>
         </tr>
         </thead>
@@ -60,22 +72,34 @@ export default {
       }
       return filtered.sort(this.generateSortingFunction(this.sortingField));
     },
+
+    nameSortIcon() {
+      if (this.sortingField === '-friendlyName') {
+        return 'mdi-sort-descending';
+      }
+      if (this.sortingField === 'friendlyName') {
+        return 'mdi-sort-ascending';
+      }
+      return 'mdi-sort';
+    },
+
+    categorySortIcon() {
+      if (this.sortingField === '-category') {
+        return 'mdi-sort-descending';
+      }
+      if (this.sortingField === 'category') {
+        return 'mdi-sort-ascending';
+      }
+      return 'mdi-sort';
+    }
   },
 
   methods: {
-    sortByName() {
-      if (this.sortingField === 'friendlyName') {
+    sortByProperty(property) {
+      if (this.sortingField === property) {
         this.sortingField = '-' + this.sortingField;
       } else {
-        this.sortingField = 'friendlyName';
-      }
-    },
-
-    sortByCategory() {
-      if (this.sortingField === 'category') {
-        this.sortingField = '-' + this.sortingField;
-      } else {
-        this.sortingField = 'category';
+        this.sortingField = property;
       }
     },
 
@@ -89,6 +113,13 @@ export default {
         const result = (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0;
         return result * sortOrder;
       }
+    },
+
+    getSortIconColor(property) {
+      if (this.sortingField.includes(property)) {
+        return 'primary';
+      }
+      return 'default';
     }
   },
 }
