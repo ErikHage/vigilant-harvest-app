@@ -25,37 +25,52 @@
 </template>
 
 <script>
-  export default {
-    name: 'PlantsTable',
+export default {
+  name: 'PlantsTable',
 
-    props: {
-      plants: {
-        type: Array,
-      },
-      filter: {
-        type: String,
-      },
-      onViewClicked: {
-        type: Function,
-      },
-      onEditClicked: {
-        type: Function,
-      },
+  props: {
+    plants: {
+      type: Array,
     },
+    filter: {
+      type: String,
+    },
+    onViewClicked: {
+      type: Function,
+    },
+    onEditClicked: {
+      type: Function,
+    },
+  },
 
-    computed: {
-      filteredPlants() {
-        if (this.filter === null) {
-          return this.plants;
-        }
-        return this.plants.filter(plant => {
+  computed: {
+    filteredPlants() {
+      let filtered = this.plants;
+      if (this.filter !== null) {
+        filtered = this.plants.filter(plant => {
           const matchString = plant.friendlyName.toUpperCase() + (plant.category?.toUpperCase() ?? "");
-
           return matchString.includes(this.filter.toUpperCase());
         });
       }
+      return filtered.sort(this.generateSortingFunction("friendlyName"));
     },
-  }
+  },
+
+  methods: {
+    generateSortingFunction(property) {
+      let sortOrder = 1;
+      if (property[0] === "-") {
+        sortOrder = -1;
+        property = property.substr(1);
+      }
+      console.log('sorting by ' + property);
+      return function (a, b) {
+        const result = (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0;
+        return result * sortOrder;
+      }
+    }
+  },
+}
 </script>
 
 <style scoped>
