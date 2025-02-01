@@ -4,8 +4,8 @@
       <v-table density="compact" height="60vh">
         <thead>
         <tr>
-          <th>Name</th>
-          <th>Category</th>
+          <th>Name <v-icon @click="sortByName">mdi-sort</v-icon></th>
+          <th>Category <v-icon @click="sortByCategory">mdi-sort</v-icon></th>
           <th></th>
         </tr>
         </thead>
@@ -43,6 +43,12 @@ export default {
     },
   },
 
+  data() {
+    return {
+      sortingField: 'friendlyName',
+    };
+  },
+
   computed: {
     filteredPlants() {
       let filtered = this.plants;
@@ -52,18 +58,33 @@ export default {
           return matchString.includes(this.filter.toUpperCase());
         });
       }
-      return filtered.sort(this.generateSortingFunction("friendlyName"));
+      return filtered.sort(this.generateSortingFunction(this.sortingField));
     },
   },
 
   methods: {
+    sortByName() {
+      if (this.sortingField === 'friendlyName') {
+        this.sortingField = '-' + this.sortingField;
+      } else {
+        this.sortingField = 'friendlyName';
+      }
+    },
+
+    sortByCategory() {
+      if (this.sortingField === 'category') {
+        this.sortingField = '-' + this.sortingField;
+      } else {
+        this.sortingField = 'category';
+      }
+    },
+
     generateSortingFunction(property) {
       let sortOrder = 1;
       if (property[0] === "-") {
         sortOrder = -1;
         property = property.substr(1);
       }
-      console.log('sorting by ' + property);
       return function (a, b) {
         const result = (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0;
         return result * sortOrder;
