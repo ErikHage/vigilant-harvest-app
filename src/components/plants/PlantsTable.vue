@@ -34,6 +34,9 @@
       </v-table>
     </v-card-text>
   </v-card>
+  <div class="mt-4">
+    <span> {{ filteredPlants.length }} of {{ plants.length }} plants</span>
+  </div>
 </template>
 
 <script>
