@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="showDialog" max-width="500px" persistent>
+  <v-dialog v-model="showDialog" max-width="800px" persistent>
     <v-card>
       <v-card-title>
         <span class="headline">Add Plant</span>
@@ -8,6 +8,7 @@
         <v-form ref="applicationForm">
           <v-text-field v-model="form.category" label="Category" density="compact" required></v-text-field>
           <v-text-field v-model="form.friendlyName" label="Name" density="compact" required></v-text-field>
+          <v-textarea v-model="form.description" label="Description" density="compact" rows="8" required></v-textarea>
         </v-form>
       </v-card-text>
       <v-card-actions>
@@ -34,6 +35,7 @@ export default {
       form: {
         category: '',
         friendlyName: '',
+        description: '',
       },
     };
   },
@@ -53,6 +55,7 @@ export default {
       this.form = {
         category: '',
         friendlyName: '',
+        description: '',
       };
     },
 
