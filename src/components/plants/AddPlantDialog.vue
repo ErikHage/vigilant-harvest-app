@@ -8,9 +8,6 @@
         <v-form ref="applicationForm">
           <v-text-field v-model="form.category" label="Category" density="compact" required></v-text-field>
           <v-text-field v-model="form.friendlyName" label="Name" density="compact" required></v-text-field>
-          <v-text-field v-model="form.taxonomy.family" label="Family" density="compact" required></v-text-field>
-          <v-text-field v-model="form.taxonomy.genus" label="Genus" density="compact" required></v-text-field>
-          <v-text-field v-model="form.taxonomy.species" label="Species" density="compact" required></v-text-field>
         </v-form>
       </v-card-text>
       <v-card-actions>
@@ -37,11 +34,6 @@ export default {
       form: {
         category: '',
         friendlyName: '',
-        taxonomy: {
-          family: '',
-          genus: '',
-          species: '',
-        },
       },
     };
   },
@@ -61,11 +53,6 @@ export default {
       this.form = {
         category: '',
         friendlyName: '',
-        taxonomy: {
-          family: '',
-          genus: '',
-          species: '',
-        },
       };
     },
 
