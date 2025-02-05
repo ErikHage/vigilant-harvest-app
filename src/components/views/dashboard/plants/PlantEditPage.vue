@@ -332,6 +332,6 @@ export default {
 
 <style scoped>
 .respect-formatting {
-  white-space: pre;
+  white-space: pre-wrap;
 }
 </style>

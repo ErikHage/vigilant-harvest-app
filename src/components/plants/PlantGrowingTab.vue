@@ -44,6 +44,6 @@ export default {
   width: 1%;
 }
 .multiline-cell {
-  white-space: pre;
+  white-space: pre-wrap;
 }
 </style>
