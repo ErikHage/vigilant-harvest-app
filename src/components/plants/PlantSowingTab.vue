@@ -17,6 +17,10 @@
       <th class="details-header shrink-column">Germination Temperature</th>
       <td>{{ plant.sowing.germinationTempRange }}</td>
     </tr>
+    <tr>
+      <th class="details-header shrink-column">Notes</th>
+      <td class="multiline-cell">{{ plant.sowing.sowingNotes }}</td>
+    </tr>
     </tbody>
   </v-table>
 </template>

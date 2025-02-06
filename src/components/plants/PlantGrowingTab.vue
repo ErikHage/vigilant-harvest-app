@@ -21,6 +21,10 @@
       <th class="details-header shrink-column">Mature Size</th>
       <td>{{ plant.growing.plantSize }}</td>
     </tr>
+    <tr>
+      <th class="details-header shrink-column">Notes</th>
+      <td class="multiline-cell">{{ plant.growing.growingNotes }}</td>
+    </tr>
     </tbody>
   </v-table>
 </template>
