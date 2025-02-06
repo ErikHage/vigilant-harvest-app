@@ -125,6 +125,12 @@
                   <v-text-field v-if="plantCopy.growing.isClimbing" v-model.number="plantCopy.growing.climbingHeightFeet" type="number" label="Climbing Height (ft.)" variant="solo" density="compact"/>
                 </div>
                 <v-text-field v-model="plantCopy.growing.plantSize" label="Plant Size" variant="solo" density="compact"/>
+                <v-label class="mx-2" >Notes</v-label>
+                <text-box-dialog title="Growing Notes"
+                                 subtitle="Notes about growing the plant"
+                                 :on-submit="updateGrowingNotes"
+                                 :value="plantCopy.growing.growingNotes"/>
+                <p class="mx-5 mt-2 respect-formatting">{{ plantCopy.growing.growingNotes }}</p>
               </v-card-text>
             </v-card>
           </v-col>
@@ -239,6 +245,7 @@ export default {
           || this.plant.growing.isClimbing !== this.plantCopy.growing.isClimbing
           || this.plant.growing.climbingHeightFeet !== this.plantCopy.growing.climbingHeightFeet
           || this.textFieldEdited(this.plant.growing.plantSize, this.plantCopy.growing.plantSize)
+          || this.textFieldEdited(this.plant.growing.growingNotes, this.plantCopy.growing.growingNotes)
           || this.textFieldEdited(this.plant.harvesting.fruitSize, this.plantCopy.harvesting.fruitSize)
           || this.textFieldEdited(this.plant.harvesting.shelfStability, this.plantCopy.harvesting.shelfStability)
           || this.textFieldEdited(this.plant.harvesting.harvestInstructions, this.plantCopy.harvesting.harvestInstructions);
@@ -266,6 +273,10 @@ export default {
 
     updatePlantingInstructions(instructions) {
       this.plantCopy.planting.instructions = instructions;
+    },
+
+    updateGrowingNotes(notes) {
+      this.plantCopy.growing.growingNotes = notes;
     },
 
     updateHarvestingInstructions(instructions) {
@@ -309,6 +320,7 @@ export default {
           isClimbing: this.plantCopy.growing.isClimbing,
           climbingHeightFeet: this.plantCopy.growing.climbingHeightFeet,
           plantSize: this.sanitize(this.plantCopy.growing.plantSize),
+          growingNotes: this.sanitize(this.plantCopy.growing.growingNotes),
         },
         harvesting: {
           fruitSize: this.sanitize(this.plantCopy.harvesting.fruitSize),
