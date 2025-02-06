@@ -89,6 +89,12 @@
                 <v-text-field v-model="plantCopy.sowing.direct" label="Direct Sow" variant="solo" density="compact"/>
                 <v-text-field v-model="plantCopy.sowing.germinationDaysRange" label="Germination Days" variant="solo" density="compact"/>
                 <v-text-field v-model="plantCopy.sowing.germinationTempRange" label="Germination Temp" variant="solo" density="compact"/>
+                <v-label class="mx-2" >Notes</v-label>
+                <text-box-dialog title="Sowing Notes"
+                                 subtitle="Notes about sowing seeds"
+                                 :on-submit="updateSowingNotes"
+                                 :value="plantCopy.sowing.sowingNotes"/>
+                <p class="mx-5 mt-2 respect-formatting">{{ plantCopy.sowing.sowingNotes }}</p>
               </v-card-text>
             </v-card>
           </v-col>
@@ -223,6 +229,7 @@ export default {
           || this.textFieldEdited(this.plant.sowing.direct, this.plantCopy.sowing.direct)
           || this.textFieldEdited(this.plant.sowing.germinationDaysRange, this.plantCopy.sowing.germinationDaysRange)
           || this.textFieldEdited(this.plant.sowing.germinationTempRange, this.plantCopy.sowing.germinationTempRange)
+          || this.textFieldEdited(this.plant.sowing.sowingNotes, this.plantCopy.sowing.sowingNotes)
           || this.plant.planting.depthInInches !== this.plantCopy.planting.depthInInches
           || this.plant.planting.plantSpacingInches !== this.plantCopy.planting.plantSpacingInches
           || this.plant.planting.rowSpacingInches !== this.plantCopy.planting.rowSpacingInches
@@ -251,6 +258,10 @@ export default {
 
     updateDescription(description) {
       this.plantCopy.description = description;
+    },
+
+    updateSowingNotes(notes) {
+      this.plantCopy.sowing.sowingNotes = notes;
     },
 
     updatePlantingInstructions(instructions) {
@@ -284,6 +295,7 @@ export default {
           direct: this.sanitize(this.plantCopy.sowing.direct),
           germinationDaysRange: this.sanitize(this.plantCopy.sowing.germinationDaysRange),
           germinationTempRange: this.sanitize(this.plantCopy.sowing.germinationTempRange),
+          sowingNotes: this.sanitize(this.plantCopy.sowing.sowingNotes),
         },
         planting: {
           depthInInches: this.plantCopy.planting.depthInInches,
