@@ -4,7 +4,7 @@
       <h3>{{ hydratedPlot.friendlyName }}</h3>
     </v-card-title>
     <v-card-text>
-      <v-table>
+      <v-table density="compact">
         <tbody>
         <tr v-for="planting in hydratedPlot.plantings">
           <td>
