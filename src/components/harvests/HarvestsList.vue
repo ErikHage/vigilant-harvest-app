@@ -11,7 +11,7 @@
         <v-col class="text-right">
           <v-btn
               size="small"
-              color="#d73027"
+              color="default"
               @click="handleEditClicked(hydratedHarvestsByDate[harvestDate])">
             <v-icon>mdi-pencil</v-icon>
           </v-btn>

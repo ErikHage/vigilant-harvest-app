@@ -6,8 +6,8 @@
         <v-spacer></v-spacer>
         <strong>Harvest Date:</strong> {{ this.selectedHarvestDateString }}
         <v-spacer></v-spacer>
-        <v-btn class="mt-3 mr-3" color="orange darken-1" @click="openHarvestDateOverrideDialog">Override Date</v-btn>
-        <v-btn class="mt-3" color="blue darken-1" @click="openDialog">Add Harvests</v-btn>
+        <v-btn class="mt-3 mr-3" color="success" @click="openHarvestDateOverrideDialog">Override Date</v-btn>
+        <v-btn class="mt-3" color="primary" @click="openDialog">Add Harvests</v-btn>
       </v-col>
     </v-row>
 
@@ -70,8 +70,8 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="red darken-1" text @click="closeDialog">Cancel</v-btn>
-          <v-btn color="blue darken-1" text @click="confirmHarvests" :disabled="this.harvestsEntered.length === 0">Save</v-btn>
+          <v-btn color="error" text @click="closeDialog">Cancel</v-btn>
+          <v-btn color="primary" text @click="confirmHarvests" :disabled="this.harvestsEntered.length === 0">Save</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -91,9 +91,9 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="red darken-1" text @click="closeConfirmDialog">Cancel</v-btn>
-          <v-btn color="blue darken-1" text @click="goBackToHarvestDialog">Back</v-btn>
-          <v-btn color="blue darken-1" text @click="saveHarvests">Confirm</v-btn>
+          <v-btn color="error" text @click="closeConfirmDialog">Cancel</v-btn>
+          <v-btn color="warning" text @click="goBackToHarvestDialog">Back</v-btn>
+          <v-btn color="primary" text @click="saveHarvests">Confirm</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

@@ -1,7 +1,7 @@
 <template>
   <v-container>
     <v-app-bar app v-if="!showAppBar">
-      <v-btn :to="loginPath">Login</v-btn>
+      <v-btn :to="loginPath" color="primary">Login</v-btn>
     </v-app-bar>
     <div class="text-center mb-4">
       <v-img

@@ -5,7 +5,7 @@
         <page-title title="Manage Plots"/>
         <v-spacer></v-spacer>
         <v-btn class="mr-2 mt-3" color="primary" @click="openDialog()">Add</v-btn>
-        <v-btn class="mt-3" color="primary" @click="refreshData">Refresh</v-btn>
+        <v-btn class="mt-3" color="warning" @click="refreshData">Refresh</v-btn>
       </v-col>
       <v-col cols="2"></v-col>
       <v-col cols="8">

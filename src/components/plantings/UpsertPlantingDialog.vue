@@ -74,9 +74,9 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn color="blue darken-1" text @click="handleOnCancel">Cancel</v-btn>
-        <v-btn v-if="isEditMode" color="blue darken-1" text @click="handleSavePlanting">Update</v-btn>
-        <v-btn v-else color="blue darken-1" text @click="handleSavePlanting">Create</v-btn>
+        <v-btn color="error" text @click="handleOnCancel">Cancel</v-btn>
+        <v-btn v-if="isEditMode" color="primary" text @click="handleSavePlanting">Update</v-btn>
+        <v-btn v-else color="primary" text @click="handleSavePlanting">Create</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

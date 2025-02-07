@@ -21,8 +21,8 @@
         </v-form>
       </v-card-text>
       <v-card-actions>
-        <v-btn color="blue darken-1" @click="handleCancel">Cancel</v-btn>
-        <v-btn color="blue darken-1" @click="handleSubmit">Update</v-btn>
+        <v-btn color="error" @click="handleCancel">Cancel</v-btn>
+        <v-btn color="primary" @click="handleSubmit">Update</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
