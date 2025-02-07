@@ -19,6 +19,9 @@
             <v-chip v-if="planting.harvestQuantity > 0" color="yellow">
               {{ planting.harvestQuantity }}<v-icon>mdi-basket-fill</v-icon>
             </v-chip>
+            <v-chip v-else color="grey">
+              <v-icon>mdi-basket</v-icon>
+            </v-chip>
           </td>
         </tr>
         </tbody>
