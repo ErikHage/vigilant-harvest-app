@@ -19,7 +19,6 @@ export const useCommonStore = defineStore('common', {
                 this.plantingYears = await plantingYearsApi.fetchPlantingYears(storageUtils.tryToLoadTokenFromStorage());
                 this.availableYears = this.plantingYears.map((plantingYear) => plantingYear.plantingYear);
             } catch (err) {
-                console.log(err);
                 this.setAlertMessage('error', 'error fetching planting years');
             }
         },

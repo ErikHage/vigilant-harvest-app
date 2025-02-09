@@ -1,5 +1,6 @@
 import axios from "axios";
 
+import { withApiErrorHandling } from './error-handler';
 import { vigilantHarvestServiceUrl } from "@/utils/constants";
 
 async function fetchPlantingYears(actorToken) {
@@ -17,5 +18,5 @@ async function fetchPlantingYears(actorToken) {
 }
 
 export default {
-    fetchPlantingYears,
+    fetchPlantingYears: withApiErrorHandling(fetchPlantingYears),
 };
