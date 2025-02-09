@@ -1,5 +1,6 @@
 import axios from "axios";
 
+import { withApiErrorHandling } from './error-handler';
 import { feralAuthenticationServiceUrl, applicationId } from "@/utils/constants";
 
 async function verifySsoToken(ssoToken) {
@@ -34,6 +35,6 @@ async function verifyActorToken(actorToken) {
 }
 
 export default {
-    verifySsoToken,
-    verifyActorToken,
+    verifySsoToken: withApiErrorHandling(verifySsoToken),
+    verifyActorToken: withApiErrorHandling(verifyActorToken),
 };

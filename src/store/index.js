@@ -64,8 +64,7 @@ export const useAuthenticationStore = defineStore('authentication', {
                 this.showAppBar = true;
             } catch (err) {
                 this.isAuthenticated = false;
-                console.log(err);
-                // TODO redirect to login page
+                this.setAlertMessage('error', 'error authenticating sso token');
             }
         },
         async verifyToken() {
@@ -78,7 +77,8 @@ export const useAuthenticationStore = defineStore('authentication', {
                 if (err.status === 401) {
                     // token must already be expired, don't worry about it
                 } else {
-                    // show some error
+                    this.setAlertMessage('error', 'error logging out');
+                    console.error(err);
                 }
             }
             this.clearToken();
@@ -91,6 +91,14 @@ export const useAuthenticationStore = defineStore('authentication', {
         },
         clearToken() {
             storageUtils.clearTokenFromStorage();
+        },
+        setAlertMessage(type, message) {
+            this.alertVisible = true;
+            this.alertType = type;
+            this.alertMessage = message;
+            setTimeout(() => {
+                this.alertVisible = false;
+            }, 3000);
         },
     },
     state: () => {
