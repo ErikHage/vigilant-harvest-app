@@ -1,51 +1,27 @@
 import axios from "axios";
 
+import { withApiErrorHandling } from './error-handler';
 import { vigilantHarvestServiceUrl } from "@/utils/constants";
 
 async function upsertPlot(actorToken, plot) {
-    try {
-        const response = await axios.put(`${vigilantHarvestServiceUrl.v0}/plots`, plot, {
-            headers: {
-                'x-feral-auth-token': actorToken,
-            },
-        });
-        return response.data;
-    } catch (err) {
-        console.log('error upserting plot');
-        throw err;
-    }
+    const response = await axios.put(`${vigilantHarvestServiceUrl.v0}/plots`, plot, {
+        headers: {
+            'x-feral-auth-token': actorToken,
+        },
+    });
+    return response.data;
 }
 
 async function fetchPlots(actorToken) {
-    try {
-        const response = await axios.get(`${vigilantHarvestServiceUrl.v0}/plots`, {
-            headers: {
-                'x-feral-auth-token': actorToken,
-            },
-        });
-        return response.data;
-    } catch (err) {
-        console.log('error fetching plots');
-        throw err;
-    }
-}
-
-async function deletePlotById(actorToken, plotId) {
-    try {
-        const response = await axios.delete(`${vigilantHarvestServiceUrl.v0}/plots/${plotId}`, {
-            headers: {
-                'x-feral-auth-token': actorToken,
-            },
-        });
-        return response.data;
-    } catch (err) {
-        console.log('error deleting plot by id');
-        throw err;
-    }
+    const response = await axios.get(`${vigilantHarvestServiceUrl.v0}/plots`, {
+        headers: {
+            'x-feral-auth-token': actorToken,
+        },
+    });
+    return response.data;
 }
 
 export default {
-    upsertPlot,
-    fetchPlots,
-    deletePlotById,
+    upsertPlot: withApiErrorHandling(upsertPlot),
+    fetchPlots: withApiErrorHandling(fetchPlots),
 };

@@ -209,14 +209,6 @@ export const usePlotsStore = defineStore('plots', {
                 this.setAlertMessage('error', 'error fetching plots');
             }
         },
-        async deletePlotById(plotId) {
-            try {
-                await plotsApi.deletePlotById(storageUtils.tryToLoadTokenFromStorage(), plotId);
-            } catch (err) {
-                console.log(err);
-                this.setAlertMessage('error', 'error deleting plot');
-            }
-        },
         setAlertMessage(type, message) {
             this.alertVisible = true;
             this.alertType = type;

@@ -59,7 +59,6 @@ export default {
     ...mapActions(usePlotsStore, [
       'upsertPlot',
       'fetchPlots',
-      'deletePlotById',
     ]),
 
     async refreshData() {
