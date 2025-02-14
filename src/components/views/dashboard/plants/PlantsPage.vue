@@ -3,6 +3,8 @@
     <v-row>
       <v-col cols="12" class="text-center">
         <page-title title="Manage Plants"/>
+        <v-spacer></v-spacer>
+        <fade-out-alert :is-visible="alert.isVisible" :alert-type="alert.type" :message="alert.message" />
       </v-col>
       <v-col cols="2"></v-col>
       <v-col cols="8">
@@ -47,11 +49,13 @@ import { usePlantsStore } from "@/store";
 import PageTitle from "@/components/layout/PageTitle.vue";
 import PlantsTable from "@/components/plants/PlantsTable.vue";
 import AddPlantDialog from "@/components/plants/AddPlantDialog.vue";
+import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
 
 export default {
   name: 'PlantsPage',
 
   components: {
+    FadeOutAlert,
     AddPlantDialog,
     PageTitle,
     PlantsTable,
@@ -69,6 +73,14 @@ export default {
       'alertMessage',
       'alertVisible',
     ]),
+
+    alert() {
+      return {
+        isVisible: this.alertVisible,
+        type: this.alertType,
+        message: this.alertMessage,
+      };
+    },
   },
 
   methods: {
