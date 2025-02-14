@@ -18,7 +18,7 @@ export default {
       default: false,
     },
     alertType: {
-      type: String | undefined,
+      type: String,
     },
     message: {
       type: String,
