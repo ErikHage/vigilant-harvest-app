@@ -57,9 +57,12 @@ export default {
   }),
 
   computed: {
-    ...mapState(usePlotsStore, [
-      'plots', 'alertType', 'alertMessage', 'alertVisible',
-    ]),
+    ...mapState(usePlotsStore, {
+      plots: 'plots',
+      alertType: 'alertType',
+      alertMessage: 'alertMessage',
+      alertVisible: 'alertVisible',
+    }),
 
     alert() {
       return {

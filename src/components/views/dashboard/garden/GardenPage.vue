@@ -134,25 +134,27 @@ export default {
   }),
 
   computed: {
-    ...mapState(useCommonStore, [
-      'plantingYear',
-    ]),
+    ...mapState(useCommonStore, {
+      plantingYear: 'plantingYear',
+    }),
 
-    ...mapState(usePlotsStore, [
-      'plots', 'plotsById',
-    ]),
+    ...mapState(usePlotsStore, {
+      plots: 'plots',
+      plotsById: 'plotsById',
+    }),
 
-    ...mapState(usePlantsStore, [
-      'plants', 'plantsById',
-    ]),
+    ...mapState(usePlantsStore, {
+      plants: 'plants',
+      plantsById: 'plantsById',
+    }),
 
-    ...mapState(usePlantingsStore, [
-      'plantings',
-    ]),
+    ...mapState(usePlantingsStore, {
+      plantings: 'plantings',
+    }),
 
-    ...mapState(useHarvestsStore, [
-      'harvestCounts',
-    ]),
+    ...mapState(useHarvestsStore, {
+      harvestCounts: 'harvestCounts',
+    }),
 
     hydratedPlots() {
       if (this.initialized) {

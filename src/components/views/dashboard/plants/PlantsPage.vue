@@ -67,12 +67,12 @@ export default {
   }),
 
   computed: {
-    ...mapState(usePlantsStore, [
-      'plants',
-      'alertType',
-      'alertMessage',
-      'alertVisible',
-    ]),
+    ...mapState(usePlantsStore, {
+      plants: 'plants',
+      alertType: 'alertType',
+      alertMessage: 'alertMessage',
+      alertVisible: 'alertVisible',
+    }),
 
     alert() {
       return {

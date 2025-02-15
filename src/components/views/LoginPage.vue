@@ -34,9 +34,9 @@ export default {
   name: 'LoginPage',
 
   computed: {
-    ...mapState(useAuthenticationStore, [
-      'isAuthenticated',
-    ]),
+    ...mapState(useAuthenticationStore, {
+      isAuthenticated: 'isAuthenticated',
+    }),
   },
 
   methods: {

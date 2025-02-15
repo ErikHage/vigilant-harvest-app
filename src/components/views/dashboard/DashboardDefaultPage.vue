@@ -46,9 +46,10 @@ export default {
   },
 
   computed: {
-    ...mapState(useCommonStore, [
-      'availableYears', 'plantingYear',
-    ]),
+    ...mapState(useCommonStore, {
+      availableYears: 'availableYears',
+      plantingYear: 'plantingYear',
+    }),
   },
 
   methods: {

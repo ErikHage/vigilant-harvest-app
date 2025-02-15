@@ -70,16 +70,16 @@ export default {
   }),
 
   computed: {
-    ...mapState(useCommonStore, [
-      'plantingYear',
-    ]),
+    ...mapState(useCommonStore, {
+      plantingYear: 'plantingYear',
+    }),
 
-    ...mapState(useHarvestsStore, [
-      'harvestStats',
-      'alertType',
-      'alertMessage',
-      'alertVisible',
-    ]),
+    ...mapState(useHarvestsStore, {
+      harvestStats: 'harvestStats',
+      alertType: 'alertType',
+      alertMessage: 'alertMessage',
+      alertVisible: 'alertVisible',
+    }),
 
     stats() {
       return {

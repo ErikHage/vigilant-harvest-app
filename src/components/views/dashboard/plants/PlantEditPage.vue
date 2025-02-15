@@ -198,13 +198,13 @@ export default {
   },
 
   computed: {
-    ...mapState(usePlantsStore, [
-      'plantsById',
-      'loading',
-      'alertVisible',
-      'alertType',
-      'alertMessage',
-    ]),
+    ...mapState(usePlantsStore, {
+      plantsById: 'plantsById',
+      loading: 'loading',
+      alertType: 'alertType',
+      alertMessage: 'alertMessage',
+      alertVisible: 'alertVisible',
+    }),
 
     plantId() {
       return this.$route.params.plantId;

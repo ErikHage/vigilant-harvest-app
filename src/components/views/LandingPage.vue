@@ -17,9 +17,9 @@ export default {
   },
 
   computed: {
-    ...mapState(useAuthenticationStore, [
-      'isAuthenticated',
-    ]),
+    ...mapState(useAuthenticationStore, {
+      isAuthenticated: 'isAuthenticated',
+    }),
   },
 
   methods: {

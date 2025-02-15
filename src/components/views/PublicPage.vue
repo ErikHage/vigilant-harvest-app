@@ -30,9 +30,9 @@ export default {
   }),
 
   computed: {
-    ...mapState(useAuthenticationStore, [
-      'showAppBar',
-    ]),
+    ...mapState(useAuthenticationStore, {
+      showAppBar: 'showAppBar',
+    }),
   },
 
   methods: {

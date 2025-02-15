@@ -58,21 +58,21 @@ export default {
   }),
 
   computed: {
-    ...mapState(useCommonStore, [
-      'plantingYear',
-    ]),
+    ...mapState(useCommonStore, {
+      plantingYear: 'plantingYear',
+    }),
 
-    ...mapState(usePlantsStore, [
-      'plantsById',
-    ]),
+    ...mapState(usePlantsStore, {
+      plantsById: 'plantsById',
+    }),
 
-    ...mapState(usePlantingsStore, [
-      'plantingsById',
-    ]),
+    ...mapState(usePlantingsStore, {
+      plantingsById: 'plantingsById',
+    }),
 
-    ...mapState(useHarvestsStore, [
-      'harvests'
-    ]),
+    ...mapState(useHarvestsStore, {
+      harvests: 'harvests',
+    }),
   },
 
   methods: {

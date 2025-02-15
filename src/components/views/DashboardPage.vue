@@ -19,9 +19,9 @@ export default {
   components: { DashboardAppBar },
 
   computed: {
-    ...mapState(useCommonStore, [
-        'plantingYear',
-    ]),
+    ...mapState(useCommonStore, {
+      plantingYear: 'plantingYear',
+    }),
   },
 
   methods: {
