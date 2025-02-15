@@ -60,9 +60,9 @@ export default {
   }),
 
   computed: {
-    ...mapState(useCommonStore, [
-      'plantingYear',
-    ]),
+    ...mapState(useCommonStore, {
+      plantingYear: 'plantingYear',
+    }),
 
     ...mapState(usePlotsStore, {
       plots: 'plots',
