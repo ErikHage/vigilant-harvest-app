@@ -7,7 +7,13 @@
         <v-btn class="mr-2 mt-3" color="primary" @click="openDialog()">Add</v-btn>
         <v-btn class="mt-3" color="warning" @click="refreshData">Refresh</v-btn>
         <v-spacer></v-spacer>
-        <fade-out-alert :is-visible="alert.isVisible" :alert-type="alert.type" :message="alert.message" />
+        <fade-out-alert
+            v-for="(alert, i) in alerts"
+            :key="'alert' + i"
+            :is-visible="alert.isVisible"
+            :alert-type="alert.type"
+            :message="alert.message"
+        />
       </v-col>
       <v-col cols="2"></v-col>
       <v-col cols="8">
@@ -87,15 +93,24 @@ export default {
       plantingsAlertVisible: 'alertVisible',
     }),
 
-    alert() {
-      return {
-        isVisible: this.plantingsAlertVisible || this.plantsAlertVisible || this.plotsAlertVisible,
-        type: [this.plantingsAlertType, this.plantsAlertType, this.plotsAlertType]
-            .includes('error') ? 'error' : 'success',
-        message: [this.plantingsAlertMessage, this.plantsAlertMessage, this.plotsAlertMessage]
-            .filter(message => message != null)
-            .join("\n"),
-      };
+    alerts() {
+      return [
+        {
+          isVisible: this.plantingsAlertVisible,
+          type: this.plantingsAlertType,
+          message: this.plantingsAlertMessage,
+        },
+        {
+          isVisible: this.plantsAlertVisible,
+          type: this.plantsAlertType,
+          message: this.plantsAlertMessage,
+        },
+        {
+          isVisible: this.plotsAlertVisible,
+          type: this.plotsAlertType,
+          message: this.plotsAlertMessage,
+        }
+      ];
     },
   },
 
