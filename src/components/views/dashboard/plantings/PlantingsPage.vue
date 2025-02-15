@@ -6,6 +6,8 @@
         <v-spacer></v-spacer>
         <v-btn class="mr-2 mt-3" color="primary" @click="openDialog()">Add</v-btn>
         <v-btn class="mt-3" color="warning" @click="refreshData">Refresh</v-btn>
+        <v-spacer></v-spacer>
+        <fade-out-alert :is-visible="alert.isVisible" :alert-type="alert.type" :message="alert.message" />
       </v-col>
       <v-col cols="2"></v-col>
       <v-col cols="8">
@@ -39,11 +41,13 @@ import PlantingYearSelectCard from "@/components/PlantingYearSelectCard.vue";
 import PageTitle from "@/components/layout/PageTitle.vue";
 import PlantingsTable from "@/components/plantings/PlantingsTable.vue";
 import UpsertPlantingDialog from "@/components/plantings/UpsertPlantingDialog.vue";
+import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
 
 export default {
   name: 'PlantingsPage',
 
   components: {
+    FadeOutAlert,
     UpsertPlantingDialog,
     PlantingsTable,
     PageTitle,
@@ -60,17 +64,39 @@ export default {
       'plantingYear',
     ]),
 
-    ...mapState(usePlotsStore, [
-       'plots', 'plotsById',
-    ]),
+    ...mapState(usePlotsStore, {
+      plots: 'plots',
+      plotsById: 'plotsById',
+      plotsAlertType: 'alertType',
+      plotsAlertMessage: 'alertMessage',
+      plotsAlertVisible: 'alertVisible',
+    }),
 
-    ...mapState(usePlantsStore, [
-      'plants', 'plantsById',
-    ]),
+    ...mapState(usePlantsStore, {
+      plants: 'plants',
+      plantsById: 'plantsById',
+      plantsAlertType: 'alertType',
+      plantsAlertMessage: 'alertMessage',
+      plantsAlertVisible: 'alertVisible',
+    }),
 
-    ...mapState(usePlantingsStore, [
-      'plantings', 'alertType', 'alertMessage', 'alertVisible',
-    ]),
+    ...mapState(usePlantingsStore, {
+      plantings: 'plantings',
+      plantingsAlertType: 'alertType',
+      plantingsAlertMessage: 'alertMessage',
+      plantingsAlertVisible: 'alertVisible',
+    }),
+
+    alert() {
+      return {
+        isVisible: this.plantingsAlertVisible || this.plantsAlertVisible || this.plotsAlertVisible,
+        type: [this.plantingsAlertType, this.plantsAlertType, this.plotsAlertType]
+            .includes('error') ? 'error' : 'success',
+        message: [this.plantingsAlertMessage, this.plantsAlertMessage, this.plotsAlertMessage]
+            .filter(message => message != null)
+            .join("\n"),
+      };
+    },
   },
 
   methods: {
