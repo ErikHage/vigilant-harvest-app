@@ -5,6 +5,7 @@
       <v-col cols="12" class="text-center">
         <page-title title="Stats"/>
         <v-spacer></v-spacer>
+        <fade-out-alert :is-visible="alert.isVisible" :alert-type="alert.type" :message="alert.message" />
       </v-col>
 
       <v-col cols="2"></v-col>
@@ -52,11 +53,13 @@ import { useCommonStore, useHarvestsStore } from "@/store";
 import PageTitle from "@/components/layout/PageTitle.vue";
 import PlantingStatsCard from "@/components/plantings/PlantingStatsCard.vue";
 import HarvestStatsCard from "@/components/harvests/HarvestStatsCard.vue";
+import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
 
 export default {
   name: 'StatsPage',
 
   components: {
+    FadeOutAlert,
     HarvestStatsCard,
     PlantingStatsCard,
     PageTitle,
@@ -73,6 +76,9 @@ export default {
 
     ...mapState(useHarvestsStore, [
       'harvestStats',
+      'alertType',
+      'alertMessage',
+      'alertVisible',
     ]),
 
     stats() {
@@ -86,6 +92,14 @@ export default {
         return Object.values(this.harvestStats.plantingStats);
       }
       return [];
+    },
+
+    alert() {
+      return {
+        isVisible: this.alertVisible,
+        type: this.alertType,
+        message: this.alertMessage,
+      };
     },
   },
 
