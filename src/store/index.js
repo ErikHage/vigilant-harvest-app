@@ -255,6 +255,13 @@ export const usePlantingsStore = defineStore('plantings', {
                 this.setAlertMessage(err, 'error', 'error fetching plantings by year');
             }
         },
+        async fetchPlantingById(plantingId) {
+            try {
+                this.plantingsById[plantingId] = await plantingsApi.fetchPlantingById(storageUtils.tryToLoadTokenFromStorage(), plantingId);
+            } catch (err) {
+                this.setAlertMessage(err, 'error', 'error fetching planting by id: ' + plantingId);
+            }
+        },
         setAlertMessage(err, type, message) {
             if (err) {
                 console.error(err);

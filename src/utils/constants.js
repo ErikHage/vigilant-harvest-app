@@ -55,6 +55,10 @@ export const views = {
             plantings: {
                 name: 'PlantingsPage',
                 path: 'plantings',
+                details: {
+                    name: 'PlantingDetailsPage',
+                    path: 'plantings/:plantingId/details',
+                },
             },
             harvests: {
                 name: 'HarvestsPage',

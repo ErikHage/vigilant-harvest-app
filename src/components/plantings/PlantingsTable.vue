@@ -9,6 +9,7 @@
           density="compact"
       >
         <template #item.actions="{ item }">
+          <v-icon small @click="onViewClicked(item)">mdi-magnify</v-icon>
           <v-icon small @click="onEditClicked(item)">mdi-pencil</v-icon>
           <!-- TODO add delete button, with confirm dialog. only admin can see/use it -->
         </template>
@@ -25,6 +26,7 @@
       plotsMap: Object,
       plantsMap: Object,
       plantings: Array,
+      onViewClicked: Function,
       onEditClicked: Function,
     },
 

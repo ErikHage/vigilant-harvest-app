@@ -21,6 +21,7 @@
           :plots-map="plotsById"
           :plants-map="plantsById"
           :plantings="plantings"
+          :on-view-clicked="navigateToPlantingDetails"
           :on-edit-clicked="openDialog"
         />
       </v-col>
@@ -140,6 +141,15 @@ export default {
     closeDialog() {
       this.dialog = false;
       this.selectedPlanting = null;
+    },
+
+    navigateToPlantingDetails(planting) {
+      this.$router.push({
+        name: 'PlantingDetailsPage',
+        params: {
+          plantingId: planting.plantingId,
+        },
+      });
     },
 
     async savePlanting(planting) {

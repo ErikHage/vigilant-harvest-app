@@ -24,7 +24,17 @@ async function fetchPlantingsByYear(actorToken, plantingYear) {
     return response.data;
 }
 
+async function fetchPlantingById(actorToken, plantingId) {
+    const response = await axios.get(`${vigilantHarvestServiceUrl.v0}/plantings/${plantingId}`, {
+        headers: {
+            'x-feral-auth-token': actorToken,
+        },
+    });
+    return response.data;
+}
+
 export default {
     upsertPlanting: withApiErrorHandling(upsertPlanting),
     fetchPlantingsByYear: withApiErrorHandling(fetchPlantingsByYear),
+    fetchPlantingById: withApiErrorHandling(fetchPlantingById),
 };
