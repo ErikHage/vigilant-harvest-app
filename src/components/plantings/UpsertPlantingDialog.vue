@@ -33,7 +33,7 @@
               variant="solo"
           ></v-select>
           <v-text-field
-              v-model.number="plantingCopy.numPlants"
+              v-model.number="plantingCopy.numberTransplanted"
               type="number"
               label="Number of Plants"
               required
@@ -103,7 +103,7 @@ export default {
         name: '',
         plotId: '',
         plantId: '',
-        numPlants: 0,
+        numberTransplanted: 0,
         seedSource: null,
         lotNumber: null,
         notes: [],
@@ -148,7 +148,7 @@ export default {
         name: '',
         plotId: '',
         plantId: '',
-        numPlants: 0,
+        numberTransplanted: 0,
         seedSource: null,
         lotNumber: null,
         notes: [],

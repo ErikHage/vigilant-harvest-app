@@ -35,7 +35,7 @@
         { title: 'Name', key: 'name', align: 'start', },
         { title: 'Plant', key: 'plantName', align: 'start', },
         { title: 'Plot', key: 'plotName', align: 'start', },
-        { title: 'Count', key: 'numPlants', align: 'start', },
+        { title: 'Count', key: 'numberTransplanted', align: 'start', },
         { title: 'Actions', key: 'actions', sortable: false },
       ],
     }),

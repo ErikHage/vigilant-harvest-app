@@ -9,7 +9,7 @@
         <tr v-for="planting in hydratedPlot.plantings">
           <td>
             <v-chip class="ml-2 mr-2" color="green">
-              {{ planting.numPlants }}<v-icon>mdi-leaf</v-icon>
+              {{ planting.numberTransplanted }}<v-icon>mdi-leaf</v-icon>
             </v-chip>
           </td>
           <td class="text-center">

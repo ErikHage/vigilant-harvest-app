@@ -21,7 +21,7 @@
                 <v-text-field v-model="plantingId" label="Id" variant="solo" density="compact" disabled/>
                 <v-text-field v-model="createdAt" label="Created At" variant="solo" density="compact" disabled/>
                 <v-text-field v-model="lastModifiedAt" label="Last Updated" variant="solo" density="compact" disabled/>
-                <v-text-field v-model.number="planting.numPlants" type="number" label="Number of Plants" variant="solo" density="compact"/>
+                <v-text-field v-model.number="planting.numberTransplanted" type="number" label="Number of Plants" variant="solo" density="compact"/>
 
                 <div class="d-flex">
                   <v-text-field v-model="planting.seedSource" label="source" variant="solo" density="compact"/>
