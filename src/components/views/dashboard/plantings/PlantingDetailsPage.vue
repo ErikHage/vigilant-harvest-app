@@ -6,10 +6,16 @@
         <v-row>
           <v-col cols="12" class="text-center">
             <page-title :title="title"/>
-            <v-spacer/>
-            <span>Planting</span>
-            <v-spacer/>
-            <fade-out-alert :is-visible="alertVisible" :alert-type="alertType" :message="alertMessage"/>
+            <v-spacer></v-spacer>
+            <span>Planting Details</span>
+            <v-spacer></v-spacer>
+            <fade-out-alert
+                v-for="(alert, i) in alerts"
+                :key="'alert' + i"
+                :is-visible="alert.isVisible"
+                :alert-type="alert.type"
+                :message="alert.message"
+            />
           </v-col>
         </v-row>
 
@@ -21,31 +27,33 @@
                 <v-text-field v-model="plantingId" label="Id" variant="solo" density="compact" disabled/>
                 <v-text-field v-model="createdAt" label="Created At" variant="solo" density="compact" disabled/>
                 <v-text-field v-model="lastModifiedAt" label="Last Updated" variant="solo" density="compact" disabled/>
-                <v-text-field v-model.number="planting.numberTransplanted" type="number" label="Number of Plants" variant="solo" density="compact"/>
+                <v-text-field v-model.number="planting.numberTransplanted" type="number" label="Number of Plants"
+                              variant="solo" density="compact"/>
 
                 <div class="d-flex">
                   <v-text-field v-model="planting.seedSource" label="source" variant="solo" density="compact"/>
                   <v-text-field v-model="planting.lotNumber" label="Lot#" variant="solo" density="compact"/>
                 </div>
 
-<!--                TODO hydrate name and link to plots page (once one exists)-->
+                <!--                TODO link to plots page (once one exists)-->
                 <div class="d-flex">
-                  <v-text-field v-model="planting.plotId" label="Plot" variant="solo" density="compact" disabled/>
-<!--                  <v-btn-->
-<!--                      class="px-1"-->
-<!--                      color="black"-->
-<!--                      @click="navigateToPlotDetails(planting.plotId)"-->
-<!--                  ><v-icon>mdi-magnify</v-icon></v-btn>-->
+                  <v-text-field v-model="plot.friendlyName" label="Plot" variant="solo" density="compact" disabled/>
+                  <!--                  <v-btn-->
+                  <!--                      class="px-1"-->
+                  <!--                      color="black"-->
+                  <!--                      @click="navigateToPlotDetails(planting.plotId)"-->
+                  <!--                  ><v-icon>mdi-magnify</v-icon></v-btn>-->
                 </div>
-<!--                TODO hydrate name and link to plant details page-->
                 <div class="d-flex">
-                  <v-text-field v-model="planting.plantId" label="Plant" variant="solo" density="compact" disabled />
+                  <v-text-field v-model="plant.friendlyName" label="Plant" variant="solo" density="compact" disabled/>
                   <v-btn
                       class="px-1"
                       color="black"
                       @click.stop="navigateToPlantDetails(planting.plantId)"
                       :disabled="false"
-                  ><v-icon>mdi-magnify</v-icon></v-btn>
+                  >
+                    <v-icon>mdi-magnify</v-icon>
+                  </v-btn>
                 </div>
               </v-card-text>
             </v-card>
@@ -75,7 +83,7 @@
 import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
 import PageTitle from "@/components/layout/PageTitle.vue";
 import { mapActions, mapState } from "pinia";
-import { usePlantingsStore } from "@/store";
+import { usePlantingsStore, usePlantsStore, usePlotsStore } from "@/store";
 
 export default {
   name: "PlantingDetailsPage",
@@ -86,11 +94,27 @@ export default {
   },
 
   computed: {
+    ...mapState(usePlotsStore, {
+      plots: 'plots',
+      plotsById: 'plotsById',
+      plotsAlertType: 'alertType',
+      plotsAlertMessage: 'alertMessage',
+      plotsAlertVisible: 'alertVisible',
+    }),
+
+    ...mapState(usePlantsStore, {
+      plants: 'plants',
+      plantsById: 'plantsById',
+      plantsAlertType: 'alertType',
+      plantsAlertMessage: 'alertMessage',
+      plantsAlertVisible: 'alertVisible',
+    }),
+
     ...mapState(usePlantingsStore, {
       plantingsById: 'plantingsById',
-      alertType: 'alertType',
-      alertMessage: 'alertMessage',
-      alertVisible: 'alertVisible',
+      plantingsAlertType: 'alertType',
+      plantingsAlertMessage: 'alertMessage',
+      plantingsAlertVisible: 'alertVisible',
     }),
 
     plantingId() {
@@ -115,12 +139,48 @@ export default {
 
     notes() {
       return this.planting ? this.planting.notes : [];
-    }
+    },
+
+    plot() {
+      return this.plotsById[this.planting.plotId];
+    },
+
+    plant() {
+      return this.plantsById[this.planting.plantId];
+    },
+
+    alerts() {
+      return [
+        {
+          isVisible: this.plantingsAlertVisible,
+          type: this.plantingsAlertType,
+          message: this.plantingsAlertMessage,
+        },
+        {
+          isVisible: this.plantsAlertVisible,
+          type: this.plantsAlertType,
+          message: this.plantsAlertMessage,
+        },
+        {
+          isVisible: this.plotsAlertVisible,
+          type: this.plotsAlertType,
+          message: this.plotsAlertMessage,
+        }
+      ];
+    },
   },
 
   methods: {
+    ...mapActions(usePlotsStore, [
+      'fetchPlots',
+    ]),
+
+    ...mapActions(usePlantsStore, [
+      'fetchPlants',
+    ]),
+
     ...mapActions(usePlantingsStore, [
-        'fetchPlantingById',
+      'fetchPlantingById',
     ]),
 
     async refreshData() {
