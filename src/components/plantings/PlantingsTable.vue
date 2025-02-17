@@ -10,7 +10,7 @@
       >
         <template #item.actions="{ item }">
           <v-icon small @click="onViewClicked(item)">mdi-magnify</v-icon>
-          <v-icon small @click="onEditClicked(item)">mdi-pencil</v-icon>
+          <v-icon class="ml-1" small @click="onEditClicked(item)">mdi-pencil</v-icon>
           <!-- TODO add delete button, with confirm dialog. only admin can see/use it -->
         </template>
       </v-data-table>
@@ -35,7 +35,7 @@
         { title: 'Name', key: 'name', align: 'start', },
         { title: 'Plant', key: 'plantName', align: 'start', },
         { title: 'Plot', key: 'plotName', align: 'start', },
-        { title: 'Count', key: 'numberTransplanted', align: 'start', },
+        { title: 'Seed Source', key: 'seedSource', align: 'start', },
         { title: 'Actions', key: 'actions', sortable: false },
       ],
     }),
