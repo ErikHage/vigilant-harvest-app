@@ -26,10 +26,14 @@
             <v-card>
               <v-card-text class="text-center">
                 <v-btn class="mx-1" color="primary">Comment</v-btn>
+
                 <sow-planting-action-dialog
-                    v-if="showAction('Sow')"
+                    v-if="planting && showAction('Sow')"
                     class="mx-1"
-                    :on-submit="upsertPlanting"/>
+                    :planting="planting"
+                    :plots="plots"
+                    :on-submit="savePlanting"/>
+
                 <v-btn v-if="showAction('Delete')" class="mx-1" color="error">Delete</v-btn>
                 <v-btn v-if="showAction('Transplant')" class="mx-1" color="green">Transplant</v-btn>
                 <v-btn v-if="showAction('Retire')" class="mx-1" color="warning">Retire</v-btn>
@@ -134,7 +138,6 @@ export default {
     }),
 
     ...mapState(usePlantsStore, {
-      plants: 'plants',
       plantsById: 'plantsById',
       plantsAlertType: 'alertType',
       plantsAlertMessage: 'alertMessage',
@@ -233,15 +236,13 @@ export default {
       'fetchPlots',
     ]),
 
-    ...mapActions(usePlantsStore, [
-      'fetchPlants',
-    ]),
-
     ...mapActions(usePlantingsStore, [
       'fetchPlantingById',
+      'upsertPlanting',
     ]),
 
     async refreshData() {
+      await this.fetchPlots();
       await this.fetchPlantingById(this.plantingId);
     },
 
@@ -262,8 +263,10 @@ export default {
       return this.actionMapping[this.planting.currentStatus].includes(actionName);
     },
 
-    upsertPlanting(planting) {
-      console.log('upsertPlanting - implement me plz');
+    async savePlanting(planting) {
+      console.log('saving planting', planting);
+
+      // await this.upsertPlanting(planting);
     },
   },
 

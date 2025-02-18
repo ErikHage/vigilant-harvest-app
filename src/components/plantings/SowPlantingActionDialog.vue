@@ -9,10 +9,38 @@
         <span class="headline">Sow Planting</span>
       </v-card-title>
       <v-card-text>
-        <p>indoor vs outdoor</p>
-        <p>plot - if outdoor</p>
-        <p>number sown</p>
-        <p>date sown - default today</p>
+        <v-select
+            v-model="form.sowType"
+            label="Sow Location"
+            variant="solo"
+            density="compact"
+            :items="sowTypesList"/>
+
+        <v-select
+            v-if="form.sowType === 'Outdoor'"
+            v-model="form.plotId"
+            :items="plots"
+            :item-title="(plot) => plot.friendlyName"
+            :item-value="(plot) => plot.plotId"
+            label="Select Plot"
+            variant="solo"
+            density="compact"
+        ></v-select>
+
+        <v-text-field
+            v-model.number="form.numberSown"
+            type="number"
+            label="Number Sown"
+            variant="solo"
+            density="compact"/>
+
+        <div class="d-flex">
+          <date-picker-dialog-activator
+              :on-submit="setDateValue"
+              title="Override Sow Date"
+              :date="form.sowDate"/>
+          <p>{{ formattedSowDate }}</p>
+        </div>
       </v-card-text>
 
       <v-card-actions>
@@ -25,12 +53,24 @@
 </template>
 
 <script>
+
+import DatePickerDialogActivator from "@/components/utils/DatePickerDialogActivator.vue";
+
 export default {
   name: "SowPlantingActionDialog",
+
+  components: {
+    DatePickerDialogActivator
+
+  },
 
   props: {
     planting: {
       type: Object,
+    },
+    plots: {
+      type: Array,
+      required: true,
     },
     onSubmit: {
       type: Function,
@@ -41,19 +81,45 @@ export default {
   data() {
     return {
       show: false,
+      sowTypesList: ['Indoor', 'Outdoor'],
+      form: {
+        sowType: 'Indoor',
+        sowDate: new Date(),
+        numberSown: 0,
+        plotId: null,
+      },
     };
   },
 
-  methods: {
-    handleSubmit() {
-      this.onSubmit({
+  computed: {
+    formattedSowDate() {
+      return this.form.sowDate.toISOString().split('T')[0];
+    },
+  },
 
-      });
+  methods: {
+    getDataToSubmit() {
+      return {
+        ...this.planting,
+        sowType: this.form.sowType,
+        sowDate: this.form.sowDate.toISOString(),
+        numberSown: this.form.numberSown,
+        currentStatus: this.form.sowType === 'Indoor' ? 'INDOOR SOWN' : 'OUTDOOR SOWN',
+        plotId: this.form.sowType === 'Outdoor' ? this.form.plotId : null,
+      };
+    },
+
+    handleSubmit() {
+      this.onSubmit(this.getDataToSubmit());
       this.show = false;
     },
 
     handleCancel() {
       this.show = false;
+    },
+
+    setDateValue(newDateValue) {
+      this.form.sowDate = newDateValue;
     },
   },
 }
