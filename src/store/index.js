@@ -12,6 +12,10 @@ import harvestsApi from "@/api/harvests-api";
 import { applicationId, feralAuthenticationAppUrl } from "@/utils/constants";
 import plantingYearsApi from "@/api/planting-years-api";
 
+const localStorageKeys = {
+    plantingYear: 'planting-year',
+};
+
 export const useCommonStore = defineStore('common', {
     actions: {
         async fetchPlantingYears() {
@@ -24,9 +28,11 @@ export const useCommonStore = defineStore('common', {
         },
         selectPlantingYear(year) {
             this.plantingYear = year;
+            storageUtils.setLocalStorageEntry(localStorageKeys.plantingYear, year);
         },
         clearPlantingYear() {
             this.plantingYear = null;
+            storageUtils.clearLocalStorageEntry(localStorageKeys.plantingYear);
         },
         setAlertMessage(err, type, message) {
             if (err) {
@@ -44,7 +50,7 @@ export const useCommonStore = defineStore('common', {
         return {
             plantingYears: [],
             availableYears: [],
-            plantingYear: new Date().getFullYear(),
+            plantingYear: storageUtils.getLocalStorageEntry(localStorageKeys.plantingYear) ?? new Date().getFullYear(),
             alertVisible: false,
             alertType: 'success',
             alertMessage: null,
