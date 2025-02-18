@@ -26,7 +26,10 @@
             <v-card>
               <v-card-text class="text-center">
                 <v-btn class="mx-1" color="primary">Comment</v-btn>
-                <v-btn v-if="showAction('Sow')" class="mx-1" color="green">Sow</v-btn>
+                <sow-planting-action-dialog
+                    v-if="showAction('Sow')"
+                    class="mx-1"
+                    :on-submit="upsertPlanting"/>
                 <v-btn v-if="showAction('Delete')" class="mx-1" color="error">Delete</v-btn>
                 <v-btn v-if="showAction('Transplant')" class="mx-1" color="green">Transplant</v-btn>
                 <v-btn v-if="showAction('Retire')" class="mx-1" color="warning">Retire</v-btn>
@@ -98,11 +101,13 @@ import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
 import PageTitle from "@/components/layout/PageTitle.vue";
 import { mapActions, mapState } from "pinia";
 import { usePlantingsStore, usePlantsStore, usePlotsStore } from "@/store";
+import SowPlantingActionDialog from "@/components/plantings/SowPlantingActionDialog.vue";
 
 export default {
   name: "PlantingDetailsPage",
 
   components: {
+    SowPlantingActionDialog,
     FadeOutAlert,
     PageTitle,
   },
@@ -255,6 +260,10 @@ export default {
 
     showAction(actionName) {
       return this.actionMapping[this.planting.currentStatus].includes(actionName);
+    },
+
+    upsertPlanting(planting) {
+      console.log('upsertPlanting - implement me plz');
     },
   },
 
