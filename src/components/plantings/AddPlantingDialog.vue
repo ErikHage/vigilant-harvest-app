@@ -19,6 +19,11 @@
               variant="solo"
           ></v-select>
           <v-text-field
+              v-model.number="planting.leadTimeWeeks"
+              type="number"
+              label="Indoor Sow Lead Time (weeks)"
+          ></v-text-field>
+          <v-text-field
               v-model="planting.seedSource"
               label="Seed Source"
               required></v-text-field>
@@ -53,6 +58,7 @@ export default {
       planting: {
         name: '',
         plantId: '',
+        leadTimeWeeks: null,
         seedSource: null,
         lotNumber: null,
       },
@@ -70,6 +76,7 @@ export default {
       this.planting = {
         name: '',
         plantId: '',
+        leadTimeWeeks: null,
         seedSource: null,
         lotNumber: null,
       };

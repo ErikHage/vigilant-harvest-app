@@ -7,7 +7,8 @@
           <v-col cols="12" class="text-center">
             <page-title :title="title"/>
             <v-spacer></v-spacer>
-            <h3>Planting Details [{{ planting.currentStatus }}]</h3>
+<!--            TODO do some fancy v-chip stuff -->
+            <h3>{{ planting.currentStatus }}</h3>
             <v-spacer></v-spacer>
             <fade-out-alert
                 v-for="(alert, i) in alerts"
@@ -23,6 +24,16 @@
           <v-col cols="12">
 
             <v-card>
+              <v-card-text class="text-center">
+                <v-btn class="mx-1" color="primary">Comment</v-btn>
+                <v-btn v-if="showAction('Sow')" class="mx-1" color="green">Sow</v-btn>
+                <v-btn v-if="showAction('Delete')" class="mx-1" color="error">Delete</v-btn>
+                <v-btn v-if="showAction('Transplant')" class="mx-1" color="green">Transplant</v-btn>
+                <v-btn v-if="showAction('Retire')" class="mx-1" color="warning">Retire</v-btn>
+              </v-card-text>
+            </v-card>
+
+            <v-card class="mt-4">
               <v-card-text>
                 <v-text-field v-model="plantingId" label="Id" variant="solo" density="compact" disabled/>
 
@@ -36,25 +47,28 @@
                   <v-text-field v-model="planting.lotNumber" label="Lot#" variant="solo" density="compact"/>
                 </div>
 
-                <!--                TODO link to plots page (once one exists)-->
-                <div class="d-flex">
-                  <v-text-field v-if="plot" v-model="plot.friendlyName" label="Plot" variant="solo" density="compact" disabled/>
-                  <v-text-field v-else v-model="unassignedPlot" label="Plot" variant="solo" density="compact" disabled/>
-<!--                  <v-btn v-if="plot" class="px-1" color="black" size="small" icon="mdi-magnify" @click="navigateToPlotDetails(planting.plotId)"/>-->
-                </div>
                 <div class="d-flex">
                   <v-text-field v-model="plant.friendlyName" label="Plant" variant="solo" density="compact" disabled/>
                   <v-btn class="px-1" color="black" size="small" icon="mdi-magnify" @click="navigateToPlantDetails(planting.plantId)"/>
                 </div>
+<!--                TODO combine plant and plot into one row-->
+<!--                TODO link to plots page (once one exists)-->
+                <div class="d-flex">
+                  <v-text-field v-model="plotName" label="Plot" variant="solo" density="compact" disabled/>
+<!--                  <v-btn v-if="plot" class="px-1" color="black" size="small" icon="mdi-magnify" @click="navigateToPlotDetails(planting.plotId)"/>-->
+                </div>
 
                 <div class="d-flex">
                   <v-text-field v-model="sowDate" label="Sow Date" variant="solo" density="compact" disabled/>
-                  <v-text-field v-if="planting.sowType" v-model="planting.sowType" label="Sow Type" variant="solo" density="compact" disabled/>
+                  <v-text-field v-model="sowType" label="Sow Type" variant="solo" density="compact" disabled/>
+                </div>
+
+                <div class="d-flex">
+                  <v-text-field v-model="leadTime" label="Transplant Lead Time" variant="solo" density="compact" disabled/>
+                  <v-text-field v-model="transplantDate" label="Transplant Date" variant="solo" density="compact" disabled/>
                 </div>
 
                 <v-text-field v-model="numberOfPlants" label="Number of Plants" variant="solo" density="compact" disabled/>
-                <v-text-field v-model="leadTime" label="Transplant Lead Time" variant="solo" density="compact" disabled/>
-                <v-text-field v-model="transplantDate" label="Transplant Date" variant="solo" density="compact" disabled/>
               </v-card-text>
             </v-card>
 
@@ -96,6 +110,12 @@ export default {
   data() {
     return {
       unassignedPlot: '---',
+      actionMapping: {
+        'INITIALIZED': ['Sow', 'Delete'],
+        'INDOOR SOWN': ['Transplant'],
+        'OUTDOOR SOWN': ['Retire'],
+        'RETIRED': [],
+      },
     };
   },
 
@@ -147,8 +167,9 @@ export default {
       return this.planting ? this.planting.notes : [];
     },
 
-    plot() {
-      return this.plotsById[this.planting.plotId];
+    plotName() {
+      const plot = this.plotsById[this.planting.plotId];
+      return plot ? plot.friendlyName : '---';
     },
 
     plant() {
@@ -159,6 +180,10 @@ export default {
       return this.planting.sowDate
           ? new Date(this.planting.sowDate).toLocaleDateString()
           : '---';
+    },
+
+    sowType() {
+      return this.planting.sowType || '---';
     },
 
     transplantDate() {
@@ -226,6 +251,10 @@ export default {
           plantId,
         },
       });
+    },
+
+    showAction(actionName) {
+      return this.actionMapping[this.planting.currentStatus].includes(actionName);
     },
   },
 
