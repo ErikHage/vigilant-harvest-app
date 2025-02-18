@@ -7,7 +7,7 @@
           <v-col cols="12" class="text-center">
             <page-title :title="title"/>
             <v-spacer></v-spacer>
-            <span>Planting Details</span>
+            <h3>Planting Details [{{ planting.currentStatus }}]</h3>
             <v-spacer></v-spacer>
             <fade-out-alert
                 v-for="(alert, i) in alerts"
@@ -25,10 +25,11 @@
             <v-card>
               <v-card-text>
                 <v-text-field v-model="plantingId" label="Id" variant="solo" density="compact" disabled/>
-                <v-text-field v-model="createdAt" label="Created At" variant="solo" density="compact" disabled/>
-                <v-text-field v-model="lastModifiedAt" label="Last Updated" variant="solo" density="compact" disabled/>
-                <v-text-field v-model.number="planting.numberTransplanted" type="number" label="Number of Plants"
-                              variant="solo" density="compact"/>
+
+                <div class="d-flex">
+                  <v-text-field v-model="createdAt" label="Created At" variant="solo" density="compact" disabled/>
+                  <v-text-field v-model="lastModifiedAt" label="Last Updated" variant="solo" density="compact" disabled/>
+                </div>
 
                 <div class="d-flex">
                   <v-text-field v-model="planting.seedSource" label="source" variant="solo" density="compact"/>
@@ -37,24 +38,23 @@
 
                 <!--                TODO link to plots page (once one exists)-->
                 <div class="d-flex">
-                  <v-text-field v-model="plot.friendlyName" label="Plot" variant="solo" density="compact" disabled/>
-                  <!--                  <v-btn-->
-                  <!--                      class="px-1"-->
-                  <!--                      color="black"-->
-                  <!--                      @click="navigateToPlotDetails(planting.plotId)"-->
-                  <!--                  ><v-icon>mdi-magnify</v-icon></v-btn>-->
+                  <v-text-field v-if="plot" v-model="plot.friendlyName" label="Plot" variant="solo" density="compact" disabled/>
+                  <v-text-field v-else v-model="unassignedPlot" label="Plot" variant="solo" density="compact" disabled/>
+<!--                  <v-btn v-if="plot" class="px-1" color="black" size="small" icon="mdi-magnify" @click="navigateToPlotDetails(planting.plotId)"/>-->
                 </div>
                 <div class="d-flex">
                   <v-text-field v-model="plant.friendlyName" label="Plant" variant="solo" density="compact" disabled/>
-                  <v-btn
-                      class="px-1"
-                      color="black"
-                      @click.stop="navigateToPlantDetails(planting.plantId)"
-                      :disabled="false"
-                  >
-                    <v-icon>mdi-magnify</v-icon>
-                  </v-btn>
+                  <v-btn class="px-1" color="black" size="small" icon="mdi-magnify" @click="navigateToPlantDetails(planting.plantId)"/>
                 </div>
+
+                <div class="d-flex">
+                  <v-text-field v-model="sowDate" label="Sow Date" variant="solo" density="compact" disabled/>
+                  <v-text-field v-if="planting.sowType" v-model="planting.sowType" label="Sow Type" variant="solo" density="compact" disabled/>
+                </div>
+
+                <v-text-field v-model="numberOfPlants" label="Number of Plants" variant="solo" density="compact" disabled/>
+                <v-text-field v-model="leadTime" label="Transplant Lead Time" variant="solo" density="compact" disabled/>
+                <v-text-field v-model="transplantDate" label="Transplant Date" variant="solo" density="compact" disabled/>
               </v-card-text>
             </v-card>
 
@@ -91,6 +91,12 @@ export default {
   components: {
     FadeOutAlert,
     PageTitle,
+  },
+
+  data() {
+    return {
+      unassignedPlot: '---',
+    };
   },
 
   computed: {
@@ -147,6 +153,28 @@ export default {
 
     plant() {
       return this.plantsById[this.planting.plantId];
+    },
+
+    sowDate() {
+      return this.planting.sowDate
+          ? new Date(this.planting.sowDate).toLocaleDateString()
+          : '---';
+    },
+
+    transplantDate() {
+      return this.planting.transplantDate
+          ? new Date(this.planting.transplantDate).toLocaleDateString()
+          : '---';
+    },
+
+    numberOfPlants() {
+      return this.planting.numberTransplanted || this.planting.numberSown || '---';
+    },
+
+    leadTime() {
+      return this.planting.leadTimeWeeks
+          ? this.planting.leadTimeWeeks + ' weeks'
+          : '---';
     },
 
     alerts() {

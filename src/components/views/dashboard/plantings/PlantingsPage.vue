@@ -22,13 +22,12 @@
           :plants-map="plantsById"
           :plantings="plantings"
           :on-view-clicked="navigateToPlantingDetails"
-          :on-edit-clicked="openDialog"
         />
       </v-col>
       <v-col cols="2"></v-col>
     </v-row>
 
-    <upsert-planting-dialog
+    <add-planting-dialog
       :show="dialog"
       :planting="selectedPlanting"
       :plants="plants"
@@ -47,7 +46,7 @@ import { useCommonStore, usePlantingsStore, usePlantsStore, usePlotsStore } from
 import PlantingYearSelectCard from "@/components/PlantingYearSelectCard.vue";
 import PageTitle from "@/components/layout/PageTitle.vue";
 import PlantingsTable from "@/components/plantings/PlantingsTable.vue";
-import UpsertPlantingDialog from "@/components/plantings/UpsertPlantingDialog.vue";
+import AddPlantingDialog from "@/components/plantings/AddPlantingDialog.vue";
 import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
 
 export default {
@@ -55,7 +54,7 @@ export default {
 
   components: {
     FadeOutAlert,
-    UpsertPlantingDialog,
+    AddPlantingDialog,
     PlantingsTable,
     PageTitle,
     PlantingYearSelectCard,
