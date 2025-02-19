@@ -247,7 +247,7 @@ export default {
     },
 
     navigateToPlotDetails(plotId) {
-      console.log('plot clicked, do something');
+      console.log('plot clicked, do something in the future');
     },
 
     navigateToPlantDetails(plantId) {
