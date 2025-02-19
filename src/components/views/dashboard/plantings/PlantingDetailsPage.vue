@@ -7,8 +7,7 @@
           <v-col cols="12" class="text-center">
             <page-title :title="title"/>
             <v-spacer></v-spacer>
-<!--            TODO do some fancy v-chip stuff -->
-            <h3>{{ planting.currentStatus }}</h3>
+            <v-chip size="large" :color="statusColor">{{ planting.currentStatus }}</v-chip>
             <v-spacer></v-spacer>
             <fade-out-alert
                 v-for="(alert, i) in alerts"
@@ -101,10 +100,12 @@
 </template>
 
 <script>
-import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
-import PageTitle from "@/components/layout/PageTitle.vue";
 import { mapActions, mapState } from "pinia";
 import { usePlantingsStore, usePlantsStore, usePlotsStore } from "@/store";
+import plantingUtils from '@/utils/plantings';
+
+import PageTitle from "@/components/layout/PageTitle.vue";
+import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
 import SowPlantingActionDialog from "@/components/plantings/SowPlantingActionDialog.vue";
 
 export default {
@@ -208,6 +209,10 @@ export default {
       return this.planting.leadTimeWeeks
           ? this.planting.leadTimeWeeks + ' weeks'
           : '---';
+    },
+
+    statusColor() {
+      return plantingUtils.mapPlantingStatusToColor(this.planting?.currentStatus);
     },
 
     alerts() {
