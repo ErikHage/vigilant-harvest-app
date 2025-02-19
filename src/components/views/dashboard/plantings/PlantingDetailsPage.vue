@@ -55,14 +55,14 @@
                 </div>
 
                 <div class="d-flex">
-                  <v-text-field v-model="plant.friendlyName" label="Plant" variant="solo" density="compact" disabled/>
-                  <v-btn class="px-1" color="black" size="small" icon="mdi-magnify" @click="navigateToPlantDetails(planting.plantId)"/>
-                </div>
-<!--                TODO combine plant and plot into one row-->
-<!--                TODO link to plots page (once one exists)-->
-                <div class="d-flex">
-                  <v-text-field v-model="plotName" label="Plot" variant="solo" density="compact" disabled/>
-<!--                  <v-btn v-if="plot" class="px-1" color="black" size="small" icon="mdi-magnify" @click="navigateToPlotDetails(planting.plotId)"/>-->
+                  <v-btn class="px-1 mt-2" color="black" size="small" @click="navigateToPlantDetails(planting.plantId)">
+                    <v-icon>mdi-sprout-outline</v-icon>
+                  </v-btn>
+                  <v-text-field v-model="plant.friendlyName" class="ml-1" label="Plant" variant="solo" density="compact" disabled/>
+                  <v-btn class="px-1 mt-2" color="black" size="small" @click="navigateToPlotDetails(planting.plotId)">
+                    <v-icon>mdi-vector-square</v-icon>
+                  </v-btn>
+                  <v-text-field v-model="plotName" class="ml-1" label="Plot" variant="solo" density="compact" disabled/>
                 </div>
 
                 <div class="d-flex">
