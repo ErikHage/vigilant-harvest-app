@@ -264,9 +264,8 @@ export default {
     },
 
     async savePlanting(planting) {
-      console.log('saving planting', planting);
-
-      // await this.upsertPlanting(planting);
+      await this.upsertPlanting(planting);
+      await this.refreshData();
     },
   },
 
