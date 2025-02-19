@@ -50,8 +50,8 @@
                 </div>
 
                 <div class="d-flex">
-                  <v-text-field v-model="planting.seedSource" label="source" variant="solo" density="compact"/>
-                  <v-text-field v-model="planting.lotNumber" label="Lot#" variant="solo" density="compact"/>
+                  <v-text-field v-model="planting.seedSource" label="source" variant="solo" density="compact" disabled/>
+                  <v-text-field v-model="planting.lotNumber" label="Lot#" variant="solo" density="compact" disabled/>
                 </div>
 
                 <div class="d-flex">
