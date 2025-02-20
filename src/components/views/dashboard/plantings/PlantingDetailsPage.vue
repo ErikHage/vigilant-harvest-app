@@ -33,8 +33,14 @@
                     :plots="plots"
                     :on-submit="savePlanting"/>
 
+                <transplant-planting-action-dialog
+                    v-if="planting && showAction('Transplant')"
+                    class="mx-1"
+                    :planting="planting"
+                    :plots="plots"
+                    :on-submit="savePlanting"/>
+
                 <v-btn v-if="showAction('Delete')" class="mx-1" color="error">Delete</v-btn>
-                <v-btn v-if="showAction('Transplant')" class="mx-1" color="green">Transplant</v-btn>
                 <v-btn v-if="showAction('Retire')" class="mx-1" color="warning">Retire</v-btn>
               </v-card-text>
             </v-card>
@@ -107,11 +113,13 @@ import plantingUtils from '@/utils/plantings';
 import PageTitle from "@/components/layout/PageTitle.vue";
 import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
 import SowPlantingActionDialog from "@/components/plantings/SowPlantingActionDialog.vue";
+import TransplantPlantingActionDialog from "@/components/plantings/TransplantPlantingActionDialog.vue";
 
 export default {
   name: "PlantingDetailsPage",
 
   components: {
+    TransplantPlantingActionDialog,
     SowPlantingActionDialog,
     FadeOutAlert,
     PageTitle,
