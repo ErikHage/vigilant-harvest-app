@@ -250,6 +250,25 @@ export const usePlantingsStore = defineStore('plantings', {
                 this.setAlertMessage(err, 'error', 'error upserting planting');
             }
         },
+        async createPlanting(planting) {
+            try {
+                const planting = await plantingsApi.createPlanting(storageUtils.tryToLoadTokenFromStorage(), planting);
+                this.plantingsById[planting.plantingId] = planting;
+            } catch (err) {
+                this.setAlertMessage(err, 'error', 'error creating planting');
+            }
+        },
+        async performPlantingAction(plantingId, action, actionData) {
+            try {
+                this.plantingsById[plantingId] = await plantingsApi.performPlantingAction(
+                    storageUtils.tryToLoadTokenFromStorage(),
+                    plantingId,
+                    action,
+                    actionData);
+            } catch (err) {
+                this.setAlertMessage(err, 'error', 'error performing planting action ' + action);
+            }
+        },
         async fetchPlantingsByYear(plantingYear) {
             try {
                 this.plantings = await plantingsApi.fetchPlantingsByYear(storageUtils.tryToLoadTokenFromStorage(), plantingYear);
