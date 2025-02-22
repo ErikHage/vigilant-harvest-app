@@ -17,7 +17,7 @@
             :items="sowTypesList"/>
 
         <v-select
-            v-if="form.sowType === 'Outdoor'"
+            v-if="form.sowType === 'OUTDOOR'"
             v-model="form.plotId"
             :items="plots"
             :item-title="(plot) => plot.friendlyName"
@@ -80,9 +80,9 @@ export default {
   data() {
     return {
       show: false,
-      sowTypesList: ['Indoor', 'Outdoor'],
+      sowTypesList: ['INDOOR', 'OUTDOOR'],
       form: {
-        sowType: 'Indoor',
+        sowType: 'INDOOR',
         sowDate: new Date(),
         numberSown: 0,
         plotId: null,
@@ -99,17 +99,15 @@ export default {
   methods: {
     getDataToSubmit() {
       return {
-        ...this.planting,
         sowType: this.form.sowType,
         sowDate: this.form.sowDate.toISOString(),
         numberSown: this.form.numberSown,
-        currentStatus: this.form.sowType === 'Indoor' ? 'INDOOR SOWN' : 'OUTDOOR SOWN',
-        plotId: this.form.sowType === 'Outdoor' ? this.form.plotId : null,
+        plotId: this.form.sowType === 'OUTDOOR' ? this.form.plotId : null,
       };
     },
 
     handleSubmit() {
-      this.onSubmit(this.getDataToSubmit());
+      this.onSubmit('SOW', this.getDataToSubmit());
       this.show = false;
     },
 
