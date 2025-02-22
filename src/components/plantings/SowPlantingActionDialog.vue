@@ -54,7 +54,11 @@
 
 <script>
 
+import plantingUtils from '../../utils/plantings';
+
 import DatePickerDialogActivator from "@/components/utils/DatePickerDialogActivator.vue";
+
+const { plantingActions } = plantingUtils;
 
 export default {
   name: "SowPlantingActionDialog",
@@ -107,7 +111,7 @@ export default {
     },
 
     handleSubmit() {
-      this.onSubmit('SOW', this.getDataToSubmit());
+      this.onSubmit(plantingActions.sow, this.getDataToSubmit());
       this.show = false;
     },
 
