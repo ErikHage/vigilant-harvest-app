@@ -89,16 +89,14 @@ export default {
   methods: {
     getDataToSubmit() {
       return {
-        ...this.planting,
         transplantDate: this.form.transplantDate.toISOString(),
         numberTransplanted: this.form.numberTransplanted,
         plotId: this.form.plotId,
-        currentStatus: 'OUTDOOR SOWN',
       };
     },
 
     handleSubmit() {
-      this.onSubmit(this.getDataToSubmit());
+      this.onSubmit('TRANSPLANT', this.getDataToSubmit());
       this.show = false;
     },
 
