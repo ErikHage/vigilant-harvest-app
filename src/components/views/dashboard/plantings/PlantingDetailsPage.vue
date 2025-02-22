@@ -129,7 +129,7 @@ export default {
     return {
       unassignedPlot: '---',
       actionMapping: {
-        'INITIALIZED': ['Sow', 'Delete'],
+        'CREATED': ['Sow', 'Delete'],
         'INDOOR SOWN': ['Transplant'],
         'OUTDOOR SOWN': ['Retire'],
         'RETIRED': [],
@@ -273,7 +273,7 @@ export default {
     },
 
     showAction(actionName) {
-      return this.actionMapping[this.planting.currentStatus].includes(actionName);
+      return this.actionMapping[this.planting.currentStatus]?.includes(actionName) ?? false;
     },
 
     async savePlanting(planting) {
