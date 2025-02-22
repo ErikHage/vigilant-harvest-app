@@ -1,7 +1,7 @@
 const plantingStatusMap = {
     'CREATED': 'info',
-    'INDOOR SOWN': 'success',
-    'OUTDOOR SOWN': 'success',
+    'STARTED': 'success',
+    'PLANTED': 'success',
     'RETIRED': 'error',
 };
 
