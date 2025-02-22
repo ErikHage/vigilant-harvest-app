@@ -124,7 +124,7 @@ export default {
     ]),
 
     ...mapActions(usePlantingsStore, [
-      'upsertPlanting',
+      'createPlanting',
       'fetchPlantingsByYear',
     ]),
 
@@ -152,7 +152,7 @@ export default {
     },
 
     async savePlanting(planting) {
-      await this.upsertPlanting({
+      await this.createPlanting({
         ...planting,
         plantingYear: this.plantingYear,
       });

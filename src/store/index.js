@@ -250,9 +250,9 @@ export const usePlantingsStore = defineStore('plantings', {
                 this.setAlertMessage(err, 'error', 'error upserting planting');
             }
         },
-        async createPlanting(planting) {
+        async createPlanting(plantingRequest) {
             try {
-                const planting = await plantingsApi.createPlanting(storageUtils.tryToLoadTokenFromStorage(), planting);
+                const planting = await plantingsApi.createPlanting(storageUtils.tryToLoadTokenFromStorage(), plantingRequest);
                 this.plantingsById[planting.plantingId] = planting;
             } catch (err) {
                 this.setAlertMessage(err, 'error', 'error creating planting');

@@ -83,10 +83,7 @@ export default {
     },
 
     async handleSavePlanting() {
-      await this.onSubmit({
-        ...this.planting,
-        currentStatus: 'INITIALIZED',
-      });
+      await this.onSubmit(this.planting);
       this.resetForm();
     },
 
