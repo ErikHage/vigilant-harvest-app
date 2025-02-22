@@ -71,7 +71,8 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="error" text @click="closeDialog">Cancel</v-btn>
-          <v-btn color="primary" text @click="confirmHarvests" :disabled="this.harvestsEntered.length === 0">Save</v-btn>
+          <v-btn color="primary" text @click="confirmHarvests" :disabled="this.harvestsEntered.length === 0">Save
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -157,27 +158,30 @@ export default {
     }),
 
     hydratedPlots() {
+      // TODO this page doesn't show plantings without a plot yet, maybe another api?
       if (this.initialized) {
-        const mappedPlots = this.plantings.reduce((acc, planting) => {
-          if (!acc[planting.plotId]) {
-            const plot = this.plotsById[planting.plotId];
+        const mappedPlots = this.plantings
+            .filter(planting => planting.plotId) // only with assigned plot for now
+            .reduce((acc, planting) => {
+              if (!acc[planting.plotId]) {
+                const plot = this.plotsById[planting.plotId];
 
-            acc[planting.plotId] = {
-              ...plot,
-              plantings: [],
-            };
-          }
+                acc[planting.plotId] = {
+                  ...plot,
+                  plantings: [],
+                };
+              }
 
-          const plant = this.plantsById[planting.plantId];
+              const plant = this.plantsById[planting.plantId];
 
-          acc[planting.plotId].plantings.push({
-            ...planting,
-            plant,
-            harvestQuantity: this.harvestCounts[planting.plantingId] ?? 0,
-          });
+              acc[planting.plotId].plantings.push({
+                ...planting,
+                plant,
+                harvestQuantity: this.harvestCounts[planting.plantingId] ?? 0,
+              });
 
-          return acc;
-        }, {});
+              return acc;
+            }, {});
 
         return Object.values(mappedPlots).sort(sorting.sortByPlotFriendlyName);
       } else {
