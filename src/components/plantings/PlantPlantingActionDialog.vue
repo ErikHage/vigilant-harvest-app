@@ -1,23 +1,15 @@
 <template>
-  <v-dialog v-model="show" max-width="500px" persistent>
+  <v-dialog v-model="show"  max-width="500px" persistent>
     <template v-slot:activator="{ props: activatorProps }">
-      <v-btn v-bind="activatorProps" text="Sow" color="green" @click="show = true"/>
+      <v-btn v-bind="activatorProps" class="mx-1" text="Plant" color="green" @click="show = true"/>
     </template>
 
     <v-card>
       <v-card-title>
-        <span class="headline">Sow Planting</span>
+        <span class="headline">Plant Planting</span>
       </v-card-title>
       <v-card-text>
         <v-select
-            v-model="form.sowType"
-            label="Sow Location"
-            variant="solo"
-            density="compact"
-            :items="sowTypesList"/>
-
-        <v-select
-            v-if="form.sowType === 'OUTDOOR'"
             v-model="form.plotId"
             :items="plots"
             :item-title="(plot) => plot.friendlyName"
@@ -28,18 +20,18 @@
         ></v-select>
 
         <v-text-field
-            v-model.number="form.numberSown"
+            v-model.number="form.numberTransplanted"
             type="number"
-            label="Number Sown"
+            label="Number Transplanted"
             variant="solo"
             density="compact"/>
 
         <div class="d-flex">
           <date-picker-dialog-activator
               :on-submit="setDateValue"
-              title="Override Sow Date"
-              :date="form.sowDate"/>
-          <p>{{ formattedSowDate }}</p>
+              title="Override Transplanted Date"
+              :date="form.transplantDate"/>
+          <p>{{ formattedTransplantDate }}</p>
         </div>
       </v-card-text>
 
@@ -61,7 +53,7 @@ import DatePickerDialogActivator from "@/components/utils/DatePickerDialogActiva
 const { plantingActions } = plantingUtils;
 
 export default {
-  name: "SowPlantingActionDialog",
+  name: "PlantPlantingActionDialog",
 
   components: {
     DatePickerDialogActivator
@@ -84,34 +76,31 @@ export default {
   data() {
     return {
       show: false,
-      sowTypesList: ['INDOOR', 'OUTDOOR'],
       form: {
-        sowType: 'INDOOR',
-        sowDate: new Date(),
-        numberSown: 0,
+        transplantDate: new Date(),
+        numberTransplanted: 0,
         plotId: null,
       },
     };
   },
 
   computed: {
-    formattedSowDate() {
-      return this.form.sowDate.toISOString().split('T')[0];
+    formattedTransplantDate() {
+      return this.form.transplantDate.toISOString().split('T')[0];
     },
   },
 
   methods: {
     getDataToSubmit() {
       return {
-        sowType: this.form.sowType,
-        sowDate: this.form.sowDate.toISOString(),
-        numberSown: this.form.numberSown,
-        plotId: this.form.sowType === 'OUTDOOR' ? this.form.plotId : null,
+        transplantDate: this.form.transplantDate.toISOString(),
+        numberTransplanted: this.form.numberTransplanted,
+        plotId: this.form.plotId,
       };
     },
 
     handleSubmit() {
-      this.onSubmit(plantingActions.sow, this.getDataToSubmit());
+      this.onSubmit(plantingActions.plant, this.getDataToSubmit());
       this.show = false;
     },
 
@@ -120,12 +109,8 @@ export default {
     },
 
     setDateValue(newDateValue) {
-      this.form.sowDate = newDateValue;
+      this.form.transplantDate = newDateValue;
     },
   },
 }
 </script>
-
-<style scoped>
-
-</style>

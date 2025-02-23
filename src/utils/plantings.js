@@ -1,6 +1,6 @@
 const plantingActions = {
-    sow: 'SOW',
-    transplant: 'TRANSPLANT',
+    start: 'START',
+    plant: 'PLANT',
     retire: 'RETIRE',
     comment: 'COMMENT',
 };

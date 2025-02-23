@@ -26,16 +26,13 @@
               <v-card-text class="text-center">
                 <v-btn class="mx-1" color="primary">Comment</v-btn>
 
-                <sow-planting-action-dialog
-                    v-if="planting && showAction('Sow')"
-                    class="mx-1"
+                <start-planting-action-dialog
+                    v-if="planting && showAction('Start')"
                     :planting="planting"
-                    :plots="plots"
                     :on-submit="performAction"/>
 
-                <transplant-planting-action-dialog
-                    v-if="planting && showAction('Transplant')"
-                    class="mx-1"
+                <plant-planting-action-dialog
+                    v-if="planting && showAction('Plant')"
                     :planting="planting"
                     :plots="plots"
                     :on-submit="performAction"/>
@@ -112,15 +109,15 @@ import plantingUtils from '@/utils/plantings';
 
 import PageTitle from "@/components/layout/PageTitle.vue";
 import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
-import SowPlantingActionDialog from "@/components/plantings/SowPlantingActionDialog.vue";
-import TransplantPlantingActionDialog from "@/components/plantings/TransplantPlantingActionDialog.vue";
+import StartPlantingActionDialog from "@/components/plantings/StartPlantingActionDialog.vue";
+import PlantPlantingActionDialog from "@/components/plantings/PlantPlantingActionDialog.vue";
 
 export default {
   name: "PlantingDetailsPage",
 
   components: {
-    TransplantPlantingActionDialog,
-    SowPlantingActionDialog,
+    PlantPlantingActionDialog,
+    StartPlantingActionDialog,
     FadeOutAlert,
     PageTitle,
   },
@@ -129,9 +126,9 @@ export default {
     return {
       unassignedPlot: '---',
       actionMapping: {
-        'CREATED': ['Sow', 'Delete'],
-        'INDOOR SOWN': ['Transplant'],
-        'OUTDOOR SOWN': ['Retire'],
+        'CREATED': ['Start', 'Plant', 'Delete'],
+        'STARTED': ['Plant'],
+        'PLANTED': ['Retire'],
         'RETIRED': [],
       },
     };

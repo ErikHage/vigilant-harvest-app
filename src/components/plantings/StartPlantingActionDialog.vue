@@ -1,37 +1,27 @@
 <template>
   <v-dialog v-model="show" max-width="500px" persistent>
     <template v-slot:activator="{ props: activatorProps }">
-      <v-btn v-bind="activatorProps" text="Transplant" color="green" @click="show = true"/>
+      <v-btn v-bind="activatorProps" class="mx-1" text="Start" color="green" @click="show = true"/>
     </template>
 
     <v-card>
       <v-card-title>
-        <span class="headline">Transplant Planting</span>
+        <span class="headline">Start Planting</span>
       </v-card-title>
       <v-card-text>
-        <v-select
-            v-model="form.plotId"
-            :items="plots"
-            :item-title="(plot) => plot.friendlyName"
-            :item-value="(plot) => plot.plotId"
-            label="Select Plot"
-            variant="solo"
-            density="compact"
-        ></v-select>
-
         <v-text-field
-            v-model.number="form.numberTransplanted"
+            v-model.number="form.numberSown"
             type="number"
-            label="Number Transplanted"
+            label="Number Sown"
             variant="solo"
             density="compact"/>
 
         <div class="d-flex">
           <date-picker-dialog-activator
               :on-submit="setDateValue"
-              title="Override Transplanted Date"
-              :date="form.transplantDate"/>
-          <p>{{ formattedTransplantDate }}</p>
+              title="Override Sow Date"
+              :date="form.sowDate"/>
+          <p>{{ formattedSowDate }}</p>
         </div>
       </v-card-text>
 
@@ -53,7 +43,7 @@ import DatePickerDialogActivator from "@/components/utils/DatePickerDialogActiva
 const { plantingActions } = plantingUtils;
 
 export default {
-  name: "TransplantPlantingActionDialog",
+  name: "StartPlantingActionDialog",
 
   components: {
     DatePickerDialogActivator
@@ -62,10 +52,6 @@ export default {
   props: {
     planting: {
       type: Object,
-    },
-    plots: {
-      type: Array,
-      required: true,
     },
     onSubmit: {
       type: Function,
@@ -77,30 +63,28 @@ export default {
     return {
       show: false,
       form: {
-        transplantDate: new Date(),
-        numberTransplanted: 0,
-        plotId: null,
+        sowDate: new Date(),
+        numberSown: 0,
       },
     };
   },
 
   computed: {
-    formattedTransplantDate() {
-      return this.form.transplantDate.toISOString().split('T')[0];
+    formattedSowDate() {
+      return this.form.sowDate.toISOString().split('T')[0];
     },
   },
 
   methods: {
     getDataToSubmit() {
       return {
-        transplantDate: this.form.transplantDate.toISOString(),
-        numberTransplanted: this.form.numberTransplanted,
-        plotId: this.form.plotId,
+        sowDate: this.form.sowDate.toISOString(),
+        numberSown: this.form.numberSown,
       };
     },
 
     handleSubmit() {
-      this.onSubmit(plantingActions.transplant, this.getDataToSubmit());
+      this.onSubmit(plantingActions.start, this.getDataToSubmit());
       this.show = false;
     },
 
@@ -109,8 +93,12 @@ export default {
     },
 
     setDateValue(newDateValue) {
-      this.form.transplantDate = newDateValue;
+      this.form.sowDate = newDateValue;
     },
   },
 }
 </script>
+
+<style scoped>
+
+</style>
