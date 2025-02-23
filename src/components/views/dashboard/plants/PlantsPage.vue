@@ -4,7 +4,10 @@
       <v-col cols="12" class="text-center">
         <page-title title="Manage Plants"/>
         <v-spacer></v-spacer>
-        <fade-out-alert :is-visible="alert.isVisible" :alert-type="alert.type" :message="alert.message" />
+        <fade-out-alert
+            :is-visible="alert.isVisible"
+            :alert-type="alert.type"
+            :message="alert.message"/>
       </v-col>
       <v-col cols="2"></v-col>
       <v-col cols="8">
