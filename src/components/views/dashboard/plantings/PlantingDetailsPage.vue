@@ -38,7 +38,12 @@
                     :on-submit="performAction"/>
 
                 <v-btn v-if="showAction('Delete')" class="mx-1" color="error">Delete</v-btn>
-                <v-btn v-if="showAction('Retire')" class="mx-1" color="warning">Retire</v-btn>
+
+                <retire-planting-action-dialog
+                    v-if="planting && showAction('Retire')"
+                    :planting="planting"
+                    :on-submit="performAction"/>
+
               </v-card-text>
             </v-card>
 
@@ -111,11 +116,13 @@ import PageTitle from "@/components/layout/PageTitle.vue";
 import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
 import StartPlantingActionDialog from "@/components/plantings/StartPlantingActionDialog.vue";
 import PlantPlantingActionDialog from "@/components/plantings/PlantPlantingActionDialog.vue";
+import RetirePlantingActionDialog from "@/components/plantings/RetirePlantingActionDialog.vue";
 
 export default {
   name: "PlantingDetailsPage",
 
   components: {
+    RetirePlantingActionDialog,
     PlantPlantingActionDialog,
     StartPlantingActionDialog,
     FadeOutAlert,
