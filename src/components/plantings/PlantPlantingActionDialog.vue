@@ -26,12 +26,12 @@
             variant="solo"
             density="compact"/>
 
-        <div class="d-flex">
+        <div class="d-flex align-center">
           <date-picker-dialog-activator
               :on-submit="setDateValue"
               title="Override Transplanted Date"
               :date="form.transplantDate"/>
-          <p>{{ formattedTransplantDate }}</p>
+          <h3 class="ml-2">{{ formattedTransplantDate }}</h3>
         </div>
       </v-card-text>
 
@@ -86,7 +86,7 @@ export default {
 
   computed: {
     formattedTransplantDate() {
-      return this.form.transplantDate.toISOString().split('T')[0];
+      return this.form.transplantDate.toDateString();
     },
   },
 

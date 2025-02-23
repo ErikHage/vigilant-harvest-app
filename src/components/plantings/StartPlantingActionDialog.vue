@@ -16,12 +16,12 @@
             variant="solo"
             density="compact"/>
 
-        <div class="d-flex">
+        <div class="d-flex align-center">
           <date-picker-dialog-activator
               :on-submit="setDateValue"
               title="Override Sow Date"
               :date="form.sowDate"/>
-          <p>{{ formattedSowDate }}</p>
+          <h3 class="ml-2">{{ formattedSowDate }}</h3>
         </div>
       </v-card-text>
 
@@ -71,7 +71,7 @@ export default {
 
   computed: {
     formattedSowDate() {
-      return this.form.sowDate.toISOString().split('T')[0];
+      return this.form.sowDate.toDateString();
     },
   },
 
