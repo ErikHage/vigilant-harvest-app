@@ -37,7 +37,10 @@
                     :plots="plots"
                     :on-submit="performAction"/>
 
-                <v-btn v-if="showAction('Delete')" class="mx-1" color="error">Delete</v-btn>
+                <delete-planting-action-dialog
+                    v-if="planting && showAction('Delete')"
+                    :planting="planting"
+                    :on-submit="performAction"/>
 
                 <retire-planting-action-dialog
                     v-if="planting && showAction('Retire')"
@@ -117,11 +120,15 @@ import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
 import StartPlantingActionDialog from "@/components/plantings/StartPlantingActionDialog.vue";
 import PlantPlantingActionDialog from "@/components/plantings/PlantPlantingActionDialog.vue";
 import RetirePlantingActionDialog from "@/components/plantings/RetirePlantingActionDialog.vue";
+import DeletePlantingActionDialog from "@/components/plantings/DeletePlantingActionDialog.vue";
+
+const { plantingActions } = plantingUtils;
 
 export default {
   name: "PlantingDetailsPage",
 
   components: {
+    DeletePlantingActionDialog,
     RetirePlantingActionDialog,
     PlantPlantingActionDialog,
     StartPlantingActionDialog,
@@ -282,7 +289,14 @@ export default {
 
     async performAction(action, actionData) {
       await this.performPlantingAction(this.plantingId, action, actionData);
-      await this.refreshData();
+
+      if (action === plantingActions.delete) {
+        this.$router.push({
+          name: 'PlantingsPage',
+        });
+      } else {
+        await this.refreshData();
+      }
     },
   },
 
