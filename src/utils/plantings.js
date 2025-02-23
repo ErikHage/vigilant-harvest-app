@@ -3,6 +3,7 @@ const plantingActions = {
     plant: 'PLANT',
     retire: 'RETIRE',
     comment: 'COMMENT',
+    delete: 'DELETE',
 };
 
 const plantingStatuses = {
