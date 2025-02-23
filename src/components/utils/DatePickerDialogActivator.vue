@@ -16,6 +16,7 @@
               required
               locale="en"
               full-width
+              show-adjacent-months
           ></v-date-picker>
         </v-form>
       </v-card-text>
