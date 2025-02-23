@@ -67,7 +67,7 @@ export default {
   computed: {
     filteredPlants() {
       let filtered = this.plants;
-      if (this.filter !== null) {
+      if (this.filter) {
         filtered = this.plants.filter(plant => {
           const matchString = plant.friendlyName.toUpperCase() + (plant.category?.toUpperCase() ?? "");
           return matchString.includes(this.filter.toUpperCase());
