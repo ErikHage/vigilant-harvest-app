@@ -4,9 +4,6 @@
       <v-col cols="12" class="text-center">
         <page-title title="Manage Plantings"/>
         <v-spacer></v-spacer>
-        <v-btn class="mr-2 mt-3" color="primary" @click="openDialog()">Add</v-btn>
-        <v-btn class="mt-3" color="warning" @click="refreshData">Refresh</v-btn>
-        <v-spacer></v-spacer>
         <fade-out-alert
             v-for="(alert, i) in alerts"
             :key="'alert' + i"
@@ -17,23 +14,40 @@
       </v-col>
       <v-col cols="2"></v-col>
       <v-col cols="8">
-        <plantings-table
-          :plots-map="plotsById"
-          :plants-map="plantsById"
-          :plantings="plantings"
-          :on-view-clicked="navigateToPlantingDetails"
-        />
+        <v-sheet class="pa-4">
+          <div class="d-flex">
+            <v-text-field
+                v-model="searchFilter"
+                label="Search..."
+                class="search-bar"
+                variant="solo"
+                density="compact"
+                clearable
+            />
+
+            <v-btn class="mx-4" color="primary" @click="openDialog()">Add</v-btn>
+            <v-btn color="warning" @click="refreshData">Refresh</v-btn>
+          </div>
+
+          <plantings-table
+              :plots-map="plotsById"
+              :plants-map="plantsById"
+              :plantings="plantings"
+              :filter="searchFilter"
+              :on-view-clicked="navigateToPlantingDetails"
+          />
+        </v-sheet>
       </v-col>
       <v-col cols="2"></v-col>
     </v-row>
 
     <add-planting-dialog
-      :show="dialog"
-      :planting="selectedPlanting"
-      :plants="plants"
-      :plots="plots"
-      :on-submit="savePlanting"
-      :on-cancel="closeDialog"
+        :show="dialog"
+        :planting="selectedPlanting"
+        :plants="plants"
+        :plots="plots"
+        :on-submit="savePlanting"
+        :on-cancel="closeDialog"
     />
 
   </v-container>
@@ -63,6 +77,7 @@ export default {
   data: () => ({
     dialog: false,
     selectedPlanting: null,
+    searchFilter: null,
   }),
 
   computed: {

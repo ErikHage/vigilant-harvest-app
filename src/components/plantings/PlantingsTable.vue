@@ -1,23 +1,35 @@
 <template>
   <v-card>
     <v-card-text>
-      <v-data-table
-          class="elevation-1 align-left"
-          :headers="headers"
-          :items="hydratedPlantings"
-          item-key="plantingId"
-          density="compact"
-      >
-        <template #item.currentStatus="{ item }">
-          <v-chip size="small" :color="getStatusColor(item.currentStatus)">{{ item.currentStatus }}</v-chip>
-        </template>
-        <template #item.actions="{ item }">
-          <v-icon @click="onViewClicked(item)">mdi-magnify</v-icon>
-          <!-- TODO add delete button, with confirm dialog. only admin can see/use it -->
-        </template>
-      </v-data-table>
+      <v-table density="compact" height="50vh">
+        <thead>
+        <tr>
+          <th>Name</th>
+          <th>Plant</th>
+          <th>Plot</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr v-for="planting in hydratedPlantings">
+          <td>{{ planting.name }}</td>
+          <td>{{ planting.plantName }}</td>
+          <td>{{ planting.plotName }}</td>
+          <td>
+            <v-chip size="small" :color="getStatusColor(planting.currentStatus)">{{ planting.currentStatus }}</v-chip>
+          </td>
+          <td>
+            <v-icon @click="onViewClicked(planting)">mdi-magnify</v-icon>
+          </td>
+        </tr>
+        </tbody>
+      </v-table>
     </v-card-text>
   </v-card>
+  <div class="mt-4">
+    <span> {{ hydratedPlantings.length }} of {{ plantings.length }} plantings</span>
+  </div>
 </template>
 
 <script>
@@ -27,35 +39,54 @@ export default {
   name: 'PlantingsTable',
 
   props: {
-    plotsMap: Object,
-    plantsMap: Object,
-    plantings: Array,
-    onViewClicked: Function,
-    onEditClicked: Function,
+    plotsMap: {
+      type : Object,
+    },
+    plantsMap: {
+      type: Object,
+    },
+    plantings: {
+      type: Array,
+    },
+    filter: {
+      type: String,
+    },
+    onViewClicked: {
+      type: Function,
+    },
+    onEditClicked: {
+      type: Function,
+    },
   },
 
-  data: () => ({
-    headers: [
-      { title: 'Name', key: 'name', align: 'start', },
-      { title: 'Plant', key: 'plantName', align: 'start', },
-      { title: 'Plot', key: 'plotName', align: 'start', },
-      { title: 'Status', key: 'currentStatus', align: 'start', },
-      { title: 'Actions', key: 'actions', sortable: false },
-    ],
-  }),
+  data() {
+    return {};
+  },
 
   computed: {
     hydratedPlantings() {
       if (this.plantings.length > 0 && Object.keys(this.plotsMap).length > 0) {
-        return this.plantings.map(planting => {
-          const plant = this.plantsMap[planting.plantId];
-          const plot = this.plotsMap[planting.plotId];
-          return {
-            ...planting,
-            plantName: plant.friendlyName,
-            plotName: plot?.friendlyName,
-          };
-        });
+        let filteredPlantings = this.plantings
+            .map(planting => {
+              const plant = this.plantsMap[planting.plantId];
+              const plot = this.plotsMap[planting.plotId];
+              return {
+                ...planting,
+                plantName: plant.friendlyName,
+                plotName: plot?.friendlyName,
+              };
+            });
+
+        if (this.filter) {
+          filteredPlantings = filteredPlantings.filter(planting => {
+            const matchString = planting.name.toUpperCase()
+                + planting.plantName.toUpperCase()
+                + (planting.plotName?.toUpperCase() ?? "");
+            return matchString.includes(this.filter.toUpperCase());
+          });
+        }
+
+        return filteredPlantings;
       }
       return [];
     },
