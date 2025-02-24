@@ -24,7 +24,9 @@
 
             <v-card>
               <v-card-text class="text-center">
-                <v-btn class="mx-1" color="primary">Comment</v-btn>
+                <comment-planting-action-dialog
+                    :planting="planting"
+                    :on-submit="performAction"/>
 
                 <start-planting-action-dialog
                     v-if="planting && showAction('Start')"
@@ -121,6 +123,7 @@ import StartPlantingActionDialog from "@/components/plantings/StartPlantingActio
 import PlantPlantingActionDialog from "@/components/plantings/PlantPlantingActionDialog.vue";
 import RetirePlantingActionDialog from "@/components/plantings/RetirePlantingActionDialog.vue";
 import DeletePlantingActionDialog from "@/components/plantings/DeletePlantingActionDialog.vue";
+import CommentPlantingActionDialog from "@/components/plantings/CommentPlantingActionDialog.vue";
 
 const { plantingActions } = plantingUtils;
 
@@ -128,6 +131,7 @@ export default {
   name: "PlantingDetailsPage",
 
   components: {
+    CommentPlantingActionDialog,
     DeletePlantingActionDialog,
     RetirePlantingActionDialog,
     PlantPlantingActionDialog,
