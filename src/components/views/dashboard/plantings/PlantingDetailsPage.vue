@@ -92,13 +92,19 @@
             </v-card>
 
             <v-card class="mt-4">
-              <v-card-title>Notes</v-card-title>
+              <v-card-title>Status History</v-card-title>
               <v-card-text>
                 <v-card
-                    v-for="note in notes"
+                    v-for="historyItem in sortedHistory"
                     class="mt-2">
+                  <v-card-title>
+                    <div class="d-flex align-center">
+                      <v-chip :color="getColorForStatus(historyItem.plantingStatus)">{{ historyItem.plantingStatus }}</v-chip>
+                      <p class="ml-4">{{ new Date(historyItem.dateCreated).toLocaleDateString() }}</p>
+                    </div>
+                  </v-card-title>
                   <v-card-text>
-                    {{ note }}
+                    <p v-if="historyItem.comment" class="ml-12 multiline">{{ historyItem.comment }}</p>
                   </v-card-text>
                 </v-card>
               </v-card-text>
@@ -116,6 +122,7 @@
 import { mapActions, mapState } from "pinia";
 import { usePlantingsStore, usePlantsStore, usePlotsStore } from "@/store";
 import plantingUtils from '@/utils/plantings';
+import sorting from '@/utils/sorting';
 
 import PageTitle from "@/components/layout/PageTitle.vue";
 import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
@@ -238,6 +245,10 @@ export default {
       return plantingUtils.mapPlantingStatusToColor(this.planting?.currentStatus);
     },
 
+    sortedHistory() {
+      return this.planting.statusHistory.sort(sorting.sortPlantingHistoryByDateCreated);
+    },
+
     alerts() {
       return [
         {
@@ -272,6 +283,10 @@ export default {
     async refreshData() {
       await this.fetchPlots();
       await this.fetchPlantingById(this.plantingId);
+    },
+
+    getColorForStatus(status) {
+      return plantingUtils.mapPlantingStatusToColor(status);
     },
 
     navigateToPlotDetails(plotId) {
@@ -311,5 +326,7 @@ export default {
 </script>
 
 <style scoped>
-
+.multiline {
+  white-space: pre-wrap;
+}
 </style>
