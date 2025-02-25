@@ -16,6 +16,7 @@
             variant="solo"
             density="compact"/>
 
+        <p>Date sown</p>
         <div class="d-flex align-center">
           <date-picker-dialog-activator
               :on-submit="setDateValue"
@@ -23,6 +24,12 @@
               :date="form.sowDate"/>
           <h3 class="ml-2">{{ formattedSowDate }}</h3>
         </div>
+
+        <v-textarea
+            v-model="form.comment"
+            class="mt-4"
+            label="Comment (optional)"
+            rows="4"></v-textarea>
       </v-card-text>
 
       <v-card-actions>
@@ -65,6 +72,7 @@ export default {
       form: {
         sowDate: new Date(),
         numberSown: 0,
+        comment: null,
       },
     };
   },
@@ -80,6 +88,7 @@ export default {
       return {
         sowDate: this.form.sowDate.toISOString(),
         numberSown: this.form.numberSown,
+        comment: this.form.comment,
       };
     },
 

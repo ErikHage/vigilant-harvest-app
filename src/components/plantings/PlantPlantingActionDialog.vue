@@ -26,6 +26,7 @@
             variant="solo"
             density="compact"/>
 
+        <p>Date planted</p>
         <div class="d-flex align-center">
           <date-picker-dialog-activator
               :on-submit="setDateValue"
@@ -33,6 +34,12 @@
               :date="form.transplantDate"/>
           <h3 class="ml-2">{{ formattedTransplantDate }}</h3>
         </div>
+
+        <v-textarea
+            v-model="form.comment"
+            class="mt-4"
+            label="Comment (optional)"
+            rows="4"></v-textarea>
       </v-card-text>
 
       <v-card-actions>
@@ -80,6 +87,7 @@ export default {
         transplantDate: new Date(),
         numberTransplanted: 0,
         plotId: null,
+        comment: null,
       },
     };
   },
@@ -96,6 +104,7 @@ export default {
         transplantDate: this.form.transplantDate.toISOString(),
         numberTransplanted: this.form.numberTransplanted,
         plotId: this.form.plotId,
+        comment: this.form.comment,
       };
     },
 

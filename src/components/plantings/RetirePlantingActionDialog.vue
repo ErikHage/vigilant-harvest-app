@@ -10,6 +10,12 @@
       </v-card-title>
       <v-card-text>
         <h3>Do you really want to retire {{ planting.name }}?</h3>
+
+        <v-textarea
+            v-model="form.comment"
+            class="mt-4"
+            label="Comment (optional)"
+            rows="4"></v-textarea>
       </v-card-text>
 
       <v-card-actions>
@@ -43,12 +49,17 @@ export default {
   data() {
     return {
       show: false,
+      form: {
+        comment: null,
+      }
     };
   },
 
   methods: {
     handleSubmit() {
-      this.onSubmit(plantingActions.retire, {});
+      this.onSubmit(plantingActions.retire, {
+        comment: this.form.comment,
+      });
       this.show = false;
     },
 
