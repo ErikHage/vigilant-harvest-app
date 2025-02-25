@@ -52,68 +52,31 @@
               </v-card-text>
             </v-card>
 
-            <v-card class="mt-4">
-              <v-card-text>
-                <v-text-field v-model="plantingId" label="Id" variant="solo" density="compact" disabled/>
 
-                <div class="d-flex">
-                  <v-text-field v-model="createdAt" label="Created At" variant="solo" density="compact" disabled/>
-                  <v-text-field v-model="lastModifiedAt" label="Last Updated" variant="solo" density="compact" disabled/>
-                </div>
-
-                <div class="d-flex">
-                  <v-text-field v-model="planting.seedSource" label="source" variant="solo" density="compact" disabled/>
-                  <v-text-field v-model="planting.lotNumber" label="Lot#" variant="solo" density="compact" disabled/>
-                </div>
-
-                <div class="d-flex">
-                  <v-btn class="px-1 mt-2" color="black" size="small" @click="navigateToPlantDetails(planting.plantId)">
-                    <v-icon>mdi-sprout-outline</v-icon>
-                  </v-btn>
-                  <v-text-field v-model="plant.friendlyName" class="ml-1" label="Plant" variant="solo" density="compact" disabled/>
-                  <v-btn class="px-1 mt-2" color="black" size="small" @click="navigateToPlotDetails(planting.plotId)">
-                    <v-icon>mdi-vector-square</v-icon>
-                  </v-btn>
-                  <v-text-field v-model="plotName" class="ml-1" label="Plot" variant="solo" density="compact" disabled/>
-                </div>
-
-                <div class="d-flex">
-                  <v-text-field v-model="sowDate" label="Sow Date" variant="solo" density="compact" disabled/>
-                  <v-text-field v-model="sowType" label="Sow Type" variant="solo" density="compact" disabled/>
-                </div>
-
-                <div class="d-flex">
-                  <v-text-field v-model="leadTime" label="Transplant Lead Time" variant="solo" density="compact" disabled/>
-                  <v-text-field v-model="transplantDate" label="Transplant Date" variant="solo" density="compact" disabled/>
-                </div>
-
-                <v-text-field v-model="numberOfPlants" label="Number of Plants" variant="solo" density="compact" disabled/>
-              </v-card-text>
-            </v-card>
 
             <v-card class="mt-4">
-              <v-card-title>History</v-card-title>
+              <v-tabs
+                  v-model="tab"
+                  align-tabs="start"
+                  fixed-tabs
+              >
+                <v-tab value="details">Details</v-tab>
+                <v-tab value="history">History</v-tab>
+              </v-tabs>
+
               <v-card-text>
-                <v-card
-                    v-for="historyItem in sortedHistory"
-                    class="mt-1">
-                  <v-card-text>
-                    <div class="d-flex align-center">
-                      <p class="mr-4">
-                        {{ new Date(historyItem.dateCreated).toLocaleDateString() }}
-                      </p>
-                      <v-chip
-                          v-if="showStatusChip(historyItem)"
-                          class="mr-4"
-                          :color="getColorForStatus(historyItem.plantingStatus)">
-                        {{ historyItem.plantingStatus }}
-                      </v-chip>
-                      <p v-if="historyItem.comment" class="multiline">
-                        {{ historyItem.comment }}
-                      </p>
-                    </div>
-                  </v-card-text>
-                </v-card>
+                <v-tabs-window v-model="tab">
+                  <v-tabs-window-item value="details">
+                    <planting-details-tab
+                        :planting="planting"
+                        :plant="plant"
+                        :plot="plot"
+                    />
+                  </v-tabs-window-item>
+                  <v-tabs-window-item value="history">
+                    <planting-history-tab :history="sortedHistory"/>
+                  </v-tabs-window-item>
+                </v-tabs-window>
               </v-card-text>
             </v-card>
 
@@ -138,6 +101,9 @@ import PlantPlantingActionDialog from "@/components/plantings/PlantPlantingActio
 import RetirePlantingActionDialog from "@/components/plantings/RetirePlantingActionDialog.vue";
 import DeletePlantingActionDialog from "@/components/plantings/DeletePlantingActionDialog.vue";
 import CommentPlantingActionDialog from "@/components/plantings/CommentPlantingActionDialog.vue";
+import PlantDetailsTab from "@/components/plants/PlantDetailsTab.vue";
+import PlantingDetailsTab from "@/components/plantings/PlantingDetailsTab.vue";
+import PlantingHistoryTab from "@/components/plantings/PlantingHistoryTab.vue";
 
 const { plantingActions } = plantingUtils;
 
@@ -145,6 +111,9 @@ export default {
   name: "PlantingDetailsPage",
 
   components: {
+    PlantingHistoryTab,
+    PlantingDetailsTab,
+    PlantDetailsTab,
     CommentPlantingActionDialog,
     DeletePlantingActionDialog,
     RetirePlantingActionDialog,
@@ -156,7 +125,7 @@ export default {
 
   data() {
     return {
-      unassignedPlot: '---',
+      tab: null,
       actionMapping: {
         'CREATED': ['Start', 'Plant', 'Delete'],
         'STARTED': ['Plant'],
@@ -201,51 +170,12 @@ export default {
       return this.planting?.name ?? 'Planting Details';
     },
 
-    createdAt() {
-      return this.planting ? new Date(this.planting.dateCreated).toLocaleString() : '--';
-    },
-
-    lastModifiedAt() {
-      return this.planting ? new Date(this.planting.dateModified).toLocaleString() : '--';
-    },
-
-    notes() {
-      return this.planting ? this.planting.notes : [];
-    },
-
-    plotName() {
-      const plot = this.plotsById[this.planting.plotId];
-      return plot ? plot.friendlyName : '---';
+    plot() {
+      return this.plotsById[this.planting.plotId];
     },
 
     plant() {
       return this.plantsById[this.planting.plantId];
-    },
-
-    sowDate() {
-      return this.planting.sowDate
-          ? new Date(this.planting.sowDate).toLocaleDateString()
-          : '---';
-    },
-
-    sowType() {
-      return this.planting.sowType || '---';
-    },
-
-    transplantDate() {
-      return this.planting.transplantDate
-          ? new Date(this.planting.transplantDate).toLocaleDateString()
-          : '---';
-    },
-
-    numberOfPlants() {
-      return this.planting.numberTransplanted || this.planting.numberSown || '---';
-    },
-
-    leadTime() {
-      return this.planting.leadTimeWeeks
-          ? this.planting.leadTimeWeeks + ' weeks'
-          : '---';
     },
 
     statusColor() {
@@ -294,19 +224,6 @@ export default {
 
     getColorForStatus(status) {
       return plantingUtils.mapPlantingStatusToColor(status);
-    },
-
-    navigateToPlotDetails(plotId) {
-      console.log('plot clicked, do something in the future');
-    },
-
-    navigateToPlantDetails(plantId) {
-      this.$router.push({
-        name: 'PlantDetailsPage',
-        params: {
-          plantId,
-        },
-      });
     },
 
     showAction(actionName) {
