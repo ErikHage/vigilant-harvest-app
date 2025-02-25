@@ -52,30 +52,30 @@
               </v-card-text>
             </v-card>
 
-
-
             <v-card class="mt-4">
               <v-tabs
                   v-model="tab"
                   align-tabs="start"
-                  fixed-tabs
-              >
+                  fixed-tabs>
                 <v-tab value="details">Details</v-tab>
                 <v-tab value="history">History</v-tab>
               </v-tabs>
 
               <v-card-text>
                 <v-tabs-window v-model="tab">
+
                   <v-tabs-window-item value="details">
                     <planting-details-tab
                         :planting="planting"
                         :plant="plant"
-                        :plot="plot"
-                    />
+                        :plot="plot"/>
                   </v-tabs-window-item>
+
                   <v-tabs-window-item value="history">
-                    <planting-history-tab :history="sortedHistory"/>
+                    <planting-history-tab
+                        :history="sortedHistory"/>
                   </v-tabs-window-item>
+
                 </v-tabs-window>
               </v-card-text>
             </v-card>
@@ -222,16 +222,8 @@ export default {
       await this.fetchPlantingById(this.plantingId);
     },
 
-    getColorForStatus(status) {
-      return plantingUtils.mapPlantingStatusToColor(status);
-    },
-
     showAction(actionName) {
       return this.actionMapping[this.planting.currentStatus]?.includes(actionName) ?? false;
-    },
-
-    showStatusChip(historyItem) {
-      return historyItem.plantingStatus !== plantingActions.comment;
     },
 
     async performAction(action, actionData) {
@@ -252,9 +244,3 @@ export default {
   },
 }
 </script>
-
-<style scoped>
-.multiline {
-  white-space: pre-wrap;
-}
-</style>
