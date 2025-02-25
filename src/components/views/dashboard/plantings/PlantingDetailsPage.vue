@@ -92,19 +92,26 @@
             </v-card>
 
             <v-card class="mt-4">
-              <v-card-title>Status History</v-card-title>
+              <v-card-title>History</v-card-title>
               <v-card-text>
                 <v-card
                     v-for="historyItem in sortedHistory"
-                    class="mt-2">
-                  <v-card-title>
-                    <div class="d-flex align-center">
-                      <v-chip :color="getColorForStatus(historyItem.plantingStatus)">{{ historyItem.plantingStatus }}</v-chip>
-                      <p class="ml-4">{{ new Date(historyItem.dateCreated).toLocaleDateString() }}</p>
-                    </div>
-                  </v-card-title>
+                    class="mt-1">
                   <v-card-text>
-                    <p v-if="historyItem.comment" class="ml-12 multiline">{{ historyItem.comment }}</p>
+                    <div class="d-flex align-center">
+                      <p class="mr-4">
+                        {{ new Date(historyItem.dateCreated).toLocaleDateString() }}
+                      </p>
+                      <v-chip
+                          v-if="showStatusChip(historyItem)"
+                          class="mr-4"
+                          :color="getColorForStatus(historyItem.plantingStatus)">
+                        {{ historyItem.plantingStatus }}
+                      </v-chip>
+                      <p v-if="historyItem.comment" class="multiline">
+                        {{ historyItem.comment }}
+                      </p>
+                    </div>
                   </v-card-text>
                 </v-card>
               </v-card-text>
@@ -304,6 +311,10 @@ export default {
 
     showAction(actionName) {
       return this.actionMapping[this.planting.currentStatus]?.includes(actionName) ?? false;
+    },
+
+    showStatusChip(historyItem) {
+      return historyItem.plantingStatus !== plantingActions.comment;
     },
 
     async performAction(action, actionData) {
