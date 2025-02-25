@@ -15,7 +15,7 @@ const plantingStatuses = {
 
 const plantingStatusColorMap = {
     [plantingStatuses.created]: 'info',
-    [plantingStatuses.started]: 'success',
+    [plantingStatuses.started]: 'secondary',
     [plantingStatuses.planted]: 'success',
     [plantingStatuses.retired]: 'error',
 };
