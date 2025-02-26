@@ -11,12 +11,13 @@
       <v-card-text>
         <v-select
             v-model="form.plotId"
-            :items="plots"
+            :items="sortedPlots"
             :item-title="(plot) => plot.friendlyName"
             :item-value="(plot) => plot.plotId"
             label="Select Plot"
             variant="solo"
             density="compact"
+            clearable
         ></v-select>
 
         <v-text-field
@@ -54,6 +55,7 @@
 <script>
 
 import plantingUtils from '../../utils/plantings';
+import sorting from "@/utils/sorting";
 
 import DatePickerDialogActivator from "@/components/utils/DatePickerDialogActivator.vue";
 
@@ -96,6 +98,10 @@ export default {
     formattedTransplantDate() {
       return this.form.transplantDate.toDateString();
     },
+
+    sortedPlots() {
+      return this.plots.sort(sorting.sortByPlotFriendlyName);
+    }
   },
 
   methods: {
