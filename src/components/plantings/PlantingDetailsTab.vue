@@ -58,13 +58,13 @@ export default {
 
     sowDate() {
       return this.planting.sowDate
-          ? new Date(this.planting.sowDate).toLocaleDateString()
+          ? this.planting.sowDate
           : '---';
     },
 
     transplantDate() {
       return this.planting.transplantDate
-          ? new Date(this.planting.transplantDate).toLocaleDateString()
+          ? this.planting.transplantDate
           : '---';
     },
 
