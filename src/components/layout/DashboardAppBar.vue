@@ -1,5 +1,6 @@
 <template>
   <v-app-bar app>
+    <v-btn v-if="showYearSpecificViews" :to="planningPagePath">Planning</v-btn>
     <v-btn v-if="showYearSpecificViews" :to="gardenPagePath">Garden</v-btn>
     <v-btn :to="plantsPagePath">Plants</v-btn>
     <v-btn :to="plotsPagePath">Plots</v-btn>
@@ -19,6 +20,7 @@ export default {
 
   data: () => ({
     gardenPagePath: views.dashboard.path + "/" + views.dashboard.children.garden.path,
+    planningPagePath: views.dashboard.path + "/" + views.dashboard.children.planning.path,
     plantsPagePath: views.dashboard.path + "/" + views.dashboard.children.plants.path,
     plotsPagePath: views.dashboard.path + "/" + views.dashboard.children.plots.path,
     plantingsPagePath: views.dashboard.path + "/" + views.dashboard.children.plantings.path,
