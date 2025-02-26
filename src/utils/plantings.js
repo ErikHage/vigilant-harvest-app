@@ -27,5 +27,6 @@ function mapPlantingStatusToColor(status) {
 export default {
     plantingActions,
     plantingStatuses,
+    plantingStatusesList: Object.values(plantingStatuses),
     mapPlantingStatusToColor,
 };

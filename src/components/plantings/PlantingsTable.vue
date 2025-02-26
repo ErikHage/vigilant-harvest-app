@@ -51,6 +51,9 @@ export default {
     filter: {
       type: String,
     },
+    statusFilter: {
+      type: String,
+    },
     onViewClicked: {
       type: Function,
     },
@@ -84,6 +87,10 @@ export default {
                 + (planting.plotName?.toUpperCase() ?? "");
             return matchString.includes(this.filter.toUpperCase());
           });
+        }
+
+        if (this.statusFilter) {
+          filteredPlantings = filteredPlantings.filter(planting => planting.currentStatus === this.statusFilter);
         }
 
         return filteredPlantings;

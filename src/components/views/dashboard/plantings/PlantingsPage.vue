@@ -25,6 +25,16 @@
                 clearable
             />
 
+            <v-select
+                v-model="statusFilter"
+                class="ml-2"
+                :items="plantingStatuses"
+                label="Status Filter"
+                variant="solo"
+                density="compact"
+                clearable
+            ></v-select>
+
             <v-btn class="mx-4" color="primary" @click="openDialog()">Add</v-btn>
             <v-btn color="warning" @click="refreshData">Refresh</v-btn>
           </div>
@@ -34,6 +44,7 @@
               :plants-map="plantsById"
               :plantings="plantings"
               :filter="searchFilter"
+              :statusFilter="statusFilter"
               :on-view-clicked="navigateToPlantingDetails"
           />
         </v-sheet>
@@ -62,6 +73,7 @@ import PageTitle from "@/components/layout/PageTitle.vue";
 import PlantingsTable from "@/components/plantings/PlantingsTable.vue";
 import AddPlantingDialog from "@/components/plantings/AddPlantingDialog.vue";
 import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
+import plantingUtils from '@/utils/plantings';
 
 export default {
   name: 'PlantingsPage',
@@ -78,6 +90,8 @@ export default {
     dialog: false,
     selectedPlanting: null,
     searchFilter: null,
+    statusFilter: null,
+    plantingStatuses: plantingUtils.plantingStatusesList,
   }),
 
   computed: {
