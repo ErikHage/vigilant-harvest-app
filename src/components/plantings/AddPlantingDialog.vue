@@ -10,14 +10,15 @@
               v-model="planting.name"
               label="Name"
               required></v-text-field>
-          <v-select
+          <v-autocomplete
               v-model="planting.plantId"
               :items="sortedPlants"
               :item-title="(plant) => plant.friendlyName"
               :item-value="(plant) => plant.plantId"
               label="Select Plant"
               variant="solo"
-          ></v-select>
+              clearable
+          ></v-autocomplete>
           <v-text-field
               v-model.number="planting.leadTimeWeeks"
               type="number"
