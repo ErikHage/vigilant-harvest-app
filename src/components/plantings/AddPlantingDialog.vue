@@ -12,7 +12,7 @@
               required></v-text-field>
           <v-select
               v-model="planting.plantId"
-              :items="plants"
+              :items="sortedPlants"
               :item-title="(plant) => plant.friendlyName"
               :item-value="(plant) => plant.plantId"
               label="Select Plant"
@@ -43,6 +43,8 @@
 </template>
 
 <script>
+import sorting from "@/utils/sorting";
+
 export default {
   name: "AddPlantingDialog",
 
@@ -69,6 +71,10 @@ export default {
     showDialog() {
       return this.show;
     },
+
+    sortedPlants() {
+      return this.plants.sort(sorting.sortByPlantFriendlyName);
+    }
   },
 
   methods: {

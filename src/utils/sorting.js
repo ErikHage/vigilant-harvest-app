@@ -7,6 +7,15 @@ function sortByPlotFriendlyName(a, b) {
     return 0;
 }
 
+function sortByPlantFriendlyName(a, b) {
+    const nameA = a.friendlyName.toLowerCase();
+    const nameB = b.friendlyName.toLowerCase();
+
+    if (nameA < nameB) return -1;
+    if (nameA > nameB) return 1;
+    return 0;
+}
+
 function sortPlantingHistoryByDateCreated(a, b) {
     const createdA = new Date(a.dateCreated);
     const createdB = new Date(b.dateCreated);
@@ -18,5 +27,6 @@ function sortPlantingHistoryByDateCreated(a, b) {
 
 export default {
     sortByPlotFriendlyName,
+    sortByPlantFriendlyName,
     sortPlantingHistoryByDateCreated,
 }
