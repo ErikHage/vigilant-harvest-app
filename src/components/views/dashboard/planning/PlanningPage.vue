@@ -29,11 +29,16 @@
             <v-tabs-window v-model="tab">
 
               <v-tabs-window-item value="created">
-                <planning-created-tab :plantings="createdPlantings" :plants-map="plantsById"/>
+                <planning-created-tab
+                    :plantings="createdPlantings"
+                    :plants-map="plantsById"
+                    :planting-year-config="plantingYearConfig"/>
               </v-tabs-window-item>
 
               <v-tabs-window-item value="started">
-                <planning-started-tab :plantings="startedPlantings" :plants-map="plantsById"/>
+                <planning-started-tab
+                    :plantings="startedPlantings"
+                    :plants-map="plantsById"/>
               </v-tabs-window-item>
 
             </v-tabs-window>
@@ -74,7 +79,11 @@ export default {
   },
 
   computed: {
-    // TODO get the last frost date from the planting years config and pass to created tab to calculate target start date
+    ...mapState(useCommonStore, {
+      plantingYearsByYear: 'plantingYearsByYear',
+      plantingYear: 'plantingYear',
+    }),
+
     ...mapState(usePlantsStore, {
       plantsById: 'plantsById',
       plantsAlertType: 'alertType',
@@ -95,6 +104,10 @@ export default {
 
     startedPlantings() {
       return this.plantings.filter(planting => planting.currentStatus === plantingStatuses.started);
+    },
+
+    plantingYearConfig() {
+      return this.plantingYearsByYear[this.plantingYear];
     },
 
     alerts() {
