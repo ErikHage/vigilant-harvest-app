@@ -46,14 +46,12 @@
 </template>
 
 <script>
-import { mapState } from "pinia";
-import { usePlantingsStore, usePlantsStore } from "@/store";
+import { mapActions, mapState } from "pinia";
+import { useCommonStore, usePlantingsStore, usePlantsStore } from "@/store";
 import plantingUtils from '@/utils/plantings';
 
 import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
 import PageTitle from "@/components/layout/PageTitle.vue";
-import PlantingDetailsTab from "@/components/plantings/PlantingDetailsTab.vue";
-import PlantingHistoryTab from "@/components/plantings/PlantingHistoryTab.vue";
 import PlanningCreatedTab from "@/components/planning/PlanningCreatedTab.vue";
 import PlanningStartedTab from "@/components/planning/PlanningStartedTab.vue";
 
@@ -65,7 +63,6 @@ export default {
   components: {
     PlanningStartedTab,
     PlanningCreatedTab,
-    PlantingHistoryTab, PlantingDetailsTab,
     PageTitle,
     FadeOutAlert,
   },
@@ -77,6 +74,7 @@ export default {
   },
 
   computed: {
+    // TODO get the last frost date from the planting years config and pass to created tab to calculate target start date
     ...mapState(usePlantsStore, {
       plantsById: 'plantsById',
       plantsAlertType: 'alertType',
@@ -114,6 +112,21 @@ export default {
       ];
     },
   },
+
+  methods: {
+    ...mapActions(usePlantsStore, [
+      'fetchPlants',
+    ]),
+
+    ...mapActions(usePlantingsStore, [
+      'fetchPlantingsByYear',
+    ]),
+  },
+
+  mounted() {
+    this.fetchPlants();
+    this.fetchPlantingsByYear();
+  }
 }
 </script>
 
