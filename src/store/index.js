@@ -20,8 +20,12 @@ export const useCommonStore = defineStore('common', {
     actions: {
         async fetchPlantingYears() {
             try {
-                this.plantingYears = await plantingYearsApi.fetchPlantingYears(storageUtils.tryToLoadTokenFromStorage());
-                this.availableYears = this.plantingYears.map((plantingYear) => plantingYear.plantingYear);
+                const result = await plantingYearsApi.fetchPlantingYears(storageUtils.tryToLoadTokenFromStorage());
+                this.plantingYearsByYear = result.reduce((acc, py) => {
+                    acc[py.plantingYear] = py;
+                    return acc;
+                }, {});
+                this.availableYears = Object.keys(this.plantingYearsByYear);
             } catch (err) {
                 this.setAlertMessage(null, 'error', 'error fetching planting years');
             }
@@ -48,7 +52,7 @@ export const useCommonStore = defineStore('common', {
     },
     state: () => {
         return {
-            plantingYears: [],
+            plantingYearsByYear: {},
             availableYears: [],
             plantingYear: storageUtils.getLocalStorageEntry(localStorageKeys.plantingYear) ?? new Date().getFullYear(),
             alertVisible: false,
