@@ -7,6 +7,7 @@
           class="ma-1"
           elevation="3"
           density="compact"
+          @click="onClickCard(planting)"
       >
         <v-card-title>
           <div class="d-flex justify-space-between">
@@ -102,6 +103,15 @@ export default {
       const progress = this.getPlantingProgress(planting);
 
       return progressColorMap[Math.floor(progress / 10)];
+    },
+
+    onClickCard(planting) {
+      this.$router.push({
+        name: 'PlantingDetailsPage',
+        params: {
+          plantingId: planting.plantingId,
+        },
+      });
     }
   },
 }
