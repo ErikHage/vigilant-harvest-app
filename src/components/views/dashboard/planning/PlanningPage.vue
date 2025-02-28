@@ -59,6 +59,7 @@ import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
 import PageTitle from "@/components/layout/PageTitle.vue";
 import PlanningCreatedTab from "@/components/planning/PlanningCreatedTab.vue";
 import PlanningStartedTab from "@/components/planning/PlanningStartedTab.vue";
+import sorting from "@/utils/sorting";
 
 const { plantingStatuses } = plantingUtils;
 
@@ -99,11 +100,13 @@ export default {
     }),
 
     createdPlantings() {
-      return this.plantings.filter(planting => planting.currentStatus === plantingStatuses.created);
+      return this.plantings
+          .filter(planting => planting.currentStatus === plantingStatuses.created);
     },
 
     startedPlantings() {
-      return this.plantings.filter(planting => planting.currentStatus === plantingStatuses.started);
+      return this.plantings
+          .filter(planting => planting.currentStatus === plantingStatuses.started);
     },
 
     plantingYearConfig() {
