@@ -10,7 +10,10 @@
       >
         <v-card-title>{{ planting.name }} [{{ getPlantName(planting.plantId) }}]</v-card-title>
         <v-card-text>
-          Start: {{ getStartDate(planting).format('dddd, MMM D') }}
+          <div class="d-flex justify-space-between">
+            <p>Start: {{ getStartDate(planting).format('dddd, MMM D') }}</p>
+            <p>{{ getDaysUntilStart(planting) }} days to go!</p>
+          </div>
           <v-progress-linear
               :model-value="getPlantingProgress(planting)"
               :height="10"
