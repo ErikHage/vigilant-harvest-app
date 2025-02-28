@@ -8,7 +8,12 @@
           elevation="3"
           density="compact"
       >
-        <v-card-title>{{ planting.name }} [{{ getPlantName(planting.plantId) }}]</v-card-title>
+        <v-card-title>
+          <div class="d-flex justify-space-between">
+            <p>{{ planting.name }}</p>
+            <p>{{ getPlantName(planting.plantId) }}</p>
+          </div>
+        </v-card-title>
         <v-card-text>
           <div class="d-flex justify-space-between">
             <p>Start: {{ getStartDate(planting).format('dddd, MMM D') }}</p>
