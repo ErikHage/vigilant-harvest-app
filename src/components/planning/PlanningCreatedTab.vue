@@ -1,7 +1,7 @@
 <template>
   <v-row>
     <v-col
-        v-for="planting in plantings"
+        v-for="planting in sortedPlantings"
         cols="6">
       <v-card
           class="ma-1"
@@ -46,6 +46,17 @@ export default {
   },
 
   computed: {
+    sortedPlantings() {
+      return this.plantings.sort((a, b) => {
+        const daysA = this.getDaysUntilStart(a);
+        const daysB = this.getDaysUntilStart(b);
+
+        if (daysA < daysB) return -1;
+        if (daysA > daysB) return 1;
+        return 0;
+      });
+    },
+
     plantingDate() {
       return dayjs(this.plantingYearConfig.targetPlantingDate);
     },
