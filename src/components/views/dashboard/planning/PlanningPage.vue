@@ -21,8 +21,8 @@
               v-model="tab"
               align-tabs="start"
               fixed-tabs>
-            <v-tab value="created">Created</v-tab>
-            <v-tab value="started">Started</v-tab>
+            <v-tab value="created">Starting Schedule</v-tab>
+            <v-tab value="started">Seedlings</v-tab>
           </v-tabs>
 
           <v-card-text>
