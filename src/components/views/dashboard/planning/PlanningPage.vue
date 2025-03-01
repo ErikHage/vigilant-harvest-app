@@ -38,7 +38,8 @@
               <v-tabs-window-item value="started">
                 <planning-started-tab
                     :plantings="startedPlantings"
-                    :plants-map="plantsById"/>
+                    :plants-map="plantsById"
+                    :planting-year-config="plantingYearConfig"/>
               </v-tabs-window-item>
 
             </v-tabs-window>
