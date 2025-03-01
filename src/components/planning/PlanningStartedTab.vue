@@ -58,7 +58,7 @@ export default {
 
   computed: {
     sortedPlantings() {
-      return this.plantings.sort(sorting.sortByPlantFriendlyName);
+      return this.plantings.sort(sorting.sortByPlantingName);
     },
 
     startOfYear() {
