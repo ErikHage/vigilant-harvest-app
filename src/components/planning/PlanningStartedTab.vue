@@ -1,25 +1,51 @@
 <template>
   <v-row dense>
-    <v-col cols="12">
-      <div class="d-flex justify-space-between">
-        <p>Progress To Planting Day</p>
-        <p>{{ daysUntilPlantingDay }} days to go!</p>
-      </div>
-      <v-progress-linear
-          :model-value="progressToPlantingDay"
-          :height="20"
-          :color="progressToPlantingDayColor"
-      ></v-progress-linear>
+    <v-col cols="12" class="mb-4">
+      <v-card density="compact">
+        <v-card-text>
+          <div class="d-flex justify-space-between">
+            <p>Progress To Planting Day</p>
+            <p>{{ daysUntilPlantingDay }} days to go!</p>
+          </div>
+          <v-progress-linear
+              :model-value="progressToPlantingDay"
+              :height="20"
+              :color="progressToPlantingDayColor"
+          ></v-progress-linear>
+        </v-card-text>
+      </v-card>
+    </v-col>
+
+    <v-col
+        v-for="planting in sortedPlantings"
+        cols="4">
+      <v-card>
+        <div class="d-flex justify-center align-center">
+          <div>
+            <v-card-title>{{ planting.name }}</v-card-title>
+            <v-card-subtitle>{{ getPlantName(planting.plantId) }}</v-card-subtitle>
+            <v-card-text>
+              <p>Sown On: {{ planting.sowDate }}</p>
+            </v-card-text>
+          </div>
+          <v-progress-circular
+              :color="getColorForProgress(planting)"
+              :model-value="getProgress(planting)"
+              :size="80"
+              :width="40"
+          ></v-progress-circular>
+        </div>
+      </v-card>
     </v-col>
 
   </v-row>
-  {{ plantings }}
 </template>
 
 <script>
 import dayjs from 'dayjs';
 
 import { heatMap } from '@/utils/display'
+import sorting from "@/utils/sorting";
 
 export default {
   name: "PlanningStartedTab",
@@ -31,6 +57,10 @@ export default {
   },
 
   computed: {
+    sortedPlantings() {
+      return this.plantings.sort(sorting.sortByPlantFriendlyName);
+    },
+
     startOfYear() {
       return dayjs().startOf('year');
     },
@@ -50,6 +80,26 @@ export default {
     progressToPlantingDayColor() {
       return heatMap[Math.floor(this.progressToPlantingDay / 10)];
     }
-  }
+  },
+
+  methods: {
+    getPlantName(plantId) {
+      return this.plantsMap[plantId]?.friendlyName ?? '---';
+    },
+
+    getProgress(planting) {
+      const dateSown = dayjs(planting.sowDate);
+      const daysElapsed = dayjs().diff(dateSown, 'days');
+      console.log('days elapsed', daysElapsed);
+      const totalDays = this.targetPlantingDate.diff(dateSown, 'days');
+      console.log('total days', totalDays);
+
+      return daysElapsed / totalDays * 100;
+    },
+
+    getColorForProgress(planting) {
+      return heatMap[Math.floor(this.getProgress(planting)) / 10];
+    }
+  },
 }
 </script>
