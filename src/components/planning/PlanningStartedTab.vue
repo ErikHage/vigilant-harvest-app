@@ -94,9 +94,7 @@ export default {
     getProgress(planting) {
       const dateSown = dayjs(planting.sowDate);
       const daysElapsed = dayjs().diff(dateSown, 'days');
-      console.log('days elapsed', daysElapsed);
       const totalDays = this.targetPlantingDate.diff(dateSown, 'days');
-      console.log('total days', totalDays);
 
       return daysElapsed / totalDays * 100;
     },
