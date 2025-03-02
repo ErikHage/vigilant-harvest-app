@@ -52,11 +52,16 @@ export default {
       this.onSubmit(plantingActions.comment, {
         comment: this.comment,
       });
-      this.show = false;
+      this.closeDialog();
     },
 
     handleCancel() {
+      this.closeDialog();
+    },
+
+    closeDialog() {
       this.show = false;
+      this.comment = null;
     },
   },
 }
