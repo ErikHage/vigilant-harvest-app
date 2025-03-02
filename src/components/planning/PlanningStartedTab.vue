@@ -19,7 +19,11 @@
     <v-col
         v-for="planting in sortedPlantings"
         cols="4">
-      <v-card>
+      <v-card
+          class="ma-1"
+          elevation="3"
+          density="compact"
+          @click="onClickCard(planting)">
         <div class="d-flex justify-center align-center">
           <div>
             <v-card-title>{{ planting.name }}</v-card-title>
@@ -99,6 +103,15 @@ export default {
 
     getColorForProgress(planting) {
       return heatMap[Math.floor(this.getProgress(planting)) / 10];
+    },
+
+    onClickCard(planting) {
+      this.$router.push({
+        name: 'PlantingDetailsPage',
+        params: {
+          plantingId: planting.plantingId,
+        },
+      });
     }
   },
 }
