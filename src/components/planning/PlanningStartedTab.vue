@@ -33,7 +33,7 @@
             </v-card-text>
           </div>
           <v-progress-circular
-              :color="getColorForProgress(planting)"
+              :color="getProgressColor(planting)"
               :model-value="getProgress(planting)"
               :size="80"
               :width="40"
@@ -99,8 +99,10 @@ export default {
       return daysElapsed / totalDays * 100;
     },
 
-    getColorForProgress(planting) {
-      return heatMap[Math.floor(this.getProgress(planting)) / 10];
+    getProgressColor(planting) {
+      const progress = this.getProgress(planting);
+
+      return heatMap[Math.floor(progress / 10)];
     },
 
     onClickCard(planting) {
