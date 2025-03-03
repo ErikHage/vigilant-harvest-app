@@ -247,11 +247,11 @@ export const usePlotsStore = defineStore('plots', {
 
 export const usePlantingsStore = defineStore('plantings', {
     actions: {
-        async upsertPlanting(planting) {
+        async updatePlanting(plantingUpdate) {
             try {
-                await plantingsApi.upsertPlanting(storageUtils.tryToLoadTokenFromStorage(), planting);
+                await plantingsApi.updatePlanting(storageUtils.tryToLoadTokenFromStorage(), plantingUpdate);
             } catch (err) {
-                this.setAlertMessage(err, 'error', 'error upserting planting');
+                this.setAlertMessage(err, 'error', 'error updating planting');
             }
         },
         async createPlanting(plantingRequest) {

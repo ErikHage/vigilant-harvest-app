@@ -3,12 +3,30 @@ import axios from "axios";
 import { withApiErrorHandling } from './error-handler';
 import { vigilantHarvestServiceUrl } from "@/utils/constants";
 
-async function upsertPlanting(actorToken, planting) {
-    const response = await axios.put(`${vigilantHarvestServiceUrl.v0}/plantings`, planting, {
-        headers: {
-            'x-feral-auth-token': actorToken,
-        },
-    });
+function mapForUpdate(plantingUpdate) {
+    return {
+        plotId: plantingUpdate.plotId,
+        numberTransplanted: plantingUpdate.numberTransplanted,
+        leadTimeWeeks: plantingUpdate.leadTimeWeeks,
+        sowDate: plantingUpdate.sowDate,
+        sowType: plantingUpdate.sowType,
+        numberSown: plantingUpdate.numberSown,
+        transplantDate: plantingUpdate.transplantDate,
+        notes: plantingUpdate.notes,
+    };
+}
+
+async function updatePlanting(actorToken, plantingUpdate) {
+    const requestBody = mapForUpdate(plantingUpdate);
+
+    const response = await axios.put(
+        `${vigilantHarvestServiceUrl.v0}/plantings`,
+        requestBody,
+        {
+            headers: {
+                'x-feral-auth-token': actorToken,
+            },
+        });
     return response.data;
 }
 
@@ -27,10 +45,10 @@ async function performPlantingAction(actorToken, plantingId, action, actionData)
             actionType: action,
             ...actionData,
         }, {
-        headers: {
-            'x-feral-auth-token': actorToken,
-        },
-    });
+            headers: {
+                'x-feral-auth-token': actorToken,
+            },
+        });
     return response.data;
 }
 
@@ -56,7 +74,7 @@ async function fetchPlantingById(actorToken, plantingId) {
 }
 
 export default {
-    upsertPlanting: withApiErrorHandling(upsertPlanting),
+    updatePlanting: withApiErrorHandling(updatePlanting),
     createPlanting: withApiErrorHandling(createPlanting),
     performPlantingAction: withApiErrorHandling(performPlantingAction),
     fetchPlantingsByYear: withApiErrorHandling(fetchPlantingsByYear),
