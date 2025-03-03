@@ -5,6 +5,8 @@ import { vigilantHarvestServiceUrl } from "@/utils/constants";
 
 function mapForUpdate(plantingUpdate) {
     return {
+        seedSource: plantingUpdate.seedSource,
+        lotNumber: plantingUpdate.lotNumber,
         plotId: plantingUpdate.plotId,
         numberTransplanted: plantingUpdate.numberTransplanted,
         leadTimeWeeks: plantingUpdate.leadTimeWeeks,
@@ -16,11 +18,11 @@ function mapForUpdate(plantingUpdate) {
     };
 }
 
-async function updatePlanting(actorToken, plantingUpdate) {
+async function updatePlanting(actorToken, plantingId, plantingUpdate) {
     const requestBody = mapForUpdate(plantingUpdate);
 
     const response = await axios.put(
-        `${vigilantHarvestServiceUrl.v0}/plantings`,
+        `${vigilantHarvestServiceUrl.v0}/plantings/${plantingId}`,
         requestBody,
         {
             headers: {

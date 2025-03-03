@@ -247,9 +247,9 @@ export const usePlotsStore = defineStore('plots', {
 
 export const usePlantingsStore = defineStore('plantings', {
     actions: {
-        async updatePlanting(plantingUpdate) {
+        async updatePlanting(plantingId, plantingUpdate) {
             try {
-                await plantingsApi.updatePlanting(storageUtils.tryToLoadTokenFromStorage(), plantingUpdate);
+                await plantingsApi.updatePlanting(storageUtils.tryToLoadTokenFromStorage(), plantingId, plantingUpdate);
             } catch (err) {
                 this.setAlertMessage(err, 'error', 'error updating planting');
             }

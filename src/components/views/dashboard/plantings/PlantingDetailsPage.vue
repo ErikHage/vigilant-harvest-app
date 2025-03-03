@@ -22,33 +22,53 @@
         <v-row>
           <v-col cols="12">
 
-            <v-card>
-              <v-card-text class="text-center">
-                <comment-planting-action-dialog
-                    :planting="planting"
-                    :on-submit="performAction"/>
+            <v-card density="compact">
+              <v-card-text class="d-flex justify-space-between">
+                <div class="d-flex align-center">
+                  <comment-planting-action-dialog
+                      :planting="planting"
+                      :on-submit="performAction"/>
 
-                <start-planting-action-dialog
-                    v-if="planting && showAction('Start')"
-                    :planting="planting"
-                    :on-submit="performAction"/>
+                  <start-planting-action-dialog
+                      v-if="planting && showAction('Start')"
+                      :planting="planting"
+                      :on-submit="performAction"/>
 
-                <plant-planting-action-dialog
-                    v-if="planting && showAction('Plant')"
-                    :planting="planting"
-                    :plots="plots"
-                    :on-submit="performAction"/>
+                  <plant-planting-action-dialog
+                      v-if="planting && showAction('Plant')"
+                      :planting="planting"
+                      :plots="plots"
+                      :on-submit="performAction"/>
 
-                <delete-planting-action-dialog
-                    v-if="planting && showAction('Delete')"
-                    :planting="planting"
-                    :on-submit="performAction"/>
+                  <delete-planting-action-dialog
+                      v-if="planting && showAction('Delete')"
+                      :planting="planting"
+                      :on-submit="performAction"/>
 
-                <retire-planting-action-dialog
-                    v-if="planting && showAction('Retire')"
-                    :planting="planting"
-                    :on-submit="performAction"/>
+                  <retire-planting-action-dialog
+                      v-if="planting && showAction('Retire')"
+                      :planting="planting"
+                      :on-submit="performAction"/>
+                </div>
 
+                <div class="d-flex align-center">
+                  <v-switch
+                      v-model="enableEdit"
+                      color="#00C000"
+                      density="compact"
+                      base-color="#C00000">
+                    <template v-slot:label>
+                      <v-icon>{{ enableEdit ? 'mdi-lock-open' : 'mdi-lock' }}</v-icon>
+                    </template>
+                  </v-switch>
+
+                  <v-btn
+                      class="mx-1"
+                      text="Update"
+                      color="warning"
+                      @click="handleUpdatePlanting"
+                  ></v-btn>
+                </div>
               </v-card-text>
             </v-card>
 
@@ -66,9 +86,10 @@
 
                   <v-tabs-window-item value="details">
                     <planting-details-tab
-                        :planting="planting"
+                        :planting="plantingCopy"
                         :plant="plant"
-                        :plot="plot"/>
+                        :plot="plot"
+                        :enable-edit="enableEdit"/>
                   </v-tabs-window-item>
 
                   <v-tabs-window-item value="history">
@@ -126,11 +147,27 @@ export default {
   data() {
     return {
       tab: null,
+      enableEdit: false,
       actionMapping: {
         'CREATED': ['Start', 'Plant', 'Delete'],
         'STARTED': ['Plant'],
         'PLANTED': ['Retire'],
         'RETIRED': [],
+      },
+      plantingCopy: {
+        plantingId: null,
+        plotId: null,
+        plantId: null,
+        plantingYear: null,
+        name: null,
+        seedSource: null,
+        lotNumber: null,
+        leadTimeWeeks: null,
+        sowDate: null,
+        sowType: null,
+        numberSown: null,
+        transplantDate: null,
+        numberTransplanted: null,
       },
     };
   },
@@ -167,23 +204,23 @@ export default {
     },
 
     title() {
-      return this.planting?.name ?? 'Planting Details';
+      return this.plantingCopy?.name ?? 'Planting Details';
     },
 
     plot() {
-      return this.plotsById[this.planting.plotId];
+      return this.plotsById[this.plantingCopy?.plotId];
     },
 
     plant() {
-      return this.plantsById[this.planting.plantId];
+      return this.plantsById[this.plantingCopy?.plantId];
     },
 
     statusColor() {
-      return plantingUtils.mapPlantingStatusToColor(this.planting?.currentStatus);
+      return plantingUtils.mapPlantingStatusToColor(this.plantingCopy?.currentStatus);
     },
 
     sortedHistory() {
-      return this.planting.statusHistory.sort(sorting.sortPlantingHistoryByDateCreated);
+      return this.plantingCopy?.statusHistory.sort(sorting.sortPlantingHistoryByDateCreated);
     },
 
     alerts() {
@@ -215,15 +252,37 @@ export default {
     ...mapActions(usePlantingsStore, [
       'fetchPlantingById',
       'performPlantingAction',
+      'updatePlanting',
     ]),
 
     async refreshData() {
       await this.fetchPlots();
       await this.fetchPlantingById(this.plantingId);
+
+      const planting = this.plantingsById[this.plantingId];
+      this.plantingCopy = {
+        plantingId: planting.plantingId ?? undefined,
+        plotId: planting.plotId ?? undefined,
+        plantId: planting.plantId ?? undefined,
+        plantingYear: planting.plantingYear ?? undefined,
+        name: planting.name ?? undefined,
+        seedSource: planting.seedSource ?? undefined,
+        lotNumber: planting.lotNumber ?? undefined,
+        leadTimeWeeks: planting.leadTimeWeeks ?? undefined,
+        sowDate: planting.sowDate ?? undefined,
+        sowType: planting.sowType ?? undefined,
+        numberSown: planting.numberSown ?? undefined,
+        transplantDate: planting.transplantDate ?? undefined,
+        numberTransplanted: planting.numberTransplanted ?? undefined,
+        statusHistory: planting.statusHistory ?? [],
+        currentStatus: planting.currentStatus ?? undefined,
+        dateCreated: planting.dateCreated,
+        dateModified: planting.dateModified,
+      };
     },
 
     showAction(actionName) {
-      return this.actionMapping[this.planting.currentStatus]?.includes(actionName) ?? false;
+      return this.actionMapping[this.plantingCopy.currentStatus]?.includes(actionName) ?? false;
     },
 
     async performAction(action, actionData) {
@@ -236,6 +295,10 @@ export default {
       } else {
         await this.refreshData();
       }
+    },
+
+    async handleUpdatePlanting() {
+      await this.updatePlanting(this.plantingId, this.plantingCopy);
     },
   },
 
