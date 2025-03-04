@@ -277,7 +277,7 @@ export default {
         transplantDate: planting.transplantDate ?? undefined,
         numberTransplanted: planting.numberTransplanted ?? undefined,
         statusHistory: planting.statusHistory ?? [],
-        currentStatus: planting.currentStatus ?? undefined,
+        currentStatus: planting.currentStatus,
         dateCreated: planting.dateCreated,
         dateModified: planting.dateModified,
       };
