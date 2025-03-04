@@ -66,6 +66,7 @@
                       class="mx-1"
                       text="Update"
                       color="warning"
+                      :disabled="!enableEdit"
                       @click="handleUpdatePlanting"
                   ></v-btn>
                 </div>
@@ -87,7 +88,7 @@
                   <v-tabs-window-item value="details">
                     <planting-details-tab
                         :planting="plantingCopy"
-                        :plant="plant"
+                        :plants="plants"
                         :plot="plot"
                         :enable-edit="enableEdit"/>
                   </v-tabs-window-item>
@@ -182,6 +183,7 @@ export default {
     }),
 
     ...mapState(usePlantsStore, {
+      plants: 'plants',
       plantsById: 'plantsById',
       plantsAlertType: 'alertType',
       plantsAlertMessage: 'alertMessage',

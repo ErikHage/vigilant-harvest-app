@@ -1,5 +1,5 @@
 <template>
-  <div v-if="planting && plant">
+  <div v-if="planting">
     <v-text-field
         v-model="planting.plantingId"
         label="Id"
@@ -41,13 +41,17 @@
       <v-btn class="px-1 mt-2" color="black" size="small" @click="navigateToPlantDetails(planting.plantId)">
         <v-icon>mdi-sprout-outline</v-icon>
       </v-btn>
-      <v-text-field
-          v-model="plant.friendlyName"
-          class="ml-1"
-          label="Plant"
+      <v-autocomplete
+          v-model="planting.plantId"
+          :items="sortedPlants"
+          :item-title="(plant) => plant.friendlyName"
+          :item-value="(plant) => plant.plantId"
+          label="Select Plant"
           variant="solo"
           density="compact"
-          :disabled="isFieldEditDisabled()"/>
+          :disabled="isFieldEditDisabled('CREATED')"
+          clearable
+      ></v-autocomplete>
     </div>
 
     <div class="d-flex">
@@ -103,6 +107,7 @@
 
 <script>
 import plantingUtils from '@/utils/plantings';
+import sorting from "@/utils/sorting";
 
 const { plantingStatusesList } = plantingUtils;
 
@@ -111,7 +116,7 @@ export default {
 
   props: {
     planting: Object,
-    plant: Object,
+    plants: Array,
     plot: Object,
     enableEdit: Boolean,
   },
@@ -133,6 +138,10 @@ export default {
 
     plotName() {
       return this.plot ? this.plot?.friendlyName : '---';
+    },
+
+    sortedPlants() {
+      return this.plants.sort(sorting.sortByPlantFriendlyName);
     },
   },
 

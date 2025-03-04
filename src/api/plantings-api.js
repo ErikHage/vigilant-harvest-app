@@ -5,6 +5,7 @@ import { vigilantHarvestServiceUrl } from "@/utils/constants";
 
 function mapForUpdate(plantingUpdate) {
     return {
+        plantId: plantingUpdate.plantId,
         seedSource: plantingUpdate.seedSource,
         lotNumber: plantingUpdate.lotNumber,
         plotId: plantingUpdate.plotId,
