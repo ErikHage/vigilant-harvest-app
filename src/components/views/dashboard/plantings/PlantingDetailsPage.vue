@@ -257,6 +257,10 @@ export default {
       'updatePlanting',
     ]),
 
+    toggleEditMode(enabled) {
+      this.enableEdit = enabled;
+    },
+
     async refreshData() {
       await this.fetchPlots();
       await this.fetchPlantingById(this.plantingId);
@@ -337,6 +341,8 @@ export default {
       }
 
       await this.updatePlanting(this.plantingId, requestBody);
+
+      this.toggleEditMode(false);
     },
   },
 
