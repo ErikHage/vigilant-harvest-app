@@ -56,9 +56,10 @@
 
     <div class="d-flex">
       <v-text-field
-          v-model="planting.leadTimeWeeks"
+          v-model.number="planting.leadTimeWeeks"
           label="Transplant Lead Time (weeks)"
           variant="solo"
+          type="number"
           density="compact"
           :disabled="isFieldEditDisabled('CREATED')"/>
       <v-text-field
@@ -68,9 +69,10 @@
           density="compact"
           :disabled="isFieldEditDisabled('STARTED')"/>
       <v-text-field
-          v-model="planting.numberSown"
+          v-model.number="planting.numberSown"
           label="Number Sown"
           variant="solo"
+          type="number"
           density="compact"
           :disabled="isFieldEditDisabled('STARTED')"/>
     </div>
@@ -100,9 +102,10 @@
           density="compact"
           :disabled="isFieldEditDisabled('PLANTED')"/>
       <v-text-field
-          v-model="planting.numberTransplanted"
+          v-model.number="planting.numberTransplanted"
           label="Number Planted"
           variant="solo"
+          type="number"
           density="compact"
           :disabled="isFieldEditDisabled('PLANTED')"/>
     </div>
