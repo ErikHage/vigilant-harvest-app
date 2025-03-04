@@ -79,13 +79,17 @@
       <v-btn class="px-1 mt-2" color="black" size="small" @click="navigateToPlotDetails(planting.plotId)">
         <v-icon>mdi-vector-square</v-icon>
       </v-btn>
-      <v-text-field
-          v-model="plotName"
-          class="ml-1"
+      <v-select
+          v-model="planting.plotId"
+          :items="sortedPlots"
+          :item-title="(plot) => plot.friendlyName"
+          :item-value="(plot) => plot.plotId"
           label="Plot"
           variant="solo"
           density="compact"
-          :disabled="isFieldEditDisabled('PLANTED')"/>
+          :disabled="isFieldEditDisabled('PLANTED')"
+          clearable
+      ></v-select>
     </div>
 
     <div class="d-flex">
@@ -117,7 +121,7 @@ export default {
   props: {
     planting: Object,
     plants: Array,
-    plot: Object,
+    plots: Array,
     enableEdit: Boolean,
   },
 
@@ -136,8 +140,8 @@ export default {
       return this.planting ? new Date(this.planting.dateModified).toLocaleString() : '--';
     },
 
-    plotName() {
-      return this.plot ? this.plot?.friendlyName : '---';
+    sortedPlots() {
+      return this.plots.sort(sorting.sortByPlotFriendlyName);
     },
 
     sortedPlants() {

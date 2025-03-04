@@ -89,7 +89,7 @@
                     <planting-details-tab
                         :planting="plantingCopy"
                         :plants="plants"
-                        :plot="plot"
+                        :plots="plots"
                         :enable-edit="enableEdit"/>
                   </v-tabs-window-item>
 
