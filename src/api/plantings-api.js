@@ -3,28 +3,11 @@ import axios from "axios";
 import { withApiErrorHandling } from './error-handler';
 import { vigilantHarvestServiceUrl } from "@/utils/constants";
 
-function mapForUpdate(plantingUpdate) {
-    return {
-        plantId: plantingUpdate.plantId,
-        seedSource: plantingUpdate.seedSource,
-        lotNumber: plantingUpdate.lotNumber,
-        plotId: plantingUpdate.plotId,
-        numberTransplanted: plantingUpdate.numberTransplanted,
-        leadTimeWeeks: plantingUpdate.leadTimeWeeks,
-        sowDate: plantingUpdate.sowDate,
-        sowType: plantingUpdate.sowType,
-        numberSown: plantingUpdate.numberSown,
-        transplantDate: plantingUpdate.transplantDate,
-        notes: plantingUpdate.notes,
-    };
-}
-
 async function updatePlanting(actorToken, plantingId, plantingUpdate) {
-    const requestBody = mapForUpdate(plantingUpdate);
 
     const response = await axios.put(
         `${vigilantHarvestServiceUrl.v0}/plantings/${plantingId}`,
-        requestBody,
+        plantingUpdate,
         {
             headers: {
                 'x-feral-auth-token': actorToken,

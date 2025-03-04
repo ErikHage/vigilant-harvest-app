@@ -127,7 +127,7 @@ import PlantDetailsTab from "@/components/plants/PlantDetailsTab.vue";
 import PlantingDetailsTab from "@/components/plantings/PlantingDetailsTab.vue";
 import PlantingHistoryTab from "@/components/plantings/PlantingHistoryTab.vue";
 
-const { plantingActions } = plantingUtils;
+const { plantingActions, plantingStatuses } = plantingUtils;
 
 export default {
   name: "PlantingDetailsPage",
@@ -300,7 +300,43 @@ export default {
     },
 
     async handleUpdatePlanting() {
-      await this.updatePlanting(this.plantingId, this.plantingCopy);
+      let requestBody = {};
+
+      switch (this.plantingCopy.currentStatus) {
+        case plantingStatuses.created:
+          requestBody = {
+            seedSource: this.plantingCopy.seedSource,
+            lotNumber: this.plantingCopy.lotNumber,
+            plantId: this.plantingCopy.plantId,
+            leadTimeWeeks: this.plantingCopy.leadTimeWeeks,
+          };
+          break;
+        case plantingStatuses.started:
+          requestBody = {
+            seedSource: this.plantingCopy.seedSource,
+            lotNumber: this.plantingCopy.lotNumber,
+            sowDate: this.plantingCopy.sowDate,
+            numberSown: this.plantingCopy.numberSown,
+          };
+          break;
+        case plantingStatuses.planted:
+          requestBody = {
+            seedSource: this.plantingCopy.seedSource,
+            lotNumber: this.plantingCopy.lotNumber,
+            plotId: this.plantingCopy.plotId,
+            transplantDate: this.plantingCopy.transplantDate,
+            numberTransplanted: this.plantingCopy.numberTransplanted,
+          };
+          break;
+        case plantingStatuses.retired:
+          requestBody = {
+            seedSource: this.plantingCopy.seedSource,
+            lotNumber: this.plantingCopy.lotNumber,
+          };
+          break;
+      }
+
+      await this.updatePlanting(this.plantingId, requestBody);
     },
   },
 
