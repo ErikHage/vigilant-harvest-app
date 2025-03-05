@@ -52,9 +52,6 @@
           :disabled="isFieldEditDisabled('CREATED')"
           clearable
       ></v-autocomplete>
-    </div>
-
-    <div class="d-flex">
       <v-text-field
           v-model.number="planting.leadTimeWeeks"
           label="Transplant Lead Time (weeks)"
@@ -62,6 +59,15 @@
           type="number"
           density="compact"
           :disabled="isFieldEditDisabled('CREATED')"/>
+    </div>
+
+    <div class="d-flex align-center my-2">
+      <v-divider class="flex-grow-1"></v-divider>
+      <span class="mx-2 text-caption">Sowing</span>
+      <v-divider class="flex-grow-1"></v-divider>
+    </div>
+
+    <div class="d-flex">
       <v-text-field
           v-model="planting.sowDate"
           label="Sow Date"
@@ -75,6 +81,12 @@
           type="number"
           density="compact"
           :disabled="isFieldEditDisabled('STARTED')"/>
+    </div>
+
+    <div class="d-flex align-center my-2">
+      <v-divider class="flex-grow-1"></v-divider>
+      <span class="mx-2 text-caption">Planting</span>
+      <v-divider class="flex-grow-1"></v-divider>
     </div>
 
     <div class="d-flex">
@@ -92,9 +104,6 @@
           :disabled="isFieldEditDisabled('PLANTED')"
           clearable
       ></v-select>
-    </div>
-
-    <div class="d-flex">
       <v-text-field
           v-model="planting.transplantDate"
           label="Planting Date"
@@ -156,7 +165,6 @@ export default {
     enableEdit: {
       immediate: true,
       handler(newValue) {
-        console.log('enableEdit changed: ', newValue);
         this.isEditEnabled = newValue;
       },
     },
