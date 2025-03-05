@@ -249,7 +249,7 @@ export const usePlantingsStore = defineStore('plantings', {
     actions: {
         async updatePlanting(plantingId, plantingUpdate) {
             try {
-                await plantingsApi.updatePlanting(storageUtils.tryToLoadTokenFromStorage(), plantingId, plantingUpdate);
+                this.plantingsById[plantingId] = await plantingsApi.updatePlanting(storageUtils.tryToLoadTokenFromStorage(), plantingId, plantingUpdate);
                 this.setAlertMessage(null, 'success', 'planting updated successfully');
             } catch (err) {
                 this.setAlertMessage(err, 'error', 'error updating planting');

@@ -343,6 +343,7 @@ export default {
       await this.updatePlanting(this.plantingId, requestBody);
 
       this.toggleEditMode(false);
+      await this.refreshData();
     },
   },
 
