@@ -9,7 +9,7 @@
         </p>
         <v-chip
             v-if="showStatusChip(historyItem)"
-            class="mr-4"
+            class="status-chip mr-4 d-flex justify-center"
             :color="getColorForStatus(historyItem.plantingStatus)">
           {{ historyItem.plantingStatus }}
         </v-chip>
@@ -59,14 +59,10 @@ export default {
 </script>
 
 <style scoped>
-.details-header {
-  font-weight: bold;
+.status-chip {
+  min-width: 85px;
 }
-.shrink-column {
-  white-space: nowrap;
-  width: 1%;
-}
-.multiline-cell {
+.multiline {
   white-space: pre-wrap;
 }
 </style>
