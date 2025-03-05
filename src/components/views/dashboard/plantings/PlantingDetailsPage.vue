@@ -23,7 +23,7 @@
           <v-col cols="12">
 
             <v-card density="compact">
-              <v-card-text class="d-flex justify-space-between">
+              <v-card-text class="d-flex justify-space-between pa-2">
                 <div class="d-flex align-center">
                   <comment-planting-action-dialog
                       :planting="planting"
@@ -53,6 +53,7 @@
 
                 <div class="d-flex align-center">
                   <v-switch
+                      class="d-flex align-center"
                       v-model="enableEdit"
                       color="#00C000"
                       density="compact"
