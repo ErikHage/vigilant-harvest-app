@@ -34,6 +34,7 @@
 
 <script>
 import plantingUtils from '@/utils/plantings'
+import sorting from "@/utils/sorting";
 
 export default {
   name: 'PlantingsTable',
@@ -93,7 +94,7 @@ export default {
           filteredPlantings = filteredPlantings.filter(planting => planting.currentStatus === this.statusFilter);
         }
 
-        return filteredPlantings;
+        return filteredPlantings.sort(sorting.sortByPlantingName);
       }
       return [];
     },
