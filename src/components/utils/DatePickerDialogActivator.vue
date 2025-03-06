@@ -1,7 +1,13 @@
 <template>
   <v-dialog v-model="show" max-width="500px" persistent>
     <template v-slot:activator="{ props: activatorProps }">
-      <v-btn v-bind="activatorProps" icon="mdi-calendar" color="default" @click="show = true"/>
+      <v-btn
+          v-bind="activatorProps"
+          icon="mdi-calendar"
+          color="default"
+          :disabled="disabled"
+          density="comfortable"
+          @click="show = true"/>
     </template>
 
     <v-card>
@@ -37,6 +43,7 @@ export default {
     title: String,
     date: Date,
     onSubmit: Function,
+    disabled: Boolean,
   },
 
   data() {
