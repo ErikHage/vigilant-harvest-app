@@ -69,18 +69,22 @@
 
     <div class="d-flex">
       <v-text-field
-          v-model="planting.sowDate"
-          label="Sow Date"
-          variant="solo"
-          density="compact"
-          :disabled="isFieldEditDisabled('STARTED')"/>
-      <v-text-field
           v-model.number="planting.numberSown"
           label="Number Sown"
           variant="solo"
           type="number"
           density="compact"
           :disabled="isFieldEditDisabled('STARTED')"/>
+      <div :class="getDateFieldClasses('STARTED')">
+        <p class="mr-2">Date sown</p>
+        <date-picker-dialog-activator
+            :on-submit="setSowDateValue"
+            title="Set Sow Date"
+            :date="planting.sowDate"
+            :disabled="isFieldEditDisabled('STARTED')"
+        />
+        <h3 class="ml-2">{{ formattedSowDate }}</h3>
+      </div>
     </div>
 
     <div class="d-flex align-center my-2">
@@ -165,6 +169,12 @@ export default {
           '--';
     },
 
+    formattedSowDate() {
+      return this.planting.sowDate ?
+          dayjs(this.planting.sowDate).format('YYYY-MM-DD') :
+          '--';
+    },
+
     sortedPlots() {
       return this.plots.sort(sorting.sortByPlotFriendlyName);
     },
@@ -202,6 +212,10 @@ export default {
         return true;
       }
       return !allowedStatuses.includes(this.planting.currentStatus);
+    },
+
+    setSowDateValue(newDateValue) {
+      this.planting.sowDate = newDateValue;
     },
 
     setPlantingDateValue(newDateValue) {
