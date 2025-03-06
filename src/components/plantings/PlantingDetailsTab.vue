@@ -105,30 +105,37 @@
           clearable
       ></v-select>
       <v-text-field
-          v-model="planting.transplantDate"
-          label="Planting Date"
-          variant="solo"
-          density="compact"
-          :disabled="isFieldEditDisabled('PLANTED')"/>
-      <v-text-field
           v-model.number="planting.numberTransplanted"
           label="Number Planted"
           variant="solo"
           type="number"
           density="compact"
           :disabled="isFieldEditDisabled('PLANTED')"/>
+      <div :class="getDateFieldClasses('PLANTED')">
+        <p class="mr-2">Date planted</p>
+        <date-picker-dialog-activator
+            :on-submit="setPlantingDateValue"
+            title="Set Planting Date"
+            :date="planting.transplantDate"
+            :disabled="isFieldEditDisabled('PLANTED')"
+        />
+        <h3 class="ml-2">{{ formattedPlantingDate }}</h3>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
+import dayjs from 'dayjs';
 import plantingUtils from '@/utils/plantings';
 import sorting from "@/utils/sorting";
+import DatePickerDialogActivator from "@/components/utils/DatePickerDialogActivator.vue";
 
 const { plantingStatusesList } = plantingUtils;
 
 export default {
   name: "PlantingDetailsTab",
+  components: { DatePickerDialogActivator },
 
   props: {
     planting: Object,
@@ -150,6 +157,12 @@ export default {
 
     lastModifiedAt() {
       return this.planting ? new Date(this.planting.dateModified).toLocaleString() : '--';
+    },
+
+    formattedPlantingDate() {
+      return this.planting.transplantDate ?
+          dayjs(this.planting.transplantDate).format('YYYY-MM-DD') :
+          '--';
     },
 
     sortedPlots() {
@@ -190,6 +203,20 @@ export default {
       }
       return !allowedStatuses.includes(this.planting.currentStatus);
     },
+
+    setPlantingDateValue(newDateValue) {
+      this.planting.transplantDate = newDateValue;
+    },
+
+    getDateFieldClasses(allowedStatuses) {
+      const isFieldEditDisabled = this.isFieldEditDisabled(allowedStatuses);
+
+      let classes = 'd-flex align-center mx-2';
+      if (isFieldEditDisabled) {
+        classes += ' disabled-text';
+      }
+      return classes;
+    }
   },
 }
 </script>
@@ -197,5 +224,9 @@ export default {
 <style scoped>
 .multiline {
   white-space: pre-wrap;
+}
+
+.disabled-text {
+  color: gray;
 }
 </style>
