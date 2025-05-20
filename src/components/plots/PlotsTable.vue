@@ -3,14 +3,14 @@
     <v-card-text>
       <v-data-table
           :headers="headers"
-          :items="plots"
+          :items="filteredPlots"
           item-key="plotId"
           class="elevation-1"
           density="compact"
       >
         <template #item.actions="{ item }">
           <v-icon small @click="onEditClicked(item)">mdi-pencil</v-icon>
-          <!-- TODO add delete button, with confirm dialog. only admin can see/use it -->
+          <!-- TODO add enable/disable button, with confirm dialog. -->
         </template>
       </v-data-table>
     </v-card-text>
@@ -18,6 +18,8 @@
 </template>
 
 <script>
+  import sorting from "@/utils/sorting";
+
   export default {
     name: 'PlotsTable',
 
@@ -36,5 +38,11 @@
         {title: 'Actions', key: 'actions', sortable: false},
       ],
     }),
+
+    computed: {
+      filteredPlots() {
+        return this.plots.sort(sorting.sortByPlantFriendlyName);
+      }
+    }
   }
 </script>
