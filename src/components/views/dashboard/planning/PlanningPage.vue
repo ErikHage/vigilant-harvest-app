@@ -13,8 +13,8 @@
         />
       </v-col>
 
-      <v-col cols="2"></v-col>
-      <v-col cols="8">
+      <v-col cols="0" lg="2"></v-col>
+      <v-col cols="12" lg="8">
 
         <v-card class="mt-4">
           <v-tabs
@@ -46,7 +46,7 @@
           </v-card-text>
         </v-card>
       </v-col>
-      <v-col cols="2"></v-col>
+      <v-col cols="0" lg="2"></v-col>
     </v-row>
   </v-container>
 </template>
