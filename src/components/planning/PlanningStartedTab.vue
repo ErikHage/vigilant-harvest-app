@@ -75,7 +75,7 @@ export default {
     },
 
     progressToPlantingDay() {
-      return dayjs().diff(this.startOfYear, 'days');
+      return dayjs().diff(this.startOfYear, 'days') / this.targetPlantingDate.diff(this.startOfYear, 'days') * 100;
     },
 
     daysUntilPlantingDay() {
@@ -83,8 +83,7 @@ export default {
     },
 
     progressToPlantingDayColor() {
-      console.log('progressToPlantingDay', this.progressToPlantingDay);
-      return heatMap[Math.floor(this.progressToPlantingDay / 10)];
+      return heatMap[Math.floor(this.daysUntilPlantingDay / 10)];
     }
   },
 
