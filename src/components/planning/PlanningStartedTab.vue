@@ -18,26 +18,27 @@
 
     <v-col
         v-for="planting in sortedPlantings"
-        cols="4">
+        cols="12">
       <v-card
           class="ma-1"
           elevation="3"
           density="compact"
           @click="onClickCard(planting)">
-        <div class="d-flex justify-center align-center">
-          <div>
-            <v-card-title>{{ planting.name }}</v-card-title>
-            <v-card-subtitle>{{ getPlantName(planting.plantId) }}</v-card-subtitle>
-            <v-card-text>
-              <p>Sown On: {{ planting.sowDate }}</p>
-            </v-card-text>
-          </div>
+        <div class="d-flex justify-start align-center">
           <v-progress-circular
+              class="mx-4"
               :color="getProgressColor(planting)"
               :model-value="getProgress(planting)"
               :size="80"
               :width="40"
           ></v-progress-circular>
+              <div>
+                <v-card-title class="overflow-text">{{ planting.name }}</v-card-title>
+                <v-card-subtitle>{{ getPlantName(planting.plantId) }}</v-card-subtitle>
+                <v-card-text>
+                  <p>Sown On: {{ planting.sowDate }}</p>
+                </v-card-text>
+              </div>
         </div>
       </v-card>
     </v-col>
@@ -48,7 +49,7 @@
 <script>
 import dayjs from 'dayjs';
 
-import { heatMap } from '@/utils/display'
+import {heatMap} from '@/utils/display'
 import sorting from "@/utils/sorting";
 
 export default {
@@ -82,6 +83,7 @@ export default {
     },
 
     progressToPlantingDayColor() {
+      console.log('progressToPlantingDay', this.progressToPlantingDay);
       return heatMap[Math.floor(this.progressToPlantingDay / 10)];
     }
   },
@@ -116,3 +118,11 @@ export default {
   },
 }
 </script>
+
+<style scoped>
+.overflow-text {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+</style>
