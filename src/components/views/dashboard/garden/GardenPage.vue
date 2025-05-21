@@ -6,7 +6,6 @@
         <v-spacer></v-spacer>
         <strong>Harvest Date:</strong> {{ this.selectedHarvestDateString }}
         <v-spacer></v-spacer>
-        <v-btn class="mt-3 mr-3" color="success" @click="openHarvestDateOverrideDialog">Override Date</v-btn>
         <v-btn class="mt-3" color="primary" @click="openDialog">Add Harvests</v-btn>
       </v-col>
     </v-row>
@@ -23,18 +22,17 @@
       </v-col>
     </v-row>
 
-    <date-picker-dialog
-        :show="overrideHarvestDateDialog"
-        title="Override Harvest Date"
-        :date="selectedHarvestDate"
-        :on-submit="confirmHarvestDateOverrideDialog"
-        :on-cancel="closeHarvestDateOverrideDialog"
-    />
-
     <v-dialog v-model="dialog" max-width="800px" persistent v-if="!loading">
       <v-card>
-        <v-card-title>
-          <span class="headline">Add Harvests [{{ this.selectedHarvestDate.toDateString() }}]</span>
+        <v-card-title class="d-flex align-center justify-space-between">
+          <span class="headline mr-4">Add Harvests</span>
+          <div class="d-flex align-center justify-end">
+            <date-picker-dialog-activator
+                :on-submit="confirmHarvestDateOverrideDialog"
+                title="Override Harvest Date"
+                :date="selectedHarvestDate"/>
+            <span class="headline ml-2">{{ selectedHarvestDate.toDateString() }}</span>
+          </div>
         </v-card-title>
         <v-card-text>
           <v-form ref="addHarvestsForm">
@@ -104,17 +102,19 @@
 
 <script>
 
-import { mapActions, mapState } from "pinia";
-import { useCommonStore, useHarvestsStore, usePlantingsStore, usePlantsStore, usePlotsStore } from "@/store";
+import {mapActions, mapState} from "pinia";
+import {useCommonStore, useHarvestsStore, usePlantingsStore, usePlantsStore, usePlotsStore} from "@/store";
 import sorting from "@/utils/sorting";
 import PageTitle from "@/components/layout/PageTitle.vue";
 import HarvestSummary from "@/components/harvests/HarvestSummary.vue";
 import DatePickerDialog from "@/components/utils/DatePickerDialog.vue";
+import DatePickerDialogActivator from "@/components/utils/DatePickerDialogActivator.vue";
 
 export default {
   name: 'GardenPage',
 
   components: {
+    DatePickerDialogActivator,
     DatePickerDialog,
     HarvestSummary,
     PageTitle,
@@ -262,18 +262,8 @@ export default {
       return this.selectedPlot?.plotId === harvestFormRecord.plotId;
     },
 
-    openHarvestDateOverrideDialog() {
-      this.overrideHarvestDateDialog = true;
-    },
-
     confirmHarvestDateOverrideDialog(date) {
       this.selectedHarvestDate = date;
-      this.overrideHarvestDateDialog = false;
-    },
-
-    closeHarvestDateOverrideDialog() {
-      this.selectedHarvestDate = new Date();
-      this.overrideHarvestDateDialog = false;
     },
 
     closeDialog() {
