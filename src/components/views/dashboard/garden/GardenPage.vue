@@ -4,9 +4,7 @@
       <v-col cols="12" class="text-center">
         <page-title title="Garden Overview"/>
         <v-spacer></v-spacer>
-        <strong>Harvest Date:</strong> {{ this.selectedHarvestDateString }}
-        <v-spacer></v-spacer>
-        <v-btn class="mt-3" color="primary" @click="openDialog">Add Harvests</v-btn>
+        <v-btn class="mt-3" color="primary" @click="openAddHarvestDialog">Add Harvests</v-btn>
       </v-col>
     </v-row>
 
@@ -220,19 +218,7 @@ export default {
       'fetchHarvestSummariesByYear',
     ]),
 
-    async onSelectYearChange(year) {
-      this.loading = true;
-      this.selectPlantingYear(year);
-      await this.refreshData();
-      this.loading = false;
-    },
-
-    async onSelectYearClear() {
-      this.clearPlantingYear();
-      await this.refreshData();
-    },
-
-    openDialog() {
+    openAddHarvestDialog() {
       if (!this.loading) {
         const tempPlots = this.hydratedPlots;
 
