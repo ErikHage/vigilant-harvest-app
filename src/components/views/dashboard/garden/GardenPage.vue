@@ -35,7 +35,7 @@
         <v-card-text>
           <v-form ref="addHarvestsForm">
             <v-select
-                :items="plots"
+                :items="filteredPlots"
                 :item-title="(plot) => plot.friendlyName"
                 :item-value="(plot) => plot.plotId"
                 label="Select Plot"
@@ -154,6 +154,10 @@ export default {
     ...mapState(useHarvestsStore, {
       harvestCounts: 'harvestCounts',
     }),
+
+    filteredPlots() {
+      return this.plots.sort(sorting.sortByPlotFriendlyName);
+    },
 
     hydratedPlots() {
       // TODO this page doesn't show plantings without a plot yet, maybe another api?
