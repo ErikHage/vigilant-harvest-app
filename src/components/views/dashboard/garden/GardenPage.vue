@@ -66,8 +66,8 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="error" text @click="closeDialog">Cancel</v-btn>
-          <v-btn color="primary" text @click="confirmHarvests" :disabled="this.harvestsEntered.length === 0">Save
+          <v-btn color="error" @click="closeDialog">Cancel</v-btn>
+          <v-btn color="primary" @click="confirmHarvests" :disabled="this.harvestsEntered.length === 0">Save
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -88,9 +88,9 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="error" text @click="closeConfirmDialog">Cancel</v-btn>
-          <v-btn color="warning" text @click="goBackToHarvestDialog">Back</v-btn>
-          <v-btn color="primary" text @click="saveHarvests">Confirm</v-btn>
+          <v-btn color="error" @click="closeConfirmDialog">Cancel</v-btn>
+          <v-btn color="warning" @click="goBackToHarvestDialog">Back</v-btn>
+          <v-btn color="primary" @click="saveHarvests">Confirm</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -196,10 +196,6 @@ export default {
     harvestsEntered() {
       return Object.values(this.harvestsForm).filter(harvest => harvest.quantity > 0);
     },
-
-    selectedHarvestDateString() {
-      return this.selectedHarvestDate.toDateString();
-    }
   },
 
   methods: {
