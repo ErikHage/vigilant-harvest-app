@@ -5,7 +5,7 @@
     </v-card-title>
     <v-card-text>
       <template v-for="planting in hydratedPlot.plantings">
-        <div class="d-flex justify-space-between align-center">
+        <div class="d-flex justify-space-between align-center mb-1">
           <v-chip class="ml-2 mr-2" color="green">
             {{ planting.numberTransplanted }}
             <v-icon class="ml-1">mdi-leaf</v-icon>
