@@ -9,7 +9,7 @@
         <tr v-for="planting in hydratedPlot.plantings">
           <td>
             <v-chip class="ml-2 mr-2" color="green">
-              {{ planting.numberTransplanted }}<v-icon>mdi-leaf</v-icon>
+              {{ planting.numberTransplanted }}<v-icon class="ml-1">mdi-leaf</v-icon>
             </v-chip>
           </td>
           <td class="text-center">
@@ -17,7 +17,7 @@
           </td>
           <td class="text-right">
             <v-chip v-if="planting.harvestQuantity > 0" color="yellow">
-              {{ planting.harvestQuantity }}<v-icon>mdi-basket-fill</v-icon>
+              {{ planting.harvestQuantity }}<v-icon class="ml-1">mdi-basket-fill</v-icon>
             </v-chip>
             <v-chip v-else color="grey">
               <v-icon>mdi-basket</v-icon>
