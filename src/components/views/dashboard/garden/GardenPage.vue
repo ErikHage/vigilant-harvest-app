@@ -11,7 +11,7 @@
     <v-row>
       <v-col cols="12">
         <v-row>
-          <v-col cols="6"
+          <v-col cols="12" lg="4" md="6"
                  v-if="!loading"
                  v-for="hydratedPlot in hydratedPlots">
             <harvest-summary :hydrated-plot="hydratedPlot"/>
