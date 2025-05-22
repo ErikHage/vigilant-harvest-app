@@ -105,7 +105,6 @@ import {useCommonStore, useHarvestsStore, usePlantingsStore, usePlantsStore, use
 import sorting from "@/utils/sorting";
 import PageTitle from "@/components/layout/PageTitle.vue";
 import HarvestSummary from "@/components/harvests/HarvestSummary.vue";
-import DatePickerDialog from "@/components/utils/DatePickerDialog.vue";
 import DatePickerDialogActivator from "@/components/utils/DatePickerDialogActivator.vue";
 
 export default {
@@ -113,7 +112,6 @@ export default {
 
   components: {
     DatePickerDialogActivator,
-    DatePickerDialog,
     HarvestSummary,
     PageTitle,
   },
