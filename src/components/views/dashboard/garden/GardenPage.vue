@@ -73,27 +73,13 @@
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="harvestsConfirmDialog" max-width="800px" persistent>
-      <v-card>
-        <v-card-title>
-          <span class="headline">Confirm Harvests [{{ this.selectedHarvestDate.toDateString() }}]</span>
-        </v-card-title>
-        <v-card-text>
-          <div v-for="harvestFormRecord in harvestsEntered"
-               :key="harvestFormRecord.plantingId">
-            <span class="headline">{{ harvestFormRecord.plotName }}: {{ harvestFormRecord.plantName }}</span>
-            &nbsp;
-            <v-chip color="yellow">+{{ harvestFormRecord.quantity }}</v-chip>
-          </div>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="error" @click="closeConfirmDialog">Cancel</v-btn>
-          <v-btn color="warning" @click="goBackToHarvestDialog">Back</v-btn>
-          <v-btn color="primary" @click="saveHarvests">Confirm</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <ConfirmHarvestsDialog
+        :show="harvestsConfirmDialog"
+        :harvest-date="selectedHarvestDate"
+        :harvests="harvestsEntered"
+        :on-cancel="closeConfirmDialog"
+        :on-back="goBackToHarvestDialog"
+        :on-confirm="saveHarvests"/>
 
   </v-container>
 </template>
@@ -106,11 +92,13 @@ import sorting from "@/utils/sorting";
 import PageTitle from "@/components/layout/PageTitle.vue";
 import HarvestSummary from "@/components/harvests/HarvestSummary.vue";
 import DatePickerDialogActivator from "@/components/utils/DatePickerDialogActivator.vue";
+import ConfirmHarvestsDialog from "@/components/garden/ConfirmHarvestsDialog.vue";
 
 export default {
   name: 'GardenPage',
 
   components: {
+    ConfirmHarvestsDialog,
     DatePickerDialogActivator,
     HarvestSummary,
     PageTitle,
