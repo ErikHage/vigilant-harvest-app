@@ -6,16 +6,20 @@
     <v-card-text>
       <template v-for="planting in hydratedPlot.plantings">
         <div class="d-flex justify-space-between align-center mb-1">
-          <v-chip class="ml-2 mr-2" color="green">
-            {{ planting.numberTransplanted }}
-            <v-icon class="ml-1">mdi-leaf</v-icon>
+          <v-chip class="ml-2 mr-2"
+                  color="green">
+            {{ planting.numberTransplanted }} <v-icon class="ml-1">mdi-leaf</v-icon>
           </v-chip>
+
           <span>{{ planting.plant.friendlyName }}</span>
-          <v-chip v-if="planting.harvestQuantity > 0" color="yellow">
-            {{ planting.harvestQuantity }}
-            <v-icon class="ml-1">mdi-basket-fill</v-icon>
+
+          <v-chip v-if="planting.harvestQuantity > 0"
+                  color="yellow">
+            {{ planting.harvestQuantity }} <v-icon class="ml-1">mdi-basket-fill</v-icon>
           </v-chip>
-          <v-chip v-else color="grey">
+
+          <v-chip v-else
+                  color="grey">
             <v-icon>mdi-basket</v-icon>
           </v-chip>
         </div>
