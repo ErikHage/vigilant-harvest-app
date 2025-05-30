@@ -34,6 +34,11 @@
                       :planting="planting"
                       :on-submit="performAction"/>
 
+                  <split-planting-action-dialog
+                      v-if="planting && showAction('Split') && planting.numberSown > 1"
+                      :planting="planting"
+                      :on-submit="performAction"/>
+
                   <plant-planting-action-dialog
                       v-if="planting && showAction('Plant')"
                       :planting="planting"
@@ -120,6 +125,7 @@ import sorting from '@/utils/sorting';
 import PageTitle from "@/components/layout/PageTitle.vue";
 import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
 import StartPlantingActionDialog from "@/components/plantings/StartPlantingActionDialog.vue";
+import SplitPlantingActionDialog from "@/components/plantings/SplitPlantingActionDialog.vue";
 import PlantPlantingActionDialog from "@/components/plantings/PlantPlantingActionDialog.vue";
 import RetirePlantingActionDialog from "@/components/plantings/RetirePlantingActionDialog.vue";
 import DeletePlantingActionDialog from "@/components/plantings/DeletePlantingActionDialog.vue";
@@ -142,6 +148,7 @@ export default {
     RetirePlantingActionDialog,
     PlantPlantingActionDialog,
     StartPlantingActionDialog,
+    SplitPlantingActionDialog,
     FadeOutAlert,
     PageTitle,
   },
@@ -152,7 +159,7 @@ export default {
       enableEdit: false,
       actionMapping: {
         'CREATED': ['Start', 'Plant', 'Delete'],
-        'STARTED': ['Plant'],
+        'STARTED': ['Plant', 'Split'],
         'PLANTED': ['Retire'],
         'RETIRED': [],
       },
@@ -295,7 +302,7 @@ export default {
     async performAction(action, actionData) {
       await this.performPlantingAction(this.plantingId, action, actionData);
 
-      if (action === plantingActions.delete) {
+      if (action === plantingActions.delete || action === plantingActions.split) {
         this.$router.push({
           name: 'PlantingsPage',
         });

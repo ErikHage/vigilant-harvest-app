@@ -1,5 +1,6 @@
 const plantingActions = {
     start: 'START',
+    split: 'SPLIT',
     plant: 'PLANT',
     retire: 'RETIRE',
     comment: 'COMMENT',
