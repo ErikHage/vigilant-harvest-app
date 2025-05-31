@@ -317,6 +317,7 @@ export default {
       switch (this.plantingCopy.currentStatus) {
         case plantingStatuses.created:
           requestBody = {
+            name: this.plantingCopy.name,
             seedSource: this.plantingCopy.seedSource,
             lotNumber: this.plantingCopy.lotNumber,
             plantId: this.plantingCopy.plantId,
@@ -325,6 +326,7 @@ export default {
           break;
         case plantingStatuses.started:
           requestBody = {
+            name: this.plantingCopy.name,
             seedSource: this.plantingCopy.seedSource,
             lotNumber: this.plantingCopy.lotNumber,
             sowDate: this.plantingCopy.sowDate,
@@ -333,6 +335,7 @@ export default {
           break;
         case plantingStatuses.planted:
           requestBody = {
+            name: this.plantingCopy.name,
             seedSource: this.plantingCopy.seedSource,
             lotNumber: this.plantingCopy.lotNumber,
             plotId: this.plantingCopy.plotId,
@@ -342,6 +345,7 @@ export default {
           break;
         case plantingStatuses.retired:
           requestBody = {
+            name: this.plantingCopy.name,
             seedSource: this.plantingCopy.seedSource,
             lotNumber: this.plantingCopy.lotNumber,
           };

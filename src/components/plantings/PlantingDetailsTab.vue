@@ -1,11 +1,19 @@
 <template>
   <div v-if="planting">
-    <v-text-field
-        v-model="planting.plantingId"
-        label="Id"
-        variant="solo"
-        density="compact"
-        disabled/>
+    <div class="d-flex">
+      <v-text-field
+          v-model="planting.plantingId"
+          label="Id"
+          variant="solo"
+          density="compact"
+          disabled/>
+      <v-text-field
+          v-model="planting.name"
+          label="Name"
+          variant="solo"
+          density="compact"
+          :disabled="isFieldEditDisabled()"/>
+    </div>
 
     <div class="d-flex">
       <v-text-field
@@ -135,11 +143,11 @@ import plantingUtils from '@/utils/plantings';
 import sorting from "@/utils/sorting";
 import DatePickerDialogActivator from "@/components/utils/DatePickerDialogActivator.vue";
 
-const { plantingStatusesList } = plantingUtils;
+const {plantingStatusesList} = plantingUtils;
 
 export default {
   name: "PlantingDetailsTab",
-  components: { DatePickerDialogActivator },
+  components: {DatePickerDialogActivator},
 
   props: {
     planting: Object,
