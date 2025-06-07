@@ -6,6 +6,7 @@
         <tr>
           <th>Name</th>
           <th>Plant</th>
+          <th>Qty</th>
           <th>Plot</th>
           <th>Status</th>
           <th></th>
@@ -15,6 +16,7 @@
         <tr v-for="planting in hydratedPlantings">
           <td>{{ planting.name }}</td>
           <td>{{ planting.plantName }}</td>
+          <td>{{ getCount(planting) }}</td>
           <td>{{ planting.plotName }}</td>
           <td>
             <v-chip size="small" :color="getStatusColor(planting.currentStatus)">{{ planting.currentStatus }}</v-chip>
@@ -35,6 +37,8 @@
 <script>
 import plantingUtils from '@/utils/plantings'
 import sorting from "@/utils/sorting";
+
+const { plantingStatuses, } = plantingUtils;
 
 export default {
   name: 'PlantingsTable',
@@ -101,9 +105,17 @@ export default {
   },
 
   methods: {
+    getCount(planting) {
+      if (planting.currentStatus === plantingStatuses.started) {
+        return planting.numberSown;
+      } else if (planting.currentStatus === plantingStatuses.planted) {
+        return planting.numberTransplanted;
+      }
+    },
+
     getStatusColor(value) {
       return plantingUtils.mapPlantingStatusToColor(value);
-    }
+    },
   },
 }
 </script>
