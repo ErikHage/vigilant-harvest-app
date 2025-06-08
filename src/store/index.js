@@ -1,4 +1,4 @@
-import { defineStore } from 'pinia';
+import {defineStore} from 'pinia';
 
 import storageUtils from "@/utils/storage-utils";
 import jwtUtils from "@/utils/jwt-utils";
@@ -8,8 +8,9 @@ import plantsApi from "@/api/plants-api";
 import plotsApi from "@/api/plots-api";
 import plantingsApi from "@/api/plantings-api";
 import harvestsApi from "@/api/harvests-api";
+import journalApi from "@/api/journal-api";
 
-import { applicationId, feralAuthenticationAppUrl } from "@/utils/constants";
+import {applicationId, feralAuthenticationAppUrl} from "@/utils/constants";
 import plantingYearsApi from "@/api/planting-years-api";
 
 const localStorageKeys = {
@@ -77,7 +78,7 @@ export const useAuthenticationStore = defineStore('authentication', {
                 this.showAppBar = true;
             } catch (err) {
                 this.isAuthenticated = false;
-                this.setAlertMessage(null,'error', 'error authenticating sso token');
+                this.setAlertMessage(null, 'error', 'error authenticating sso token');
             }
         },
         async verifyToken() {
@@ -373,6 +374,44 @@ export const useHarvestsStore = defineStore('harvests', {
             harvestSummaries: [],
             harvestCounts: {},
             harvestStats: {},
+            alertVisible: false,
+            alertType: 'success',
+            alertMessage: null,
+        };
+    },
+});
+
+export const useJournalStore = defineStore('journal', {
+    actions: {
+        async upsertJournalEntry(journalEntry) {
+            try {
+                await journalApi.upsertJournalEntry(storageUtils.tryToLoadTokenFromStorage(), journalEntry);
+            } catch (err) {
+                this.setAlertMessage(err, 'error', 'error upserting journal entry');
+            }
+        },
+        async fetchJournalEntriesByYear(plantingYear) {
+            try {
+                this.journalEntries = await journalApi.fetchJournalEntriesByYear(storageUtils.tryToLoadTokenFromStorage(), plantingYear);
+            } catch (err) {
+                this.setAlertMessage(err, 'error', 'error fetching journal entries by year');
+            }
+        },
+        setAlertMessage(err, type, message) {
+            if (err) {
+                console.error(err);
+            }
+            this.alertVisible = true;
+            this.alertType = type;
+            this.alertMessage = message;
+            setTimeout(() => {
+                this.alertVisible = false;
+            }, 3000);
+        }
+    },
+    state: () => {
+        return {
+            journalEntries: [],
             alertVisible: false,
             alertType: 'success',
             alertMessage: null,
