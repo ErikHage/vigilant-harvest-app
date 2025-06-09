@@ -101,14 +101,13 @@ export default {
     }),
 
     groupedEntries() {
-      // TODO can be done as a reduce
-      const groups = {};
-      for (const entry of this.journalEntries) {
-        const entryDate = entry.entryDate;
-        if (!groups[entryDate]) groups[entryDate] = [];
-        groups[entryDate].push(entry);
-      }
-      return groups;
+      return this.journalEntries.reduce((groups, entry) => {
+        const dateObj = new Date(entry.entryDate);
+        const dateOnly = dateObj.toLocaleDateString();
+        if (!groups[dateOnly]) groups[dateOnly] = [];
+        groups[dateOnly].push(entry);
+        return groups;
+      }, {});
     },
 
     sortedDates() {
