@@ -7,13 +7,20 @@
     </v-row>
 
     <v-row>
-      <v-col cols="2" class="timeline-column">
-        <div class="timeline">
+      <v-col cols="2" class="timeline-column d-flex flex-column">
+        <div class="add-entry-wrapper mb-2 text-center">
+          <add-journal-entry-dialog
+              :on-submit="handleNewEntry"
+              :on-cancel="() => {}"
+          />
+        </div>
+
+        <div class="timeline flex-grow-1 overflow-y-auto">
           <div
               v-for="(item, index) in timelineItems"
               :key="index"
               class="timeline-entry"
-              :class="{'selected': selectedDate === item.date, 'gap': item.gap}"
+              :class="{ selected: selectedDate === item.date, gap: item.gap }"
               @click="selectDate(item.date)"
           >
             <span v-if="item.gap">...</span>
@@ -68,11 +75,15 @@ import {mapActions, mapState} from "pinia";
 
 import {useCommonStore, useJournalStore} from "@/store";
 import PageTitle from "@/components/layout/PageTitle.vue";
+import AddJournalEntryDialog from "@/components/views/dashboard/garden/AddJournalEntryDialog.vue";
 
 export default {
   name: "GardenJournalPage",
 
-  components: {PageTitle},
+  components: {
+    AddJournalEntryDialog,
+    PageTitle,
+  },
 
   data() {
     return {
@@ -143,6 +154,7 @@ export default {
 
   methods: {
     ...mapActions(useJournalStore, [
+      'upsertJournalEntry',
       'fetchJournalEntriesByYear',
     ]),
 
@@ -158,6 +170,15 @@ export default {
 
     formatDate(date) {
       return new Date(date).toLocaleDateString();
+    },
+
+    async handleNewEntry(entry) {
+      await this.upsertJournalEntry({
+        plantingYear: this.plantingYear,
+        ...entry,
+      });
+      await this.refreshData();
+      this.selectedDate = entry.entryDate.toISOString().split('T')[0];
     }
   },
 
@@ -170,13 +191,13 @@ export default {
 <style scoped>
 .timeline-column {
   max-height: 75vh;
-  overflow-y: auto;
+  overflow: hidden; /* stop outer scroll */
   border-right: 1px solid #ccc;
 }
 
 .timeline {
-  display: flex;
-  flex-direction: column;
+  overflow-y: auto;
+  flex-grow: 1;
   padding: 10px;
 }
 
@@ -218,5 +239,10 @@ export default {
 
 .respect-formatting {
   white-space: pre-wrap;
+}
+
+.add-entry-wrapper {
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 10px;
 }
 </style>
