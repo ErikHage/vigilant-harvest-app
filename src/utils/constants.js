@@ -36,6 +36,10 @@ export const views = {
                 name: 'Garden',
                 path: 'garden',
             },
+            journal: {
+                name: 'Journal',
+                path: 'journal',
+            },
             planning: {
                 name: 'Planning',
                 path: 'planning',

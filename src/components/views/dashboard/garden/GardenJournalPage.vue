@@ -1,0 +1,222 @@
+<template>
+  <v-container fluid>
+    <v-row>
+      <v-col cols="12" class="text-center">
+        <page-title title="Garden Journal"/>
+      </v-col>
+    </v-row>
+
+    <v-row>
+      <v-col cols="2" class="timeline-column">
+        <div class="timeline">
+          <div
+              v-for="(item, index) in timelineItems"
+              :key="index"
+              class="timeline-entry"
+              :class="{'selected': selectedDate === item.date, 'gap': item.gap}"
+              @click="selectDate(item.date)"
+          >
+            <span v-if="item.gap">...</span>
+            <span v-else>{{ formatDate(item.date) }}</span>
+          </div>
+        </div>
+      </v-col>
+
+      <v-col cols="10" class="content-column">
+        <div class="content-area" v-if="selectedEntries.length">
+          <div class="navigation-buttons d-flex justify-space-between mb-4">
+            <v-btn
+                variant="tonal"
+                :disabled="!previousDate"
+                @click="selectDate(previousDate)"
+                prepend-icon="mdi-chevron-left"
+            >
+              Previous
+            </v-btn>
+            <h2>{{ formatDate(selectedDate) }}</h2>
+            <v-btn
+                variant="tonal"
+                :disabled="!nextDate"
+                @click="selectDate(nextDate)"
+                append-icon="mdi-chevron-right"
+            >
+              Next
+            </v-btn>
+          </div>
+          <v-divider class="my-4" />
+
+          <div
+              v-for="(entry, index) in selectedEntries"
+              :key="index"
+              class="journal-entry respect-formatting"
+          >
+            <p>{{ entry.entry }}</p>
+            <v-divider class="my-4" v-if="index < selectedEntries.length - 1" />
+          </div>
+        </div>
+
+        <div class="content-area" v-else>
+          <p>No entry selected.</p>
+        </div>
+      </v-col>
+    </v-row>
+  </v-container>
+</template>
+
+<script>
+import {mapActions, mapState} from "pinia";
+
+import {useCommonStore, useJournalStore} from "@/store";
+import PageTitle from "@/components/layout/PageTitle.vue";
+
+export default {
+  name: "GardenJournalPage",
+
+  components: {PageTitle},
+
+  data() {
+    return {
+      selectedDate: null,
+    };
+  },
+
+  computed: {
+    ...mapState(useCommonStore, {
+      plantingYear: 'plantingYear',
+    }),
+
+    ...mapState(useJournalStore, {
+      journalEntries: 'journalEntries',
+    }),
+
+    groupedEntries() {
+      // TODO can be done as a reduce
+      const groups = {};
+      for (const entry of this.journalEntries) {
+        const entryDate = entry.entryDate;
+        if (!groups[entryDate]) groups[entryDate] = [];
+        groups[entryDate].push(entry);
+      }
+      return groups;
+    },
+
+    sortedDates() {
+      return Object.keys(this.groupedEntries).sort(
+          (a, b) => new Date(a) - new Date(b)
+      );
+    },
+
+    timelineItems() {
+      const items = [];
+      const dates = this.sortedDates;
+
+      for (let i = 0; i < dates.length; i++) {
+        items.push({ date: dates[i], gap: false });
+
+        if (i < dates.length - 1) {
+          const current = new Date(dates[i]);
+          const next = new Date(dates[i + 1]);
+          const diffDays = (next - current) / (1000 * 60 * 60 * 24);
+          if (diffDays > 2) {
+            items.push({ gap: true });
+          }
+        }
+      }
+
+      return items;
+    },
+
+    selectedEntries() {
+      return this.groupedEntries[this.selectedDate] || [];
+    },
+
+    previousDate() {
+      const index = this.sortedDates.indexOf(this.selectedDate);
+      return index > 0 ? this.sortedDates[index - 1] : null;
+    },
+
+    nextDate() {
+      const index = this.sortedDates.indexOf(this.selectedDate);
+      return index < this.sortedDates.length - 1 ? this.sortedDates[index + 1] : null;
+    }
+  },
+
+  methods: {
+    ...mapActions(useJournalStore, [
+      'fetchJournalEntriesByYear',
+    ]),
+
+    async refreshData() {
+      await this.fetchJournalEntriesByYear(this.plantingYear);
+      const firstDate = this.sortedDates[0];
+      if (firstDate) this.selectedDate = firstDate;
+    },
+
+    selectDate(date) {
+      if (date) this.selectedDate = date;
+    },
+
+    formatDate(date) {
+      return new Date(date).toLocaleDateString();
+    }
+  },
+
+  async mounted() {
+    await this.refreshData();
+  }
+}
+</script>
+
+<style scoped>
+.timeline-column {
+  max-height: 75vh;
+  overflow-y: auto;
+  border-right: 1px solid #ccc;
+}
+
+.timeline {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+}
+
+.timeline-entry {
+  cursor: pointer;
+  padding: 8px 12px;
+  margin: 0;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  font-size: 14px;
+}
+
+.timeline-entry.selected {
+  background-color: darkgreen;
+  color: white;
+  font-weight: bold;
+  transform: scale(1.05);
+}
+
+.timeline-entry.gap {
+  color: #888;
+  text-align: center;
+  cursor: default;
+}
+
+.content-column {
+  max-height: 75vh;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.content-area {
+  white-space: pre-wrap;
+}
+
+.journal-entry {
+  margin-bottom: 20px;
+}
+
+.respect-formatting {
+  white-space: pre-wrap;
+}
+</style>

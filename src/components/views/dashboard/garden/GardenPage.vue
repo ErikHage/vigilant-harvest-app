@@ -5,6 +5,7 @@
         <page-title title="Garden Overview"/>
         <v-spacer></v-spacer>
         <v-btn class="mt-3" color="primary" @click="openAddHarvestDialog">Add Harvests</v-btn>
+        <v-btn class="mt-3 ml-3" color="success" @click="goToJournal">Journal</v-btn>
       </v-col>
     </v-row>
 
@@ -203,6 +204,12 @@ export default {
       'upsertHarvests',
       'fetchHarvestSummariesByYear',
     ]),
+
+    goToJournal() {
+      this.$router.push({
+        name: 'Journal',
+      });
+    },
 
     openAddHarvestDialog() {
       if (!this.loading) {
