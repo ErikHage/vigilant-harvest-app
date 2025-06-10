@@ -159,7 +159,7 @@ export default {
       enableEdit: false,
       actionMapping: {
         'CREATED': ['Start', 'Plant', 'Delete'],
-        'STARTED': ['Plant', 'Split'],
+        'STARTED': ['Plant', 'Split', 'Retire'],
         'PLANTED': ['Retire'],
         'RETIRED': [],
       },
