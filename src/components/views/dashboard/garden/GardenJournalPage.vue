@@ -103,7 +103,7 @@ export default {
     groupedEntries() {
       return this.journalEntries.reduce((groups, entry) => {
         const dateObj = new Date(entry.entryDate);
-        const dateOnly = dateObj.toLocaleDateString();
+        const dateOnly = dateObj.toLocaleDateString('sv-SE');
         if (!groups[dateOnly]) groups[dateOnly] = [];
         groups[dateOnly].push(entry);
         return groups;
@@ -168,7 +168,7 @@ export default {
     },
 
     formatDate(date) {
-      return new Date(date).toLocaleDateString();
+      return new Date(date).toLocaleDateString('sv-SE');
     },
 
     async handleNewEntry(entry) {
