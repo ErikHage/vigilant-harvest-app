@@ -5,28 +5,45 @@
       <v-col cols="12" class="text-center">
         <page-title title="Manage Plots"/>
         <v-spacer></v-spacer>
-        <v-btn class="mr-2 mt-3" color="primary" @click="openDialog()">Add</v-btn>
-        <v-btn class="mt-3" color="warning" @click="refreshData">Refresh</v-btn>
-        <v-spacer></v-spacer>
-        <fade-out-alert :is-visible="alert.isVisible" :alert-type="alert.type" :message="alert.message" />
+        <fade-out-alert
+            :is-visible="alert.isVisible"
+            :alert-type="alert.type"
+            :message="alert.message"/>
       </v-col>
 
       <v-col cols="2"></v-col>
       <v-col cols="8">
-        <plots-table
-          :plots="plots"
-          :on-edit-clicked="openDialog"
-        />
+        <v-sheet class="pa-4">
+          <div class="d-flex">
+            <v-text-field
+                v-model="searchFilter"
+                label="Search..."
+                class="search-bar"
+                variant="solo"
+                density="compact"
+                clearable
+            />
+
+            <v-btn class="mx-4" color="primary" @click="openDialog()">Add</v-btn>
+            <v-btn color="warning" @click="refreshData">Refresh</v-btn>
+          </div>
+
+          <plots-table
+              :plots="plots"
+              :search-filter="searchFilter"
+              :on-edit-clicked="openDialog"
+          />
+        </v-sheet>
       </v-col>
       <v-col cols="2"></v-col>
 
     </v-row>
 
     <upsert-plot-dialog
-      :show="dialog"
-      :plot="selectedPlot"
-      :on-submit="savePlot"
-      :on-cancel="closeDialog"
+        :show="dialog"
+        :plot="selectedPlot"
+        :on-submit="savePlot"
+        :on-cancel="closeDialog"
     />
 
   </v-container>
@@ -54,6 +71,7 @@ export default {
   data: () => ({
     dialog: false,
     selectedPlot: null,
+    searchFilter: null,
   }),
 
   computed: {

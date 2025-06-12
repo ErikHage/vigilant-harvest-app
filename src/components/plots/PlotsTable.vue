@@ -1,48 +1,71 @@
 <template>
   <v-card>
     <v-card-text>
-      <v-data-table
-          :headers="headers"
-          :items="filteredPlots"
-          item-key="plotId"
-          class="elevation-1"
-          density="compact"
-      >
-        <template #item.actions="{ item }">
-          <v-icon small @click="onEditClicked(item)">mdi-pencil</v-icon>
-          <!-- TODO add enable/disable button, with confirm dialog. -->
-        </template>
-      </v-data-table>
+      <v-table density="compact" height="50vh">
+        <thead>
+        <tr>
+          <th>Name</th>
+          <th>Length</th>
+          <th>Width</th>
+          <th>Type</th>
+          <th>Active</th>
+          <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr v-for="plot in filteredPlots" :key="plot.plotId">
+          <td>{{ plot.friendlyName }}</td>
+          <td>{{ plot.lengthInInches }}</td>
+          <td>{{ plot.widthInInches }}</td>
+          <td>{{ plot.plotType }}</td>
+          <td>{{ plot.isActive ? 'Y' : 'N' }}</td>
+          <td>
+            <v-icon small @click="onEditClicked(plot)">mdi-pencil</v-icon>
+          </td>
+        </tr>
+        </tbody>
+      </v-table>
     </v-card-text>
   </v-card>
+  <div class="mt-4">
+    <span> {{ filteredPlots.length }} of {{ plots.length }} plots</span>
+  </div>
 </template>
 
 <script>
-  import sorting from "@/utils/sorting";
+import sorting from "@/utils/sorting";
 
-  export default {
-    name: 'PlotsTable',
+export default {
+  name: 'PlotsTable',
 
-    props: {
-      plots: Array,
-      onEditClicked: Function,
+  props: {
+    plots: {
+      type: Array,
     },
+    searchFilter: {
+      type: String,
+    },
+    onEditClicked: {
+      type: Function,
+      required: true,
+    },
+  },
 
-    data: () => ({
-      headers: [
-        {title: 'Name', key: 'friendlyName'},
-        {title: 'Length (in.)', key: 'lengthInInches'},
-        {title: 'Width (in.)', key: 'widthInInches'},
-        {title: 'Type', key: 'plotType'},
-        {title: 'Active', key: 'isActive', value: (item) => item.isActive ? 'Y' : 'N' },
-        {title: 'Actions', key: 'actions', sortable: false},
-      ],
-    }),
+  data() {
+    return {};
+  },
 
-    computed: {
-      filteredPlots() {
-        return this.plots.sort(sorting.sortByPlantFriendlyName);
+  computed: {
+    filteredPlots() {
+      let filteredPlots = this.plots;
+
+      if (this.searchFilter && this.searchFilter.length > 0) {
+        filteredPlots = filteredPlots.filter(
+            plot => plot.friendlyName.toUpperCase().includes(this.searchFilter.toUpperCase()));
       }
+
+      return filteredPlots.sort(sorting.sortByPlantFriendlyName);
     }
   }
+}
 </script>
