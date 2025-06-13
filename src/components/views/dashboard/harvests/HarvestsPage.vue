@@ -72,8 +72,9 @@
 </template>
 
 <script>
-
+import dayjs from 'dayjs';
 import { mapActions, mapState } from "pinia";
+
 import { useCommonStore, useHarvestsStore, usePlantingsStore, usePlantsStore } from "@/store";
 import PageTitle from "@/components/layout/PageTitle.vue";
 import EditHarvestsDialog from "@/components/harvests/EditHarvestsDialog.vue";
@@ -140,7 +141,7 @@ export default {
             };
           })
           .reduce((acc, hydratedHarvest) => {
-            let harvestDate = hydratedHarvest.harvestDate;
+            let harvestDate = dayjs(hydratedHarvest.harvestDate).format('YYYY-MM-DD');
 
             if (!acc[harvestDate]) {
               acc[harvestDate] = [];
@@ -154,12 +155,12 @@ export default {
 
       const withEllipsis = [];
       for (let i = 0; i < this.harvestDates.length; i++) {
-        const current = new Date(this.harvestDates[i]);
+        const current = dayjs(this.harvestDates[i]);
         withEllipsis.push(this.harvestDates[i]);
 
         if (i < this.harvestDates.length - 1) {
-          const next = new Date(this.harvestDates[i + 1]);
-          let dayDiff = Math.floor((current - next) / (1000 * 60 * 60 * 24));
+          const next = dayjs(this.harvestDates[i + 1]);
+          const dayDiff = current.diff(next, 'day');
 
           // Insert "..." for each missing day
           if (dayDiff > 1) {
@@ -189,7 +190,7 @@ export default {
     },
 
     formatDate(date) {
-      return new Date(date).toLocaleDateString('sv-SE');
+      return dayjs(date).format('YYYY-MM-DD');
     },
 
     getQuantityColor(quantity) {
@@ -210,40 +211,41 @@ export default {
 <style scoped>
 .timeline-column {
   max-height: 75vh;
-  overflow-y: auto;
+  overflow: hidden;
   border-right: 1px solid #ccc;
 }
 
 .timeline {
+  overflow-y: auto;
+  flex-grow: 1;
+  padding: 10px;
   display: flex;
   flex-direction: column;
-  padding: 4px;
-  gap: 2px;
 }
 
 .timeline-entry {
   cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 4px;
+  padding: 8px 12px;
+  margin: 0;
+  border-radius: 6px;
+  transition: all 0.2s ease;
   font-size: 14px;
-  line-height: 1.2;
-  transition: background 0.2s ease;
-  margin-bottom: 2px;
 }
 
 .timeline-entry.selected {
   background-color: darkgreen;
   color: white;
   font-weight: bold;
+  transform: scale(1.05);
 }
 
 .timeline-entry.ellipsis {
   pointer-events: none;
-  color: #aaa;
+  color: #888;
   text-align: center;
   font-style: italic;
-  font-size: 10px;
-  margin: 2px 0;
+  font-size: 14px;
+  margin: 4px 0;
 }
 
 .content-column {
