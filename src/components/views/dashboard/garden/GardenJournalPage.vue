@@ -71,6 +71,7 @@
 </template>
 
 <script>
+import dayjs from 'dayjs';
 import {mapActions, mapState} from "pinia";
 
 import {useCommonStore, useJournalStore} from "@/store";
@@ -102,8 +103,7 @@ export default {
 
     groupedEntries() {
       return this.journalEntries.reduce((groups, entry) => {
-        const dateObj = new Date(entry.entryDate);
-        const dateOnly = dateObj.toLocaleDateString('sv-SE');
+        const dateOnly = dayjs(entry.entryDate).format('YYYY-MM-DD');
         if (!groups[dateOnly]) groups[dateOnly] = [];
         groups[dateOnly].push(entry);
         return groups;
@@ -112,7 +112,7 @@ export default {
 
     sortedDates() {
       return Object.keys(this.groupedEntries).sort(
-          (a, b) => new Date(a) - new Date(b)
+          (a, b) => dayjs(a).unix() - dayjs(b).unix()
       );
     },
 
@@ -124,9 +124,9 @@ export default {
         items.push({ date: dates[i], gap: false });
 
         if (i < dates.length - 1) {
-          const current = new Date(dates[i]);
-          const next = new Date(dates[i + 1]);
-          const diffDays = (next - current) / (1000 * 60 * 60 * 24);
+          const current = dayjs(dates[i]);
+          const next = dayjs(dates[i + 1]);
+          const diffDays = next.diff(current, 'day');
           if (diffDays > 1) {
             items.push({ gap: true });
           }
@@ -168,7 +168,7 @@ export default {
     },
 
     formatDate(date) {
-      return new Date(date).toLocaleDateString('sv-SE');
+      return dayjs(date).format('YYYY-MM-DD');
     },
 
     async handleNewEntry(entry) {
@@ -177,7 +177,7 @@ export default {
         ...entry,
       });
       await this.refreshData();
-      this.selectedDate = entry.entryDate.toISOString().split('T')[0];
+      this.selectedDate = entry.entryDate.format('YYYY-MM-DD');
     }
   },
 

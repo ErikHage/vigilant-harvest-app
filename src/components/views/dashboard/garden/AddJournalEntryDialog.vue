@@ -21,8 +21,8 @@
           <date-picker-dialog-activator
               :on-submit="setDateValue"
               title="Entry Date"
-              :date="entryDate"/>
-          <h3 class="ml-2">{{ entryDate.toLocaleDateString() }}</h3>
+              :date="entryDate.toDate()"/>
+          <h3 class="ml-2">{{ entryDate.format('YYYY-MM-DD') }}</h3>
         </div>
         <v-textarea
             v-model="entryText"
@@ -41,11 +41,16 @@
 </template>
 
 <script>
+import dayjs from 'dayjs';
+
 import DatePickerDialogActivator from "@/components/utils/DatePickerDialogActivator.vue";
 
 export default {
   name: "AddJournalEntryDialog",
-  components: {DatePickerDialogActivator},
+
+  components: {
+    DatePickerDialogActivator,
+  },
 
   props: {
     onSubmit: {
@@ -61,18 +66,18 @@ export default {
   data() {
     return {
       show: false,
-      entryDate: new Date(),
+      entryDate: dayjs(),
       entryText: '',
     };
   },
 
   methods: {
     setDateValue(date) {
-      this.entryDate = date;
+      this.entryDate = dayjs(date);
     },
 
     resetData() {
-      this.entryDate = new Date();
+      this.entryDate = dayjs();
       this.entryText = '';
     },
 
@@ -84,7 +89,7 @@ export default {
 
     async handleSubmit() {
       this.onSubmit({
-        entryDate: this.entryDate,
+        entryDate: this.entryDate.toISOString(),
         entry: this.entryText,
       });
       // TODO don't close until submitted successfully
