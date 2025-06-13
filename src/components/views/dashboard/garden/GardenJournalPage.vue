@@ -127,7 +127,7 @@ export default {
           const current = new Date(dates[i]);
           const next = new Date(dates[i + 1]);
           const diffDays = (next - current) / (1000 * 60 * 60 * 24);
-          if (diffDays > 2) {
+          if (diffDays > 1) {
             items.push({ gap: true });
           }
         }
