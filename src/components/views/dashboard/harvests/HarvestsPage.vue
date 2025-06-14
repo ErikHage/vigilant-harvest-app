@@ -206,7 +206,7 @@ export default {
 
 <style scoped>
 .timeline-column {
-  max-height: 75vh;
+  max-height: 70vh;
   overflow: hidden;
   border-right: 1px solid #ccc;
 }
