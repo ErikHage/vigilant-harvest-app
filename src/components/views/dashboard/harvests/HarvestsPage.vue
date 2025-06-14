@@ -4,13 +4,12 @@
       <v-col cols="12">
         <page-title title="Review Harvests"/>
         <v-spacer></v-spacer>
-        <v-btn class="mt-3" color="primary" @click="refreshData">Refresh</v-btn>
       </v-col>
     </v-row>
 
     <v-row>
-      <v-col cols="2" class="timeline-column">
-        <div class="timeline">
+      <v-col cols="2" class="timeline-column d-flex flex-column">
+        <div class="timeline flex-grow-1 overflow-y-auto">
           <div
               v-for="(entry, index) in timelineEntries"
               :key="index"
@@ -25,21 +24,18 @@
 
       <v-col cols="10" class="content-column">
         <div v-if="selectedDate">
-          <v-row>
-            <v-col class="text-right">
+          <v-card class="pa-4">
+            <div class="d-flex justify-space-between">
+              <h3>{{ formatDate(selectedDate) }}</h3>
               <v-btn
                   size="small"
-                  color="default"
+                  color="warning"
                   @click="showEditHarvestsDialog(hydratedHarvestsByDate[selectedDate])"
               >
-                <v-icon>mdi-pencil</v-icon> Edit
+                <v-icon>mdi-pencil</v-icon>&nbsp;Edit
               </v-btn>
-            </v-col>
-          </v-row>
-
-          <v-card class="pa-4">
-            <h3>{{ formatDate(selectedDate) }}</h3>
-            <v-divider class="my-4" />
+            </div>
+            <v-divider class="my-4"/>
 
             <v-table class="no-lines" density="compact">
               <tbody>
@@ -73,9 +69,9 @@
 
 <script>
 import dayjs from 'dayjs';
-import { mapActions, mapState } from "pinia";
+import {mapActions, mapState} from "pinia";
 
-import { useCommonStore, useHarvestsStore, usePlantingsStore, usePlantsStore } from "@/store";
+import {useCommonStore, useHarvestsStore, usePlantingsStore, usePlantsStore} from "@/store";
 import PageTitle from "@/components/layout/PageTitle.vue";
 import EditHarvestsDialog from "@/components/harvests/EditHarvestsDialog.vue";
 
