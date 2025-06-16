@@ -37,21 +37,44 @@
             </div>
             <v-divider class="my-4"/>
 
-            <v-table class="no-lines" density="compact">
-              <tbody>
-              <tr
-                  v-for="harvest in hydratedHarvestsByDate[selectedDate]"
-                  :key="harvest.harvestId"
-              >
-                <td class="quantity-column text-right">
-                  <v-chip :color="getQuantityColor(harvest.quantity)">
-                    {{ harvest.quantity }}
+            <template
+                v-for="plantGroup in groupedHarvests"
+                :key="plantGroup.plantName"
+            >
+              <div class="chip-row">
+                <div class="d-flex align-center" @click="toggleExpanded(plantGroup.plantName)"
+                     style="cursor: pointer;">
+                  <v-chip
+                      :color="getQuantityColor(plantGroup.totalQuantity)"
+                      class="fixed-width-chip"
+                      size="small"
+                  >
+                    {{ plantGroup.totalQuantity }}
                   </v-chip>
-                </td>
-                <td class="planting-column text-left">{{ harvest.plantName }}</td>
-              </tr>
-              </tbody>
-            </v-table>
+
+                  <div class="ml-3 plant-name">
+                    {{ plantGroup.plantName }}
+                  </div>
+
+                  <v-icon small class="ml-2">
+                    {{ expandedPlants.includes(plantGroup.plantName) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
+                  </v-icon>
+                </div>
+
+                <div
+                    v-if="expandedPlants.includes(plantGroup.plantName)"
+                    class="ml-10"
+                >
+                  <div
+                      v-for="harvest in plantGroup.harvests"
+                      :key="harvest.harvestId"
+                      class="breakdown-row mb-1"
+                  >
+                    • {{ harvest.plantingName }} – {{ harvest.quantity }}
+                  </div>
+                </div>
+              </div>
+            </template>
           </v-card>
         </div>
         <div v-else class="pa-4">Select a date from the timeline to see harvests.</div>
@@ -90,6 +113,7 @@ export default {
     selectedHarvests: [],
     timelineEntries: [],
     selectedDate: null,
+    expandedPlants: [],
   }),
 
   computed: {
@@ -108,6 +132,31 @@ export default {
     ...mapState(useHarvestsStore, {
       harvests: 'harvests',
     }),
+
+    groupedHarvests() {
+      const harvestsByPlant = this.hydratedHarvestsByDate?.[this.selectedDate] ?? {};
+      const grouped = {};
+
+      for (const [plantName, harvestArray] of Object.entries(harvestsByPlant)) {
+        for (const harvest of harvestArray) {
+          if (!grouped[plantName]) {
+            grouped[plantName] = {
+              plantName: plantName,
+              totalQuantity: 0,
+              harvests: [],
+            };
+          }
+
+          grouped[plantName].totalQuantity += harvest.quantity;
+          grouped[plantName].harvests.push(harvest);
+        }
+      }
+
+      // Sort alphabetically by plantName
+      return Object.values(grouped).sort((a, b) =>
+          a.plantName.localeCompare(b.plantName)
+      );
+    },
   },
 
   methods: {
@@ -131,19 +180,22 @@ export default {
 
       this.hydratedHarvestsByDate = this.harvests
           .map(harvest => {
+            const planting = this.plantingsById[harvest.plantingId];
+            const plant = this.plantsById[planting.plantId];
             return {
               ...harvest,
-              plantName: this.plantsById[this.plantingsById[harvest.plantingId].plantId].friendlyName,
+              plantName: plant.friendlyName,
+              plantingName: planting.name,
             };
           })
           .reduce((acc, hydratedHarvest) => {
-            let harvestDate = dayjs(hydratedHarvest.harvestDate).format('YYYY-MM-DD');
+            const harvestDate = dayjs(hydratedHarvest.harvestDate).format('YYYY-MM-DD');
+            if (!acc[harvestDate]) acc[harvestDate] = {};
 
-            if (!acc[harvestDate]) {
-              acc[harvestDate] = [];
-            }
+            const plantName = hydratedHarvest.plantName;
+            if (!acc[harvestDate][plantName]) acc[harvestDate][plantName] = [];
 
-            acc[harvestDate].push(hydratedHarvest);
+            acc[harvestDate][plantName].push(hydratedHarvest);
             return acc;
           }, {});
 
@@ -195,7 +247,15 @@ export default {
       if (quantity <= 10) return "#ffffbf";
       if (quantity <= 20) return "#fdae61";
       return "#d73027";
-    }
+    },
+
+    toggleExpanded(plantName) {
+      if (this.expandedPlants.includes(plantName)) {
+        this.expandedPlants = this.expandedPlants.filter(name => name !== plantName);
+      } else {
+        this.expandedPlants.push(plantName);
+      }
+    },
   },
 
   async mounted() {
@@ -252,5 +312,27 @@ export default {
 
 .no-lines td {
   border: none !important;
+}
+
+.chip-row {
+  margin-bottom: 10px;
+}
+
+.fixed-width-chip {
+  width: 45px;
+  justify-content: center;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.plant-name {
+  font-weight: 500;
+  font-size: 16px;
+}
+
+.breakdown-row {
+  font-size: 14px;
+  color: #444;
+  margin-left: 14px;
 }
 </style>
