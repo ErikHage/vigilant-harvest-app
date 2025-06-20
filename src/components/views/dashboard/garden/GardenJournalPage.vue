@@ -112,7 +112,7 @@ export default {
 
     sortedDates() {
       return Object.keys(this.groupedEntries).sort(
-          (a, b) => dayjs(a).unix() - dayjs(b).unix()
+          (a, b) => dayjs(b).unix() - dayjs(a).unix()
       );
     },
 
@@ -126,7 +126,7 @@ export default {
         if (i < dates.length - 1) {
           const current = dayjs(dates[i]);
           const next = dayjs(dates[i + 1]);
-          const diffDays = next.diff(current, 'day');
+          const diffDays = current.diff(next, 'day');
           if (diffDays > 1) {
             items.push({ gap: true });
           }
@@ -219,7 +219,7 @@ export default {
 .timeline-entry.gap {
   color: #888;
   text-align: center;
-  cursor: default;
+  cursor: default;padding: 0;
 }
 
 .content-column {
