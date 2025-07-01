@@ -27,16 +27,19 @@ export const useCommonStore = defineStore('common', {
                     return acc;
                 }, {});
                 this.availableYears = Object.keys(this.plantingYearsByYear);
+                this.selectedPlantingYear = this.plantingYearsByYear[this.plantingYear];
             } catch (err) {
                 this.setAlertMessage(null, 'error', 'error fetching planting years');
             }
         },
         selectPlantingYear(year) {
             this.plantingYear = year;
+            this.selectedPlantingYear = this.plantingYearsByYear[year];
             storageUtils.setLocalStorageEntry(localStorageKeys.plantingYear, year);
         },
         clearPlantingYear() {
             this.plantingYear = null;
+            this.selectedPlantingYear = null;
             storageUtils.clearLocalStorageEntry(localStorageKeys.plantingYear);
         },
         setAlertMessage(err, type, message) {
@@ -56,6 +59,7 @@ export const useCommonStore = defineStore('common', {
             plantingYearsByYear: {},
             availableYears: [],
             plantingYear: storageUtils.getLocalStorageEntry(localStorageKeys.plantingYear) ?? new Date().getFullYear(),
+            selectedPlantingYear: null,
             alertVisible: false,
             alertType: 'success',
             alertMessage: null,
