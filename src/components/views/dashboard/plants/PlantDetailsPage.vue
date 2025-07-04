@@ -1,8 +1,7 @@
 <template>
   <v-container>
     <v-row>
-      <v-col cols="2"></v-col>
-      <v-col cols="8">
+      <v-col cols="12">
 
         <v-row v-if="alertVisible">
           <fade-out-alert :is-visible="alertVisible" :alert-type="alertType" :message="alertMessage"/>

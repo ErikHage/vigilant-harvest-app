@@ -9,10 +9,9 @@
             :alert-type="alert.type"
             :message="alert.message"/>
       </v-col>
-      <v-col cols="2"></v-col>
-      <v-col cols="8">
+      <v-col cols="12">
         <v-sheet class="pa-4">
-          <div class="d-flex">
+          <div class="d-flex justify-space-between">
             <v-text-field
                 v-model="searchFilter"
                 label="Search..."
@@ -23,7 +22,7 @@
             />
 
             <v-btn class="mx-4" color="primary" @click="openDialog()">Add</v-btn>
-            <v-btn color="warning" @click="refreshData">Refresh</v-btn>
+            <!--                <v-btn color="warning" @click="refreshData">Refresh</v-btn>-->
           </div>
 
           <plants-table
@@ -34,7 +33,6 @@
           />
         </v-sheet>
       </v-col>
-      <v-col cols="2"></v-col>
     </v-row>
 
     <add-plant-dialog
@@ -47,8 +45,8 @@
 
 <script>
 
-import { mapActions, mapState } from "pinia";
-import { usePlantsStore } from "@/store";
+import {mapActions, mapState} from "pinia";
+import {usePlantsStore} from "@/store";
 import PageTitle from "@/components/layout/PageTitle.vue";
 import PlantsTable from "@/components/plants/PlantsTable.vue";
 import AddPlantDialog from "@/components/plants/AddPlantDialog.vue";
