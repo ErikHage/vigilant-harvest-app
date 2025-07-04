@@ -1,22 +1,44 @@
 <template>
   <v-app-bar app>
-    <v-toolbar-title>Vigilant Harvest</v-toolbar-title>
+    <template v-if="$vuetify.display.smAndDown">
+      <v-btn :to="dashboardPath" icon>
+        <v-icon>mdi-home</v-icon>
+      </v-btn>
 
-    <v-spacer></v-spacer>
+      <v-spacer></v-spacer>
 
-    <v-toolbar-title
-        class="planting-year"
-        v-if="showPlantingYear"
-    >
-      {{plantingYear}}
-    </v-toolbar-title>
+      <v-toolbar-title
+          class="planting-year"
+          v-if="showPlantingYear"
+      >
+        {{plantingYear}}
+      </v-toolbar-title>
 
-    <v-spacer></v-spacer>
+      <v-spacer></v-spacer>
 
-    <div v-if="showAppBar === true">
-      <v-btn :to="dashboardPath">Dashboard</v-btn>
       <v-btn @click="logoutUser">Logout</v-btn>
-    </div>
+    </template>
+
+    <template v-else>
+      <v-toolbar-title>Vigilant Harvest</v-toolbar-title>
+
+      <v-spacer></v-spacer>
+
+      <v-toolbar-title
+          class="planting-year"
+          v-if="showPlantingYear"
+      >
+        {{plantingYear}}
+      </v-toolbar-title>
+
+      <v-spacer></v-spacer>
+
+      <div v-if="showAppBar === true">
+        <v-btn :to="dashboardPath">Dashboard</v-btn>
+        <v-btn @click="logoutUser">Logout</v-btn>
+      </div>
+    </template>
+
   </v-app-bar>
 </template>
 
