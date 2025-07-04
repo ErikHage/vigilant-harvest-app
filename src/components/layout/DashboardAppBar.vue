@@ -1,12 +1,50 @@
 <template>
   <v-app-bar app>
-    <v-btn v-if="showPlanningLink" :to="planningPagePath">Planning</v-btn>
-    <v-btn v-if="showYearSpecificViews" :to="gardenPagePath">Garden</v-btn>
-    <v-btn :to="plantsPagePath">Plants</v-btn>
-    <v-btn :to="plotsPagePath">Plots</v-btn>
-    <v-btn v-if="showYearSpecificViews" :to="plantingsPagePath">Plantings</v-btn>
-    <v-btn v-if="showYearSpecificViews" :to="harvestsPagePath">Harvests</v-btn>
-    <v-btn v-if="showYearSpecificViews" :to="statsPagePath">Stats</v-btn>
+
+    <template v-if="$vuetify.display.smAndDown">
+      <v-menu offset-y>
+        <template #activator="{ props }">
+          <v-btn v-bind="props" icon>
+            <v-icon>mdi-menu</v-icon>
+          </v-btn>
+        </template>
+
+        <v-list>
+          <v-list-item v-if="showPlanningLink" :to="planningPagePath" link>
+            <v-list-item-title>Planning</v-list-item-title>
+          </v-list-item>
+          <v-list-item v-if="showYearSpecificViews" :to="gardenPagePath" link>
+            <v-list-item-title>Garden</v-list-item-title>
+          </v-list-item>
+          <v-list-item :to="plantsPagePath" link>
+            <v-list-item-title>Plants</v-list-item-title>
+          </v-list-item>
+          <v-list-item :to="plotsPagePath" link>
+            <v-list-item-title>Plots</v-list-item-title>
+          </v-list-item>
+          <v-list-item v-if="showYearSpecificViews" :to="plantingsPagePath" link>
+            <v-list-item-title>Plantings</v-list-item-title>
+          </v-list-item>
+          <v-list-item v-if="showYearSpecificViews" :to="harvestsPagePath" link>
+            <v-list-item-title>Harvests</v-list-item-title>
+          </v-list-item>
+          <v-list-item v-if="showYearSpecificViews" :to="statsPagePath" link>
+            <v-list-item-title>Stats</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
+    </template>
+
+    <template v-else>
+      <v-btn v-if="showPlanningLink" :to="planningPagePath">Planning</v-btn>
+      <v-btn v-if="showYearSpecificViews" :to="gardenPagePath">Garden</v-btn>
+      <v-btn :to="plantsPagePath">Plants</v-btn>
+      <v-btn :to="plotsPagePath">Plots</v-btn>
+      <v-btn v-if="showYearSpecificViews" :to="plantingsPagePath">Plantings</v-btn>
+      <v-btn v-if="showYearSpecificViews" :to="harvestsPagePath">Harvests</v-btn>
+      <v-btn v-if="showYearSpecificViews" :to="statsPagePath">Stats</v-btn>
+    </template>
+
   </v-app-bar>
 </template>
 
