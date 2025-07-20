@@ -455,6 +455,17 @@ export const useActivityLogStore = defineStore('activity-log', {
     },
     state: () => {
         return {
+            activityTypes: [
+                {
+                    name: 'Fertilize',
+                    subTypes: [
+                        'Miracle Grow',
+                        'CalMag',
+                        'Blood Meal',
+                        'Bone Meal',
+                    ]
+                },
+            ],
             activityLogEntries: [],
             alertVisible: false,
             alertType: 'success',
