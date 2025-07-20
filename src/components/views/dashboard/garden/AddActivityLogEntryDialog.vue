@@ -12,6 +12,9 @@
     </template>
 
     <v-card>
+      <v-card-title>
+        <span class="headline">Log Activity</span>
+      </v-card-title>
       <v-card-text>
         <p>Entry Date</p>
         <div class="d-flex align-center">
@@ -21,22 +24,20 @@
               :date="entryDate.toDate()"/>
           <h3 class="ml-2">{{ entryDate.format('YYYY-MM-DD') }}</h3>
         </div>
-        <!--        select activity type (source from backend) -->
+        <!-- TODO select activity type (source from backend) -->
         <v-select
             v-model="activityType"
             :items="activityTypes"
-            item-title="item"
-            item-value="item"
+            item-title="name"
             label="Activity"
             variant="solo"
             return-object
         ></v-select>
-        <!--        select sub type (source from backend) -->
+        <!-- TODO select sub type (source from backend) -->
+        <!-- TODO clear on activity select changed-->
         <v-select
             v-model="activitySubType"
             :items="activitySubTypes"
-            item-title="item"
-            item-value="item"
             label="SubType"
             variant="solo"
         ></v-select>
@@ -46,9 +47,6 @@
             label="Comments"
             rows="10"></v-textarea>
       </v-card-text>
-      <v-card-title>
-        <span class="headline">Log Activity</span>
-      </v-card-title>
 
       <v-card-actions>
         <v-spacer></v-spacer>

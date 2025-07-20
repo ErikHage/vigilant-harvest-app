@@ -40,6 +40,10 @@ export const views = {
                 name: 'Journal',
                 path: 'journal',
             },
+            activityLog: {
+                name: 'ActivityLog',
+                path: 'activity-log',
+            },
             planning: {
                 name: 'Planning',
                 path: 'planning',

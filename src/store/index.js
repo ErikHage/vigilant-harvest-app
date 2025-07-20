@@ -465,6 +465,14 @@ export const useActivityLogStore = defineStore('activity-log', {
                         'Bone Meal',
                     ]
                 },
+                {
+                    name: 'Treat',
+                    subTypes: [
+                        'Copper Fungicide',
+                        'Insecticidal Soap',
+                        'Neem Oil',
+                    ]
+                },
             ],
             activityLogEntries: [],
             alertVisible: false,

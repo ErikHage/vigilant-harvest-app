@@ -6,6 +6,7 @@
         <v-spacer></v-spacer>
         <v-btn class="mt-3" color="primary" @click="openAddHarvestDialog">Add Harvests</v-btn>
         <v-btn class="mt-3 ml-3" color="success" @click="goToJournal">Journal</v-btn>
+        <v-btn class="mt-3 ml-3" color="success" @click="goToActivityLog">Activity Log</v-btn>
       </v-col>
     </v-row>
 
@@ -208,6 +209,12 @@ export default {
     goToJournal() {
       this.$router.push({
         name: 'Journal',
+      });
+    },
+
+    goToActivityLog() {
+      this.$router.push({
+        name: 'ActivityLog',
       });
     },
 
