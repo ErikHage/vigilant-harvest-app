@@ -9,6 +9,7 @@ import plotsApi from "@/api/plots-api";
 import plantingsApi from "@/api/plantings-api";
 import harvestsApi from "@/api/harvests-api";
 import journalApi from "@/api/journal-api";
+import activityLogApi from "@/api/activity-log-api";
 
 import {applicationId, feralAuthenticationAppUrl} from "@/utils/constants";
 import plantingYearsApi from "@/api/planting-years-api";
@@ -416,6 +417,45 @@ export const useJournalStore = defineStore('journal', {
     state: () => {
         return {
             journalEntries: [],
+            alertVisible: false,
+            alertType: 'success',
+            alertMessage: null,
+        };
+    },
+});
+
+export const useActivityLogStore = defineStore('activity-log', {
+    actions: {
+        async upsertActivityLogEntry(activityLogEntry) {
+            try {
+                await activityLogApi.upsertActivityLogEntry(storageUtils.tryToLoadTokenFromStorage(), activityLogEntry);
+            } catch (err) {
+                this.setAlertMessage(err, 'error', 'error upserting activity log entry');
+            }
+        },
+        async fetchActivityLogEntriesByYear(plantingYear) {
+            try {
+                this.activityLogEntries = await activityLogApi.fetchActivityLogEntriesByYear(storageUtils.tryToLoadTokenFromStorage(), plantingYear);
+                console.log(this.activityLogEntries);
+            } catch (err) {
+                this.setAlertMessage(err, 'error', 'error fetching activity log entries by year');
+            }
+        },
+        setAlertMessage(err, type, message) {
+            if (err) {
+                console.error(err);
+            }
+            this.alertVisible = true;
+            this.alertType = type;
+            this.alertMessage = message;
+            setTimeout(() => {
+                this.alertVisible = false;
+            }, 3000);
+        }
+    },
+    state: () => {
+        return {
+            activityLogEntries: [],
             alertVisible: false,
             alertType: 'success',
             alertMessage: null,
