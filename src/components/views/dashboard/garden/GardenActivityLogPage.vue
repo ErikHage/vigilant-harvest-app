@@ -28,7 +28,7 @@
           <v-card-text>
             <v-data-table
                 :headers="headers"
-                :items="activityLogEntries"
+                :items="filteredActivityLogEntries"
                 item-value="entryId"
                 :sort-by="sortBy"
                 class="elevation-1"
@@ -87,6 +87,15 @@ export default {
       activityTypes: 'activityTypes',
       activityLogEntries: 'activityLogEntries',
     }),
+
+    filteredActivityLogEntries() {
+      if (this.activityTypeFilter) {
+        return this.activityLogEntries
+            .filter(entry => entry.activityType.toUpperCase() === this.activityTypeFilter.name);
+      }
+
+      return this.activityLogEntries;
+    }
   },
 
   methods: {
