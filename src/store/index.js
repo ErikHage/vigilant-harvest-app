@@ -455,9 +455,10 @@ export const useActivityLogStore = defineStore('activity-log', {
     },
     state: () => {
         return {
+            // TODO source from backend
             activityTypes: [
                 {
-                    name: 'Fertilize',
+                    name: 'FERTILIZE',
                     subTypes: [
                         'Miracle Grow',
                         'CalMag',
@@ -466,7 +467,7 @@ export const useActivityLogStore = defineStore('activity-log', {
                     ]
                 },
                 {
-                    name: 'Treat',
+                    name: 'TREAT',
                     subTypes: [
                         'Copper Fungicide',
                         'Insecticidal Soap',

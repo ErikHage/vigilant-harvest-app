@@ -14,9 +14,32 @@
 
     <v-row>
       <v-col>
-        <pre>
-        {{ JSON.stringify(this.activityLogEntries, null, 2) }}
-        </pre>
+        <v-card>
+          <v-card-title>
+            <v-select
+                v-model="activityTypeFilter"
+                :items="activityTypes"
+                item-title="name"
+                label="Activity"
+                variant="solo"
+                return-object
+            ></v-select>
+          </v-card-title>
+          <v-card-text>
+            <v-data-table
+                :headers="headers"
+                :items="activityLogEntries"
+                item-value="entryId"
+                :sort-by="sortBy"
+                class="elevation-1"
+                density="compact"
+            >
+              <template #item.entryDate="{ item }">
+                {{ formatDate(item.entryDate) }}
+              </template>
+            </v-data-table>
+          </v-card-text>
+        </v-card>
       </v-col>
     </v-row>
   </v-container>
@@ -42,7 +65,16 @@ export default {
 
   data() {
     return {
-      selectedDate: null,
+      activityTypeFilter: null,
+      sortBy: [
+        { key: 'entryDate', order: 'desc' }
+      ],
+      headers: [
+        {title: 'Date', key: 'entryDate'},
+        {title: 'Type', key: 'activityType'},
+        {title: 'Sub-Type', key: 'subType'},
+        {title: 'Comments', key: 'comments'}
+      ],
     };
   },
 
