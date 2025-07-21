@@ -2,7 +2,8 @@
   <v-container fluid>
     <v-row>
       <v-col cols="12" class="text-center">
-        <page-title title="Garden Activity Log"/>
+        <page-title title="Activity Log"/>
+        <v-spacer></v-spacer>
         <add-activity-log-entry-dialog
             :activity-types="activityTypes"
             :on-submit="handleNewEntry"
