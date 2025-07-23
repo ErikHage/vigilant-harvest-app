@@ -148,10 +148,9 @@ export default {
     },
 
     hydratedPlots() {
-      // TODO this page doesn't show plantings without a plot yet, maybe another api?
       if (this.initialized) {
         const mappedPlots = this.plantings
-            .filter(planting => planting.plotId) // only with assigned plot for now
+            .filter(planting => planting.plotId) // only with assigned
             .reduce((acc, planting) => {
               if (!acc[planting.plotId]) {
                 const plot = this.plotsById[planting.plotId];

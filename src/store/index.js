@@ -455,7 +455,8 @@ export const useActivityLogStore = defineStore('activity-log', {
     },
     state: () => {
         return {
-            // TODO source from backend
+            // TODO select activity type (source from backend)
+            // TODO select sub type (source from backend)
             activityTypes: [
                 {
                     name: 'FERTILIZE',

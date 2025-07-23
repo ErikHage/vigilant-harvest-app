@@ -24,7 +24,6 @@
               :date="entryDate.toDate()"/>
           <h3 class="ml-2">{{ entryDate.format('YYYY-MM-DD') }}</h3>
         </div>
-        <!-- TODO select activity type (source from backend) -->
         <v-select
             v-model="activityType"
             :items="activityTypes"
@@ -34,7 +33,6 @@
             return-object
             @update:model-value="onActivityTypeChanged"
         ></v-select>
-        <!-- TODO select sub type (source from backend) -->
         <v-select
             v-model="activitySubType"
             :items="activitySubTypes"
