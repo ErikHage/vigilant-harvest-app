@@ -124,7 +124,7 @@ export default {
       this.onSubmit({
         entryDate: this.entryDate.toISOString(),
         activityType: this.activityType.name,
-        activitySubType: this.activitySubType,
+        subType: this.activitySubType,
         comments: this.comments,
       });
       // TODO don't close until submitted successfully
