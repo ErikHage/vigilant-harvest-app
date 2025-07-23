@@ -179,7 +179,9 @@ export default {
     },
 
     filteredHarvestFormRecords() {
-      return Object.values(this.harvestsForm).filter(this.isRecordInSelectedPlot);
+      return Object.values(this.harvestsForm)
+          .filter(this.isRecordInSelectedPlot)
+          .filter(this.isRecordNotRetired);
     },
 
     harvestsEntered() {
@@ -231,6 +233,7 @@ export default {
               plotName: plot.friendlyName,
               plantName: tempPlanting.plant.friendlyName,
               quantity: 0,
+              currentStatus: tempPlanting.currentStatus,
             }
           }
         }
@@ -245,6 +248,11 @@ export default {
 
     isRecordInSelectedPlot(harvestFormRecord) {
       return this.selectedPlot?.plotId === harvestFormRecord.plotId;
+    },
+
+    isRecordNotRetired(harvestFormRecord) {
+      console.log(harvestFormRecord);
+      return harvestFormRecord.currentStatus !== 'RETIRED';
     },
 
     confirmHarvestDateOverrideDialog(date) {
