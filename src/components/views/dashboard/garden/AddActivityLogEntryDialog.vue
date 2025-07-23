@@ -32,9 +32,9 @@
             label="Activity"
             variant="solo"
             return-object
+            @update:model-value="onActivityTypeChanged"
         ></v-select>
         <!-- TODO select sub type (source from backend) -->
-        <!-- TODO clear on activity select changed-->
         <v-select
             v-model="activitySubType"
             :items="activitySubTypes"
@@ -130,6 +130,10 @@ export default {
       // TODO don't close until submitted successfully
       this.show = false;
       this.resetData();
+    },
+
+    onActivityTypeChanged() {
+      this.activitySubType = null;
     },
   },
 }
