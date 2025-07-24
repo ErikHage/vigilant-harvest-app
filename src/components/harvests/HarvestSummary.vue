@@ -17,7 +17,7 @@
             {{ planting.plant.friendlyName }}
           </span>
 
-          <v-chip v-if="planting.harvestQuantity > 0 && planting.currentStatus === 'RETIRED'"
+          <v-chip v-if="planting.currentStatus === 'RETIRED'"
                   color="#8B0000">
             {{ planting.harvestQuantity }}
             <v-icon class="ml-1">mdi-basket-fill</v-icon>
