@@ -54,7 +54,7 @@
               <v-row no-gutters>
                 <v-col cols="8">
                   <div class="d-flex flex-column align-start justify-center">
-                    <span class="text-success">{{ harvestFormRecord.plotName }}: {{ harvestFormRecord.plantingName }}</span>
+                    <span class="text-success">{{ harvestFormRecord.plantingName }}</span>
                     <span class="smaller-text">{{ harvestFormRecord.plantName }}</span>
                   </div>
                 </v-col>
