@@ -7,9 +7,13 @@
       <v-card-text>
         <div v-for="harvestFormRecord in newHarvests"
              :key="harvestFormRecord.plantingId">
-          <span class="headline">{{ harvestFormRecord.plotName }}: {{ harvestFormRecord.plantName }}</span>
-          &nbsp;
-          <v-chip color="yellow">+{{ harvestFormRecord.quantity }}</v-chip>
+          <div class="d-flex flex-row align-center justify-start">
+            <div class="d-flex flex-column align-start justify-center mr-6">
+              <span class="text-success">{{ harvestFormRecord.plantingName }}</span>
+              <span class="smaller-text">{{ harvestFormRecord.plotName }}:{{ harvestFormRecord.plantName }}</span>
+            </div>
+            <v-chip color="yellow">+{{ harvestFormRecord.quantity }}</v-chip>
+          </div>
         </div>
       </v-card-text>
       <v-card-actions>
@@ -79,3 +83,10 @@ export default {
   },
 }
 </script>
+
+<style scoped>
+.smaller-text {
+  font-size: 0.8rem;
+  color: gray;
+}
+</style>
