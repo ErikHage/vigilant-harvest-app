@@ -12,10 +12,16 @@
             <v-icon class="ml-1">mdi-leaf</v-icon>
           </v-chip>
 
-          <span class="clickable text-primary font-weight-medium"
-                @click="onClickPlanting(planting.plantingId)">
+          <div class="d-flex flex-column align-center">
+            <span class="clickable text-primary font-weight-medium"
+                  @click="onClickPlanting(planting.plantingId)">
+            {{ planting.name }}
+            </span>
+            <span class="clickable smaller-text"
+                  @click="onClickPlant(planting.plant.plantId)">
             {{ planting.plant.friendlyName }}
-          </span>
+            </span>
+          </div>
 
           <v-chip v-if="planting.currentStatus === 'RETIRED'"
                   color="#8B0000">
@@ -55,6 +61,15 @@ export default {
           plantingId,
         },
       });
+    },
+
+    onClickPlant(plantId) {
+      this.$router.push({
+        name: 'PlantDetailsPage',
+        params: {
+          plantId,
+        },
+      });
     }
   },
 }
@@ -69,5 +84,10 @@ export default {
 .clickable:hover {
   color: #1976D2; /* Vuetify primary color */
   text-decoration: underline;
+}
+
+.smaller-text {
+  font-size: 0.8rem;
+  color: gray;
 }
 </style>
