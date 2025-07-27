@@ -23,6 +23,7 @@
                 label="Activity"
                 variant="solo"
                 return-object
+                clearable
             ></v-select>
           </v-card-title>
           <v-card-text>
