@@ -472,6 +472,7 @@ export const useActivityLogStore = defineStore('activity-log', {
                     subTypes: [
                         'Copper Fungicide',
                         'Insecticidal Soap',
+                        'BT Thuricide',
                         'Neem Oil',
                     ]
                 },
