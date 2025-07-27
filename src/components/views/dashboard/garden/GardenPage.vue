@@ -256,7 +256,6 @@ export default {
     },
 
     isRecordNotRetired(harvestFormRecord) {
-      console.log(harvestFormRecord);
       return harvestFormRecord.currentStatus !== 'RETIRED';
     },
 
