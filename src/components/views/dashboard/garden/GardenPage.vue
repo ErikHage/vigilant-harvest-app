@@ -53,13 +53,17 @@
                  :key="harvestFormRecord.plantingId">
               <v-row no-gutters>
                 <v-col cols="8">
-                  <span class="headline">{{ harvestFormRecord.plotName }}: {{ harvestFormRecord.plantName }}</span>
+                  <div class="d-flex flex-column align-start justify-center">
+                    <span class="text-success">{{ harvestFormRecord.plotName }}: {{ harvestFormRecord.plantingName }}</span>
+                    <span class="smaller-text">{{ harvestFormRecord.plantName }}</span>
+                  </div>
                 </v-col>
                 <v-col cols="4">
                   <v-text-field v-model.number="harvestsForm[harvestFormRecord.plantingId].quantity"
                                 type="number"
                                 label="Quantity"
                                 required
+                                density="compact"
                   ></v-text-field>
                 </v-col>
               </v-row>
@@ -229,8 +233,9 @@ export default {
             const tempPlanting = plot.plantings[j];
             this.harvestsForm[tempPlanting.plantingId] = {
               plotId: plot.plotId,
-              plantingId: tempPlanting.plantingId,
               plotName: plot.friendlyName,
+              plantingId: tempPlanting.plantingId,
+              plantingName: tempPlanting.name,
               plantName: tempPlanting.plant.friendlyName,
               quantity: 0,
               currentStatus: tempPlanting.currentStatus,
@@ -319,3 +324,10 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.smaller-text {
+  font-size: 0.8rem;
+  color: gray;
+}
+</style>
