@@ -109,7 +109,9 @@ export default {
 
     resetData() {
       this.entryDate = dayjs();
-      this.entryText = '';
+      this.activityType = null;
+      this.activitySubType = null;
+      this.comments = '';
     },
 
     handleCancel() {
