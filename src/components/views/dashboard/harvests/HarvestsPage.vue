@@ -189,7 +189,7 @@ export default {
             };
           })
           .reduce((acc, hydratedHarvest) => {
-            const harvestDate = dayjs(hydratedHarvest.harvestDate).format('YYYY-MM-DD');
+            const harvestDate = this.formatDate(hydratedHarvest.harvestDate);
             if (!acc[harvestDate]) acc[harvestDate] = {};
 
             const plantName = hydratedHarvest.plantName;

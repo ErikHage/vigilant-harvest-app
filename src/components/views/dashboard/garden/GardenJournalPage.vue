@@ -103,7 +103,7 @@ export default {
 
     groupedEntries() {
       return this.journalEntries.reduce((groups, entry) => {
-        const dateOnly = dayjs(entry.entryDate).format('YYYY-MM-DD');
+        const dateOnly = this.formatDate(entry.entryDate);
         if (!groups[dateOnly]) groups[dateOnly] = [];
         groups[dateOnly].push(entry);
         return groups;
@@ -177,7 +177,7 @@ export default {
         ...entry,
       });
       await this.refreshData();
-      this.selectedDate = entry.entryDate.format('YYYY-MM-DD');
+      this.selectedDate = this.formatDate(entry.entryDate);
     }
   },
 
