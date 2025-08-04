@@ -14,6 +14,10 @@
       <td>{{ lastModifiedAt }}</td>
     </tr>
     <tr>
+      <th class="details-header shrink-column">Lifespan Type</th>
+      <td>{{ plant.lifespanType }}</td>
+    </tr>
+    <tr>
       <th class="details-header shrink-column">Tags</th>
       <td>
         <v-chip
