@@ -63,6 +63,15 @@
               <v-card-text>
                 <v-text-field v-model="plantCopy.friendlyName" label="Name" variant="solo" density="compact"/>
                 <v-text-field v-model="plantCopy.category" label="Category" variant="solo" density="compact"/>
+                <v-select
+                    v-model="plantCopy.lifespanType"
+                    :items="lifespanTypes"
+                    :item-title="(lifespanType) => lifespanType"
+                    :item-value="(lifespanType) => lifespanType"
+                    label="Lifespan Type"
+                    density="compact"
+                    variant="solo"
+                ></v-select>
                 <v-label class="mx-2">Tags</v-label>
                 <plant-tags-dialog :on-submit="updateTags" :tags="plantCopy.tags"/>
                 <v-chip-group column>
@@ -183,6 +192,12 @@ export default {
         'Part Shade (2-4 hours)',
         'Full Shade (< 2 hours)',
       ],
+      lifespanTypes: [
+        'Annual',
+        'Perennial',
+        'Biennial',
+        'Unknown',
+      ],
       snackbar: {
         show: false,
         message: '',
@@ -224,6 +239,7 @@ export default {
 
     updateButtonEnabled() {
       return this.textFieldEdited(this.plant.friendlyName, this.plantCopy.friendlyName)
+          || this.textFieldEdited(this.plant.lifespanType, this.plantCopy.lifespanType)
           || this.textFieldEdited(this.plant.category, this.plantCopy.category)
           || this.textFieldEdited(this.plant.seedSource, this.plantCopy.seedSource)
           || this.textFieldEdited(this.plant.description, this.plantCopy.description)
@@ -293,6 +309,7 @@ export default {
         plantId: this.plantCopy.plantId,
         category: this.sanitize(this.plantCopy.category),
         friendlyName: this.sanitize(this.plantCopy.friendlyName),
+        lifespanType: this.sanitize(this.plantCopy.lifespanType),
         seedSource: this.sanitize(this.plantCopy.seedSource),
         tags: this.plantCopy.tags,
         description: this.sanitize(this.plantCopy.description),
