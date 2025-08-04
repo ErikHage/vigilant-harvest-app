@@ -13,7 +13,7 @@
               :items="lifespanTypes"
               :item-title="(lifespanType) => lifespanType"
               :item-value="(lifespanType) => lifespanType"
-              label="Select Lifespan Type"
+              label="Lifespan Type"
               density="compact"
               variant="solo"
           ></v-select>
