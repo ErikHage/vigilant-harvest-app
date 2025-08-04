@@ -8,6 +8,15 @@
         <v-form ref="applicationForm">
           <v-text-field v-model="form.category" label="Category" density="compact" required></v-text-field>
           <v-text-field v-model="form.friendlyName" label="Name" density="compact" required></v-text-field>
+          <v-select
+              v-model="form.lifespanType"
+              :items="lifespanTypes"
+              :item-title="(lifespanType) => lifespanType"
+              :item-value="(lifespanType) => lifespanType"
+              label="Select Lifespan Type"
+              density="compact"
+              variant="solo"
+          ></v-select>
           <v-textarea v-model="form.description" label="Description" density="compact" rows="8" required></v-textarea>
         </v-form>
       </v-card-text>
@@ -35,8 +44,15 @@ export default {
       form: {
         category: '',
         friendlyName: '',
+        lifespanType: null,
         description: '',
       },
+      lifespanTypes: [
+        'Annual',
+        'Perennial',
+        'Biennial',
+        'Unknown',
+      ],
     };
   },
 
@@ -44,10 +60,6 @@ export default {
     showDialog() {
       return this.show;
     },
-
-    isEditMode() {
-      return this.plant !== null;
-    }
   },
 
   methods: {
@@ -55,6 +67,7 @@ export default {
       this.form = {
         category: '',
         friendlyName: '',
+        lifespanType: null,
         description: '',
       };
     },
