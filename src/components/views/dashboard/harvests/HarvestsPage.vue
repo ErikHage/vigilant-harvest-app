@@ -223,7 +223,9 @@ export default {
     },
 
     showEditHarvestsDialog(harvests) {
-      this.selectedHarvests = harvests;
+      // is multi-value map of plant to harvest (per planting), need to flatten out to edit.
+      this.selectedHarvests = Object.values(harvests)
+          .flatMap(h => h);
       this.editHarvestsDialog = true;
     },
 
