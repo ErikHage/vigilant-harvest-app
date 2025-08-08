@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="showDialog" id="edit-harvests-dialog" max-width="500px" persistent>
+  <v-dialog v-model="showDialog" id="edit-harvests-dialog" max-width="800px" persistent>
     <v-card>
       <v-card-title>
         <span class="headline">Edit Harvests</span>
@@ -7,10 +7,15 @@
       <v-card-text>
         <v-form ref="editHarvestsForm">
           <v-row no-gutters v-for="harvest in harvestsCopy" :key="harvest.harvestId">
-            <v-col cols="8">
-              <span class="headline">{{ harvest.plantName }}</span>
+            <v-col cols="9">
+              <div class="d-flex flex-row align-center justify-start">
+                <div class="d-flex flex-column align-start justify-center mr-6">
+                  <span class="text-success">{{ harvest.plantingName }}</span>
+                  <span class="smaller-text">{{ harvest.plantName }}</span>
+                </div>
+              </div>
             </v-col>
-            <v-col cols="4">
+            <v-col cols="3">
               <v-text-field v-model.number="harvest.quantity"
                             type="number"
                             label="Quantity"
@@ -73,5 +78,8 @@ export default {
 </script>
 
 <style scoped>
-
+.smaller-text {
+  font-size: 0.8rem;
+  color: gray;
+}
 </style>
