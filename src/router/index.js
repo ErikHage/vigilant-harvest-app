@@ -1,7 +1,7 @@
-import { createRouter, createWebHistory } from 'vue-router';
+import {createRouter, createWebHistory} from 'vue-router';
 
-import { useAuthenticationStore } from "@/store";
-import { views } from '@/utils/constants';
+import {useAuthenticationStore} from "@/store";
+import {views} from '@/utils/constants';
 
 import LandingPage from "@/components/views/LandingPage.vue";
 import LoginPage from "@/components/views/LoginPage.vue";
@@ -155,16 +155,27 @@ const routes = [
 
 const router = createRouter({
     history: createWebHistory('/apps/vigilant-harvest/'),
-    routes
+    routes,
 });
 
-router.beforeEach((to /*, from */) => {
-    const user = useAuthenticationStore();
+router.beforeEach(async (to /*, from */) => {
+    const authenticationStore = useAuthenticationStore();
     const requiresAuthenticated = to.matched.some(record => record.meta.requiresAuthenticated);
 
-    if (requiresAuthenticated && !user.isAuthenticated) {
+    if (requiresAuthenticated) {
+        if (authenticationStore.isAuthenticated) {
+            return;
+        }
+
+        if (authenticationStore.tokenPresent()) {
+            await authenticationStore.verifyToken();
+            if (authenticationStore.isAuthenticated) {
+                return;
+            }
+        }
+
         console.log('sending you back to Landing');
-        return { name: 'LandingPage' };
+        return {name: 'LandingPage'};
     }
 });
 
