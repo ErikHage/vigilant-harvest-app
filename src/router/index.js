@@ -3,7 +3,6 @@ import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthenticationStore } from "@/store";
 import { views } from '@/utils/constants';
 
-import PublicPage from "@/components/views/PublicPage.vue";
 import LandingPage from "@/components/views/LandingPage.vue";
 import LoginPage from "@/components/views/LoginPage.vue";
 import DashboardPage from "@/components/views/DashboardPage.vue";
@@ -22,14 +21,6 @@ import GardenJournalPage from "@/components/views/dashboard/garden/GardenJournal
 import GardenActivityLogPage from "@/components/views/dashboard/garden/GardenActivityLogPage.vue";
 
 const routes = [
-    {
-        path: views.public.path,
-        name: views.public.name,
-        component: PublicPage,
-        meta: {
-            requiresAuthenticated: false,
-        },
-    },
     {
         path: views.login.path,
         name: views.login.name,

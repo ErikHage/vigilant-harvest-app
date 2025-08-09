@@ -12,13 +12,9 @@ export const vigilantHarvestServiceUrl = {
 };
 
 export const views = {
-    public: {
-        name: 'PublicPage',
-        path: '/',
-    },
     login:  {
         name: 'Login',
-        path: '/login',
+        path: '/',
     },
     landing: {
         name: 'LandingPage',
