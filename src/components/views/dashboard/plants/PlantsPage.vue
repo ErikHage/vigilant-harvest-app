@@ -1,6 +1,7 @@
 <template>
   <v-container>
     <v-row>
+
       <v-col cols="12" class="text-center">
         <page-title title="Manage Plants"/>
         <v-spacer></v-spacer>
@@ -9,6 +10,7 @@
             :alert-type="alert.type"
             :message="alert.message"/>
       </v-col>
+
       <v-col cols="12">
         <v-sheet class="pa-4">
           <div class="d-flex justify-space-between">
@@ -40,6 +42,7 @@
         :on-submit="savePlant"
         :on-cancel="closeDialog"
     />
+
   </v-container>
 </template>
 

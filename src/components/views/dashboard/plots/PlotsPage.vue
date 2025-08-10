@@ -11,8 +11,7 @@
             :message="alert.message"/>
       </v-col>
 
-      <v-col cols="2"></v-col>
-      <v-col cols="8">
+      <v-col cols="12">
         <v-sheet class="pa-4">
           <div class="d-flex">
             <v-text-field
@@ -35,8 +34,6 @@
           />
         </v-sheet>
       </v-col>
-      <v-col cols="2"></v-col>
-
     </v-row>
 
     <upsert-plot-dialog
