@@ -1,13 +1,15 @@
 <template>
   <v-container>
     <v-row class="justify-center">
-      <v-col cols="12" sm="8" md="4">
+      <v-col cols="12" lg="6">
         <div class="text-center mb-4">
+          <h1>Vigilant Harvest</h1>
+          <h3 class="ma-2">An Online Garden Tracker</h3>
           <v-img
               :src="getAssetPath('ai-owl.jpg')"
               alt="Logo"
               contain
-              max-width="250"
+              max-width="500"
               class="mx-auto"
           ></v-img>
         </div>
