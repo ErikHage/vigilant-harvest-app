@@ -356,7 +356,7 @@ export const useHarvestsStore = defineStore('harvests', {
         async fetchHarvestStats(year) {
             try {
                 this.harvestStats = await harvestsApi
-                    .fetchHarvestStats(storageUtils.tryToLoadTokenFromStorage(), year);
+                    .fetchHarvestStats(storageUtils.tryToLoadTokenFromStorage(), year, 'Planting');
             } catch (err) {
                 this.setAlertMessage(err, 'error', 'error fetching harvest stats');
             }

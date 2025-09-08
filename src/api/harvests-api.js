@@ -33,12 +33,14 @@ async function searchHarvests(actorToken, year) {
     return response.data;
 }
 
-async function fetchHarvestStats(actorToken, year) {
-    const response = await axios.get(`${vigilantHarvestServiceUrl.v0}/harvests/stats?year=${year}`, {
-        headers: {
-            'x-feral-auth-token': actorToken,
-        },
-    });
+async function fetchHarvestStats(actorToken, year, statsType) {
+    const response = await axios.get(
+        `${vigilantHarvestServiceUrl.v0}/harvests/stats?year=${year}&type=${statsType}`,
+        {
+            headers: {
+                'x-feral-auth-token': actorToken,
+            },
+        });
     return response.data;
 }
 
