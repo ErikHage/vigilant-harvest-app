@@ -1,8 +1,20 @@
 <template>
   <v-card>
     <v-card-title>
-      <h3>{{ stats.plantName }}</h3>
-      <span class="subtitle">{{ stats.plantingId }}</span>
+      <div v-if="stats.plantingName" class="title-container">
+        <h3 class="text-h5 mb-2 font-weight-medium text-primary">{{ stats.plantingName }}</h3>
+        <div class="d-flex align-center mb-1">
+          <v-icon size="small" class="me-2">mdi-sprout-outline</v-icon>
+          <span class="text-subtitle-1 text-medium-emphasis">{{ stats.plantName }}</span>
+        </div>
+        <div class="d-flex align-center" v-if="stats.plotName">
+          <v-icon size="small" class="me-2">mdi-vector-square</v-icon>
+          <span class="text-subtitle-2 text-medium-emphasis">{{ stats.plotName }}</span>
+        </div>
+      </div>
+      <div v-else>
+        <h3 class="text-h5 font-weight-medium text-primary">{{ stats.plantName }}</h3>
+      </div>
     </v-card-title>
     <v-card-text>
       <v-table>
