@@ -88,11 +88,17 @@ export default {
     },
 
     plantingStats() {
-      if (this.harvestStats && this.harvestStats.plantingStats) {
-        return Object.values(this.harvestStats.plantingStats);
+      if (this.harvestStats && this.harvestStats.stats) {
+        return this.harvestStats.stats
+            .sort((a, b) => {
+              const nameA = a.plantingName || a.plantName || '';
+              const nameB = b.plantingName || b.plantName || '';
+              return nameA.localeCompare(nameB);
+            });
       }
       return [];
     },
+
 
     alert() {
       return {
