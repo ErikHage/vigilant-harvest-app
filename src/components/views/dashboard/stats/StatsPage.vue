@@ -24,7 +24,6 @@
       <v-col cols="8">
 
         <v-select
-            v-model="selectedStat"
             :items="stats"
             :item-title="getDisplayTitle"
             item-value="index"
