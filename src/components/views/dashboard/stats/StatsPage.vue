@@ -5,14 +5,15 @@
       <v-col cols="12" class="text-center">
         <page-title title="Stats"/>
         <v-spacer></v-spacer>
-        <fade-out-alert :is-visible="alert.isVisible" :alert-type="alert.type" :message="alert.message" />
+        <fade-out-alert :is-visible="alert.isVisible" :alert-type="alert.type" :message="alert.message"/>
       </v-col>
 
       <v-col cols="2"></v-col>
       <v-col cols="8">
 
-        <harvest-stats-card
-            :harvest-stats="stats"/>
+        <div v-if="harvestStatsData">
+          <harvest-stats-card :harvest-stats="harvestStatsData"/>
+        </div>
 
       </v-col>
       <v-col cols="2"></v-col>
@@ -23,20 +24,24 @@
       <v-col cols="8">
 
         <v-select
-            :items="plantingStats"
-            :item-title="(plantingStats) => plantingStats.plantName"
-            label="Select Planting To View Stats"
+            v-model="selectedStat"
+            :items="stats"
+            :item-title="getDisplayTitle"
+            item-value="index"
+            label="Select Stats to View"
             variant="solo"
             clearable
-            return-object
-            @update:model-value="onSelectPlantingStatChange"
+            @update:model-value="onSelectedStatChange"
         />
 
-        <div v-if="selectedPlantingStat !== null">
-          <planting-stats-card
-              class="planting-stats-card"
-              :planting-stats="selectedPlantingStat"
+        <div v-if="selectedStat">
+          <stats-card
+              class="stats-card"
+              :stats="selectedStat"
           />
+        </div>
+        <div v-else class="d-flex justify-center">
+          No stats selected.
         </div>
 
       </v-col>
@@ -48,10 +53,10 @@
 
 <script>
 
-import { mapActions, mapState } from "pinia";
-import { useCommonStore, useHarvestsStore } from "@/store";
+import {mapActions, mapState} from "pinia";
+import {useCommonStore, useHarvestsStore} from "@/store";
 import PageTitle from "@/components/layout/PageTitle.vue";
-import PlantingStatsCard from "@/components/plantings/PlantingStatsCard.vue";
+import StatsCard from "@/components/harvests/StatsCard.vue";
 import HarvestStatsCard from "@/components/harvests/HarvestStatsCard.vue";
 import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
 
@@ -61,12 +66,12 @@ export default {
   components: {
     FadeOutAlert,
     HarvestStatsCard,
-    PlantingStatsCard,
+    StatsCard,
     PageTitle,
   },
 
   data: () => ({
-    selectedPlantingStat: null,
+    selectedStatIndex: null,
   }),
 
   computed: {
@@ -81,24 +86,28 @@ export default {
       alertVisible: 'alertVisible',
     }),
 
-    stats() {
+    harvestStatsData() {
       return {
         ...this.harvestStats,
       };
     },
 
-    plantingStats() {
+    stats() {
       if (this.harvestStats && this.harvestStats.stats) {
         return this.harvestStats.stats
             .sort((a, b) => {
               const nameA = a.plantingName || a.plantName || '';
               const nameB = b.plantingName || b.plantName || '';
               return nameA.localeCompare(nameB);
-            });
+            })
+            .map((item, index) => ({ ...item, index }));
       }
       return [];
     },
 
+    selectedStat() {
+      return this.selectedStatIndex !== null ? this.stats[this.selectedStatIndex] : null;
+    },
 
     alert() {
       return {
@@ -118,8 +127,16 @@ export default {
       await this.fetchHarvestStats(this.plantingYear);
     },
 
-    onSelectPlantingStatChange(plantingStat) {
-      this.selectedPlantingStat = plantingStat;
+    onSelectedStatChange(index) {
+      console.log(`Selected stat index changed: ${index}`);
+      this.selectedStatIndex = index;
+    },
+
+    getDisplayTitle(item) {
+      if (item.plantingName) {
+        return `${item.plantingName} | ${item.plotName} | ${item.plantName}`;
+      }
+      return item.plantName;
     },
   },
 
@@ -130,7 +147,7 @@ export default {
 </script>
 
 <style scoped>
-.planting-stats-card {
+.stats-card {
   margin-bottom: 5px;
 }
 </style>

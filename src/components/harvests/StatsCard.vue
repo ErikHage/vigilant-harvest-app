@@ -1,27 +1,27 @@
 <template>
   <v-card>
     <v-card-title>
-      <h3>{{ plantingStats.plantName }}</h3>
-      <span class="subtitle">{{ plantingStats.plantingId }}</span>
+      <h3>{{ stats.plantName }}</h3>
+      <span class="subtitle">{{ stats.plantingId }}</span>
     </v-card-title>
     <v-card-text>
       <v-table>
         <tbody>
         <tr>
           <th>First Harvest</th>
-          <td>{{ this.formatDate(plantingStats.firstHarvest) }}</td>
+          <td>{{ this.formatDate(stats.firstHarvest) }}</td>
         </tr>
         <tr>
           <th>Last Harvest</th>
-          <td>{{ this.formatDate(plantingStats.lastHarvest) }}</td>
+          <td>{{ this.formatDate(stats.lastHarvest) }}</td>
         </tr>
         <tr>
           <th>Total Harvested</th>
-          <td>{{ plantingStats.totalQuantity }}</td>
+          <td>{{ stats.totalQuantity }}</td>
         </tr>
         <tr>
           <th>Average Harvest per Day</th>
-          <td>{{ plantingStats.averageHarvestPerDay }}</td>
+          <td>{{ stats.averageHarvestPerDay }}</td>
         </tr>
         </tbody>
       </v-table>
@@ -31,10 +31,10 @@
 
 <script>
 export default {
-  name: "PlantingStatsCard",
+  name: "StatsCard",
 
   props: {
-    plantingStats: {
+    stats: {
       type: Object,
       required: true,
     },
