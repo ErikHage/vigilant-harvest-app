@@ -118,10 +118,6 @@ export default {
       await this.fetchHarvestStats(this.plantingYear);
     },
 
-    formatDate(date) {
-      return date ? new Date(date).toDateString() : '---';
-    },
-
     onSelectPlantingStatChange(plantingStat) {
       this.selectedPlantingStat = plantingStat;
     },
