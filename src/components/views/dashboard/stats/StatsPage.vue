@@ -127,7 +127,6 @@ export default {
     },
 
     onSelectedStatChange(index) {
-      console.log(`Selected stat index changed: ${index}`);
       this.selectedStatIndex = index;
     },
 
