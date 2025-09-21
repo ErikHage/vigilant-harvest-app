@@ -353,10 +353,10 @@ export const useHarvestsStore = defineStore('harvests', {
                 this.setAlertMessage(err, 'error', 'error searching harvests page');
             }
         },
-        async fetchHarvestStats(year) {
+        async fetchHarvestStats(year, statType) {
             try {
                 this.harvestStats = await harvestsApi
-                    .fetchHarvestStats(storageUtils.tryToLoadTokenFromStorage(), year, 'Planting');
+                    .fetchHarvestStats(storageUtils.tryToLoadTokenFromStorage(), year, statType);
             } catch (err) {
                 this.setAlertMessage(err, 'error', 'error fetching harvest stats');
             }

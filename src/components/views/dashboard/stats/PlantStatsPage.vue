@@ -3,7 +3,7 @@
 
     <v-row>
       <v-col cols="12" class="text-center">
-        <page-title title="Stats"/>
+        <page-title title="Plant Stats"/>
         <v-spacer></v-spacer>
         <fade-out-alert :is-visible="alert.isVisible" :alert-type="alert.type" :message="alert.message"/>
       </v-col>
@@ -27,7 +27,7 @@
             :items="stats"
             :item-title="getDisplayTitle"
             item-value="index"
-            label="Select Stats to View"
+            label="Select Plant to View"
             variant="solo"
             clearable
             @update:model-value="onSelectedStatChange"
@@ -60,7 +60,7 @@ import HarvestStatsCard from "@/components/harvests/HarvestStatsCard.vue";
 import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
 
 export default {
-  name: 'StatsPage',
+  name: 'PlantingStatsPage',
 
   components: {
     FadeOutAlert,
@@ -123,7 +123,7 @@ export default {
     ]),
 
     async refreshData() {
-      await this.fetchHarvestStats(this.plantingYear);
+      await this.fetchHarvestStats(this.plantingYear, "Plant");
     },
 
     onSelectedStatChange(index) {
