@@ -6,7 +6,7 @@
           <v-col cols="12" class="text-center">
             <page-title :title="title"/>
             <v-spacer></v-spacer>
-            <v-chip size="large" :color="statusColor">{{ planting.currentStatus }}</v-chip>
+            <v-chip size="large" :color="statusColor">{{ planting?.currentStatus }}</v-chip>
             <v-spacer></v-spacer>
             <fade-out-alert
                 v-for="(alert, i) in alerts"
@@ -166,6 +166,7 @@ export default {
         plotId: null,
         plantId: null,
         plantingYear: null,
+        plantingYears: null,
         name: null,
         seedSource: null,
         lotNumber: null,
@@ -277,6 +278,7 @@ export default {
         plotId: planting.plotId ?? undefined,
         plantId: planting.plantId ?? undefined,
         plantingYear: planting.plantingYear ?? undefined,
+        plantingYears: planting.plantingYears ?? undefined,
         name: planting.name ?? undefined,
         seedSource: planting.seedSource ?? undefined,
         lotNumber: planting.lotNumber ?? undefined,

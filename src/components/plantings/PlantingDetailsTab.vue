@@ -46,6 +46,15 @@
     </div>
 
     <div class="d-flex">
+      <v-text-field
+          v-model="plantingYearsDisplay"
+          label="Planting Years"
+          variant="solo"
+          density="compact"
+          :disabled="true"/>
+    </div>
+
+    <div class="d-flex">
       <v-btn class="px-1 mt-2" color="black" size="small" @click="navigateToPlantDetails(planting.plantId)">
         <v-icon>mdi-sprout-outline</v-icon>
       </v-btn>
@@ -189,6 +198,11 @@ export default {
 
     sortedPlants() {
       return this.plants.sort(sorting.sortByPlantFriendlyName);
+    },
+
+    plantingYearsDisplay() {
+      console.log(this.planting);
+      return this.planting?.plantingYears?.join(", ") ?? '';
     },
   },
 
