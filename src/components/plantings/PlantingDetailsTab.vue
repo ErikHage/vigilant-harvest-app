@@ -201,8 +201,16 @@ export default {
     },
 
     plantingYearsDisplay() {
-      console.log(this.planting);
-      return this.planting?.plantingYears?.join(", ") ?? '';
+      if (this.planting?.plantingYears) {
+        let pys = this.planting?.plantingYears;
+        if (pys.length > 1) {
+          return pys[0] + ' - ' + pys[pys.length - 1];
+        }
+        if (pys.length === 1) {
+          return pys[0];
+        }
+      }
+      return '';
     },
   },
 
