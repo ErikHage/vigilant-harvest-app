@@ -47,6 +47,12 @@
 
     <div class="d-flex">
       <v-text-field
+          v-model="planting.currentPlantingYear"
+          label="Current Planting Year"
+          variant="solo"
+          density="compact"
+          :disabled="true"/>
+      <v-text-field
           v-model="plantingYearsDisplay"
           label="Planting Years"
           variant="solo"
