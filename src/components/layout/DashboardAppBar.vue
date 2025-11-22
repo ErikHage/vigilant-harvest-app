@@ -16,6 +16,9 @@
           <v-list-item v-if="showYearSpecificViews" :to="gardenPagePath" link>
             <v-list-item-title>Garden</v-list-item-title>
           </v-list-item>
+          <v-list-item :to="yearsPagePath" link>
+            <v-list-item-title>Years</v-list-item-title>
+          </v-list-item>
           <v-list-item :to="plantsPagePath" link>
             <v-list-item-title>Plants</v-list-item-title>
           </v-list-item>
@@ -50,6 +53,7 @@
       <v-btn v-if="showYearSpecificViews" :to="gardenPagePath">Garden</v-btn>
       <v-btn :to="plantsPagePath">Plants</v-btn>
       <v-btn :to="plotsPagePath">Plots</v-btn>
+      <v-btn :to="yearsPagePath">Years</v-btn>
       <v-btn v-if="showYearSpecificViews" :to="plantingsPagePath">Plantings</v-btn>
       <v-btn v-if="showYearSpecificViews" :to="harvestsPagePath">Harvests</v-btn>
       <v-menu v-if="showYearSpecificViews" offset-y>
@@ -95,6 +99,7 @@ export default {
     planningPagePath: views.dashboard.path + "/" + views.dashboard.children.planning.path,
     plantsPagePath: views.dashboard.path + "/" + views.dashboard.children.plants.path,
     plotsPagePath: views.dashboard.path + "/" + views.dashboard.children.plots.path,
+    yearsPagePath: views.dashboard.path + "/" + views.dashboard.children.years.path,
     plantingsPagePath: views.dashboard.path + "/" + views.dashboard.children.plantings.path,
     harvestsPagePath: views.dashboard.path + "/" + views.dashboard.children.harvests.path,
     statsPlantPagePath: views.dashboard.path + "/" + views.dashboard.children.stats.plant.path,

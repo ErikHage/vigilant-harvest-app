@@ -143,6 +143,46 @@ export const useAuthenticationStore = defineStore('authentication', {
     },
 });
 
+export const usePlantingYearsStore = defineStore('plantingYears', {
+    actions: {
+        async fetchPlantingYears() {
+            try {
+                this.plantingYears = await plantingYearsApi.fetchPlantingYears(storageUtils.tryToLoadTokenFromStorage());
+            } catch (err) {
+                this.setAlertMessage(null, 'error', 'error fetching planting years');
+            }
+        },
+        async fetchPlantingYear(year) {
+            try {
+                this.plantingYear = await plantingYearsApi.fetchPlantingYear(storageUtils.tryToLoadTokenFromStorage(), year);
+            } catch (err) {
+                this.setAlertMessage(null, 'error', 'error fetching planting year');
+            }
+        },
+        setAlertMessage(err, type, message) {
+            if (err) {
+                console.error(err);
+            }
+            this.alertVisible = true;
+            this.alertType = type;
+            this.alertMessage = message;
+            setTimeout(() => {
+                this.alertVisible = false;
+            }, 3000);
+        },
+    },
+
+    state: () => {
+        return {
+            plantingYears: [],
+            plantingYear: null,
+            alertVisible: false,
+            alertType: 'success',
+            alertMessage: null,
+        };
+    },
+});
+
 export const usePlantsStore = defineStore('plants', {
     actions: {
         async upsertPlant(plant) {

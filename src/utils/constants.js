@@ -60,6 +60,14 @@ export const views = {
                 name: 'PlotsPage',
                 path: 'plots',
             },
+            years: {
+                name: 'PlantingYearsPage',
+                path: 'planting-years',
+                details: {
+                    name: 'PlantingYearDetailsPage',
+                    path: 'planting-years/:year',
+                },
+            },
             plantings: {
                 name: 'PlantingsPage',
                 path: 'plantings',
