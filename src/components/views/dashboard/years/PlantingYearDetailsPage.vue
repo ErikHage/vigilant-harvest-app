@@ -113,7 +113,10 @@ export default {
     ]),
 
     formatDate(dateString) {
-      return new Date(dateString).toLocaleDateString('en-US', {
+      // dates in UTC, hack to get the right date
+      const date = new Date(dateString);
+      date.setHours(date.getHours() + 12);
+      return date.toLocaleDateString('en-US', {
         month: 'long',
         day: 'numeric',
         year: 'numeric'
