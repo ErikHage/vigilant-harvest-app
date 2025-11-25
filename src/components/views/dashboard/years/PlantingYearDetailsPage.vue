@@ -2,7 +2,7 @@
   <v-container>
     <v-row v-if="plantingYear">
       <v-col cols="12">
-        <v-sheet>
+        <v-sheet class="pa-4">
           <v-row>
             <v-col cols="12">
               <v-card>
