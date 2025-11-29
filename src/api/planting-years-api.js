@@ -31,7 +31,22 @@ async function fetchPlantingYear(actorToken, year) {
     }
 }
 
+async function addPlantingYear(actorToken, plantingYearRequest) {
+    try {
+    const response = await axios.put(`${vigilantHarvestServiceUrl.v0}/planting-years`, plantingYearRequest, {
+        headers: {
+            'x-feral-auth-token': actorToken,
+        },
+    });
+    return response.data;
+    } catch (err) {
+        console.log('error adding planting year ' + plantingYearRequest);
+        throw err;
+    }
+}
+
 export default {
     fetchPlantingYears: withApiErrorHandling(fetchPlantingYears),
     fetchPlantingYear: withApiErrorHandling(fetchPlantingYear),
+    addPlantingYear: withApiErrorHandling(addPlantingYear),
 };

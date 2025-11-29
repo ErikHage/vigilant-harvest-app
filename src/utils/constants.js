@@ -67,6 +67,10 @@ export const views = {
                     name: 'PlantingYearDetailsPage',
                     path: 'planting-years/:year',
                 },
+                add: {
+                    name: 'AddPlantingYearPage',
+                    path: 'planting-years/add',
+                },
             },
             plantings: {
                 name: 'PlantingsPage',

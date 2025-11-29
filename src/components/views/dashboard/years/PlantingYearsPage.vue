@@ -68,7 +68,9 @@ export default {
     ]),
 
     navigateToAddPlantingYearPage() {
-      console.log("navigateToAddPlantingYearPage called");
+      this.$router.push({
+        name: views.dashboard.children.years.add.name,
+      });
     },
 
     navigateToPlantingYearDetails(plantingYear) {

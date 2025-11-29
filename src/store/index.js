@@ -159,6 +159,14 @@ export const usePlantingYearsStore = defineStore('plantingYears', {
                 this.setAlertMessage(null, 'error', 'error fetching planting year');
             }
         },
+        async addPlantingYear(plantingYearRequest) {
+            try {
+                await plantingYearsApi.addPlantingYear(storageUtils.tryToLoadTokenFromStorage(), plantingYearRequest);
+            } catch (err) {
+                this.setAlertMessage(err, 'error', 'error adding planting year');
+                throw err;
+            }
+        },
         setAlertMessage(err, type, message) {
             if (err) {
                 console.error(err);
