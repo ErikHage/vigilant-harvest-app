@@ -10,7 +10,7 @@
         </template>
 
         <v-list>
-          <v-list-item v-if="showPlanningLink" :to="planningPagePath" link>
+          <v-list-item v-if="showYearSpecificViews" :to="planningPagePath" link>
             <v-list-item-title>Planning</v-list-item-title>
           </v-list-item>
           <v-list-item v-if="showYearSpecificViews" :to="gardenPagePath" link>
@@ -49,7 +49,7 @@
     </template>
 
     <template v-else>
-      <v-btn v-if="showPlanningLink" :to="planningPagePath">Planning</v-btn>
+      <v-btn v-if="showYearSpecificViews" :to="planningPagePath">Planning</v-btn>
       <v-btn v-if="showYearSpecificViews" :to="gardenPagePath">Garden</v-btn>
       <v-btn :to="plantsPagePath">Plants</v-btn>
       <v-btn :to="plotsPagePath">Plots</v-btn>
@@ -106,32 +106,9 @@ export default {
     statsPlantingPagePath: views.dashboard.path + "/" + views.dashboard.children.stats.planting.path,
   }),
 
-  computed: {
-    showPlanningLink() {
-      if (!this.showYearSpecificViews()) {
-        return false;
-      }
-
-      if (!this.plantingYear) {
-        return false;
-      }
-
-      const plantingCounts = this.extractCounts(this.plantingYear.details);
-
-      return plantingCounts.created > 0 || plantingCounts.started > 0;
-    },
-  },
-
   methods: {
     showYearSpecificViews() {
       return this.isPlantingYearSelected === true;
-    },
-
-    extractCounts(plantingYearDetails) {
-      return {
-        created: plantingYearDetails?.createdPlantings ?? 0,
-        started: plantingYearDetails?.startedPlantings ?? 0,
-      };
     },
   },
 }

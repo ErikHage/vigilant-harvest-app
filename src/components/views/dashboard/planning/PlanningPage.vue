@@ -2,7 +2,7 @@
   <v-container>
     <v-row>
       <v-col cols="12" class="text-center">
-        <page-title title="Planning"/>
+        <page-title :title="'Planting Plan - ' + plantingYear"/>
         <v-spacer></v-spacer>
         <fade-out-alert
             v-for="(alert, i) in alerts"
@@ -13,70 +13,87 @@
         />
       </v-col>
 
-      <v-col cols="0" lg="2"></v-col>
-      <v-col cols="12" lg="8">
+      <v-col v-if="planningDetails !== null" cols="12">
+        <v-card>
+          <v-card-title class="d-flex justify-center py-6">
+            <div class="d-flex align-center ga-6">
 
-        <v-card class="mt-4">
-          <v-tabs
-              v-model="tab"
-              align-tabs="start"
-              fixed-tabs>
-            <v-tab value="created">Starting Schedule</v-tab>
-            <v-tab value="started">Seedlings</v-tab>
+              <v-chip
+                  size="x-large"
+                  variant="outlined"
+                  color="primary"
+              >
+                Today: {{ formatDayOfMonthToDate(planningDetails.currentDay) }}
+              </v-chip>
+
+              <v-chip
+                  size="x-large"
+                  variant="outlined"
+                  color="primary"
+              >
+                Planting Day: {{ formatDayOfMonthToDate(planningDetails.targetPlantingDay) }}
+              </v-chip>
+
+              <v-chip
+                  size="x-large"
+                  variant="outlined"
+                  :color="currentVsTargetColor"
+              >
+                {{ dayDifference }} days until planting!
+              </v-chip>
+
+            </div>
+          </v-card-title>
+
+          <v-tabs v-model="activeTab" color="primary" grow>
+            <v-tab value="planning">Planning</v-tab>
+            <v-tab value="propagation">Propagation</v-tab>
           </v-tabs>
 
-          <v-card-text>
-            <v-tabs-window v-model="tab">
+          <v-tabs-window v-model="activeTab">
+            <v-tabs-window-item value="planning">
+              <planning-table
+                  :items="planningDetails.planning.plantings"
+                  :year="plantingYear"
+                  action-day-title="Sowing Day"
+              />
+            </v-tabs-window-item>
 
-              <v-tabs-window-item value="created">
-                <planning-created-tab
-                    :plantings="createdPlantings"
-                    :plants-map="plantsById"
-                    :planting-year-config="plantingYearConfig"/>
-              </v-tabs-window-item>
-
-              <v-tabs-window-item value="started">
-                <planning-started-tab
-                    :plantings="startedPlantings"
-                    :plants-map="plantsById"
-                    :planting-year-config="plantingYearConfig"/>
-              </v-tabs-window-item>
-
-            </v-tabs-window>
-          </v-card-text>
+            <v-tabs-window-item value="propagation">
+              <planning-table
+                  :items="planningDetails.propagation.plantings"
+                  :year="plantingYear"
+                  action-day-title="Planting Day"
+              />
+            </v-tabs-window-item>
+          </v-tabs-window>
         </v-card>
       </v-col>
-      <v-col cols="0" lg="2"></v-col>
     </v-row>
   </v-container>
 </template>
 
 <script>
-import { mapActions, mapState } from "pinia";
-import { useCommonStore, usePlantingsStore, usePlantsStore } from "@/store";
-import plantingUtils from '@/utils/plantings';
+import {mapActions, mapState} from "pinia";
+import {useCommonStore, usePlanningStore} from "@/store";
 
 import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
 import PageTitle from "@/components/layout/PageTitle.vue";
-import PlanningCreatedTab from "@/components/planning/PlanningCreatedTab.vue";
-import PlanningStartedTab from "@/components/planning/PlanningStartedTab.vue";
-import sorting from "@/utils/sorting";
-
-const { plantingStatuses } = plantingUtils;
+import PlanningTable from "@/components/planning/PlanningTable.vue";
+import dayjs from "dayjs";
 
 export default {
   name: "PlanningPage",
 
   components: {
-    PlanningStartedTab,
-    PlanningCreatedTab,
     PageTitle,
     FadeOutAlert,
+    PlanningTable
   },
 
   data() {
     return {
-      tab: null,
+      activeTab: 'planning',
     };
   },
 
@@ -86,67 +103,55 @@ export default {
       plantingYear: 'plantingYear',
     }),
 
-    ...mapState(usePlantsStore, {
-      plantsById: 'plantsById',
-      plantsAlertType: 'alertType',
-      plantsAlertMessage: 'alertMessage',
-      plantsAlertVisible: 'alertVisible',
+    ...mapState(usePlanningStore, {
+      planningDetails: 'planningDetails',
+      planningAlertType: 'alertType',
+      planningAlertMessage: 'alertMessage',
+      planningAlertVisible: 'alertVisible',
     }),
-
-    ...mapState(usePlantingsStore, {
-      plantings: 'plantings',
-      plantingsAlertType: 'alertType',
-      plantingsAlertMessage: 'alertMessage',
-      plantingsAlertVisible: 'alertVisible',
-    }),
-
-    createdPlantings() {
-      return this.plantings
-          .filter(planting => planting.currentStatus === plantingStatuses.created);
-    },
-
-    startedPlantings() {
-      return this.plantings
-          .filter(planting => planting.currentStatus === plantingStatuses.started);
-    },
-
-    plantingYearConfig() {
-      return this.plantingYearsByYear[this.plantingYear];
-    },
 
     alerts() {
       return [
         {
-          isVisible: this.plantingsAlertVisible,
-          type: this.plantingsAlertType,
-          message: this.plantingsAlertMessage,
-        },
-        {
-          isVisible: this.plantsAlertVisible,
-          type: this.plantsAlertType,
-          message: this.plantsAlertMessage,
+          isVisible: this.planningAlertVisible,
+          type: this.planningAlertType,
+          message: this.planningAlertMessage,
         },
       ];
+    },
+
+    dayDifference() {
+      if (!this.planningDetails) return 0
+      return this.planningDetails.targetPlantingDay
+          - this.planningDetails.currentDay;
+    },
+
+    currentVsTargetColor() {
+      const diff = this.dayDifference
+
+      if (diff <= 0) return 'error';
+      if (diff <= 7) return 'warning';
+      if (diff <= 30) return 'primary';
+      return 'success';
     },
   },
 
   methods: {
-    ...mapActions(usePlantsStore, [
-      'fetchPlants',
+    ...mapActions(usePlanningStore, [
+      'fetchPlanningDetailsByYear',
     ]),
 
-    ...mapActions(usePlantingsStore, [
-      'fetchPlantingsByYear',
-    ]),
+    formatDayOfMonthToDate(dayOfMonth) {
+      if (!dayOfMonth) return '—';
+
+      return dayjs(`${this.plantingYear}-01-01`)
+          .add(dayOfMonth - 1, 'day')
+          .format('MMM D');
+    },
   },
 
   mounted() {
-    this.fetchPlants();
-    this.fetchPlantingsByYear();
+    this.fetchPlanningDetailsByYear(this.plantingYear);
   }
 }
 </script>
-
-<style scoped>
-
-</style>

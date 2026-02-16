@@ -13,6 +13,7 @@ import activityLogApi from "@/api/activity-log-api";
 
 import {applicationId, feralAuthenticationAppUrl} from "@/utils/constants";
 import plantingYearsApi from "@/api/planting-years-api";
+import planningApi from "@/api/planning-api";
 
 const localStorageKeys = {
     plantingYear: 'planting-year',
@@ -465,6 +466,38 @@ export const useJournalStore = defineStore('journal', {
     state: () => {
         return {
             journalEntries: [],
+            alertVisible: false,
+            alertType: 'success',
+            alertMessage: null,
+        };
+    },
+});
+
+export const usePlanningStore = defineStore('planning', {
+    actions: {
+        async fetchPlanningDetailsByYear(plantingYear) {
+            try {
+                this.planningDetails = await planningApi.fetchPlanningDetailsByYear(storageUtils.tryToLoadTokenFromStorage(), plantingYear);
+                console.log(this.planningDetails);
+            } catch (err) {
+                this.setAlertMessage(err, 'error', 'error fetching planning details by year');
+            }
+        },
+        setAlertMessage(err, type, message) {
+            if (err) {
+                console.error(err);
+            }
+            this.alertVisible = true;
+            this.alertType = type;
+            this.alertMessage = message;
+            setTimeout(() => {
+                this.alertVisible = false;
+            }, 3000);
+        }
+    },
+    state: () => {
+        return {
+            planningDetails: null,
             alertVisible: false,
             alertType: 'success',
             alertMessage: null,
