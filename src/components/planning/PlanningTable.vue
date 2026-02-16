@@ -2,11 +2,12 @@
   <v-table>
     <thead>
     <tr>
-<!--      TODO add links to planting details page -->
+      <!-- TODO add target planting date override, planned sow?, planned transplant? -->
       <th class="text-left">Planting Name</th>
       <th class="text-left">Plant Name</th>
       <th class="text-left">{{ actionDayTitle }}</th>
       <th class="text-left">Days Until</th>
+      <th></th>
     </tr>
     </thead>
 
@@ -21,6 +22,9 @@
         <span :class="daysUntilActionColor(item.daysUntilAction)">
           {{ item.daysUntilAction ?? '—' }}
         </span>
+      </td>
+      <td>
+        <v-icon @click="goToPlantingDetailsPage(item.plantingId)">mdi-magnify</v-icon>
       </td>
     </tr>
     </tbody>
@@ -60,6 +64,15 @@ export default {
       if (days <= 7) return 'text-warning';
       if (days <= 30) return 'text-primary';
       return 'text-success';
+    },
+
+    goToPlantingDetailsPage(plantingId) {
+      this.$router.push({
+        name: 'PlantingDetailsPage',
+        params: {
+          plantingId,
+        },
+      });
     }
   }
 }
