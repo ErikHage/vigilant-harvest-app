@@ -13,8 +13,8 @@
         <tbody>
         <tr v-for="year in plantingYears">
           <td>{{ year.plantingYear }}</td>
-          <td>{{ year.targetPlantingDate }}</td>
-          <td>{{ year.lastFrostDate }}</td>
+          <td>{{ formatDateString(year.targetPlantingDate) }}</td>
+          <td>{{ formatDateString(year.lastFrostDate) }}</td>
           <td>
             <v-icon @click="onViewClicked(year)">mdi-magnify</v-icon>
           </td>
@@ -26,6 +26,11 @@
 </template>
 
 <script>
+import dayjs from "dayjs";
+import utc from 'dayjs/plugin/utc';
+
+dayjs.extend(utc);
+
 export default {
   name: 'PlantingsYearsTable',
 
@@ -39,16 +44,10 @@ export default {
     },
   },
 
-  data() {
-    return {};
-  },
-
-  computed: {
-
-  },
-
   methods: {
-
+    formatDateString(dateString) {
+      return dayjs.utc(dateString).format('MMM D');
+    },
   },
 }
 </script>

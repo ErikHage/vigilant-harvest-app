@@ -18,7 +18,7 @@
               <v-card>
                 <v-card-subtitle class="text-uppercase">Last Frost Date</v-card-subtitle>
                 <v-card-text>
-                  <div class="text-h5">{{ formatDate(plantingYear.lastFrostDate) }}</div>
+                  <div class="text-h5">{{ formatDateString(plantingYear.lastFrostDate) }}</div>
                 </v-card-text>
               </v-card>
             </v-col>
@@ -27,7 +27,7 @@
               <v-card>
                 <v-card-subtitle class="text-uppercase">Target Planting Date</v-card-subtitle>
                 <v-card-text>
-                  <div class="text-h5">{{ formatDate(plantingYear.targetPlantingDate) }}</div>
+                  <div class="text-h5">{{ formatDateString(plantingYear.targetPlantingDate) }}</div>
                 </v-card-text>
               </v-card>
             </v-col>
@@ -67,7 +67,11 @@
 
 <script>
 import {mapActions, mapState} from "pinia";
-import {usePlantingYearsStore} from "@/store";
+import {usePlantingsStore, usePlantingYearsStore} from "@/store";
+import dayjs from "dayjs";
+import utc from 'dayjs/plugin/utc';
+
+dayjs.extend(utc);
 
 export default {
   name: "PlantingYearDetailsPage",
@@ -77,30 +81,41 @@ export default {
       plantingYear: 'plantingYear',
     }),
 
+    ...mapState(usePlantingsStore, {
+      plantings: 'plantings',
+    }),
+
     year() {
       return this.$route.params.year;
+    },
+
+    plantingsCounts() {
+      return this.plantings.reduce((acc, { currentStatus }) => {
+        acc[currentStatus] = (acc[currentStatus] ?? 0) + 1
+        return acc
+      }, {})
     },
 
     statusItems() {
       return [
         {
           label: 'Created Plantings',
-          value: this.plantingYear.details.createdPlantings,
+          value: this.plantingsCounts["CREATED"] ?? 0,
           color: '#2196f3'
         },
         {
           label: 'Started Plantings',
-          value: this.plantingYear.details.startedPlantings,
+          value: this.plantingsCounts["STARTED"] ?? 0,
           color: '#ff9800'
         },
         {
           label: 'Planted Plantings',
-          value: this.plantingYear.details.plantedPlantings,
+          value: this.plantingsCounts["PLANTED"] ?? 0,
           color: '#4caf50'
         },
         {
           label: 'Retired Plantings',
-          value: this.plantingYear.details.retiredPlantings,
+          value: this.plantingsCounts["RETIRED"] ?? 0,
           color: '#9e9e9e'
         }
       ];
@@ -112,20 +127,18 @@ export default {
       'fetchPlantingYear',
     ]),
 
-    formatDate(dateString) {
-      // dates in UTC, hack to get the right date
-      const date = new Date(dateString);
-      date.setHours(date.getHours() + 12);
-      return date.toLocaleDateString('en-US', {
-        month: 'long',
-        day: 'numeric',
-        year: 'numeric'
-      });
-    }
+    ...mapActions(usePlantingsStore, [
+      'fetchPlantingsByYear',
+    ]),
+
+    formatDateString(dateString) {
+      return dayjs.utc(dateString).format('MMM D');
+    },
   },
 
   mounted() {
     this.fetchPlantingYear(this.year);
+    this.fetchPlantingsByYear(this.year);
   }
 }
 </script>
