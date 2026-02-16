@@ -1,5 +1,5 @@
 <template>
-  <v-table>
+  <v-table density="compact">
     <thead>
     <tr>
       <!-- TODO add target planting date override, planned sow?, planned transplant? -->
