@@ -298,7 +298,6 @@ export default {
     },
 
     updateTags(tags) {
-      console.log("updated tags:", tags);
       this.plantCopy.tags = [ ...tags, ];
     },
 

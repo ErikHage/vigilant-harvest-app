@@ -78,7 +78,6 @@ export const useAuthenticationStore = defineStore('authentication', {
         async authenticate(ssoToken) {
             try {
                 const actorToken = await authenticationApi.verifySsoToken(ssoToken);
-                console.log('got an actor token', actorToken);
                 storageUtils.setTokenInLocalStorage(actorToken);
                 this.isAuthenticated = true;
                 this.showAppBar = true;
@@ -199,7 +198,6 @@ export const usePlantsStore = defineStore('plants', {
                 this.loading = true;
                 await plantsApi.upsertPlant(storageUtils.tryToLoadTokenFromStorage(), plant);
             } catch (err) {
-                console.log(err);
                 this.setAlertMessage(err, 'error', 'error upserting plant');
             } finally {
                 this.loading = false;
@@ -478,7 +476,6 @@ export const usePlanningStore = defineStore('planning', {
         async fetchPlanningDetailsByYear(plantingYear) {
             try {
                 this.planningDetails = await planningApi.fetchPlanningDetailsByYear(storageUtils.tryToLoadTokenFromStorage(), plantingYear);
-                console.log(this.planningDetails);
             } catch (err) {
                 this.setAlertMessage(err, 'error', 'error fetching planning details by year');
             }
@@ -517,7 +514,6 @@ export const useActivityLogStore = defineStore('activity-log', {
         async fetchActivityLogEntriesByYear(plantingYear) {
             try {
                 this.activityLogEntries = await activityLogApi.fetchActivityLogEntriesByYear(storageUtils.tryToLoadTokenFromStorage(), plantingYear);
-                console.log(this.activityLogEntries);
             } catch (err) {
                 this.setAlertMessage(err, 'error', 'error fetching activity log entries by year');
             }
