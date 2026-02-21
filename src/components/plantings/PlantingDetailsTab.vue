@@ -7,6 +7,16 @@
           variant="solo"
           density="compact"
           :disabled="isFieldEditDisabled()"/>
+      <div :class="getDateFieldClasses(['CREATED', 'STARTED'])">
+        <p class="mr-2">Target Planting Date</p>
+        <date-picker-dialog-activator
+            :on-submit="setTargetPlantingDateValue"
+            title="Set Target Planting Date"
+            :date="planting.targetPlantingDate"
+            :disabled="isFieldEditDisabled(['CREATED', 'STARTED'])"
+        />
+        <h3 class="ml-2">{{ formattedTargetPlantingDate }}</h3>
+      </div>
     </div>
 
     <div class="d-flex">
@@ -192,6 +202,12 @@ export default {
           '--';
     },
 
+    formattedTargetPlantingDate() {
+      return this.planting.targetPlantingDate ?
+          dayjs(this.planting.targetPlantingDate).format('YYYY-MM-DD') :
+          '--';
+    },
+
     sortedPlots() {
       return this.plots.sort(sorting.sortByPlotFriendlyName);
     },
@@ -250,6 +266,10 @@ export default {
 
     setPlantingDateValue(newDateValue) {
       this.planting.transplantDate = newDateValue;
+    },
+
+    setTargetPlantingDateValue(newDateValue) {
+      this.planting.targetPlantingDate = newDateValue;
     },
 
     getDateFieldClasses(allowedStatuses) {

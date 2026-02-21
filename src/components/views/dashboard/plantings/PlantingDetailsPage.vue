@@ -173,6 +173,7 @@ export default {
         name: null,
         seedSource: null,
         lotNumber: null,
+        targetPlantingDate: null,
         leadTimeWeeks: null,
         sowDate: null,
         sowType: null,
@@ -285,6 +286,7 @@ export default {
         name: planting.name ?? undefined,
         seedSource: planting.seedSource ?? undefined,
         lotNumber: planting.lotNumber ?? undefined,
+        targetPlantingDate: planting.targetPlantingDate ?? undefined,
         leadTimeWeeks: planting.leadTimeWeeks ?? undefined,
         sowDate: planting.sowDate ?? undefined,
         sowType: planting.sowType ?? undefined,
@@ -324,6 +326,7 @@ export default {
             seedSource: this.plantingCopy.seedSource,
             lotNumber: this.plantingCopy.lotNumber,
             plantId: this.plantingCopy.plantId,
+            targetPlantingDate: this.plantingCopy.targetPlantingDate,
             leadTimeWeeks: this.plantingCopy.leadTimeWeeks,
           };
           break;
@@ -334,6 +337,7 @@ export default {
             lotNumber: this.plantingCopy.lotNumber,
             sowDate: this.plantingCopy.sowDate,
             numberSown: this.plantingCopy.numberSown,
+            targetPlantingDate: this.plantingCopy.targetPlantingDate,
           };
           break;
         case plantingStatuses.planted:
