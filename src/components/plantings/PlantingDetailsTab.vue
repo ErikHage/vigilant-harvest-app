@@ -2,12 +2,6 @@
   <div v-if="planting">
     <div class="d-flex">
       <v-text-field
-          v-model="planting.plantingId"
-          label="Id"
-          variant="solo"
-          density="compact"
-          disabled/>
-      <v-text-field
           v-model="planting.name"
           label="Name"
           variant="solo"

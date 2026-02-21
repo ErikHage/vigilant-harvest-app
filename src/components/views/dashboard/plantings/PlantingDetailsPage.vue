@@ -5,6 +5,9 @@
         <v-row>
           <v-col cols="12" class="text-center">
             <page-title :title="title"/>
+            <div class="mb-2">
+              <span>{{ planting?.plantingId }}</span>
+            </div>
             <v-spacer></v-spacer>
             <v-chip size="large" :color="statusColor">{{ planting?.currentStatus }}</v-chip>
             <v-spacer></v-spacer>
