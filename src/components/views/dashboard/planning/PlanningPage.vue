@@ -46,14 +46,14 @@
           </v-card-title>
 
           <v-tabs v-model="activeTab" color="primary" grow>
-            <v-tab value="planning">Planning</v-tab>
-            <v-tab value="propagation">Propagation</v-tab>
+            <v-tab value="planning">To Start</v-tab>
+            <v-tab value="propagation">To Plant</v-tab>
           </v-tabs>
 
           <v-tabs-window v-model="activeTab">
             <v-tabs-window-item value="planning">
               <planning-table
-                  :items="planningDetails.planning.plantings"
+                  :items="planningDetails.toStart.plantings"
                   :year="plantingYear"
                   action-day-title="Sowing Day"
               />
@@ -61,7 +61,7 @@
 
             <v-tabs-window-item value="propagation">
               <planning-table
-                  :items="planningDetails.propagation.plantings"
+                  :items="planningDetails.toPlant.plantings"
                   :year="plantingYear"
                   action-day-title="Planting Day"
               />
@@ -99,7 +99,6 @@ export default {
 
   computed: {
     ...mapState(useCommonStore, {
-      plantingYearsByYear: 'plantingYearsByYear',
       plantingYear: 'plantingYear',
     }),
 
@@ -121,7 +120,9 @@ export default {
     },
 
     dayDifference() {
-      if (!this.planningDetails) return 0
+      if (!this.planningDetails) {
+        return 0;
+      }
       return this.planningDetails.targetPlantingDay
           - this.planningDetails.currentDay;
     },
@@ -129,9 +130,15 @@ export default {
     currentVsTargetColor() {
       const diff = this.dayDifference
 
-      if (diff <= 0) return 'error';
-      if (diff <= 7) return 'warning';
-      if (diff <= 30) return 'primary';
+      if (diff <= 0) {
+        return 'error';
+      }
+      if (diff <= 7) {
+        return 'warning';
+      }
+      if (diff <= 30) {
+        return 'primary';
+      }
       return 'success';
     },
   },
