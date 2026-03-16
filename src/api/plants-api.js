@@ -39,9 +39,20 @@ async function deletePlantById(actorToken, plantId) {
     return response.data;
 }
 
+async function fetchPlantCategories(actorToken) {
+    const response = await axios.get(`${vigilantHarvestServiceUrl.v0}/plant-categories`, {
+        headers: {
+            'x-feral-auth-token': actorToken,
+        },
+    });
+    return response.data;
+}
+
 export default {
     upsertPlant: withApiErrorHandling(upsertPlant),
     fetchPlants: withApiErrorHandling(fetchPlants),
     fetchPlantById: withApiErrorHandling(fetchPlantById),
     deletePlantById: withApiErrorHandling(deletePlantById),
+
+    fetchPlantCategories: withApiErrorHandling(fetchPlantCategories),
 };

@@ -91,10 +91,12 @@ export default {
     ...mapActions(usePlantsStore, [
       'upsertPlant',
       'fetchPlants',
+      'fetchPlantCategories',
     ]),
 
     async refreshData() {
       await this.fetchPlants();
+      await this.fetchPlantCategories();
     },
 
     navigateToPlantDetails(plant) {

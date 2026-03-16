@@ -231,6 +231,13 @@ export const usePlantsStore = defineStore('plants', {
                 this.setAlertMessage(err, 'error', 'error deleting plant');
             }
         },
+        async fetchPlantCategories() {
+            try {
+                this.categories = await plantsApi.fetchPlantCategories(storageUtils.tryToLoadTokenFromStorage());
+            } catch (err) {
+                this.setAlertMessage(err, 'error', 'error fetching plant categories');
+            }
+        },
         setAlertMessage(err, type, message) {
             if (err) {
                 console.error(err);
@@ -248,6 +255,7 @@ export const usePlantsStore = defineStore('plants', {
             loading: false,
             plants: [],
             plantsById: {},
+            categories: [],
             alertVisible: false,
             alertType: 'success',
             alertMessage: null,
