@@ -18,6 +18,13 @@
                 @click="sortByProperty('category')">{{ categorySortIcon }}
             </v-icon>
           </th>
+          <th>
+            Subcategory&nbsp;
+            <v-icon
+                :color="getSortIconColor('subcategory')"
+                @click="sortByProperty('subcategory')">{{ subcategorySortIcon }}
+            </v-icon>
+          </th>
           <th></th>
         </tr>
         </thead>
@@ -25,6 +32,7 @@
         <tr v-for="item in filteredPlants">
           <td>{{ item.friendlyName }}</td>
           <td>{{ item.category }}</td>
+          <td>{{ item.subcategory }}</td>
           <td>
             <v-icon small @click="onViewClicked(item)">mdi-magnify</v-icon>
             <v-icon class="pl-2" small @click="onEditClicked(item)">mdi-pencil</v-icon>
@@ -69,7 +77,9 @@ export default {
       let filtered = this.plants;
       if (this.filter) {
         filtered = this.plants.filter(plant => {
-          const matchString = plant.friendlyName.toUpperCase() + (plant.category?.toUpperCase() ?? "");
+          const matchString = plant.friendlyName.toUpperCase() +
+              (plant.category?.toUpperCase() ?? "") +
+              (plant.subcategory?.toUpperCase() ?? "");
           return matchString.includes(this.filter.toUpperCase());
         });
       }
@@ -91,6 +101,16 @@ export default {
         return 'mdi-sort-descending';
       }
       if (this.sortingField === 'category') {
+        return 'mdi-sort-ascending';
+      }
+      return 'mdi-sort';
+    },
+
+    subcategorySortIcon() {
+      if (this.sortingField === '-subcategory') {
+        return 'mdi-sort-descending';
+      }
+      if (this.sortingField === 'subcategory') {
         return 'mdi-sort-ascending';
       }
       return 'mdi-sort';
@@ -119,10 +139,8 @@ export default {
     },
 
     getSortIconColor(property) {
-      if (this.sortingField.includes(property)) {
-        return 'primary';
-      }
-      return 'default';
+      const activeField = this.sortingField.replace(/^-/, '');
+      return activeField === property ? 'primary' : 'default';
     }
   },
 }

@@ -15,7 +15,7 @@
           <v-col cols="12" class="text-center">
             <page-title :title="plant.friendlyName"/>
             <v-spacer/>
-            <span>{{ plant.category }}</span>
+            <span>{{ plant.category }} / {{ plant.subcategory }}</span>
           </v-col>
         </v-row>
 

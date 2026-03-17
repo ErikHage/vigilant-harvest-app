@@ -6,8 +6,28 @@
       </v-card-title>
       <v-card-text>
         <v-form ref="applicationForm">
-          <v-text-field v-model="form.category" label="Category" density="compact" required></v-text-field>
           <v-text-field v-model="form.friendlyName" label="Name" density="compact" required></v-text-field>
+          <v-select
+              v-model="form.category"
+              :items="categories"
+              item-title="categoryName"
+              item-value="categoryId"
+              label="Category"
+              density="compact"
+              variant="solo"
+              return-object
+              @update:model-value="clearSubcategory"
+          ></v-select>
+          <v-select
+              v-model="form.subcategoryId"
+              :items="subcategories"
+              item-title="subcategoryName"
+              item-value="subcategoryId"
+              label="Subcategory"
+              density="compact"
+              variant="solo"
+              :disabled="form.category == null"
+          ></v-select>
           <v-select
               v-model="form.lifespanType"
               :items="lifespanTypes"
@@ -34,15 +54,27 @@ export default {
   name: 'AddPlantDialog',
 
   props: {
-    show: Boolean,
-    onSubmit: Function,
-    onCancel: Function,
+    show: {
+      type: Boolean,
+      required: true,
+    },
+    categories: {
+      type: Array,
+      default: () => [],
+    },
+    onSubmit: {
+      type: Function,
+    },
+    onCancel: {
+      type: Function,
+    },
   },
 
   data() {
     return {
       form: {
-        category: '',
+        category: null,
+        subcategoryId: null,
         friendlyName: '',
         lifespanType: null,
         description: '',
@@ -60,12 +92,25 @@ export default {
     showDialog() {
       return this.show;
     },
+
+    subcategories() {
+      if (this.form.category != null) {
+        console.log(this.form.category.subcategories);
+        return this.form.category.subcategories;
+      }
+      return [];
+    }
   },
 
   methods: {
+    clearSubcategory() {
+      this.form.subcategoryId = null;
+    },
+
     resetForm() {
       this.form = {
-        category: '',
+        category: null,
+        subcategoryId: null,
         friendlyName: '',
         lifespanType: null,
         description: '',
@@ -73,7 +118,12 @@ export default {
     },
 
     async handleSavePlant() {
-      await this.onSubmit(this.form);
+      await this.onSubmit({
+        subcategoryId: this.form.subcategoryId,
+        friendlyName: this.form.friendlyName,
+        lifespanType: this.form.lifespanType,
+        description: this.form.description,
+      });
       this.resetForm();
     },
 

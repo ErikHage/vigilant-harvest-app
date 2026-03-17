@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container v-if="plant">
     <v-row>
       <v-col cols="12">
 
@@ -61,7 +61,27 @@
               <v-card-title>Details</v-card-title>
               <v-card-text>
                 <v-text-field v-model="plantCopy.friendlyName" label="Name" variant="solo" density="compact"/>
-                <v-text-field v-model="plantCopy.category" label="Category" variant="solo" density="compact"/>
+                <v-select
+                    v-model="selectedCategory"
+                    :items="categories"
+                    item-title="categoryName"
+                    item-value="categoryId"
+                    label="Category"
+                    density="compact"
+                    variant="solo"
+                    return-object
+                    @update:model-value="clearSubcategory"
+                ></v-select>
+                <v-select
+                    v-model="selectedSubcategoryId"
+                    :items="subcategories"
+                    item-title="subcategoryName"
+                    item-value="subcategoryId"
+                    label="Subcategory"
+                    density="compact"
+                    variant="solo"
+                    :disabled="selectedCategory == null"
+                ></v-select>
                 <v-select
                     v-model="plantCopy.lifespanType"
                     :items="lifespanTypes"
@@ -207,12 +227,15 @@ export default {
         growing: {},
         harvesting: {},
       },
+      selectedCategory: null,
+      selectedSubcategoryId: null,
     };
   },
 
   computed: {
     ...mapState(usePlantsStore, {
       plantsById: 'plantsById',
+      categories: 'categories',
       loading: 'loading',
       alertType: 'alertType',
       alertMessage: 'alertMessage',
@@ -235,10 +258,17 @@ export default {
       return this.plantCopy ? new Date(this.plantCopy.dateModified).toLocaleString() : '--';
     },
 
+    subcategories() {
+      if (this.selectedCategory != null) {
+        return this.selectedCategory.subcategories;
+      }
+      return [];
+    },
+
     updateButtonEnabled() {
       return this.textFieldEdited(this.plant.friendlyName, this.plantCopy.friendlyName)
           || this.textFieldEdited(this.plant.lifespanType, this.plantCopy.lifespanType)
-          || this.textFieldEdited(this.plant.category, this.plantCopy.category)
+          || this.plant.subcategoryId !== this.selectedSubcategoryId
           || this.textFieldEdited(this.plant.seedSource, this.plantCopy.seedSource)
           || this.textFieldEdited(this.plant.description, this.plantCopy.description)
           || this.plant.tags?.join(",") !== this.plantCopy.tags?.join(",")
@@ -269,12 +299,23 @@ export default {
   methods: {
     ...mapActions(usePlantsStore, [
       'fetchPlantById',
+      'fetchPlantCategories',
       'upsertPlant',
     ]),
 
     async refreshData() {
       await this.fetchPlantById(this.plantId);
+      await this.fetchPlantCategories();
+
       this.plantCopy = JSON.parse(JSON.stringify(this.plantsById[this.plantId]));
+      this.selectedSubcategoryId = this.plantCopy.subcategoryId;
+      this.selectedCategory = this.categories.find(category =>
+          category.subcategories.some(sub => sub.subcategoryId === this.selectedSubcategoryId)
+      );
+    },
+
+    clearSubcategory() {
+      this.selectedSubcategoryId = null;
     },
 
     updateDescription(description) {
@@ -302,9 +343,9 @@ export default {
     },
 
     async updatePlant() {
-      await this.upsertPlant({
+      const success = await this.upsertPlant({
         plantId: this.plantCopy.plantId,
-        category: this.sanitize(this.plantCopy.category),
+        subcategoryId: this.selectedSubcategoryId,
         friendlyName: this.sanitize(this.plantCopy.friendlyName),
         lifespanType: this.sanitize(this.plantCopy.lifespanType),
         seedSource: this.sanitize(this.plantCopy.seedSource),
@@ -342,12 +383,15 @@ export default {
           harvestInstructions: this.sanitize(this.plantCopy.harvesting.harvestInstructions),
         },
       });
-      await this.refreshData();
 
-      this.snackbar = {
-        show: true,
-        message: 'Updated successfully!',
-      };
+      if (success) {
+        await this.refreshData();
+
+        this.snackbar = {
+          show: true,
+          message: 'Updated successfully!',
+        };
+      }
     },
 
     textFieldEdited(originalValue, currentValue) {

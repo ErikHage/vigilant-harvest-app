@@ -197,8 +197,11 @@ export const usePlantsStore = defineStore('plants', {
             try {
                 this.loading = true;
                 await plantsApi.upsertPlant(storageUtils.tryToLoadTokenFromStorage(), plant);
+                return true;
             } catch (err) {
-                this.setAlertMessage(err, 'error', 'error upserting plant');
+                console.log(JSON.stringify(err));
+                this.setAlertMessage(err, 'error', err.data?.message || 'error upserting plant');
+                return false;
             } finally {
                 this.loading = false;
             }

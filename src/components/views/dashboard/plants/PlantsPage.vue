@@ -39,6 +39,7 @@
 
     <add-plant-dialog
         :show="dialog"
+        :categories="categories"
         :on-submit="savePlant"
         :on-cancel="closeDialog"
     />
@@ -73,6 +74,7 @@ export default {
   computed: {
     ...mapState(usePlantsStore, {
       plants: 'plants',
+      categories: 'categories',
       alertType: 'alertType',
       alertMessage: 'alertMessage',
       alertVisible: 'alertVisible',
