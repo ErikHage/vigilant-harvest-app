@@ -31,19 +31,15 @@
           <v-list-item v-if="showYearSpecificViews" :to="harvestsPagePath" link>
             <v-list-item-title>Harvests</v-list-item-title>
           </v-list-item>
-          <v-list-group v-if="showYearSpecificViews" value="stats">
-            <template #activator="{ props }">
-              <v-list-item v-bind="props">
-                <v-list-item-title>Stats</v-list-item-title>
-              </v-list-item>
-            </template>
-            <v-list-item :to="statsPlantPagePath" link>
-              <v-list-item-title>Plant</v-list-item-title>
-            </v-list-item>
-            <v-list-item :to="statsPlantingPagePath" link>
-              <v-list-item-title>Planting</v-list-item-title>
-            </v-list-item>
-          </v-list-group>
+          <v-list-item v-if="showYearSpecificViews" :to="statsPlantPagePath" link>
+            <v-list-item-title>Plant Stats</v-list-item-title>
+          </v-list-item>
+          <v-list-item v-if="showYearSpecificViews" :to="statsPlantingPagePath" link>
+            <v-list-item-title>Planting Stats</v-list-item-title>
+          </v-list-item>
+          <v-list-item :to="adminCategoriesPagePath" link>
+            <v-list-item-title>Categories</v-list-item-title>
+          </v-list-item>
         </v-list>
       </v-menu>
     </template>
@@ -70,6 +66,20 @@
           </v-list-item>
           <v-list-item :to="statsPlantingPagePath" link>
             <v-list-item-title>Planting</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
+      <v-menu offset-y>
+        <template #activator="{ props }">
+          <v-btn v-bind="props">
+            Admin
+            <v-icon right>mdi-chevron-down</v-icon>
+          </v-btn>
+        </template>
+
+        <v-list>
+          <v-list-item :to="adminCategoriesPagePath" link>
+            <v-list-item-title>Categories</v-list-item-title>
           </v-list-item>
         </v-list>
       </v-menu>
@@ -104,6 +114,7 @@ export default {
     harvestsPagePath: views.dashboard.path + "/" + views.dashboard.children.harvests.path,
     statsPlantPagePath: views.dashboard.path + "/" + views.dashboard.children.stats.plant.path,
     statsPlantingPagePath: views.dashboard.path + "/" + views.dashboard.children.stats.planting.path,
+    adminCategoriesPagePath: views.dashboard.path + "/" + views.dashboard.children.categories.path,
   }),
 
   methods: {
