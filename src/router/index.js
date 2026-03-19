@@ -23,6 +23,7 @@ import GardenActivityLogPage from "@/components/views/dashboard/garden/GardenAct
 import PlantingYearsPage from "@/components/views/dashboard/years/PlantingYearsPage.vue";
 import PlantingYearDetailsPage from "@/components/views/dashboard/years/PlantingYearDetailsPage.vue";
 import AddPlantingYearPage from "@/components/views/dashboard/years/AddPlantingYearPage.vue";
+import PlantCategoriesPage from "@/components/views/dashboard/admin/PlantCategoriesPage.vue";
 
 const routes = [
     {
@@ -93,6 +94,14 @@ const routes = [
                 path: views.dashboard.children.plants.path,
                 name: views.dashboard.children.plants.name,
                 component: PlantsPage,
+                meta: {
+                    requiresAuthenticated: true,
+                },
+            },
+            {
+                path: views.dashboard.children.categories.path,
+                name: views.dashboard.children.categories.name,
+                component: PlantCategoriesPage,
                 meta: {
                     requiresAuthenticated: true,
                 },

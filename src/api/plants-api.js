@@ -1,7 +1,7 @@
 import axios from "axios";
 
-import { withApiErrorHandling } from './error-handler';
-import { vigilantHarvestServiceUrl } from "@/utils/constants";
+import {withApiErrorHandling} from './error-handler';
+import {vigilantHarvestServiceUrl} from "@/utils/constants";
 
 async function upsertPlant(actorToken, plant) {
     const response = await axios.put(`${vigilantHarvestServiceUrl.v0}/plants`, plant, {
@@ -39,6 +39,26 @@ async function deletePlantById(actorToken, plantId) {
     return response.data;
 }
 
+async function createCategory(actorToken, category) {
+    const response = await axios.post(`${vigilantHarvestServiceUrl.v0}/plant-categories`, category, {
+        headers: {
+            'x-feral-auth-token': actorToken,
+        },
+    });
+    return response.data;
+}
+
+async function createSubcategory(actorToken, subcategory) {
+    const response = await axios.post(`${vigilantHarvestServiceUrl.v0}/plant-categories/${subcategory.categoryId}/plant-subcategories`, {
+        subcategoryName: subcategory.subcategoryName,
+    }, {
+        headers: {
+            'x-feral-auth-token': actorToken,
+        },
+    });
+    return response.data;
+}
+
 async function fetchPlantCategories(actorToken) {
     const response = await axios.get(`${vigilantHarvestServiceUrl.v0}/plant-categories`, {
         headers: {
@@ -54,5 +74,7 @@ export default {
     fetchPlantById: withApiErrorHandling(fetchPlantById),
     deletePlantById: withApiErrorHandling(deletePlantById),
 
+    createCategory: withApiErrorHandling(createCategory),
+    createSubcategory: withApiErrorHandling(createSubcategory),
     fetchPlantCategories: withApiErrorHandling(fetchPlantCategories),
 };

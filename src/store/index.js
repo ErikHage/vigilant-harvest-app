@@ -234,6 +234,20 @@ export const usePlantsStore = defineStore('plants', {
                 this.setAlertMessage(err, 'error', 'error deleting plant');
             }
         },
+        async createCategory(category) {
+            try {
+                await plantsApi.createCategory(storageUtils.tryToLoadTokenFromStorage(), category);
+            } catch (err) {
+                this.setAlertMessage(err, 'error', 'error creating category');
+            }
+        },
+        async createSubcategory(subcategory) {
+            try {
+                await plantsApi.createSubcategory(storageUtils.tryToLoadTokenFromStorage(), subcategory);
+            } catch (err) {
+                this.setAlertMessage(err, 'error', 'error creating subcategory');
+            }
+        },
         async fetchPlantCategories() {
             try {
                 this.categories = await plantsApi.fetchPlantCategories(storageUtils.tryToLoadTokenFromStorage());

@@ -44,6 +44,10 @@ export const views = {
                 name: 'Planning',
                 path: 'planning',
             },
+            categories: {
+                name: 'PlantCategoriesPage',
+                path: 'categories',
+            },
             plants: {
                 name: 'PlantsPage',
                 path: 'plants',
