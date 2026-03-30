@@ -48,6 +48,10 @@ export const views = {
                 name: 'PlantCategoriesPage',
                 path: 'categories',
             },
+            activitySchedules: {
+                name: 'ActivitySchedulesPage',
+                path: 'activity-schedules',
+            },
             plants: {
                 name: 'PlantsPage',
                 path: 'plants',

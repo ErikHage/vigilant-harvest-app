@@ -40,6 +40,9 @@
           <v-list-item :to="adminCategoriesPagePath" link>
             <v-list-item-title>Categories</v-list-item-title>
           </v-list-item>
+          <v-list-item :to="adminActivitySchedulesPagePath" link>
+            <v-list-item-title>Activity Schedules</v-list-item-title>
+          </v-list-item>
         </v-list>
       </v-menu>
     </template>
@@ -81,6 +84,9 @@
           <v-list-item :to="adminCategoriesPagePath" link>
             <v-list-item-title>Categories</v-list-item-title>
           </v-list-item>
+          <v-list-item :to="adminActivitySchedulesPagePath" link>
+            <v-list-item-title>Activity Schedules</v-list-item-title>
+          </v-list-item>
         </v-list>
       </v-menu>
     </template>
@@ -115,6 +121,7 @@ export default {
     statsPlantPagePath: views.dashboard.path + "/" + views.dashboard.children.stats.plant.path,
     statsPlantingPagePath: views.dashboard.path + "/" + views.dashboard.children.stats.planting.path,
     adminCategoriesPagePath: views.dashboard.path + "/" + views.dashboard.children.categories.path,
+    adminActivitySchedulesPagePath: views.dashboard.path + "/" + views.dashboard.children.activitySchedules.path,
   }),
 
   methods: {

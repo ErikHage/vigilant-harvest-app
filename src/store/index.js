@@ -14,6 +14,7 @@ import activityLogApi from "@/api/activity-log-api";
 import {applicationId, feralAuthenticationAppUrl} from "@/utils/constants";
 import plantingYearsApi from "@/api/planting-years-api";
 import planningApi from "@/api/planning-api";
+import activitySchedulesApi from "@/api/activity-schedules-api";
 
 const localStorageKeys = {
     plantingYear: 'planting-year',
@@ -184,6 +185,51 @@ export const usePlantingYearsStore = defineStore('plantingYears', {
         return {
             plantingYears: [],
             plantingYear: null,
+            alertVisible: false,
+            alertType: 'success',
+            alertMessage: null,
+        };
+    },
+});
+
+export const useActivitySchedulesStore = defineStore('activity-schedules', {
+    actions: {
+        async createSchedule(activitySchedule) {
+            try {
+                await activitySchedulesApi.createActivitySchedule(storageUtils.tryToLoadTokenFromStorage(), activitySchedule);
+            } catch (err) {
+                this.setAlertMessage(null, 'error', 'error adding activity schedule');
+            }
+        },
+        async fetchSchedules() {
+            try {
+                this.schedules = await activitySchedulesApi.listActivitySchedules(storageUtils.tryToLoadTokenFromStorage());
+            } catch (err) {
+                this.setAlertMessage(null, 'error', 'error fetching activity schedules');
+            }
+        },
+        async addScheduleItem(activityScheduleId, activityScheduleItem) {
+            try {
+                await activitySchedulesApi.addActivityScheduleItem(storageUtils.tryToLoadTokenFromStorage(), activityScheduleId, activityScheduleItem);
+            } catch (err) {
+                this.setAlertMessage(null, 'error', 'error adding activity schedule item');
+            }
+        },
+        setAlertMessage(err, type, message) {
+            if (err) {
+                console.error(err);
+            }
+            this.alertVisible = true;
+            this.alertType = type;
+            this.alertMessage = message;
+            setTimeout(() => {
+                this.alertVisible = false;
+            }, 3000);
+        },
+    },
+    state: () => {
+        return {
+            schedules: [],
             alertVisible: false,
             alertType: 'success',
             alertMessage: null,
