@@ -21,6 +21,15 @@ async function listActivitySchedules(actorToken) {
     return response.data;
 }
 
+async function getScheduleById(actorToken, activityScheduleId) {
+    const response = await axios.get(`${vigilantHarvestServiceUrl.v0}/activity-schedules/${activityScheduleId}`, {
+        headers: {
+            'x-feral-auth-token': actorToken,
+        },
+    });
+    return response.data;
+}
+
 async function addActivityScheduleItem(actorToken, activityScheduleId, activityScheduleItem) {
     const response = await axios.post(`${vigilantHarvestServiceUrl.v0}/activity-schedules/${activityScheduleId}`, activityScheduleItem, {
         headers: {
@@ -33,6 +42,7 @@ async function addActivityScheduleItem(actorToken, activityScheduleId, activityS
 export default {
     createActivitySchedule: withApiErrorHandling(createActivitySchedule),
     listActivitySchedules: withApiErrorHandling(listActivitySchedules),
+    getScheduleById: withApiErrorHandling(getScheduleById),
 
     addActivityScheduleItem: withApiErrorHandling(addActivityScheduleItem),
 };

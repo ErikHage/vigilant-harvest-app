@@ -42,10 +42,14 @@
               </thead>
               <tbody>
               <tr v-for="schedule in filteredSchedules" :key="schedule.activityScheduleId">
-                <!-- TODO link name field to details page -->
-                <td class="font-weight-medium">{{ schedule.name }}</td>
+                <td class="font-weight-medium">
+                  <span
+                      class="clickable text-primary"
+                      @click="onClickScheduleDetails(schedule.activityScheduleId)">{{ schedule.name }}</span>
+                </td>
                 <td>{{ schedule.description }}</td>
               </tr>
+
               <tr v-if="filteredSchedules.length === 0">
                 <td colspan="3" class="text-center text-medium-emphasis py-6">No schedules found</td>
               </tr>
@@ -124,6 +128,15 @@ export default {
     async refreshData() {
       await this.fetchSchedules();
     },
+
+    onClickScheduleDetails(activityScheduleId) {
+      this.$router.push({
+        name: 'ActivityScheduleDetailsPage',
+        params: {
+          activityScheduleId,
+        },
+      });
+    },
   },
 
   mounted() {
@@ -133,5 +146,13 @@ export default {
 </script>
 
 <style scoped>
+.clickable {
+  cursor: pointer;
+  transition: color 0.2s;
+}
 
+.clickable:hover {
+  color: #1976D2; /* Vuetify primary color */
+  text-decoration: underline;
+}
 </style>

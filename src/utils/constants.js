@@ -51,6 +51,10 @@ export const views = {
             activitySchedules: {
                 name: 'ActivitySchedulesPage',
                 path: 'activity-schedules',
+                details: {
+                    name: 'ActivityScheduleDetailsPage',
+                    path: 'activity-schedules/:activityScheduleId',
+                },
             },
             plants: {
                 name: 'PlantsPage',

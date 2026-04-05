@@ -208,6 +208,13 @@ export const useActivitySchedulesStore = defineStore('activity-schedules', {
                 this.setAlertMessage(null, 'error', 'error fetching activity schedules');
             }
         },
+        async getScheduleById(activityScheduleId) {
+            try {
+                this.selectedActivitySchedule = await activitySchedulesApi.getScheduleById(storageUtils.tryToLoadTokenFromStorage(), activityScheduleId);
+            } catch (err) {
+                this.setAlertMessage(null, 'error', 'error fetching activity schedule by id: ' + activityScheduleId);
+            }
+        },
         async addScheduleItem(activityScheduleId, activityScheduleItem) {
             try {
                 await activitySchedulesApi.addActivityScheduleItem(storageUtils.tryToLoadTokenFromStorage(), activityScheduleId, activityScheduleItem);
@@ -230,6 +237,7 @@ export const useActivitySchedulesStore = defineStore('activity-schedules', {
     state: () => {
         return {
             schedules: [],
+            selectedActivitySchedule: null,
             alertVisible: false,
             alertType: 'success',
             alertMessage: null,
