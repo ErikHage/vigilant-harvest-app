@@ -45,16 +45,9 @@
           <v-card-text>
             <div class="d-flex align-center justify-space-between mb-4">
               <span class="text-subtitle-1 font-weight-medium">Schedule items</span>
-<!--              Add item dialog -->
-              <v-btn
-                  color="primary"
-                  size="small"
-                  prepend-icon="mdi-plus"
-                  :disabled="true"
-                  @click="$emit('add-item')"
-              >
-                Add item
-              </v-btn>
+              <AddScheduleItemDialog
+                  :activity-types="activityTypes"
+                  :on-submit="onAddScheduleItem"/>
             </div>
 
             <v-table density="comfortable">
@@ -124,18 +117,29 @@ import {useActivitySchedulesStore} from "@/store";
 import dayjs from "dayjs";
 import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
 import PageTitle from "@/components/layout/PageTitle.vue";
+import AddScheduleItemDialog from "@/components/admin/schedules/AddScheduleItemDialog.vue";
 
 export default {
   name: "ActivityScheduleDetailsPage",
-  components: {PageTitle, FadeOutAlert},
+
+  components: {
+    AddScheduleItemDialog,
+    PageTitle,
+    FadeOutAlert,
+  },
 
   computed: {
     ...mapState(useActivitySchedulesStore, {
       activitySchedule: 'selectedActivitySchedule',
+      activityTypes: 'activityTypes',
       alertType: 'alertType',
       alertMessage: 'alertMessage',
       alertVisible: 'alertVisible',
     }),
+
+    activityScheduleId() {
+      return this.$route.params.activityScheduleId;
+    },
 
     alert() {
       return {
@@ -149,14 +153,22 @@ export default {
   methods: {
     ...mapActions(useActivitySchedulesStore, [
       'getScheduleById',
+      'fetchActivityTypes',
+      'addScheduleItem',
     ]),
 
     async refreshData() {
-      await this.getScheduleById(this.$route.params.activityScheduleId);
+      await this.getScheduleById(this.activityScheduleId);
+      await this.fetchActivityTypes();
     },
 
     formatDate(dateString) {
       return dayjs.utc(dateString).format('MMM D');
+    },
+
+    async onAddScheduleItem(scheduleItem) {
+      await this.addScheduleItem(this.activityScheduleId, scheduleItem);
+      await this.refreshData();
     },
   },
 

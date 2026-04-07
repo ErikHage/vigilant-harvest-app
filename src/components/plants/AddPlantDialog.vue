@@ -95,7 +95,6 @@ export default {
 
     subcategories() {
       if (this.form.category != null) {
-        console.log(this.form.category.subcategories);
         return this.form.category.subcategories;
       }
       return [];

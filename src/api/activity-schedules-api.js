@@ -2,6 +2,7 @@ import axios from "axios";
 
 import { withApiErrorHandling } from './error-handler';
 import { vigilantHarvestServiceUrl } from "@/utils/constants";
+import scheduleConstants from '../store/static-data/activity-schedule';
 
 async function createActivitySchedule(actorToken, activitySchedule) {
     const response = await axios.post(`${vigilantHarvestServiceUrl.v0}/activity-schedules`, activitySchedule, {
@@ -30,10 +31,24 @@ async function getScheduleById(actorToken, activityScheduleId) {
     return response.data;
 }
 
+async function fetchActivityTypes() {
+    return Promise.resolve(scheduleConstants.activityTypes);
+}
+
 async function addActivityScheduleItem(actorToken, activityScheduleId, activityScheduleItem) {
-    const response = await axios.post(`${vigilantHarvestServiceUrl.v0}/activity-schedules/${activityScheduleId}`, activityScheduleItem, {
-        headers: {
-            'x-feral-auth-token': actorToken,
+    const response = await axios.post(
+        `${vigilantHarvestServiceUrl.v0}/activity-schedules/${activityScheduleId}`,
+        {
+            activityType: activityScheduleItem.activityType,
+            subType: activityScheduleItem.subType,
+            recurrenceRule: activityScheduleItem.recurrenceRule,
+            startDate: activityScheduleItem.startDate.toDate(),
+            endDate: activityScheduleItem.endDate.toDate(),
+            notes: activityScheduleItem.notes,
+        },
+        {
+            headers: {
+                'x-feral-auth-token': actorToken,
         },
     });
     return response.data;
@@ -43,6 +58,7 @@ export default {
     createActivitySchedule: withApiErrorHandling(createActivitySchedule),
     listActivitySchedules: withApiErrorHandling(listActivitySchedules),
     getScheduleById: withApiErrorHandling(getScheduleById),
+    fetchActivityTypes,
 
     addActivityScheduleItem: withApiErrorHandling(addActivityScheduleItem),
 };
