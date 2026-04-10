@@ -38,14 +38,20 @@
                 return-object
             ></v-select>
 
-            <!-- TODO free string for now, update to use rrule -->
-            <v-text-field
-                v-model="form.recurrenceRule"
-                label="Recurrence Rule"
+            <v-select
+                v-model="form.frequency"
+                :items="frequencies"
+                label="Frequency"
                 density="compact"
                 variant="solo"
-                required
-            ></v-text-field>
+            ></v-select>
+
+            <v-text-field
+                v-model.number="form.interval"
+                type="number"
+                label="Interval"
+                variant="solo"
+                density="compact"/>
 
             <p>Start Date</p>
             <div class="d-flex align-center">
@@ -89,6 +95,7 @@
 
 <script>
 import DatePickerDialogDayJs from "@/components/utils/DatePickerDialogDayJs.vue";
+import scheduling from '@/utils/scheduling';
 
 export default {
   name: "AddScheduleItemDialog",
@@ -113,7 +120,8 @@ export default {
       form: {
         activityType: null,
         subType: null,
-        recurrenceRule: null,
+        frequency: null,
+        interval: 1,
         startDate: null,
         endDate: null,
         notes: null,
@@ -122,6 +130,10 @@ export default {
   },
 
   computed: {
+    frequencies() {
+      return scheduling.iCal.frequencies;
+    },
+
     activitySubTypes() {
       if (this.form.activityType != null) {
         return this.form.activityType.subTypes;
@@ -144,7 +156,8 @@ export default {
     isCreateDisabled() {
       return !this.form.activityType ||
           !this.form.subType ||
-          !this.form.recurrenceRule ||
+          !this.form.frequency ||
+          !this.form.interval ||
           !this.form.startDate ||
           !this.form.endDate ||
           !this.form.notes;
@@ -156,7 +169,8 @@ export default {
       this.form = {
         activityType: null,
         subType: null,
-        recurrenceRule: null,
+        frequency: null,
+        interval: 1,
         startDate: null,
         endDate: null,
         notes: null,
@@ -171,7 +185,7 @@ export default {
       await this.onSubmit({
         activityType: this.form.activityType.name,
         subType: this.form.subType.name,
-        recurrenceRule: this.form.recurrenceRule,
+        recurrenceRule: `FREQ=${this.form.frequency};INTERVAL=${this.form.interval}`,
         startDate: this.form.startDate,
         endDate: this.form.endDate,
         notes: this.form.notes,
