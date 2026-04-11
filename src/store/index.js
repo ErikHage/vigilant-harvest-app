@@ -215,6 +215,13 @@ export const useActivitySchedulesStore = defineStore('activity-schedules', {
                 this.setAlertMessage(null, 'error', 'error fetching activity schedule by id: ' + activityScheduleId);
             }
         },
+        async updateSchedule(activitySchedule) {
+            try {
+                this.selectedActivitySchedule = await activitySchedulesApi.updateActivitySchedule(storageUtils.tryToLoadTokenFromStorage(), activitySchedule);
+            } catch (err) {
+                this.setAlertMessage(null, 'error', 'error updating activity schedule');
+            }
+        },
         async fetchActivityTypes() {
             try {
                 this.activityTypes = await activitySchedulesApi.fetchActivityTypes();

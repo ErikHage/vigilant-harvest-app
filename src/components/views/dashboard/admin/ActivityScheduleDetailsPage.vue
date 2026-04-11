@@ -20,14 +20,9 @@
                 <div class="text-caption text-disabled text-uppercase" style="letter-spacing:.05em">Description</div>
                 <div class="text-body-2 text-medium-emphasis">{{ activitySchedule.description }}</div>
               </div>
-              <!--              add an edit dialog -->
-              <!--              <v-btn-->
-              <!--                  variant="outlined"-->
-              <!--                  size="small"-->
-              <!--                  prepend-icon="mdi-pencil"-->
-              <!--              >-->
-              <!--                Edit-->
-              <!--              </v-btn>-->
+              <edit-schedule-dialog
+                  :activity-schedule="activitySchedule"
+                  :on-submit="onUpdateActivitySchedule"/>
             </div>
 
             <v-divider class="my-3"/>
@@ -118,11 +113,13 @@ import dayjs from "dayjs";
 import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
 import PageTitle from "@/components/layout/PageTitle.vue";
 import AddScheduleItemDialog from "@/components/admin/schedules/AddScheduleItemDialog.vue";
+import EditScheduleDialog from "@/components/admin/schedules/EditScheduleDialog.vue";
 
 export default {
   name: "ActivityScheduleDetailsPage",
 
   components: {
+    EditScheduleDialog,
     AddScheduleItemDialog,
     PageTitle,
     FadeOutAlert,
@@ -153,6 +150,7 @@ export default {
   methods: {
     ...mapActions(useActivitySchedulesStore, [
       'getScheduleById',
+      'updateSchedule',
       'fetchActivityTypes',
       'addScheduleItem',
     ]),
@@ -164,6 +162,10 @@ export default {
 
     formatDate(dateString) {
       return dayjs.utc(dateString).format('MMM D');
+    },
+
+    async onUpdateActivitySchedule(schedule) {
+      await this.updateSchedule(schedule);
     },
 
     async onAddScheduleItem(scheduleItem) {

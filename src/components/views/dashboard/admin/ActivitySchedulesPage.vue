@@ -36,7 +36,7 @@
             <v-table density="compact">
               <thead>
               <tr>
-                <th style="width: 220px">Schedule Name</th>
+                <th>Schedule Name</th>
                 <th>Description</th>
               </tr>
               </thead>
