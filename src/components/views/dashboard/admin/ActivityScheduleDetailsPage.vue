@@ -67,7 +67,10 @@
                   <div v-if="item.subType" class="text-caption text-disabled">{{ item.subType }}</div>
                 </td>
                 <td>
-                  <code v-if="item.recurrenceRule" class="text-caption">{{ item.recurrenceRule }}</code>
+                  <div v-if="item.recurrenceRule">
+                    <div>{{ toRRuleString(item.recurrenceRule) }}</div>
+                    <code class="text-caption text-disabled">{{ item.recurrenceRule }}</code>
+                  </div>
                   <span v-else class="text-disabled">—</span>
                 </td>
                 <td class="text-no-wrap">
@@ -107,6 +110,7 @@
 import {mapActions, mapState} from "pinia";
 import {useActivitySchedulesStore} from "@/store";
 import dayjs from "dayjs";
+import { RRule } from 'rrule';
 import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
 import PageTitle from "@/components/layout/PageTitle.vue";
 import AddScheduleItemDialog from "@/components/admin/schedules/AddScheduleItemDialog.vue";
@@ -176,6 +180,10 @@ export default {
     async onUpdateActivityScheduleItem(scheduleItem) {
       await this.updateScheduleItem(scheduleItem);
       await this.refreshData();
+    },
+
+    toRRuleString(recurrenceRule) {
+      return RRule.fromString(recurrenceRule).toText();
     },
   },
 
