@@ -198,42 +198,49 @@ export const useActivitySchedulesStore = defineStore('activity-schedules', {
             try {
                 await activitySchedulesApi.createActivitySchedule(storageUtils.tryToLoadTokenFromStorage(), activitySchedule);
             } catch (err) {
-                this.setAlertMessage(null, 'error', 'error adding activity schedule');
+                this.setAlertMessage(err, 'error', 'error adding activity schedule');
             }
         },
         async fetchSchedules() {
             try {
                 this.schedules = await activitySchedulesApi.listActivitySchedules(storageUtils.tryToLoadTokenFromStorage());
             } catch (err) {
-                this.setAlertMessage(null, 'error', 'error fetching activity schedules');
+                this.setAlertMessage(err, 'error', 'error fetching activity schedules');
             }
         },
         async getScheduleById(activityScheduleId) {
             try {
                 this.selectedActivitySchedule = await activitySchedulesApi.getScheduleById(storageUtils.tryToLoadTokenFromStorage(), activityScheduleId);
             } catch (err) {
-                this.setAlertMessage(null, 'error', 'error fetching activity schedule by id: ' + activityScheduleId);
+                this.setAlertMessage(err, 'error', 'error fetching activity schedule by id: ' + activityScheduleId);
             }
         },
         async updateSchedule(activitySchedule) {
             try {
                 this.selectedActivitySchedule = await activitySchedulesApi.updateActivitySchedule(storageUtils.tryToLoadTokenFromStorage(), activitySchedule);
             } catch (err) {
-                this.setAlertMessage(null, 'error', 'error updating activity schedule');
+                this.setAlertMessage(err, 'error', 'error updating activity schedule');
             }
         },
         async fetchActivityTypes() {
             try {
                 this.activityTypes = await activitySchedulesApi.fetchActivityTypes();
             } catch (err) {
-                this.setAlertMessage(null, 'error', 'error fetching activity types');
+                this.setAlertMessage(err, 'error', 'error fetching activity types');
             }
         },
         async addScheduleItem(activityScheduleId, activityScheduleItem) {
             try {
                 await activitySchedulesApi.addActivityScheduleItem(storageUtils.tryToLoadTokenFromStorage(), activityScheduleId, activityScheduleItem);
             } catch (err) {
-                this.setAlertMessage(null, 'error', 'error adding activity schedule item');
+                this.setAlertMessage(err, 'error', 'error adding activity schedule item');
+            }
+        },
+        async updateScheduleItem(activityScheduleItem) {
+            try {
+                await activitySchedulesApi.updateActivityScheduleItem(storageUtils.tryToLoadTokenFromStorage(), activityScheduleItem);
+            } catch (err) {
+                this.setAlertMessage(err, 'error', 'error updating activity schedule item');
             }
         },
         setAlertMessage(err, type, message) {

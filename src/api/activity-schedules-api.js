@@ -52,7 +52,26 @@ async function fetchActivityTypes() {
 
 async function addActivityScheduleItem(actorToken, activityScheduleId, activityScheduleItem) {
     const response = await axios.post(
-        `${vigilantHarvestServiceUrl.v0}/activity-schedules/${activityScheduleId}`,
+        `${vigilantHarvestServiceUrl.v0}/activity-schedules/${activityScheduleId}/schedule-items`,
+        {
+            activityType: activityScheduleItem.activityType,
+            subType: activityScheduleItem.subType,
+            recurrenceRule: activityScheduleItem.recurrenceRule,
+            startDate: activityScheduleItem.startDate.toDate(),
+            endDate: activityScheduleItem.endDate.toDate(),
+            notes: activityScheduleItem.notes,
+        },
+        {
+            headers: {
+                'x-feral-auth-token': actorToken,
+            },
+        });
+    return response.data;
+}
+
+async function updateActivityScheduleItem(actorToken, activityScheduleItem) {
+    const response = await axios.patch(
+        `${vigilantHarvestServiceUrl.v0}/activity-schedules/${activityScheduleItem.activityScheduleId}/schedule-items/${activityScheduleItem.entryId}`,
         {
             activityType: activityScheduleItem.activityType,
             subType: activityScheduleItem.subType,
@@ -78,4 +97,5 @@ export default {
     fetchActivityTypes,
 
     addActivityScheduleItem: withApiErrorHandling(addActivityScheduleItem),
+    updateActivityScheduleItem: withApiErrorHandling(updateActivityScheduleItem),
 };

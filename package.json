@@ -16,6 +16,7 @@
     "jwt-decode": "^4.0.0",
     "pinia": "^3.0.4",
     "roboto-fontface": "*",
+    "rrule": "^2.8.1",
     "vue": "^3.2.13",
     "vue-router": "^5.0.3",
     "vuetify": "^3.5.10",

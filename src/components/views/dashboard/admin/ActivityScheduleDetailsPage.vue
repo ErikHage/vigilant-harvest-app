@@ -81,13 +81,10 @@
                   <span v-else class="text-disabled">—</span>
                 </td>
                 <td class="text-right text-no-wrap">
-<!--                  add schedule item details page where we can edit -->
-<!--                  <v-btn-->
-<!--                      icon="mdi-pencil"-->
-<!--                      variant="text"-->
-<!--                      size="small"-->
-<!--                      @click="$emit('edit-item', item)"-->
-<!--                  />-->
+                  <EditScheduleItemDialog
+                      :activity-types="activityTypes"
+                      :schedule-item="item"
+                      :on-submit="onUpdateActivityScheduleItem"/>
                   <!--                <v-btn-->
                   <!--                    icon="mdi-delete"-->
                   <!--                    variant="text"-->
@@ -114,11 +111,13 @@ import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
 import PageTitle from "@/components/layout/PageTitle.vue";
 import AddScheduleItemDialog from "@/components/admin/schedules/AddScheduleItemDialog.vue";
 import EditScheduleDialog from "@/components/admin/schedules/EditScheduleDialog.vue";
+import EditScheduleItemDialog from "@/components/admin/schedules/EditScheduleItemDialog.vue";
 
 export default {
   name: "ActivityScheduleDetailsPage",
 
   components: {
+    EditScheduleItemDialog,
     EditScheduleDialog,
     AddScheduleItemDialog,
     PageTitle,
@@ -153,6 +152,7 @@ export default {
       'updateSchedule',
       'fetchActivityTypes',
       'addScheduleItem',
+      'updateScheduleItem',
     ]),
 
     async refreshData() {
@@ -170,6 +170,11 @@ export default {
 
     async onAddScheduleItem(scheduleItem) {
       await this.addScheduleItem(this.activityScheduleId, scheduleItem);
+      await this.refreshData();
+    },
+
+    async onUpdateActivityScheduleItem(scheduleItem) {
+      await this.updateScheduleItem(scheduleItem);
       await this.refreshData();
     },
   },
