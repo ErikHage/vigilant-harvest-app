@@ -84,16 +84,15 @@
                   <span v-else class="text-disabled">—</span>
                 </td>
                 <td class="text-right text-no-wrap">
-                  <EditScheduleItemDialog
-                      :activity-types="activityTypes"
-                      :schedule-item="item"
-                      :on-submit="onUpdateActivityScheduleItem"/>
-                  <!--                <v-btn-->
-                  <!--                    icon="mdi-delete"-->
-                  <!--                    variant="text"-->
-                  <!--                    size="small"-->
-                  <!--                    @click="$emit('delete-item', item)"-->
-                  <!--                />-->
+                  <div class="d-flex align-center justify-end ga-2">
+                    <EditScheduleItemDialog
+                        :activity-types="activityTypes"
+                        :schedule-item="item"
+                        :on-submit="onUpdateActivityScheduleItem"/>
+                    <DeleteScheduleItemDialog
+                        :schedule-item="item"
+                        :on-submit="onDeleteActivityScheduleItem"/>
+                  </div>
                 </td>
               </tr>
               </tbody>
@@ -116,11 +115,13 @@ import PageTitle from "@/components/layout/PageTitle.vue";
 import AddScheduleItemDialog from "@/components/admin/schedules/AddScheduleItemDialog.vue";
 import EditScheduleDialog from "@/components/admin/schedules/EditScheduleDialog.vue";
 import EditScheduleItemDialog from "@/components/admin/schedules/EditScheduleItemDialog.vue";
+import DeleteScheduleItemDialog from "@/components/admin/schedules/DeleteScheduleItemDialog.vue";
 
 export default {
   name: "ActivityScheduleDetailsPage",
 
   components: {
+    DeleteScheduleItemDialog,
     EditScheduleItemDialog,
     EditScheduleDialog,
     AddScheduleItemDialog,
@@ -157,6 +158,7 @@ export default {
       'fetchActivityTypes',
       'addScheduleItem',
       'updateScheduleItem',
+      'deleteScheduleItem',
     ]),
 
     async refreshData() {
@@ -179,6 +181,11 @@ export default {
 
     async onUpdateActivityScheduleItem(scheduleItem) {
       await this.updateScheduleItem(scheduleItem);
+      await this.refreshData();
+    },
+
+    async onDeleteActivityScheduleItem(entryId) {
+      await this.deleteScheduleItem(this.activityScheduleId, entryId);
       await this.refreshData();
     },
 

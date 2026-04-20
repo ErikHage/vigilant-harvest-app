@@ -88,6 +88,17 @@ async function updateActivityScheduleItem(actorToken, activityScheduleItem) {
     return response.data;
 }
 
+async function deleteActivityScheduleItem(actorToken, activityScheduleId, entryId) {
+    const response = await axios.delete(
+        `${vigilantHarvestServiceUrl.v0}/activity-schedules/${activityScheduleId}/schedule-items/${entryId}`,
+        {
+            headers: {
+                'x-feral-auth-token': actorToken,
+            },
+        });
+    return response.data;
+}
+
 export default {
     createActivitySchedule: withApiErrorHandling(createActivitySchedule),
     listActivitySchedules: withApiErrorHandling(listActivitySchedules),
@@ -98,4 +109,5 @@ export default {
 
     addActivityScheduleItem: withApiErrorHandling(addActivityScheduleItem),
     updateActivityScheduleItem: withApiErrorHandling(updateActivityScheduleItem),
+    deleteActivityScheduleItem: withApiErrorHandling(deleteActivityScheduleItem),
 };

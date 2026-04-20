@@ -243,6 +243,13 @@ export const useActivitySchedulesStore = defineStore('activity-schedules', {
                 this.setAlertMessage(err, 'error', 'error updating activity schedule item');
             }
         },
+        async deleteScheduleItem(activityScheduleId, entryId) {
+            try {
+                await activitySchedulesApi.deleteActivityScheduleItem(storageUtils.tryToLoadTokenFromStorage(), activityScheduleId, entryId);
+            } catch (err) {
+                this.setAlertMessage(err, 'error', 'error deleting activity schedule item');
+            }
+        },
         setAlertMessage(err, type, message) {
             if (err) {
                 console.error(err);
