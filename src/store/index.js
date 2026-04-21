@@ -282,7 +282,6 @@ export const usePlantsStore = defineStore('plants', {
                 await plantsApi.upsertPlant(storageUtils.tryToLoadTokenFromStorage(), plant);
                 return true;
             } catch (err) {
-                console.log(JSON.stringify(err));
                 this.setAlertMessage(err, 'error', err.data?.message || 'error upserting plant');
                 return false;
             } finally {
