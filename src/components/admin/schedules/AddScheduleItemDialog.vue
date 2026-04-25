@@ -54,28 +54,36 @@
                 density="compact"/>
 
             <p>Start Date</p>
-            <div class="d-flex align-center">
-              <date-picker-dialog-day-js
-                  :on-submit="setStartDate"
-                  title="Start Date"
-                  :date="form.startDate"/>
-              <h3 class="ml-2">{{ formattedStartDate }}</h3>
-            </div>
+            <month-day-select
+                v-model="form.startDate"
+                month-label="Month"
+                day-label="Day"/>
+            <v-select
+                v-model="form.startDateYearOffset"
+                :items="yearOffsets"
+                item-title="label"
+                item-value="value"
+                label="Year Offset"
+                density="compact"
+                variant="solo"/>
 
-            <div class="pt-4">
-              <p>End Date</p>
-              <div class="d-flex align-center">
-                <date-picker-dialog-day-js
-                    :on-submit="setEndDate"
-                    title="End Date"
-                    :date="form.endDate"/>
-                <h3 class="ml-2">{{ formattedEndDate }}</h3>
-              </div>
-            </div>
+            <p>End Date</p>
+            <month-day-select
+                v-model="form.endDate"
+                class="pt-4"
+                month-label="Month"
+                day-label="Day"/>
+            <v-select
+                v-model="form.endDateYearOffset"
+                :items="yearOffsets"
+                item-title="label"
+                item-value="value"
+                label="Year Offset"
+                density="compact"
+                variant="solo"/>
 
             <v-textarea
                 v-model="form.notes"
-                class="pt-4"
                 label="Notes"
                 density="compact"
                 variant="solo"
@@ -96,11 +104,14 @@
 <script>
 import DatePickerDialogDayJs from "@/components/utils/DatePickerDialogDayJs.vue";
 import scheduling from '@/utils/scheduling';
+import MonthDaySelect from "@/components/utils/MonthDaySelect.vue";
+import {RRule} from "rrule";
 
 export default {
   name: "AddScheduleItemDialog",
 
   components: {
+    MonthDaySelect,
     DatePickerDialogDayJs,
   },
 
@@ -111,7 +122,8 @@ export default {
     },
     onSubmit: {
       type: Function,
-      default: () => {},
+      default: () => {
+      },
     },
   },
 
@@ -123,7 +135,9 @@ export default {
         frequency: null,
         interval: 1,
         startDate: null,
+        startDateYearOffset: 0,
         endDate: null,
+        endDateYearOffset: 0,
         notes: null,
       },
     }
@@ -134,23 +148,15 @@ export default {
       return scheduling.iCal.frequencies;
     },
 
+    yearOffsets() {
+      return scheduling.yearOffset.items;
+    },
+
     activitySubTypes() {
       if (this.form.activityType != null) {
         return this.form.activityType.subTypes;
       }
       return [];
-    },
-
-    formattedStartDate() {
-      return this.form.startDate ?
-          this.form.startDate.format('YYYY-MM-DD') :
-          '--';
-    },
-
-    formattedEndDate() {
-      return this.form.endDate ?
-          this.form.endDate.format('YYYY-MM-DD') :
-          '--';
     },
 
     isCreateDisabled() {
@@ -172,7 +178,9 @@ export default {
         frequency: null,
         interval: 1,
         startDate: null,
+        startDateYearOffset: 0,
         endDate: null,
+        endDateYearOffset: 0,
         notes: null,
       };
     },
@@ -185,9 +193,11 @@ export default {
       await this.onSubmit({
         activityType: this.form.activityType.name,
         subType: this.form.subType.name,
-        recurrenceRule: `FREQ=${this.form.frequency};INTERVAL=${this.form.interval}`,
+        recurrenceRule: this.toRecurrenceRuleString(this.form.frequency, this.form.interval),
         startDate: this.form.startDate,
+        startDateYearOffset: this.form.startDateYearOffset,
         endDate: this.form.endDate,
+        endDateYearOffset: this.form.endDateYearOffset,
         notes: this.form.notes,
       });
       this.resetForm();
@@ -199,12 +209,11 @@ export default {
       isActive.value = false;
     },
 
-    setStartDate(date) {
-      this.form.startDate = date;
-    },
-
-    setEndDate(date) {
-      this.form.endDate = date;
+    toRecurrenceRuleString(frequency, interval) {
+      return new RRule({
+        freq: scheduling.iCal.labelToRRuleFrequency(frequency),
+        interval: interval,
+      }).toString();
     },
   },
 }

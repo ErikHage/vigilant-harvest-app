@@ -17,7 +17,7 @@
             <v-list-item title="Activity type" :subtitle="scheduleItem.activityType" />
             <v-list-item v-if="scheduleItem.subType" title="Subcategory" :subtitle="scheduleItem.subType" />
             <v-list-item title="Recurrence" :subtitle="scheduleItem.recurrenceRule" />
-            <v-list-item title="Date range" :subtitle="`${formatDate(scheduleItem.startDate)} – ${formatDate(scheduleItem.endDate)}`" />
+            <v-list-item title="Date(s)" :subtitle="getDateRange(scheduleItem)" />
             <v-list-item v-if="scheduleItem.notes" title="Notes" :subtitle="scheduleItem.notes" />
           </v-list>
 
@@ -43,7 +43,7 @@
 </template>
 
 <script>
-import dayjs from "dayjs";
+import scheduling from "@/utils/scheduling";
 
 export default {
   name: 'DeleteScheduleItemDialog',
@@ -77,8 +77,8 @@ export default {
       this.confirmed = false;
     },
 
-    formatDate(dateString) {
-      return dayjs.utc(dateString).format('MMM D');
+    getDateRange(scheduleItem) {
+      return scheduling.getFormattedDateRange(scheduleItem.startDate, scheduleItem.endDate);
     },
   },
 };

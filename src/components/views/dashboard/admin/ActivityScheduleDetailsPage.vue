@@ -50,7 +50,7 @@
               <tr>
                 <th>Activity</th>
                 <th>Recurrence</th>
-                <th>Date range</th>
+                <th>Date(s)</th>
                 <th>Notes</th>
                 <th></th>
               </tr>
@@ -74,10 +74,7 @@
                   <span v-else class="text-disabled">—</span>
                 </td>
                 <td class="text-no-wrap">
-                <span v-if="item.startDate || item.endDate">
-                  {{ formatDate(item.startDate) }} – {{ formatDate(item.endDate) }}
-                </span>
-                  <span v-else class="text-disabled">—</span>
+                  {{ getItemDateRange(item) }}
                 </td>
                 <td>
                   <span v-if="item.notes">{{ item.notes }}</span>
@@ -108,7 +105,6 @@
 <script>
 import {mapActions, mapState} from "pinia";
 import {useActivitySchedulesStore} from "@/store";
-import dayjs from "dayjs";
 import { RRule } from 'rrule';
 import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
 import PageTitle from "@/components/layout/PageTitle.vue";
@@ -116,6 +112,7 @@ import AddScheduleItemDialog from "@/components/admin/schedules/AddScheduleItemD
 import EditScheduleDialog from "@/components/admin/schedules/EditScheduleDialog.vue";
 import EditScheduleItemDialog from "@/components/admin/schedules/EditScheduleItemDialog.vue";
 import DeleteScheduleItemDialog from "@/components/admin/schedules/DeleteScheduleItemDialog.vue";
+import scheduling from "@/utils/scheduling";
 
 export default {
   name: "ActivityScheduleDetailsPage",
@@ -166,8 +163,8 @@ export default {
       await this.fetchActivityTypes();
     },
 
-    formatDate(dateString) {
-      return dayjs.utc(dateString).format('MMM D');
+    getItemDateRange(item) {
+      return scheduling.getFormattedDateRange(item.startDate, item.endDate);
     },
 
     async onUpdateActivitySchedule(schedule) {
