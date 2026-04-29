@@ -101,16 +101,6 @@
           </v-col>
           <v-col cols="6">
             <v-card>
-              <v-card-title>Taxonomy</v-card-title>
-              <v-card-text>
-                <v-text-field v-model="plantCopy.taxonomy.family" label="Family" variant="solo" density="compact"/>
-                <v-text-field v-model="plantCopy.taxonomy.genus" label="Genus" variant="solo" density="compact"/>
-                <v-text-field v-model="plantCopy.taxonomy.species" label="Species" variant="solo" density="compact"/>
-              </v-card-text>
-            </v-card>
-          </v-col>
-          <v-col cols="6">
-            <v-card>
               <v-card-title>Sowing</v-card-title>
               <v-card-text>
                 <v-text-field v-model="plantCopy.sowing.indoor" label="Indoor Sow" variant="solo" density="compact"/>
@@ -174,6 +164,16 @@
                                  :on-submit="updateHarvestingInstructions"
                                  :value="plantCopy.harvesting.harvestInstructions"/>
                 <p class="mx-5 mt-2 respect-formatting">{{ plantCopy.harvesting.harvestInstructions }}</p>
+              </v-card-text>
+            </v-card>
+          </v-col>
+          <v-col cols="6">
+            <v-card>
+              <v-card-title>Taxonomy</v-card-title>
+              <v-card-text>
+                <v-text-field v-model="plantCopy.taxonomy.family" label="Family" variant="solo" density="compact"/>
+                <v-text-field v-model="plantCopy.taxonomy.genus" label="Genus" variant="solo" density="compact"/>
+                <v-text-field v-model="plantCopy.taxonomy.species" label="Species" variant="solo" density="compact"/>
               </v-card-text>
             </v-card>
           </v-col>
