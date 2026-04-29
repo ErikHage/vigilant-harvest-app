@@ -101,6 +101,25 @@
           </v-col>
           <v-col cols="6">
             <v-card>
+              <v-card-title class="d-flex justify-space-between align-center">
+                <span>Schedules</span>
+<!--                <v-btn size="xs" color="black" class="py-1 px-2">-->
+<!--                  <v-icon>mdi-pencil</v-icon>-->
+<!--                </v-btn>-->
+              </v-card-title>
+              <v-card-text>
+                <v-sheet class="pa-2" height="30vh" elevation="2">
+                  <h4 v-for="schedule in plant.activitySchedules"
+                        class="pb-2 clickable text-primary font-weight-medium"
+                        @click="onClickSchedule(schedule.activityScheduleId)">
+                    {{ schedule.name }}
+                  </h4>
+                </v-sheet>
+              </v-card-text>
+            </v-card>
+          </v-col>
+          <v-col cols="6">
+            <v-card>
               <v-card-title>Sowing</v-card-title>
               <v-card-text>
                 <v-text-field v-model="plantCopy.sowing.indoor" label="Indoor Sow" variant="solo" density="compact"/>
@@ -185,8 +204,8 @@
 </template>
 
 <script>
-import { mapActions, mapState } from "pinia";
-import { usePlantsStore } from "@/store";
+import {mapActions, mapState} from "pinia";
+import {usePlantsStore} from "@/store";
 import PageTitle from "@/components/layout/PageTitle.vue";
 import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
 import TextBoxDialog from "@/components/utils/TextBoxDialog.vue";
@@ -404,6 +423,15 @@ export default {
       }
       return value?.trim();
     },
+
+    onClickSchedule(activityScheduleId) {
+      this.$router.push({
+        name: 'ActivityScheduleDetailsPage',
+        params: {
+          activityScheduleId,
+        },
+      });
+    },
   },
 
   mounted() {
@@ -415,5 +443,15 @@ export default {
 <style scoped>
 .respect-formatting {
   white-space: pre-wrap;
+}
+
+.clickable {
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.clickable:hover {
+  color: #1976D2; /* Vuetify primary color */
+  text-decoration: underline;
 }
 </style>
