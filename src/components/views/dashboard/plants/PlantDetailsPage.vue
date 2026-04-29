@@ -33,6 +33,7 @@
                 <v-tab value="planting">Planting</v-tab>
                 <v-tab value="growing">Growing</v-tab>
                 <v-tab value="harvesting">Harvesting</v-tab>
+                <v-tab value="schedules">Schedules</v-tab>
               </v-tabs>
 
               <v-card-text class="mt-5">
@@ -60,6 +61,10 @@
                   <v-tabs-window-item value="harvesting">
                     <plant-harvesting-tab :plant="plant"/>
                   </v-tabs-window-item>
+
+                  <v-tabs-window-item value="schedules">
+                    <plant-schedules-tab :plant="plant"/>
+                  </v-tabs-window-item>
                 </v-tabs-window>
               </v-card-text>
             </v-card>
@@ -81,11 +86,13 @@ import PlantSowingTab from "@/components/plants/PlantSowingTab.vue";
 import PlantPlantingTab from "@/components/plants/PlantPlantingTab.vue";
 import PlantGrowingTab from "@/components/plants/PlantGrowingTab.vue";
 import PlantHarvestingTab from "@/components/plants/PlantHarvestingTab.vue";
+import PlantSchedulesTab from "@/components/plants/PlantSchedulesTab.vue";
 
 export default {
   name: "PlantDetailsPage",
 
   components: {
+    PlantSchedulesTab,
     PlantHarvestingTab,
     PlantGrowingTab,
     PlantPlantingTab,
