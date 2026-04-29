@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <v-row>
+    <v-row v-if="plant">
       <v-col cols="12">
 
         <v-row v-if="alertVisible">
