@@ -12,6 +12,18 @@ async function upsertPlant(actorToken, plant) {
     return response.data;
 }
 
+async function updatePlantScheduleAssignment(actorToken, plantId, scheduleAssignment) {
+    const response = await axios.put(
+        `${vigilantHarvestServiceUrl.v0}/plants/${plantId}/activity-schedules`,
+        scheduleAssignment,
+        {
+            headers: {
+                'x-feral-auth-token': actorToken,
+            },
+        });
+    return response.data;
+}
+
 async function fetchPlants(actorToken) {
     const response = await axios.get(`${vigilantHarvestServiceUrl.v0}/plants`, {
         headers: {
@@ -70,6 +82,7 @@ async function fetchPlantCategories(actorToken) {
 
 export default {
     upsertPlant: withApiErrorHandling(upsertPlant),
+    updatePlantScheduleAssignment: withApiErrorHandling(updatePlantScheduleAssignment),
     fetchPlants: withApiErrorHandling(fetchPlants),
     fetchPlantById: withApiErrorHandling(fetchPlantById),
     deletePlantById: withApiErrorHandling(deletePlantById),

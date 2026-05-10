@@ -288,6 +288,13 @@ export const usePlantsStore = defineStore('plants', {
                 this.loading = false;
             }
         },
+        async updatePlantScheduleAssignment(plantId, plantScheduleAssignment) {
+            try {
+                await plantsApi.updatePlantScheduleAssignment(storageUtils.tryToLoadTokenFromStorage(), plantId, plantScheduleAssignment);
+            } catch (err) {
+                this.setAlertMessage(err, 'error', 'error updating plant schedule assignments');
+            }
+        },
         async fetchPlants() {
             try {
                 this.plants = await plantsApi.fetchPlants(storageUtils.tryToLoadTokenFromStorage());

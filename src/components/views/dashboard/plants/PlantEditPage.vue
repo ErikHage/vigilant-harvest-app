@@ -103,9 +103,10 @@
             <v-card>
               <v-card-title class="d-flex justify-space-between align-center">
                 <span>Schedules</span>
-<!--                <v-btn size="xs" color="black" class="py-1 px-2">-->
-<!--                  <v-icon>mdi-pencil</v-icon>-->
-<!--                </v-btn>-->
+                <ManagePlantSchedulesDialog
+                    :assigned-schedules="plant.activitySchedules"
+                    :plant-name="plant.friendlyName"
+                    :on-submit="onUpdatePlantScheduleAssignment"/>
               </v-card-title>
               <v-card-text>
                 <v-sheet class="pa-2" height="30vh" elevation="2">
@@ -210,11 +211,13 @@ import PageTitle from "@/components/layout/PageTitle.vue";
 import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
 import TextBoxDialog from "@/components/utils/TextBoxDialog.vue";
 import PlantTagsDialog from "@/components/plants/PlantTagsDialog.vue";
+import ManagePlantSchedulesDialog from "@/components/plants/ManagePlantSchedulesDialog.vue";
 
 export default {
   name: "PlantEditPage",
 
   components: {
+    ManagePlantSchedulesDialog,
     PlantTagsDialog,
     TextBoxDialog,
     FadeOutAlert,
@@ -320,6 +323,7 @@ export default {
       'fetchPlantById',
       'fetchPlantCategories',
       'upsertPlant',
+      'updatePlantScheduleAssignment',
     ]),
 
     async refreshData() {
@@ -431,6 +435,14 @@ export default {
           activityScheduleId,
         },
       });
+    },
+
+    async onUpdatePlantScheduleAssignment(addedScheduleIds, removedScheduleIds) {
+      await this.updatePlantScheduleAssignment(this.plantId, {
+        assign: addedScheduleIds,
+        unassign: removedScheduleIds,
+      });
+      await this.refreshData();
     },
   },
 
