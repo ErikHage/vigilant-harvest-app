@@ -656,6 +656,13 @@ export const useActivityLogStore = defineStore('activity-log', {
                         'CalMag',
                         'Blood Meal',
                         'Bone Meal',
+                        'Trifecta +',
+                        'Crab and Lobster Shell Meal',
+                        'True Organic Liquid All Purpose',
+                        'Sulphur',
+                        'Azomite',
+                        'True Organic Tomato & Vegetable',
+                        'Combo',
                     ]
                 },
                 {
@@ -665,6 +672,7 @@ export const useActivityLogStore = defineStore('activity-log', {
                         'Insecticidal Soap',
                         'BT Thuricide',
                         'Neem Oil',
+                        'Captain Jack Dead Bug',
                     ]
                 },
             ],
