@@ -4,7 +4,10 @@
       <h4>{{ hydratedPlot.friendlyName }}</h4>
     </v-card-title>
     <v-card-text>
-      <template v-for="planting in hydratedPlot.plantings">
+      <div v-if="displayedPlantings.length === 0" class="text-center">
+        <p>No active plantings</p>
+      </div>
+      <template v-else v-for="planting in displayedPlantings">
         <div class="d-flex justify-space-between align-center mb-1">
           <v-chip class="ml-2 mr-2"
                   color="green">
@@ -50,7 +53,23 @@ export default {
   name: 'HarvestSummary',
 
   props: {
-    hydratedPlot: Object,
+    hydratedPlot: {
+      type: Object,
+      required: true,
+    },
+    showRetired: {
+      type: Boolean,
+      default: false,
+    },
+  },
+
+  computed: {
+    displayedPlantings() {
+      if (this.showRetired) {
+        return this.hydratedPlot.plantings;
+      }
+      return this.hydratedPlot.plantings.filter(planting => planting.currentStatus !== 'RETIRED');
+    }
   },
 
   methods: {

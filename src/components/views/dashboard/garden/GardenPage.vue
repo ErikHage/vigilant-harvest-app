@@ -7,6 +7,7 @@
         <v-btn class="mt-3" color="primary" @click="openAddHarvestDialog">Add Harvests</v-btn>
         <v-btn class="mt-3 ml-3" color="success" @click="goToJournal">Journal</v-btn>
         <v-btn class="mt-3 ml-3" color="success" @click="goToActivityLog">Activity Log</v-btn>
+        <v-btn class="mt-3 ml-3" color="default" @click="toggleShowRetired">{{ showRetired ? "Hide Retired" : "Show Retired" }}</v-btn>
       </v-col>
     </v-row>
 
@@ -16,7 +17,7 @@
           <v-col cols="12" lg="4" md="6"
                  v-if="!loading"
                  v-for="hydratedPlot in hydratedPlots">
-            <harvest-summary :hydrated-plot="hydratedPlot"/>
+            <harvest-summary :hydrated-plot="hydratedPlot" :show-retired="showRetired"/>
           </v-col>
         </v-row>
       </v-col>
@@ -113,6 +114,7 @@ export default {
   data: () => ({
     loading: false,
     initialized: false,
+    showRetired: false,
 
     overrideHarvestDateDialog: false,
     selectedHarvestDate: new Date(),
@@ -275,6 +277,10 @@ export default {
     goBackToHarvestDialog() {
       this.harvestsConfirmDialog = false;
       this.dialog = true;
+    },
+
+    toggleShowRetired() {
+      this.showRetired = !this.showRetired;
     },
 
     closeConfirmDialog() {
