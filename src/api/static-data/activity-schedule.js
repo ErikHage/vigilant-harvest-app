@@ -23,7 +23,7 @@ const activityTypes = [
             },
             {
                 id: 5,
-                name: 'Compost',
+                name: 'Calcium/Magnesium Supplement',
             },
             {
                 id: 6,
@@ -33,10 +33,6 @@ const activityTypes = [
                 id: 7,
                 name: 'Granular Slow Release',
             },
-            {
-                id: 8,
-                name: 'Calcium/Magnesium Supplement',
-            }
         ],
     },
     {
@@ -57,6 +53,44 @@ const activityTypes = [
             }
         ]
     },
+    {
+        id: 3,
+        name: 'Soil Amendment',
+        subTypes: [
+            {
+                id: 1,
+                name: 'Compost',
+            },
+            {
+                id: 2,
+                name: 'Sulphur',
+            },
+            {
+                id: 3,
+                name: 'Mulch',
+            }
+        ],
+    },
+    {
+        id: 4,
+        name: 'Action',
+        subTypes: [
+            {
+                id: 1,
+                name: 'Prune',
+            }
+        ],
+    },
+    {
+        id: 5,
+        name: 'Test',
+        subTypes: [
+            {
+                id: 1,
+                name: 'Soil pH',
+            }
+        ],
+    }
 ];
 
 export default {
