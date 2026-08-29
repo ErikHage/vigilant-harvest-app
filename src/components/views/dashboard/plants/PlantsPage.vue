@@ -40,6 +40,7 @@
     <add-plant-dialog
         :show="dialog"
         :categories="categories"
+        :harvest-types="harvestTypes"
         :on-submit="savePlant"
         :on-cancel="closeDialog"
     />
@@ -75,6 +76,7 @@ export default {
     ...mapState(usePlantsStore, {
       plants: 'plants',
       categories: 'categories',
+      harvestTypes: 'harvestTypes',
       alertType: 'alertType',
       alertMessage: 'alertMessage',
       alertVisible: 'alertVisible',
@@ -94,11 +96,13 @@ export default {
       'upsertPlant',
       'fetchPlants',
       'fetchPlantCategories',
+      'fetchHarvestTypes',
     ]),
 
     async refreshData() {
       await this.fetchPlants();
       await this.fetchPlantCategories();
+      await this.fetchHarvestTypes();
     },
 
     navigateToPlantDetails(plant) {

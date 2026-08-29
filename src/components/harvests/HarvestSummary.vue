@@ -7,48 +7,51 @@
       <div v-if="displayedPlantings.length === 0" class="text-center">
         <p>No active plantings</p>
       </div>
-      <template v-else v-for="planting in displayedPlantings">
-        <div class="d-flex justify-space-between align-center mb-1">
-          <v-chip class="ml-2 mr-2"
-                  color="green">
+
+      <div v-else class="plantings-grid">
+        <template v-for="(planting, index) in displayedPlantings" :key="planting.plantingId">
+          <v-chip class="leaf-chip" color="green">
             {{ planting.numberTransplanted }}
             <v-icon class="ml-1">mdi-leaf</v-icon>
           </v-chip>
 
-          <div class="d-flex flex-column align-center">
-            <span class="clickable text-primary font-weight-medium"
-                  @click="onClickPlanting(planting.plantingId)">
-            {{ planting.name }}
-            </span>
-            <span class="clickable smaller-text"
-                  @click="onClickPlant(planting.plant.plantId)">
-            {{ planting.plant.friendlyName }}
-            </span>
+          <div class="planting-names">
+            <span class="clickable text-primary font-weight-medium name-line"
+                  :title="planting.name"
+                  @click="onClickPlanting(planting.plantingId)">{{ planting.name }}</span>
+            <span class="clickable smaller-text name-line"
+                  :title="planting.plant.friendlyName"
+                  @click="onClickPlant(planting.plant.plantId)">{{ planting.plant.friendlyName }}</span>
           </div>
 
-          <v-chip v-if="planting.currentStatus === 'RETIRED'"
-                  color="#8B0000">
-            {{ planting.harvestQuantity }}
-            <v-icon class="ml-1">mdi-basket-fill</v-icon>
-          </v-chip>
+          <div class="harvest-chips">
+            <template v-if="planting.harvestQuantities.length > 0">
+              <v-chip v-for="harvestQuantity in planting.harvestQuantities"
+                      :key="harvestQuantity.harvestTypeId"
+                      size="small"
+                      :color="planting.currentStatus === 'RETIRED' ? '#8B0000' : 'yellow'">
+                {{ formatQuantity(harvestQuantity.quantity, harvestQuantity.harvestType) }}
+                <v-icon class="ml-1">mdi-basket-fill</v-icon>
+              </v-chip>
+            </template>
 
-          <v-chip v-else-if="planting.harvestQuantity > 0"
-                  color="yellow">
-            {{ planting.harvestQuantity }}
-            <v-icon class="ml-1">mdi-basket-fill</v-icon>
-          </v-chip>
+            <v-chip v-else
+                    size="small"
+                    color="grey">
+              <v-icon>mdi-basket</v-icon>
+            </v-chip>
+          </div>
 
-          <v-chip v-else
-                  color="grey">
-            <v-icon>mdi-basket</v-icon>
-          </v-chip>
-        </div>
-      </template>
+          <v-divider v-if="index < displayedPlantings.length - 1" class="planting-divider"/>
+        </template>
+      </div>
     </v-card-text>
   </v-card>
 </template>
 
 <script>
+import harvestUtils from "@/utils/harvest-utils";
+
 export default {
   name: 'HarvestSummary',
 
@@ -73,6 +76,10 @@ export default {
   },
 
   methods: {
+    formatQuantity(quantity, harvestType) {
+      return harvestUtils.formatQuantity(quantity, harvestType);
+    },
+
     onClickPlanting(plantingId) {
       this.$router.push({
         name: 'PlantingDetailsPage',
@@ -95,6 +102,45 @@ export default {
 </script>
 
 <style scoped>
+/* one grid for the whole card, so every planting row shares the same column edges */
+.plantings-grid {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  column-gap: 12px;
+  row-gap: 8px;
+  align-items: center;
+}
+
+/* minmax(0, 1fr) above plus this lets the cell shrink so the names can truncate */
+.planting-names {
+  min-width: 0;
+}
+
+.name-line {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.harvest-chips {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+}
+
+/* stretching the chips to fill their auto-sized track lines the icons up in a column */
+.leaf-chip,
+.harvest-chips .v-chip {
+  justify-content: flex-end;
+  font-variant-numeric: tabular-nums;
+}
+
+.planting-divider {
+  grid-column: 1 / -1;
+}
+
 .clickable {
   cursor: pointer;
   transition: color 0.2s;

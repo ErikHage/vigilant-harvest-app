@@ -12,7 +12,7 @@
               <span class="text-success">{{ harvestFormRecord.plantingName }}</span>
               <span class="smaller-text">{{ harvestFormRecord.plotName }}:{{ harvestFormRecord.plantName }}</span>
             </div>
-            <v-chip color="yellow">+{{ harvestFormRecord.quantity }}</v-chip>
+            <v-chip color="yellow">+{{ formatQuantity(harvestFormRecord.quantity, harvestFormRecord.harvestType) }}</v-chip>
           </div>
         </div>
       </v-card-text>
@@ -27,6 +27,8 @@
 </template>
 
 <script>
+import harvestUtils from "@/utils/harvest-utils";
+
 export default {
   name: "ConfirmHarvestsDialog",
 
@@ -70,6 +72,12 @@ export default {
 
     harvestDateString() {
       return this.harvestDate.toDateString();
+    },
+  },
+
+  methods: {
+    formatQuantity(quantity, harvestType) {
+      return harvestUtils.formatQuantity(quantity, harvestType);
     },
   },
 

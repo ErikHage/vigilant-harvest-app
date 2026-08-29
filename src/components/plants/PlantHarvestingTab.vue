@@ -2,6 +2,10 @@
   <v-table>
     <tbody>
     <tr>
+      <th class="details-header shrink-column">Default Harvest Type</th>
+      <td>{{ plant.harvesting.defaultHarvestType }}</td>
+    </tr>
+    <tr>
       <th class="details-header shrink-column">Fruit Size</th>
       <td>{{ plant.harvesting.fruitSize }}</td>
     </tr>

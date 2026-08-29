@@ -24,19 +24,21 @@
       <v-col cols="8">
 
         <v-select
-            :items="stats"
+            :items="statGroups"
             :item-title="getDisplayTitle"
-            item-value="index"
+            item-value="key"
             label="Select Plant to View"
             variant="solo"
             clearable
             @update:model-value="onSelectedStatChange"
         />
 
-        <div v-if="selectedStat">
+        <div v-if="selectedGroup">
           <stats-card
+              v-for="row in selectedGroup.rows"
+              :key="row.harvestTypeId"
               class="stats-card"
-              :stats="selectedStat"
+              :stats="row"
           />
         </div>
         <div v-else class="d-flex justify-center">
@@ -70,7 +72,7 @@ export default {
   },
 
   data: () => ({
-    selectedStatIndex: null,
+    selectedGroupKey: null,
   }),
 
   computed: {
@@ -91,21 +93,42 @@ export default {
       };
     },
 
-    stats() {
-      if (this.harvestStats && this.harvestStats.stats) {
-        return this.harvestStats.stats
-            .sort((a, b) => {
-              const nameA = a.plantingName || a.plantName || '';
-              const nameB = b.plantingName || b.plantName || '';
-              return nameA.localeCompare(nameB);
-            })
-            .map((item, index) => ({ ...item, index }));
-      }
-      return [];
+    // stats come back one row per planting (or plant) x harvest type, so rows are grouped
+    // back together and each type is rendered as its own card
+    statGroups() {
+      const rows = this.harvestStats?.stats ?? [];
+
+      const grouped = rows.reduce((acc, row) => {
+        const key = row.plantingId ?? row.plantId;
+
+        if (!acc[key]) {
+          acc[key] = {
+            key,
+            plantingName: row.plantingName,
+            plantName: row.plantName,
+            plotName: row.plotName,
+            rows: [],
+          };
+        }
+
+        acc[key].rows.push(row);
+        return acc;
+      }, {});
+
+      return Object.values(grouped)
+          .map(group => ({
+            ...group,
+            rows: [...group.rows].sort((a, b) => b.totalQuantity - a.totalQuantity),
+          }))
+          .sort((a, b) => {
+            const nameA = a.plantingName || a.plantName || '';
+            const nameB = b.plantingName || b.plantName || '';
+            return nameA.localeCompare(nameB);
+          });
     },
 
-    selectedStat() {
-      return this.selectedStatIndex !== null ? this.stats[this.selectedStatIndex] : null;
+    selectedGroup() {
+      return this.statGroups.find(group => group.key === this.selectedGroupKey) ?? null;
     },
 
     alert() {
@@ -126,8 +149,8 @@ export default {
       await this.fetchHarvestStats(this.plantingYear, "Plant");
     },
 
-    onSelectedStatChange(index) {
-      this.selectedStatIndex = index;
+    onSelectedStatChange(key) {
+      this.selectedGroupKey = key;
     },
 
     getDisplayTitle(item) {

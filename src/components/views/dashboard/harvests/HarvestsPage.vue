@@ -44,13 +44,17 @@
               <div class="chip-row">
                 <div class="d-flex align-center" @click="toggleExpanded(plantGroup.plantName)"
                      style="cursor: pointer;">
-                  <v-chip
-                      :color="getQuantityColor(plantGroup.totalQuantity)"
-                      class="fixed-width-chip"
-                      size="small"
-                  >
-                    {{ plantGroup.totalQuantity }}
-                  </v-chip>
+                  <div class="d-flex flex-wrap ga-1">
+                    <v-chip
+                        v-for="total in plantGroup.totalsByType"
+                        :key="total.harvestTypeId"
+                        :color="getQuantityColor(total.quantity)"
+                        class="fixed-width-chip"
+                        size="small"
+                    >
+                      {{ formatQuantity(total.quantity, total.harvestType) }}
+                    </v-chip>
+                  </div>
 
                   <div class="ml-3 plant-name">
                     {{ plantGroup.plantName }}
@@ -70,7 +74,7 @@
                       :key="harvest.harvestId"
                       class="breakdown-row mb-1"
                   >
-                    • {{ harvest.plantingName }} – {{ harvest.quantity }}
+                    • {{ harvest.plantingName }} – {{ formatQuantity(harvest.quantity, harvest.harvestType) }}
                   </div>
                 </div>
               </div>
@@ -97,6 +101,7 @@ import {mapActions, mapState} from "pinia";
 import {useCommonStore, useHarvestsStore, usePlantingsStore, usePlantsStore} from "@/store";
 import PageTitle from "@/components/layout/PageTitle.vue";
 import EditHarvestsDialog from "@/components/harvests/EditHarvestsDialog.vue";
+import harvestUtils from "@/utils/harvest-utils";
 
 export default {
   name: 'HarvestsPage',
@@ -142,20 +147,33 @@ export default {
           if (!grouped[plantName]) {
             grouped[plantName] = {
               plantName: plantName,
-              totalQuantity: 0,
+              totalsByType: {},
               harvests: [],
             };
           }
 
-          grouped[plantName].totalQuantity += harvest.quantity;
+          // a plant can hold harvests of more than one type, and pounds cannot be added to count
+          const totalsByType = grouped[plantName].totalsByType;
+          if (!totalsByType[harvest.harvestTypeId]) {
+            totalsByType[harvest.harvestTypeId] = {
+              harvestTypeId: harvest.harvestTypeId,
+              harvestType: harvest.harvestType,
+              quantity: 0,
+            };
+          }
+          totalsByType[harvest.harvestTypeId].quantity += harvest.quantity;
+
           grouped[plantName].harvests.push(harvest);
         }
       }
 
       // Sort alphabetically by plantName
-      return Object.values(grouped).sort((a, b) =>
-          a.plantName.localeCompare(b.plantName)
-      );
+      return Object.values(grouped)
+          .map(plantGroup => ({
+            ...plantGroup,
+            totalsByType: Object.values(plantGroup.totalsByType).sort(harvestUtils.sortByQuantityDescending),
+          }))
+          .sort((a, b) => a.plantName.localeCompare(b.plantName));
     },
   },
 
@@ -230,8 +248,25 @@ export default {
     },
 
     async updateHarvests(harvests) {
-      await this.upsertHarvests(harvests);
+      // the harvest type is stamped server-side at creation and must not be sent back
+      const payload = harvests.map(harvest => ({
+        harvestId: harvest.harvestId,
+        plantingYear: this.plantingYear,
+        plantingId: harvest.plantingId,
+        quantity: harvest.quantity,
+        harvestDate: harvest.harvestDate,
+      }));
+
+      await this.upsertHarvests(payload);
+
+      // a save can split a planting's day into two harvests, so refetch instead of
+      // trusting the rows on screen. refreshData resets selectedDate, so restore it.
+      const previouslySelectedDate = this.selectedDate;
       this.onCloseEditHarvestsDialog();
+      await this.refreshData();
+      if (this.harvestDates.includes(previouslySelectedDate)) {
+        this.selectedDate = previouslySelectedDate;
+      }
     },
 
     onCloseEditHarvestsDialog() {
@@ -241,6 +276,10 @@ export default {
 
     formatDate(date) {
       return dayjs(date).format('YYYY-MM-DD');
+    },
+
+    formatQuantity(quantity, harvestType) {
+      return harvestUtils.formatQuantity(quantity, harvestType);
     },
 
     getQuantityColor(quantity) {
@@ -321,7 +360,7 @@ export default {
 }
 
 .fixed-width-chip {
-  width: 45px;
+  min-width: 45px;
   justify-content: center;
   text-align: right;
   font-variant-numeric: tabular-nums;

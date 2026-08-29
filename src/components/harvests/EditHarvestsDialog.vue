@@ -12,6 +12,7 @@
                 <div class="d-flex flex-column align-start justify-center mr-6">
                   <span class="text-success">{{ harvest.plantingName }}</span>
                   <span class="smaller-text">{{ harvest.plantName }}</span>
+                  <span class="smaller-text">{{ harvestTypeLabel(harvest.harvestType) }}</span>
                 </div>
               </div>
             </v-col>
@@ -19,6 +20,7 @@
               <v-text-field v-model.number="harvest.quantity"
                             type="number"
                             label="Quantity"
+                            :suffix="harvestTypeLabel(harvest.harvestType)"
                             required
               ></v-text-field>
             </v-col>
@@ -34,6 +36,8 @@
 </template>
 
 <script>
+import harvestUtils from "@/utils/harvest-utils";
+
 export default {
   name: 'EditHarvestsDialog',
 
@@ -66,6 +70,11 @@ export default {
   },
 
   methods: {
+    // the harvest type is stamped at creation and cannot be changed, so it is display only
+    harvestTypeLabel(harvestType) {
+      return harvestUtils.harvestTypeLabel(harvestType);
+    },
+
     handleCancel() {
       this.onCancel();
     },

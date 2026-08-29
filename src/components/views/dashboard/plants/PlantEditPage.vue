@@ -176,6 +176,18 @@
             <v-card>
               <v-card-title>Harvesting</v-card-title>
               <v-card-text>
+                <v-select
+                    v-model="selectedHarvestTypeId"
+                    :items="harvestTypes"
+                    item-title="harvestTypeName"
+                    item-value="harvestTypeId"
+                    label="Default Harvest Type"
+                    density="compact"
+                    variant="solo"
+                ></v-select>
+                <div class="text-caption text-medium-emphasis mx-2 mb-4">
+                  Applies to future harvests. Existing harvests keep the type they were recorded with.
+                </div>
                 <v-text-field v-model="plantCopy.harvesting.fruitSize" label="Fruit Size" variant="solo" density="compact"/>
                 <v-text-field v-model="plantCopy.harvesting.shelfStability" label="Shelf Stability" variant="solo" density="compact"/>
                 <v-label class="mx-2" >Instructions</v-label>
@@ -212,6 +224,7 @@ import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
 import TextBoxDialog from "@/components/utils/TextBoxDialog.vue";
 import PlantTagsDialog from "@/components/plants/PlantTagsDialog.vue";
 import ManagePlantSchedulesDialog from "@/components/plants/ManagePlantSchedulesDialog.vue";
+import harvestUtils from "@/utils/harvest-utils";
 
 export default {
   name: "PlantEditPage",
@@ -251,6 +264,7 @@ export default {
       },
       selectedCategory: null,
       selectedSubcategoryId: null,
+      selectedHarvestTypeId: null,
     };
   },
 
@@ -258,6 +272,7 @@ export default {
     ...mapState(usePlantsStore, {
       plantsById: 'plantsById',
       categories: 'categories',
+      harvestTypes: 'harvestTypes',
       loading: 'loading',
       alertType: 'alertType',
       alertMessage: 'alertMessage',
@@ -314,7 +329,12 @@ export default {
           || this.textFieldEdited(this.plant.growing.growingNotes, this.plantCopy.growing.growingNotes)
           || this.textFieldEdited(this.plant.harvesting.fruitSize, this.plantCopy.harvesting.fruitSize)
           || this.textFieldEdited(this.plant.harvesting.shelfStability, this.plantCopy.harvesting.shelfStability)
-          || this.textFieldEdited(this.plant.harvesting.harvestInstructions, this.plantCopy.harvesting.harvestInstructions);
+          || this.textFieldEdited(this.plant.harvesting.harvestInstructions, this.plantCopy.harvesting.harvestInstructions)
+          || this.plantHarvestTypeId !== this.selectedHarvestTypeId;
+    },
+
+    plantHarvestTypeId() {
+      return this.plant.harvesting.defaultHarvestTypeId ?? harvestUtils.unspecifiedHarvestTypeId;
     },
   },
 
@@ -322,6 +342,7 @@ export default {
     ...mapActions(usePlantsStore, [
       'fetchPlantById',
       'fetchPlantCategories',
+      'fetchHarvestTypes',
       'upsertPlant',
       'updatePlantScheduleAssignment',
     ]),
@@ -329,9 +350,11 @@ export default {
     async refreshData() {
       await this.fetchPlantById(this.plantId);
       await this.fetchPlantCategories();
+      await this.fetchHarvestTypes();
 
       this.plantCopy = JSON.parse(JSON.stringify(this.plantsById[this.plantId]));
       this.selectedSubcategoryId = this.plantCopy.subcategoryId;
+      this.selectedHarvestTypeId = this.plantCopy.harvesting?.defaultHarvestTypeId ?? harvestUtils.unspecifiedHarvestTypeId;
       this.selectedCategory = this.categories.find(category =>
           category.subcategories.some(sub => sub.subcategoryId === this.selectedSubcategoryId)
       );
@@ -401,6 +424,9 @@ export default {
           growingNotes: this.sanitize(this.plantCopy.growing.growingNotes),
         },
         harvesting: {
+          // PUT /plants is a full upsert and the service defaults a missing id to "unspecified",
+          // so this must always be sent or every save wipes the plant's harvest type
+          defaultHarvestTypeId: this.selectedHarvestTypeId ?? harvestUtils.unspecifiedHarvestTypeId,
           fruitSize: this.sanitize(this.plantCopy.harvesting.fruitSize),
           shelfStability: this.sanitize(this.plantCopy.harvesting.shelfStability),
           harvestInstructions: this.sanitize(this.plantCopy.harvesting.harvestInstructions),

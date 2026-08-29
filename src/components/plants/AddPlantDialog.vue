@@ -37,6 +37,15 @@
               density="compact"
               variant="solo"
           ></v-select>
+          <v-select
+              v-model="form.defaultHarvestTypeId"
+              :items="harvestTypes"
+              item-title="harvestTypeName"
+              item-value="harvestTypeId"
+              label="Default Harvest Type"
+              density="compact"
+              variant="solo"
+          ></v-select>
           <v-textarea v-model="form.description" label="Description" density="compact" rows="8" required></v-textarea>
         </v-form>
       </v-card-text>
@@ -50,6 +59,8 @@
 </template>
 
 <script>
+import harvestUtils from "@/utils/harvest-utils";
+
 export default {
   name: 'AddPlantDialog',
 
@@ -59,6 +70,10 @@ export default {
       required: true,
     },
     categories: {
+      type: Array,
+      default: () => [],
+    },
+    harvestTypes: {
       type: Array,
       default: () => [],
     },
@@ -78,6 +93,7 @@ export default {
         friendlyName: '',
         lifespanType: null,
         description: '',
+        defaultHarvestTypeId: harvestUtils.unspecifiedHarvestTypeId,
       },
       lifespanTypes: [
         'Annual',
@@ -113,6 +129,7 @@ export default {
         friendlyName: '',
         lifespanType: null,
         description: '',
+        defaultHarvestTypeId: harvestUtils.unspecifiedHarvestTypeId,
       };
     },
 
@@ -122,6 +139,9 @@ export default {
         friendlyName: this.form.friendlyName,
         lifespanType: this.form.lifespanType,
         description: this.form.description,
+        harvesting: {
+          defaultHarvestTypeId: this.form.defaultHarvestTypeId ?? harvestUtils.unspecifiedHarvestTypeId,
+        },
       });
       this.resetForm();
     },

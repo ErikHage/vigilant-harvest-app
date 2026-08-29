@@ -63,6 +63,7 @@
                   <v-text-field v-model.number="harvestsForm[harvestFormRecord.plantingId].quantity"
                                 type="number"
                                 label="Quantity"
+                                :suffix="harvestTypeLabel(harvestFormRecord.harvestType)"
                                 required
                                 density="compact"
                   ></v-text-field>
@@ -100,6 +101,7 @@ import PageTitle from "@/components/layout/PageTitle.vue";
 import HarvestSummary from "@/components/harvests/HarvestSummary.vue";
 import DatePickerDialogActivator from "@/components/utils/DatePickerDialogActivator.vue";
 import ConfirmHarvestsDialog from "@/components/garden/ConfirmHarvestsDialog.vue";
+import harvestUtils from "@/utils/harvest-utils";
 
 export default {
   name: 'GardenPage',
@@ -146,7 +148,7 @@ export default {
     }),
 
     ...mapState(useHarvestsStore, {
-      harvestCounts: 'harvestCounts',
+      harvestQuantitiesByPlanting: 'harvestQuantitiesByPlanting',
     }),
 
     filteredPlots() {
@@ -172,7 +174,7 @@ export default {
               acc[planting.plotId].plantings.push({
                 ...planting,
                 plant,
-                harvestQuantity: this.harvestCounts[planting.plantingId] ?? 0,
+                harvestQuantities: this.harvestQuantitiesByPlanting[planting.plantingId] ?? [],
               });
 
               return acc;
@@ -239,6 +241,7 @@ export default {
               plantingId: tempPlanting.plantingId,
               plantingName: tempPlanting.name,
               plantName: tempPlanting.plant.friendlyName,
+              harvestType: tempPlanting.plant.harvesting?.defaultHarvestType,
               quantity: 0,
               currentStatus: tempPlanting.currentStatus,
             }
@@ -277,6 +280,10 @@ export default {
     goBackToHarvestDialog() {
       this.harvestsConfirmDialog = false;
       this.dialog = true;
+    },
+
+    harvestTypeLabel(harvestType) {
+      return harvestUtils.harvestTypeLabel(harvestType);
     },
 
     toggleShowRetired() {

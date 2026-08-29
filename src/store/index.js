@@ -10,6 +10,9 @@ import plantingsApi from "@/api/plantings-api";
 import harvestsApi from "@/api/harvests-api";
 import journalApi from "@/api/journal-api";
 import activityLogApi from "@/api/activity-log-api";
+import harvestTypesApi from "@/api/harvest-types-api";
+
+import harvestUtils from "@/utils/harvest-utils";
 
 import {applicationId, feralAuthenticationAppUrl} from "@/utils/constants";
 import plantingYearsApi from "@/api/planting-years-api";
@@ -344,6 +347,17 @@ export const usePlantsStore = defineStore('plants', {
                 this.setAlertMessage(err, 'error', 'error fetching plant categories');
             }
         },
+        async fetchHarvestTypes() {
+            // fixed, server-seeded list, only changes with a service migration
+            if (this.harvestTypes.length > 0) {
+                return;
+            }
+            try {
+                this.harvestTypes = await harvestTypesApi.fetchHarvestTypes(storageUtils.tryToLoadTokenFromStorage());
+            } catch (err) {
+                this.setAlertMessage(err, 'error', 'error fetching harvest types');
+            }
+        },
         setAlertMessage(err, type, message) {
             if (err) {
                 console.error(err);
@@ -362,6 +376,7 @@ export const usePlantsStore = defineStore('plants', {
             plants: [],
             plantsById: {},
             categories: [],
+            harvestTypes: [],
             alertVisible: false,
             alertType: 'success',
             alertMessage: null,
@@ -498,10 +513,21 @@ export const useHarvestsStore = defineStore('harvests', {
         async fetchHarvestSummariesByYear(plantingYear) {
             try {
                 this.harvestSummaries = await harvestsApi.fetchHarvestSummary(storageUtils.tryToLoadTokenFromStorage(), plantingYear);
-                this.harvestCounts = this.harvestSummaries.reduce((acc, harvestSummary) => {
-                    acc[harvestSummary.plantingId] = harvestSummary.quantity;
+                // the summary returns one row per planting x harvest type, so a planting can have
+                // several quantities. never sum across types, they are not the same unit.
+                this.harvestQuantitiesByPlanting = this.harvestSummaries.reduce((acc, harvestSummary) => {
+                    if (!acc[harvestSummary.plantingId]) {
+                        acc[harvestSummary.plantingId] = [];
+                    }
+                    acc[harvestSummary.plantingId].push({
+                        harvestTypeId: harvestSummary.harvestTypeId,
+                        harvestType: harvestSummary.harvestType,
+                        quantity: harvestSummary.quantity,
+                    });
                     return acc;
                 }, {});
+                Object.values(this.harvestQuantitiesByPlanting)
+                    .forEach(quantities => quantities.sort(harvestUtils.sortByQuantityDescending));
             } catch (err) {
                 this.setAlertMessage(err, 'error', 'error fetching harvest summaries by year');
             }
@@ -538,7 +564,7 @@ export const useHarvestsStore = defineStore('harvests', {
         return {
             harvests: [],
             harvestSummaries: [],
-            harvestCounts: {},
+            harvestQuantitiesByPlanting: {},
             harvestStats: {},
             alertVisible: false,
             alertType: 'success',
