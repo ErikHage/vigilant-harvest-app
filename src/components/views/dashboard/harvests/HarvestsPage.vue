@@ -4,6 +4,7 @@
       <v-col cols="12">
         <page-title title="Review Harvests"/>
         <v-spacer></v-spacer>
+        <fade-out-alert :is-visible="alert.isVisible" :alert-type="alert.type" :message="alert.message"/>
       </v-col>
     </v-row>
 
@@ -88,6 +89,8 @@
     <edit-harvests-dialog
         :show="editHarvestsDialog"
         :harvests="selectedHarvests"
+        :harvest-types="harvestTypes"
+        :error-message="editHarvestsErrorMessage"
         :on-submit="updateHarvests"
         :on-cancel="onCloseEditHarvestsDialog"
     />
@@ -101,6 +104,7 @@ import {mapActions, mapState} from "pinia";
 import {useCommonStore, useHarvestsStore, usePlantingsStore, usePlantsStore} from "@/store";
 import PageTitle from "@/components/layout/PageTitle.vue";
 import EditHarvestsDialog from "@/components/harvests/EditHarvestsDialog.vue";
+import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
 import harvestUtils from "@/utils/harvest-utils";
 
 export default {
@@ -109,10 +113,12 @@ export default {
   components: {
     PageTitle,
     EditHarvestsDialog,
+    FadeOutAlert,
   },
 
   data: () => ({
     editHarvestsDialog: false,
+    editHarvestsErrorMessage: '',
     harvestDates: [],
     hydratedHarvestsByDate: {},
     selectedHarvests: [],
@@ -128,6 +134,7 @@ export default {
 
     ...mapState(usePlantsStore, {
       plantsById: 'plantsById',
+      harvestTypes: 'harvestTypes',
     }),
 
     ...mapState(usePlantingsStore, {
@@ -136,7 +143,18 @@ export default {
 
     ...mapState(useHarvestsStore, {
       harvests: 'harvests',
+      alertType: 'alertType',
+      alertMessage: 'alertMessage',
+      alertVisible: 'alertVisible',
     }),
+
+    alert() {
+      return {
+        isVisible: this.alertVisible,
+        type: this.alertType,
+        message: this.alertMessage,
+      };
+    },
 
     groupedHarvests() {
       const harvestsByPlant = this.hydratedHarvestsByDate?.[this.selectedDate] ?? {};
@@ -180,6 +198,7 @@ export default {
   methods: {
     ...mapActions(usePlantsStore, [
       'fetchPlants',
+      'fetchHarvestTypes',
     ]),
 
     ...mapActions(usePlantingsStore, [
@@ -193,6 +212,7 @@ export default {
 
     async refreshData() {
       await this.fetchPlants();
+      await this.fetchHarvestTypes();
       await this.searchHarvests(this.plantingYear);
       await this.fetchPlantingsByYear(this.plantingYear);
 
@@ -241,6 +261,7 @@ export default {
     },
 
     showEditHarvestsDialog(harvests) {
+      this.editHarvestsErrorMessage = '';
       // is multi-value map of plant to harvest (per planting), need to flatten out to edit.
       this.selectedHarvests = Object.values(harvests)
           .flatMap(h => h);
@@ -248,19 +269,25 @@ export default {
     },
 
     async updateHarvests(harvests) {
-      // the harvest type is stamped server-side at creation and must not be sent back
       const payload = harvests.map(harvest => ({
         harvestId: harvest.harvestId,
         plantingYear: this.plantingYear,
         plantingId: harvest.plantingId,
         quantity: harvest.quantity,
         harvestDate: harvest.harvestDate,
+        harvestTypeId: harvest.harvestTypeId,
       }));
 
-      await this.upsertHarvests(payload);
+      try {
+        await this.upsertHarvests(payload);
+      } catch (err) {
+        // keep the dialog open so the entries survive a rejected harvest type id
+        this.editHarvestsErrorMessage = harvestUtils.upsertErrorMessage(err, 'error updating harvests');
+        return;
+      }
 
-      // a save can split a planting's day into two harvests, so refetch instead of
-      // trusting the rows on screen. refreshData resets selectedDate, so restore it.
+      // retyping can absorb a row into another harvest, so an id we sent may no longer exist.
+      // refetch rather than reconciling against the response. refreshData resets selectedDate.
       const previouslySelectedDate = this.selectedDate;
       this.onCloseEditHarvestsDialog();
       await this.refreshData();
@@ -270,6 +297,7 @@ export default {
     },
 
     onCloseEditHarvestsDialog() {
+      this.editHarvestsErrorMessage = '';
       this.selectedHarvests = [];
       this.editHarvestsDialog = false;
     },

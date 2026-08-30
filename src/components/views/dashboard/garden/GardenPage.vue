@@ -8,6 +8,7 @@
         <v-btn class="mt-3 ml-3" color="success" @click="goToJournal">Journal</v-btn>
         <v-btn class="mt-3 ml-3" color="success" @click="goToActivityLog">Activity Log</v-btn>
         <v-btn class="mt-3 ml-3" color="default" @click="toggleShowRetired">{{ showRetired ? "Hide Retired" : "Show Retired" }}</v-btn>
+        <fade-out-alert :is-visible="alert.isVisible" :alert-type="alert.type" :message="alert.message"/>
       </v-col>
     </v-row>
 
@@ -36,6 +37,12 @@
           </div>
         </v-card-title>
         <v-card-text>
+          <v-alert v-if="saveErrorMessage"
+                   type="error"
+                   density="compact"
+                   class="mb-4">{{ saveErrorMessage }}
+          </v-alert>
+
           <v-form ref="addHarvestsForm">
             <v-select
                 :items="filteredPlots"
@@ -52,18 +59,27 @@
             <div v-if="selectedPlot"
                  v-for="harvestFormRecord in filteredHarvestFormRecords"
                  :key="harvestFormRecord.plantingId">
-              <v-row no-gutters>
-                <v-col cols="8">
+              <v-row no-gutters class="harvest-row">
+                <v-col cols="5">
                   <div class="d-flex flex-column align-start justify-center">
                     <span class="text-success">{{ harvestFormRecord.plantingName }}</span>
                     <span class="smaller-text">{{ harvestFormRecord.plantName }}</span>
                   </div>
                 </v-col>
                 <v-col cols="4">
+                  <v-select v-model="harvestsForm[harvestFormRecord.plantingId].harvestTypeId"
+                            :items="harvestTypes"
+                            item-title="harvestTypeName"
+                            item-value="harvestTypeId"
+                            label="Type"
+                            density="compact"
+                            variant="solo"
+                  ></v-select>
+                </v-col>
+                <v-col cols="3">
                   <v-text-field v-model.number="harvestsForm[harvestFormRecord.plantingId].quantity"
                                 type="number"
                                 label="Quantity"
-                                :suffix="harvestTypeLabel(harvestFormRecord.harvestType)"
                                 required
                                 density="compact"
                   ></v-text-field>
@@ -85,6 +101,7 @@
         :show="harvestsConfirmDialog"
         :harvest-date="selectedHarvestDate"
         :harvests="harvestsEntered"
+        :harvest-types="harvestTypes"
         :on-cancel="closeConfirmDialog"
         :on-back="goBackToHarvestDialog"
         :on-confirm="saveHarvests"/>
@@ -101,6 +118,7 @@ import PageTitle from "@/components/layout/PageTitle.vue";
 import HarvestSummary from "@/components/harvests/HarvestSummary.vue";
 import DatePickerDialogActivator from "@/components/utils/DatePickerDialogActivator.vue";
 import ConfirmHarvestsDialog from "@/components/garden/ConfirmHarvestsDialog.vue";
+import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
 import harvestUtils from "@/utils/harvest-utils";
 
 export default {
@@ -109,6 +127,7 @@ export default {
   components: {
     ConfirmHarvestsDialog,
     DatePickerDialogActivator,
+    FadeOutAlert,
     HarvestSummary,
     PageTitle,
   },
@@ -126,6 +145,7 @@ export default {
     harvestsForm: {},
 
     harvestsConfirmDialog: false,
+    saveErrorMessage: '',
   }),
 
   computed: {
@@ -141,6 +161,7 @@ export default {
     ...mapState(usePlantsStore, {
       plants: 'plants',
       plantsById: 'plantsById',
+      harvestTypes: 'harvestTypes',
     }),
 
     ...mapState(usePlantingsStore, {
@@ -149,7 +170,18 @@ export default {
 
     ...mapState(useHarvestsStore, {
       harvestQuantitiesByPlanting: 'harvestQuantitiesByPlanting',
+      alertType: 'alertType',
+      alertMessage: 'alertMessage',
+      alertVisible: 'alertVisible',
     }),
+
+    alert() {
+      return {
+        isVisible: this.alertVisible,
+        type: this.alertType,
+        message: this.alertMessage,
+      };
+    },
 
     filteredPlots() {
       return this.plots.sort(sorting.sortByPlotFriendlyName);
@@ -204,6 +236,7 @@ export default {
 
     ...mapActions(usePlantsStore, [
       'fetchPlants',
+      'fetchHarvestTypes',
     ]),
 
     ...mapActions(usePlantingsStore, [
@@ -229,6 +262,7 @@ export default {
 
     openAddHarvestDialog() {
       if (!this.loading) {
+        this.saveErrorMessage = '';
         const tempPlots = this.hydratedPlots;
 
         for (let i = 0; i < tempPlots.length; i++) {
@@ -241,7 +275,8 @@ export default {
               plantingId: tempPlanting.plantingId,
               plantingName: tempPlanting.name,
               plantName: tempPlanting.plant.friendlyName,
-              harvestType: tempPlanting.plant.harvesting?.defaultHarvestType,
+              harvestTypeId: tempPlanting.plant.harvesting?.defaultHarvestTypeId
+                  ?? harvestUtils.unspecifiedHarvestTypeId,
               quantity: 0,
               currentStatus: tempPlanting.currentStatus,
             }
@@ -282,10 +317,6 @@ export default {
       this.dialog = true;
     },
 
-    harvestTypeLabel(harvestType) {
-      return harvestUtils.harvestTypeLabel(harvestType);
-    },
-
     toggleShowRetired() {
       this.showRetired = !this.showRetired;
     },
@@ -302,10 +333,18 @@ export default {
             plantingId: h.plantingId,
             quantity: h.quantity,
             harvestDate: this.selectedHarvestDate,
+            harvestTypeId: h.harvestTypeId,
           }));
 
       if (mappedHarvests.length > 0) {
-        await this.upsertHarvests(mappedHarvests);
+        try {
+          await this.upsertHarvests(mappedHarvests);
+        } catch (err) {
+          // reopen the entry dialog so the quantities survive a rejected harvest type id
+          this.saveErrorMessage = harvestUtils.upsertErrorMessage(err, 'error saving harvests');
+          this.goBackToHarvestDialog();
+          return;
+        }
       } else {
         console.log('no harvests entered, skipping save');
       }
@@ -325,6 +364,7 @@ export default {
     async refreshData() {
       await this.fetchPlots();
       await this.fetchPlants();
+      await this.fetchHarvestTypes();
       await this.fetchPlantingsByYear(this.plantingYear);
       await this.fetchHarvestSummariesByYear(this.plantingYear);
       this.initialized = true;
@@ -338,6 +378,10 @@ export default {
 </script>
 
 <style scoped>
+.harvest-row {
+  align-items: center;
+}
+
 .smaller-text {
   font-size: 0.8rem;
   color: gray;

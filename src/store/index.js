@@ -505,9 +505,11 @@ export const useHarvestsStore = defineStore('harvests', {
                     plantingYear: this.plantingYear,
                     ...harvest,
                 }));
-                await harvestsApi.upsertHarvests(storageUtils.tryToLoadTokenFromStorage(), harvestsWithYear);
+                return await harvestsApi.upsertHarvests(storageUtils.tryToLoadTokenFromStorage(), harvestsWithYear);
             } catch (err) {
-                this.setAlertMessage(err, 'error', 'error inserting harvests');
+                this.setAlertMessage(err, 'error', harvestUtils.upsertErrorMessage(err, 'error inserting harvests'));
+                // the only action here that rethrows: both call sites keep a dialog open on failure
+                throw err;
             }
         },
         async fetchHarvestSummariesByYear(plantingYear) {

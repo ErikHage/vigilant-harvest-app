@@ -12,7 +12,7 @@
               <span class="text-success">{{ harvestFormRecord.plantingName }}</span>
               <span class="smaller-text">{{ harvestFormRecord.plotName }}:{{ harvestFormRecord.plantName }}</span>
             </div>
-            <v-chip color="yellow">+{{ formatQuantity(harvestFormRecord.quantity, harvestFormRecord.harvestType) }}</v-chip>
+            <v-chip color="yellow">+{{ formatQuantity(harvestFormRecord.quantity, harvestTypeName(harvestFormRecord.harvestTypeId)) }}</v-chip>
           </div>
         </div>
       </v-card-text>
@@ -45,6 +45,10 @@ export default {
       type: Array,
       required: true,
     },
+    harvestTypes: {
+      type: Array,
+      default: () => [],
+    },
     onConfirm: {
       type: Function,
       required: true,
@@ -76,6 +80,11 @@ export default {
   },
 
   methods: {
+    // the form holds the chosen type id, so resolve the name rather than the plant default
+    harvestTypeName(harvestTypeId) {
+      return harvestUtils.harvestTypeNameById(this.harvestTypes, harvestTypeId);
+    },
+
     formatQuantity(quantity, harvestType) {
       return harvestUtils.formatQuantity(quantity, harvestType);
     },
