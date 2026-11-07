@@ -66,11 +66,23 @@ helpers/ui/drivers/assertions.js the only importer of expect
 
 **Every page has `open`, `reload`, `checkIsShown` and `checkIsShownAfterReload`.** `pages/routed-page.js` supplies them. Every page has `appBar`. Every dashboard page also has `dashboardNav`, its own bar: `dashboardNav.goTo('page: plantStats')` follows the link through its menu, or through the one menu on a phone. `drivers/routed-page-driver.js` checks a page by its URL and by something only that page shows; for the dashboard's pages, their title.
 
-A dashboard page with nothing else to do yet is a one-liner, listed in `pages/dashboard-pages.js` and `drivers/dashboard-pages-drivers.js`. It moves to its own files once it has steps of its own, as the plots page has.
+A dashboard page with nothing else to do yet is a one-liner, listed in `pages/dashboard-pages.js` and `drivers/dashboard-pages-drivers.js`. It moves to its own files once it has steps of its own, as the plots, plants and categories pages have.
+
+**A page with an id in its URL has no `open`.** It's reached the way a person reaches it, from its list: `plantsPage.viewPlant('plant: sungold')` or `editPlant(...)`. The next step checks where that landed, for that thing: `plantDetailsPage.checkIsShownFor('plant: sungold')`.
+
+**A page's alert fades after three seconds,** so a step checking it comes straight after the step that caused it. `drivers/page-alert.js` finds it by its class: Vuetify gives each form field an empty `alert` of its own.
 
 **Phones.** A spec that needs the phone layout sets a narrow viewport (`test.use({ viewport: { width: 390, height: 844 } })`), below Vuetify's md breakpoint. The drivers read the viewport to know which layout they're in.
 
-**`garden` isn't a page.** It arranges, through the API, what a test needs but isn't about: `garden.hasPlot('plot: bed')`, `garden.hasPlantingYear('year: spring')`. What a test *is* about is made through the page: `plotsPage.addPlot('plot: bed')`.
+**`garden` isn't a page.** It arranges, through the API, what a test needs but isn't about: `garden.hasPlot('plot: bed')`, `garden.hasPlantingYear('year: spring')`. What a test *is* about is made through the page: `plotsPage.addPlot('plot: bed')`. A plant needs a subcategory, and a subcategory a category, so a plant's test arranges all three:
+
+```js
+await garden.hasCategory('category: tomatoes');
+await garden.hasSubcategory('subcategory: cherry', 'category: tomatoes');
+await garden.hasPlant('plant: sungold', 'subcategory: cherry', 'tags: Cold Tolerant, Heirloom', 'schedule: feeding');
+```
+
+`hasPlant` makes up every field; its `tags` and `schedule` (each a schedule from `garden.hasSchedule`) are optional.
 
 **Absence is checked once, after a sync point.** A page that shows nothing looks the same before it reacts as after. A driver checking for absence first waits for the service call it depends on to be answered (`drivers/service-calls.js` records the page's calls from the start of each test), or for the page that follows, then reads the page once.
 
@@ -100,8 +112,11 @@ The app restores a session from `localStorage`, so a reload stays signed on. Not
 What a test names is made up, and deleted afterwards.
 - `plotsPage.addPlot('plot: bed')` and `garden.hasPlot('plot: bed')` make a plot named `ui-bed-<random>`.
 - `garden.hasPlantingYear('year: spring')` makes a planting year from 8000 to 8999, picked at random so parallel workers rarely meet.
+- Categories, subcategories, plants and schedules are named `ui-<alias>-<random>` the same way, whether made on the page or through `garden`.
 - The world remembers each one under its alias *before* the step creates it, so a step that fails halfway is still cleaned up.
 - When the test ends, pass or fail, the world deletes everything it named, newest first, over the API, as the gardener, finding each by its unique name. It's best effort: what's gone is skipped, and a failure is a warning.
+- Newest first deletes a plant before its subcategory, and a subcategory before its category, which the service requires: it refuses to delete a category that has subcategories (409).
+- A plant renamed on the page (`plantEditPage.edit`) is remembered by its new name, and cleanup finds it by its old one too, in case the new one was never saved.
 - It also ends the browser's own session in feral, since the app's Logout doesn't (backlog A2).
 
 **After the last test, a residue check fails the run** if anything with a `ui-` name, or a planting year from 8000 to 8999, is still there: plots, plants, plantings, categories and subcategories, schedules, years. Harvests, journal and activity-log entries and schedule items hang off those. It throws from global teardown, which Playwright reports outside any test, and exits 1. (Setting `process.exitCode` there exits 0: Playwright sets its own.)

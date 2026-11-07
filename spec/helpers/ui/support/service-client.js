@@ -73,12 +73,46 @@ export const deletePlot = (token, plotId) => garden('DELETE', `/plots/${plotId}`
 
 export const listPlants = token => garden('GET', '/plants', { token });
 
+/** Creates a plant, or updates the one with `plant.plantId`; the reply is the plant. */
+export const upsertPlant = (token, plant) => garden('PUT', '/plants', { token, body: plant });
+
+export const deletePlant = (token, plantId) => garden('DELETE', `/plants/${plantId}`, { token });
+
+/** Assigns and unassigns schedules, each a list of ids. */
+export const assignPlantSchedules = (token, plantId, { assign = [], unassign = [] }) =>
+    garden('PUT', `/plants/${plantId}/activity-schedules`, { token, body: { assign, unassign } });
+
 export const listPlantings = token => garden('GET', '/plantings', { token });
 
 /** Each with its subcategories. */
 export const listPlantCategories = token => garden('GET', '/plant-categories', { token });
 
+/** The reply is the category, with its id. */
+export const insertPlantCategory = (token, categoryName) =>
+    garden('POST', '/plant-categories', { token, body: { categoryName } });
+
+/** Refused (409) while it has subcategories. */
+export const deletePlantCategory = (token, categoryId) => garden('DELETE', `/plant-categories/${categoryId}`, { token });
+
+/** The reply is the subcategory, with its id. */
+export const insertPlantSubcategory = (token, categoryId, subcategoryName) =>
+    garden('POST', `/plant-categories/${categoryId}/plant-subcategories`, { token, body: { subcategoryName } });
+
+export const deletePlantSubcategory = (token, categoryId, subcategoryId) =>
+    garden('DELETE', `/plant-categories/${categoryId}/plant-subcategories/${subcategoryId}`, { token });
+
+/** The service's fixed list of harvest types, each an id and a name. */
+export const listHarvestTypes = token => garden('GET', '/harvest-types', { token });
+
 export const listActivitySchedules = token => garden('GET', '/activity-schedules', { token });
+
+/** The reply is the schedule, with its id. */
+export const insertActivitySchedule = (token, schedule) =>
+    garden('POST', '/activity-schedules', { token, body: schedule });
+
+/** Answers 204. Its items, and its assignments to plants, go with it. */
+export const deleteActivitySchedule = (token, activityScheduleId) =>
+    garden('DELETE', `/activity-schedules/${activityScheduleId}`, { token });
 
 export const listPlantingYears = token => garden('GET', '/planting-years', { token });
 

@@ -7,6 +7,10 @@ import { createDashboardPageOnly } from './pages/dashboard-pages';
 import { createFeralLoginPage } from './pages/feral-login-page';
 import { createGarden } from './pages/garden';
 import { createLoginPage } from './pages/login-page';
+import { createPlantCategoriesPage } from './pages/plant-categories-page';
+import { createPlantDetailsPage } from './pages/plant-details-page';
+import { createPlantEditPage } from './pages/plant-edit-page';
+import { createPlantsPage } from './pages/plants-page';
 import { createPlotsPage } from './pages/plots-page';
 import { createUnknownPage } from './pages/unknown-page';
 
@@ -46,18 +50,20 @@ export const test = base.extend({
     feralLoginPage: pageFixture('feralLoginPage', createFeralLoginPage),
     dashboardPage: pageFixture('dashboardPage', createDashboardPage),
     plotsPage: pageFixture('plotsPage', createPlotsPage),
+    plantsPage: pageFixture('plantsPage', createPlantsPage),
+    plantDetailsPage: pageFixture('plantDetailsPage', createPlantDetailsPage),
+    plantEditPage: pageFixture('plantEditPage', createPlantEditPage),
+    plantCategoriesPage: pageFixture('plantCategoriesPage', createPlantCategoriesPage),
     unknownPage: pageFixture('unknownPage', createUnknownPage),
 
     // Reached and recognised only, so far
     planningPage: pageFixture('planningPage', createDashboardPageOnly),
     gardenPage: pageFixture('gardenPage', createDashboardPageOnly),
-    plantsPage: pageFixture('plantsPage', createDashboardPageOnly),
     plantingYearsPage: pageFixture('plantingYearsPage', createDashboardPageOnly),
     plantingsPage: pageFixture('plantingsPage', createDashboardPageOnly),
     harvestsPage: pageFixture('harvestsPage', createDashboardPageOnly),
     plantStatsPage: pageFixture('plantStatsPage', createDashboardPageOnly),
     plantingStatsPage: pageFixture('plantingStatsPage', createDashboardPageOnly),
-    plantCategoriesPage: pageFixture('plantCategoriesPage', createDashboardPageOnly),
     activitySchedulesPage: pageFixture('activitySchedulesPage', createDashboardPageOnly),
 
     // Not a page: what a test needs but isn't about, arranged through the API
