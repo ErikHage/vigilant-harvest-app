@@ -42,6 +42,11 @@ export function createLoginPageDriver(page, serviceCalls) {
             await openPath(page, `landing?sso=${encodeURIComponent(ssoToken)}`);
         },
 
+        /** Clicks SSO, which sends the browser to feral's login page. */
+        async chooseSso() {
+            await ssoButton.click();
+        },
+
         /** Brings `token` to the landing page, as if feral had sent the browser there with it. */
         async logInWithToken(token) {
             await openPath(page, `landing?sso=${encodeURIComponent(token)}`);

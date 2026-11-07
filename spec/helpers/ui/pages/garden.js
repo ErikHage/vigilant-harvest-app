@@ -1,6 +1,6 @@
 import { parseDslArgs } from '@feral-auth/ts-simple-dsl';
 
-import { plot } from '../params';
+import { plot, year } from '../params';
 
 /**
  * The garden as the service holds it, in words: what a test needs but isn't
@@ -14,6 +14,16 @@ export function createGarden(world, driver) {
             const params = parseDslArgs(args, { plot: plot() });
 
             await driver.createPlot({ ...world.newPlot(params.plot), isActive: true });
+        },
+
+        /**
+         * There is a planting year called `year`: a year from 8000 to 8999,
+         * with its frost and planting dates in it. Steps name it by its alias.
+         */
+        async hasPlantingYear(...args) {
+            const params = parseDslArgs(args, { year: year() });
+
+            await driver.createPlantingYear(world.newPlantingYear(params.year));
         },
     };
 }

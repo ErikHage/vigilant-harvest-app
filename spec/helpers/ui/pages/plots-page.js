@@ -1,12 +1,12 @@
 import { parseDslArgs } from '@feral-auth/ts-simple-dsl';
 
 import { active, plot } from '../params';
-import { routedPageSteps, shellComponents } from './routed-page';
+import { routedPageSteps, dashboardComponents } from './routed-page';
 
 /** The plots page, in words. */
 export function createPlotsPage(world, driver) {
     return {
-        ...shellComponents(world),
+        ...dashboardComponents(world),
         ...routedPageSteps(driver),
 
         /** Adds a new plot, called `plot`, with made-up details, through the Add dialog. */

@@ -1,6 +1,7 @@
 import { parseDslArgs } from '@feral-auth/ts-simple-dsl';
 
 import { createAppBar } from '../components/app-bar';
+import { createDashboardNav } from '../components/dashboard-nav';
 
 /** The steps every page the app routes to has, to spread into its page object. */
 export function routedPageSteps(driver) {
@@ -44,4 +45,10 @@ export function routedPageSteps(driver) {
 /** The app bar, which every page has. */
 export const shellComponents = world => ({
     appBar: createAppBar(world, world.drivers.appBar),
+});
+
+/** The app bar and the dashboard's own bar, which every dashboard page has. */
+export const dashboardComponents = world => ({
+    ...shellComponents(world),
+    dashboardNav: createDashboardNav(world, world.drivers.dashboardNav),
 });

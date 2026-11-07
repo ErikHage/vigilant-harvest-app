@@ -1,10 +1,10 @@
-import { randomUUID } from 'node:crypto';
+import { randomInt, randomUUID } from 'node:crypto';
 
 import { gardener } from './setup/config';
 import { createDrivers } from './drivers/drivers';
-import { FIXTURE_PREFIX } from './support/residue';
+import { FIXTURE_PREFIX, FIXTURE_YEARS } from './support/residue';
 import { asGardener } from './support/sessions';
-import { deletePlot, listPlots, logout } from './support/service-client';
+import { deletePlantingYear, deletePlot, listPlantingYears, listPlots, logout } from './support/service-client';
 
 const suffix = () => randomUUID().slice(0, 8);
 const failed = reply => reply.error !== undefined || reply.status >= 300;
@@ -22,6 +22,12 @@ const kinds = {
         matches: (plot, listed) => listed.friendlyName === plot.friendlyName,
         remove: (token, listed) => deletePlot(token, listed.plotId),
         describe: plot => `the plot ${plot.friendlyName}`,
+    },
+    plantingYear: {
+        list: listPlantingYears,
+        matches: (year, listed) => listed.plantingYear === year.plantingYear,
+        remove: (token, listed) => deletePlantingYear(token, listed.plantingYear),
+        describe: year => `the planting year ${year.plantingYear}`,
     },
 };
 
@@ -80,6 +86,7 @@ async function endBrowserSession(page) {
  */
 export function createWorld(page) {
     const plotsByAlias = new Map();
+    const plantingYearsByAlias = new Map();
     // Newest first, the order cleanup deletes in
     const named = [];
 
@@ -91,9 +98,10 @@ export function createWorld(page) {
         return { ...value };
     }
 
+    // `kind` is a key of `kinds`, which says how cleanup deletes it
     function remember(kind, map, alias, details) {
         if (map.has(alias)) {
-            throw new Error(`there is already a ${kind} called "${alias}" in this test`);
+            throw new Error(`there is already ${kinds[kind].describe(details).replace(/^the /, 'a ')} called "${alias}" in this test`);
         }
         map.set(alias, details);
         named.unshift({ kind, details });
@@ -120,6 +128,26 @@ export function createWorld(page) {
 
         plotNamed: alias => known(plotsByAlias, alias, 'plot', 'plotsPage.addPlot'),
 
+        /**
+         * As `newPlot`, for a planting year: a year from 8000 to 8999, picked at
+         * random so parallel workers rarely meet, with its frost and planting
+         * dates in that year.
+         */
+        newPlantingYear(alias) {
+            const taken = new Set([...plantingYearsByAlias.values()].map(year => year.plantingYear));
+            let plantingYear;
+            do {
+                plantingYear = randomInt(FIXTURE_YEARS.min, FIXTURE_YEARS.max + 1);
+            } while (taken.has(plantingYear));
+            return remember('plantingYear', plantingYearsByAlias, alias, {
+                plantingYear,
+                lastFrostDate: `${plantingYear}-04-15`,
+                targetPlantingDate: `${plantingYear}-05-01`,
+            });
+        },
+
+        plantingYearNamed: alias => known(plantingYearsByAlias, alias, 'year', 'garden.hasPlantingYear'),
+
         /** The username and password behind `user: <name>`. Only `gardener` for now. */
         credentialsFor(name) {
             if (name !== 'gardener') {
@@ -132,6 +160,7 @@ export function createWorld(page) {
         async cleanup() {
             const toDelete = named.splice(0, named.length);
             plotsByAlias.clear();
+            plantingYearsByAlias.clear();
 
             await endBrowserSession(page);
             if (toDelete.length > 0) {

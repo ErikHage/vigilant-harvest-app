@@ -64,9 +64,13 @@ helpers/ui/drivers/assertions.js the only importer of expect
 - `helpers/ui/support/service-client.js` is the only place that calls `fetch`: the preflight, signing on, arranging and cleanup use it. `support/sessions.js` wraps a call in a session of its own, and ends it after.
 - Steps are parsed with [`@feral-auth/ts-simple-dsl`](https://github.com/ErikHage/ts-simple-dsl).
 
-**Every page has `open`, `reload`, `checkIsShown` and `checkIsShownAfterReload`.** `pages/routed-page.js` supplies them, and every page has `appBar`. `drivers/routed-page-driver.js` checks a page by its URL and by something only that page shows.
+**Every page has `open`, `reload`, `checkIsShown` and `checkIsShownAfterReload`.** `pages/routed-page.js` supplies them. Every page has `appBar`. Every dashboard page also has `dashboardNav`, its own bar: `dashboardNav.goTo('page: plantStats')` follows the link through its menu, or through the one menu on a phone. `drivers/routed-page-driver.js` checks a page by its URL and by something only that page shows; for the dashboard's pages, their title.
 
-**`garden` isn't a page.** It arranges, through the API, what a test needs but isn't about: `garden.hasPlot('plot: bed')`. What a test *is* about is made through the page: `plotsPage.addPlot('plot: bed')`.
+A dashboard page with nothing else to do yet is a one-liner, listed in `pages/dashboard-pages.js` and `drivers/dashboard-pages-drivers.js`. It moves to its own files once it has steps of its own, as the plots page has.
+
+**Phones.** A spec that needs the phone layout sets a narrow viewport (`test.use({ viewport: { width: 390, height: 844 } })`), below Vuetify's md breakpoint. The drivers read the viewport to know which layout they're in.
+
+**`garden` isn't a page.** It arranges, through the API, what a test needs but isn't about: `garden.hasPlot('plot: bed')`, `garden.hasPlantingYear('year: spring')`. What a test *is* about is made through the page: `plotsPage.addPlot('plot: bed')`.
 
 **Absence is checked once, after a sync point.** A page that shows nothing looks the same before it reacts as after. A driver checking for absence first waits for the service call it depends on to be answered (`drivers/service-calls.js` records the page's calls from the start of each test), or for the page that follows, then reads the page once.
 
@@ -87,12 +91,15 @@ Signing on is a step, `loginPage.logIn('user: gardener')`. It does what feral's 
 
 From there the app does the rest: it exchanges the token, keeps the session token in `localStorage`, and goes to the dashboard. So every test runs the app's own sign-on code, and only feral's pages are skipped. Step 2's URL host isn't used, so the test doesn't depend on the URL feral has registered for the app.
 
+One spec, `sign-on/round-trip.spec.js`, signs on as a person does instead: the SSO button, feral's own login page (`feralLoginPage`), and back. It needs feral's app running too, and the URL feral has registered for the app to be its landing page.
+
 The app restores a session from `localStorage`, so a reload stays signed on. Nothing is shared between tests: each signs on for itself.
 
 ## Cleanup
 
 What a test names is made up, and deleted afterwards.
 - `plotsPage.addPlot('plot: bed')` and `garden.hasPlot('plot: bed')` make a plot named `ui-bed-<random>`.
+- `garden.hasPlantingYear('year: spring')` makes a planting year from 8000 to 8999, picked at random so parallel workers rarely meet.
 - The world remembers each one under its alias *before* the step creates it, so a step that fails halfway is still cleaned up.
 - When the test ends, pass or fail, the world deletes everything it named, newest first, over the API, as the gardener, finding each by its unique name. It's best effort: what's gone is skipped, and a failure is a warning.
 - It also ends the browser's own session in feral, since the app's Logout doesn't (backlog A2).
@@ -141,9 +148,9 @@ Known-wrong behaviour is pinned, not skipped. A `// DocumentsCurrentBehavior:` c
 5. Run it. A misspelled parameter fails only at runtime.
 6. Check the layering:
    ```bash
-   grep -rnE "\bexpect\(|import \{[^}]*\bexpect\b" spec/ui spec/helpers/ui   # assertions.js only
-   grep -rn "getBy\|locator(" spec/ui spec/helpers/ui/pages spec/helpers/ui/components  # nothing
-   grep -rn "^import" spec/ui                                                 # ui-test only
-   grep -rn "fetch(" spec/ui spec/helpers/ui                                  # service-client only
-   grep -rn "from '@/\|/src/" spec/ui spec/helpers/ui                         # nothing
+   grep -rnE --include=*.js "\bexpect\(|import \{[^}]*\bexpect\b" spec/ui spec/helpers/ui   # assertions.js only
+   grep -rn --include=*.js "getBy\|locator(" spec/ui spec/helpers/ui/pages spec/helpers/ui/components  # nothing
+   grep -rn --include=*.js "^import" spec/ui                                  # ui-test only
+   grep -rn --include=*.js "fetch(" spec/ui spec/helpers/ui                   # service-client only
+   grep -rn --include=*.js "from '@/\|/src/" spec/ui spec/helpers/ui          # nothing
    ```

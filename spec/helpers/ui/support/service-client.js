@@ -82,6 +82,11 @@ export const listActivitySchedules = token => garden('GET', '/activity-schedules
 
 export const listPlantingYears = token => garden('GET', '/planting-years', { token });
 
+/** Creates a planting year; the reply is empty. */
+export const insertPlantingYear = (token, year) => garden('PUT', '/planting-years', { token, body: year });
+
+export const deletePlantingYear = (token, plantingYear) => garden('DELETE', `/planting-years/${plantingYear}`, { token });
+
 /** An app's own address, outside the services; any status. */
 export async function probeApp(url) {
     try {

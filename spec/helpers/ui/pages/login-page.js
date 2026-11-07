@@ -20,6 +20,13 @@ export function createLoginPage(world, driver) {
             await driver.logIn(world.credentialsFor(params.user));
         },
 
+        /** Clicks SSO, to sign on through feral's login page. No parameters. */
+        async chooseSso(...args) {
+            parseDslArgs(args, {});
+
+            await driver.chooseSso();
+        },
+
         /** Brings a `token` (`made-up`) to the landing page, as if from feral. */
         async logInWithToken(...args) {
             const params = parseDslArgs(args, { token: token() });

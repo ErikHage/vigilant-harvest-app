@@ -1,7 +1,9 @@
 import { expectThat } from './assertions';
 import { asGardener } from '../support/sessions';
-import { upsertPlot } from '../support/service-client';
+import { insertPlantingYear, upsertPlot } from '../support/service-client';
 import { status } from '../support/status-codes';
+
+const describe = reply => reply.error ?? `${reply.status} ${JSON.stringify(reply.body)}`;
 
 /**
  * Arranges, through the service's API, what a test needs but isn't about,
@@ -15,7 +17,15 @@ export function createGardenDriver() {
 
             const reply = await asGardener(token => upsertPlot(token, plot));
             expectThat(reply.error === undefined && reply.status === status.created, 'the service to create it (201)',
-                reply.error ?? `${reply.status} ${JSON.stringify(reply.body)}`, what);
+                describe(reply), what);
+        },
+
+        async createPlantingYear(year) {
+            const what = `arranging the planting year ${year.plantingYear}`;
+
+            const reply = await asGardener(token => insertPlantingYear(token, year));
+            expectThat(reply.error === undefined && reply.status === status.created, 'the service to create it (201)',
+                describe(reply), what);
         },
     };
 }
