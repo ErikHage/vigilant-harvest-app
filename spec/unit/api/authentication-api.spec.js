@@ -67,9 +67,9 @@ describe('authenticationApi', () => {
         });
     });
 
-    // current behavior: the authentication store's logout calls
-    // authenticationApi.logout, which doesn't exist, so logging out never
-    // reaches the service
+    // DocumentsCurrentBehavior: has no logout, though the authentication store's
+    // logout calls it, so logging out never reaches the service. Should have a
+    // logout that ends the session on the service
     it('has no logout', () => {
         expect(Object.keys(authenticationApi)).toEqual(['verifySsoToken', 'verifyActorToken']);
         expect(authenticationApi.logout).toBeUndefined();

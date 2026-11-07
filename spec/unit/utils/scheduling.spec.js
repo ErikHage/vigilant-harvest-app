@@ -40,11 +40,11 @@ describe('scheduling', () => {
         });
     });
 
-    // current behavior: scheduling.js calls dayjs.utc but never loads the utc
-    // plugin. It works in the app only because PlantingYearsTable and
-    // PlantingYearDetailsPage extend dayjs with it, and the router imports both
-    // before anything formats a range. These two blocks run in order: the first
-    // before the plugin is loaded, the second after
+    // DocumentsCurrentBehavior: throws unless something else has loaded dayjs's
+    // utc plugin. Should load the plugin itself. It works in the app only because
+    // PlantingYearsTable and PlantingYearDetailsPage extend dayjs with it, and the
+    // router imports both before anything formats a range. These two blocks run
+    // in order: the first before the plugin is loaded, the second after
     describe('getFormattedDateRange, before anything loads the utc plugin', () => {
         it('throws', () => {
             expect(() => scheduling.getFormattedDateRange('05-15', '06-01')).toThrow(/\.utc is not a function/);
