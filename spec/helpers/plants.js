@@ -7,9 +7,10 @@ export function aPlant(overrides = {}) {
         category: 'Legumes',
         subcategory: 'Beans',
         subcategoryId: 'subcategory-1',
-        lifespanType: 'annual',
+        // The service stores it lower-case and sends it capitalised
+        lifespanType: 'Annual',
         description: 'A reliable bush bean.\nGood for cool soil.',
-        tags: ['easy', 'heirloom'],
+        tags: ['Cold Tolerant', 'Container Friendly'],
         dateCreated: '2026-03-01T13:00:00.000Z',
         dateModified: '2026-04-02T14:30:00.000Z',
         taxonomy: { family: 'Fabaceae', genus: 'Phaseolus', species: 'vulgaris' },
@@ -31,6 +32,7 @@ export function aPlant(overrides = {}) {
             growingNotes: 'Keep evenly moist.',
         },
         harvesting: {
+            defaultHarvestTypeId: 2,
             defaultHarvestType: 'pounds',
             fruitSize: '5 in',
             shelfStability: 'A week, refrigerated',

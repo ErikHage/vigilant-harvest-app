@@ -12,11 +12,11 @@ describe('PlantDetailsTab', () => {
             ['Plant Id', 'plant-1'],
             ['Created At', new Date('2026-03-01T13:00:00.000Z').toLocaleString()],
             ['Last Modified At', new Date('2026-04-02T14:30:00.000Z').toLocaleString()],
-            ['Lifespan Type', 'annual'],
-            ['Tags', 'easyheirloom'],
+            ['Lifespan Type', 'Annual'],
+            ['Tags', 'Cold TolerantContainer Friendly'],
             ['Description', 'A reliable bush bean.\nGood for cool soil.'],
         ]);
-        expect(wrapper.findAll('.v-chip').map(chip => chip.text())).toEqual(['easy', 'heirloom']);
+        expect(wrapper.findAll('.v-chip').map(chip => chip.text())).toEqual(['Cold Tolerant', 'Container Friendly']);
     });
 
     it('keeps the line breaks in the description', () => {
