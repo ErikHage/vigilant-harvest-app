@@ -1,0 +1,120 @@
+import { flushPromises } from '@vue/test-utils';
+import { mountWithPlugins } from '../../../../helpers/mount';
+import { buttonLabelled, inputLabelled } from '../../../../helpers/fields';
+import { dialogTitled } from '../../../../helpers/dialogs';
+import { isOpen, press } from '../../../../helpers/action-dialogs';
+import { aSchedule } from '../../../../helpers/schedules';
+import EditScheduleDialog from '@/components/admin/schedules/EditScheduleDialog.vue';
+
+// An error thrown by a handler goes to `errorHandler`, as an app's would
+function mountDialog({ errorHandler, ...props } = {}) {
+    return mountWithPlugins(EditScheduleDialog, {
+        props: { activitySchedule: aSchedule(), onSubmit: vi.fn(), ...props },
+        attachTo: document.body,
+        global: errorHandler ? { config: { errorHandler } } : {},
+    });
+}
+
+// Its button is a bare pencil icon, with no text
+async function open(wrapper) {
+    await wrapper.find('.v-btn .mdi-pencil').trigger('click');
+    await flushPromises();
+    return dialogTitled('Edit Activity Schedule');
+}
+
+const fields = dialog => [
+    inputLabelled(dialog, 'Activity Schedule Name').element.value,
+    inputLabelled(dialog, 'Description').element.value,
+];
+
+describe('EditScheduleDialog', () => {
+    it("opens on the schedule's name and description", async () => {
+        const dialog = await open(mountDialog());
+
+        expect(fields(dialog)).toEqual(['Tomatoes', 'Feed every two weeks']);
+        expect(buttonLabelled(dialog, 'Save').attributes('disabled')).toBeUndefined();
+    });
+
+    it.each([
+        ['the name', 'Activity Schedule Name'],
+        ['the description', 'Description'],
+    ])('disables Save with %s cleared', async (_, label) => {
+        const dialog = await open(mountDialog());
+
+        await inputLabelled(dialog, label).setValue('');
+
+        expect(buttonLabelled(dialog, 'Save').attributes('disabled')).toBeDefined();
+    });
+
+    it('submits the schedule with its id, the name trimmed, then closes', async () => {
+        const wrapper = mountDialog();
+        const dialog = await open(wrapper);
+        await inputLabelled(dialog, 'Activity Schedule Name').setValue(' Peppers ');
+        await inputLabelled(dialog, 'Description').setValue('Feed weekly');
+
+        await press(dialog, 'Save');
+
+        expect(wrapper.props('onSubmit')).toHaveBeenCalledWith({ activityScheduleId: 'schedule-1', name: 'Peppers', description: 'Feed weekly' });
+        expect(isOpen()).toBe(false);
+    });
+
+    it('takes up a new schedule given to it', async () => {
+        const wrapper = mountDialog();
+
+        await wrapper.setProps({ activitySchedule: aSchedule({ name: 'Peppers', description: 'Feed weekly' }) });
+
+        expect(fields(await open(wrapper))).toEqual(['Peppers', 'Feed weekly']);
+    });
+
+    it('closes on Cancel without submitting', async () => {
+        const wrapper = mountDialog();
+
+        await press(await open(wrapper), 'Cancel');
+
+        expect(isOpen()).toBe(false);
+        expect(wrapper.props('onSubmit')).not.toHaveBeenCalled();
+    });
+
+    // DocumentsCurrentBehavior: Cancel keeps the edits, so the next open
+    // shows them, not the schedule, and Save sends them (backlog A13). The
+    // same after a failed save: the store swallows (A6), the page's schedule
+    // is unchanged, and the form keeps what didn't save. Should go back to
+    // the schedule on Cancel
+    it('keeps a cancelled edit for the next time it opens', async () => {
+        const wrapper = mountDialog();
+        let dialog = await open(wrapper);
+        await inputLabelled(dialog, 'Activity Schedule Name').setValue('Peppers');
+        await press(dialog, 'Cancel');
+
+        dialog = await open(wrapper);
+
+        expect(fields(dialog)).toEqual(['Peppers', 'Feed every two weeks']);
+    });
+
+    // It waits for onSubmit; the page's never rejects, since the store
+    // swallows (A6)
+    it('stays open when the save rejects', async () => {
+        const errorHandler = vi.fn();
+        const wrapper = mountDialog({ errorHandler, onSubmit: vi.fn().mockRejectedValue(new Error('error updating activity schedule')) });
+
+        await press(await open(wrapper), 'Save');
+
+        expect(errorHandler).toHaveBeenCalledTimes(1);
+        expect(isOpen()).toBe(true);
+    });
+
+    // DocumentsCurrentBehavior: Save is enabled by any text, but the name is
+    // trimmed when sent, so a name of spaces goes out as ''. The service
+    // rejects it (name is required), and the dialog closes, since the store
+    // swallows (backlog A16, A6). Should keep Save disabled until the trimmed
+    // name has something in it
+    it('submits a name of spaces as an empty name', async () => {
+        const wrapper = mountDialog();
+        const dialog = await open(wrapper);
+        await inputLabelled(dialog, 'Activity Schedule Name').setValue('   ');
+
+        await press(dialog, 'Save');
+
+        expect(wrapper.props('onSubmit').mock.calls[0][0].name).toBe('');
+    });
+});
