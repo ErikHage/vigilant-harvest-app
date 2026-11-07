@@ -156,6 +156,18 @@ describe('GardenJournalPage', () => {
         expect(wrapper.text()).toContain('No entry selected.');
     });
 
+    it("does nothing on the dialog's Cancel", async () => {
+        const { wrapper, store } = await mountPage();
+        const before = timeline(wrapper);
+
+        await wrapper.findComponent(AddJournalEntryDialog).props('onCancel')();
+        await flushPromises();
+
+        expect(store.upsertJournalEntry).not.toHaveBeenCalled();
+        expect(store.fetchJournalEntriesByYear).toHaveBeenCalledTimes(1);
+        expect(timeline(wrapper)).toEqual(before);
+    });
+
     // DocumentsCurrentBehavior: nothing binds the journal store's alert, so
     // a failed load or save shows nothing (backlog A10). Should show it
     it("doesn't show the journal store's alert", async () => {

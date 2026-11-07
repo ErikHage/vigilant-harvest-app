@@ -91,6 +91,17 @@ describe('GardenActivityLogPage', () => {
         expect(store.fetchActivityLogEntriesByYear).toHaveBeenCalledTimes(2);
     });
 
+    it("does nothing on the dialog's Cancel", async () => {
+        const { wrapper, store } = await mountPage();
+
+        await wrapper.findComponent(AddActivityLogEntryDialog).props('onCancel')();
+        await flushPromises();
+
+        expect(store.upsertActivityLogEntry).not.toHaveBeenCalled();
+        expect(store.fetchActivityLogEntriesByYear).toHaveBeenCalledTimes(1);
+        expect(tableRows(wrapper)).toHaveLength(3);
+    });
+
     // DocumentsCurrentBehavior: nothing binds the activity-log store's alert,
     // so a failed load or save shows nothing (backlog A10). Should show it
     it("doesn't show the activity-log store's alert", async () => {
