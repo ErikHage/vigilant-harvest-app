@@ -25,3 +25,8 @@ pnpm-debug.log*
 
 # unit test coverage reports
 /coverage
+
+# UI test output, and the suite's own credentials
+/test-results/
+/playwright-report/
+/spec/helpers/ui/.env.ui

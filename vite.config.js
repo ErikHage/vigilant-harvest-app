@@ -15,6 +15,13 @@ export default defineConfig({
   ],
   define: { 'process.env': {} },
   base: '/apps/vigilant-harvest/',
+  server: {
+    watch: {
+      // Playwright writes these while the UI suite runs; watching them could
+      // reload the pages under test
+      ignored: ['**/test-results/**', '**/playwright-report/**'],
+    },
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),

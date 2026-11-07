@@ -9,7 +9,8 @@
     "dev": "vite --port 5174",
     "test:unit": "vitest run",
     "test:unit:watch": "vitest",
-    "test:unit:coverage": "vitest run --coverage"
+    "test:unit:coverage": "vitest run --coverage",
+    "test:ui": "playwright test"
   },
   "dependencies": {
     "@mdi/font": "5.9.55",
@@ -26,7 +27,9 @@
     "webfontloader": "^1.0.0"
   },
   "devDependencies": {
+    "@feral-auth/ts-simple-dsl": "0.0.1",
     "@pinia/testing": "^1.0.3",
+    "@playwright/test": "^1.64.1",
     "@vitejs/plugin-vue": "^6.0.4",
     "@vitest/coverage-v8": "^5.1.0",
     "@vue/test-utils": "^2.5.1",
