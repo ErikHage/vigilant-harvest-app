@@ -18,6 +18,12 @@ describe('sorting', () => {
         it('treats names that differ only in case as equal', () => {
             expect(sorting[comparator](item('Bean'), item('bean'))).toBe(0);
         });
+
+        // Array.sort decides which way round it compares, so call the comparator directly
+        it('orders an earlier name before a later one, either way round', () => {
+            expect(sorting[comparator](item('apple'), item('Bean'))).toBe(-1);
+            expect(sorting[comparator](item('Bean'), item('apple'))).toBe(1);
+        });
     });
 
     describe('sortPlantingHistoryByDateCreated', () => {
