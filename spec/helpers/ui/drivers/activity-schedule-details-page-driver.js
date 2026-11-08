@@ -4,7 +4,6 @@ import { escaped, urlOf } from './urls';
 import { status } from '../support/status-codes';
 
 const detailsUrl = new RegExp(`^${escaped(urlOf('dashboard/activity-schedules/'))}[^/]+$`);
-const exactly = text => new RegExp(`^\\s*${escaped(text)}\\s*$`);
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October',
     'November', 'December'];
 const SHORT_MONTHS = MONTHS.map(month => month.slice(0, 3));

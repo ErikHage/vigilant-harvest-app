@@ -1,6 +1,6 @@
 import { parseDslArgs } from '@feral-auth/ts-simple-dsl';
 
-import { day, message, planting, plantings, year } from '../params';
+import { day, message, plantings, year } from '../params';
 import { dashboardComponents, routedPageSteps } from './routed-page';
 
 /**
