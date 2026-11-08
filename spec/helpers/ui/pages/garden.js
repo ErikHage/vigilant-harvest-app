@@ -1,8 +1,8 @@
 import { parseDslArgs } from '@feral-auth/ts-simple-dsl';
 
 import {
-    arrangedStatus, category, entry, on, optionalPlot, plant, planting, plot, schedule, schedules, subcategory, tags,
-    year,
+    arrangedStatus, category, entry, leap, on, optionalPlot, plant, planting, plot, quantity, schedule, schedules,
+    subcategory, tags, year,
 } from '../params';
 
 /**
@@ -63,13 +63,31 @@ export function createGarden(world, driver) {
         },
 
         /**
+         * There is a harvest of `quantity` from the `planting` the test named,
+         * of its plant's default type, filed `on` a day, `YYYY-MM-DD`, in
+         * 2026: the service keeps harvests as timestamps, 1971 to 2037, apart
+         * from their year. One a day for a planting.
+         */
+        async hasHarvest(...args) {
+            const params = parseDslArgs(args, { planting: planting(), quantity: quantity(), on: on() });
+
+            const { harvests } = world.plantingNamed(params.planting);
+            if (harvests.some(harvest => harvest.on === params.on)) {
+                throw new Error(`hasHarvest: the planting "${params.planting}" has a harvest on ${params.on} already`);
+            }
+            await driver.createHarvest(world.plantingNamed(params.planting), params.quantity, params.on);
+            world.recordHarvest(params.planting, params.quantity, params.on);
+        },
+
+        /**
          * There is a planting year called `year`: a year from 8000 to 8999,
          * with its frost and planting dates in it. Steps name it by its alias.
+         * `leap: yes` makes it a leap year, and `leap: no` any other.
          */
         async hasPlantingYear(...args) {
-            const params = parseDslArgs(args, { year: year() });
+            const params = parseDslArgs(args, { year: year(), leap: leap() });
 
-            await driver.createPlantingYear(world.newPlantingYear(params.year));
+            await driver.createPlantingYear(world.newPlantingYear(params.year, params.leap));
         },
 
         /** There is a plant category called `category`, with no subcategories yet. */

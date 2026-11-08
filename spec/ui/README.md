@@ -66,7 +66,7 @@ helpers/ui/drivers/assertions.js the only importer of expect
 
 **Every page has `open`, `reload`, `checkIsShown` and `checkIsShownAfterReload`.** `pages/routed-page.js` supplies them. Every page has `appBar`. Every dashboard page also has `dashboardNav`, its own bar: `dashboardNav.goTo('page: plantStats')` follows the link through its menu, or through the one menu on a phone. `drivers/routed-page-driver.js` checks a page by its URL and by something only that page shows; for the dashboard's pages, their title.
 
-A dashboard page with nothing else to do yet is a one-liner, listed in `pages/dashboard-pages.js` and `drivers/dashboard-pages-drivers.js`. It moves to its own files once it has steps of its own, as the plots, plants, categories, plantings, planting years and garden pages have.
+A dashboard page with nothing else to do yet is a one-liner, listed in `pages/dashboard-pages.js` and `drivers/dashboard-pages-drivers.js`. It moves to its own files once it has steps of its own, as the plots, plants, categories, plantings, planting years, garden, harvests, stats and planning pages have.
 
 **A page with an id in its URL has no `open`.** It's reached the way a person reaches it, from its list: `plantsPage.viewPlant('plant: sungold')` or `editPlant(...)`. The next step checks where that landed, for that thing: `plantDetailsPage.checkIsShownFor('plant: sungold')`.
 
@@ -99,9 +99,13 @@ await dashboardPage.chooseYear('year: spring');
 
 **A driver can hold or fail one of the app's calls.** `drivers/service-call-control.js` holds a call until released, or answers it with an error, for pins on how a page takes a slow or failed load. It matches only calls to the service, by their path under its base: the app's own pages have paths like the service's (`dashboard/planting-years`), and failing one of those fails the page itself, so a check that nothing's shown would pass on nothing at all. Such a check also checks the page is there.
 
-**Adding a planting year needs the clock.** The add page proposes the year after the browser's calendar year, so a spec fixes the clock in a year it named first: `browserClock.setToNoonIn('year: last', 'on: 04-10')`. The year it adds is the one after, also from 8000 to 8999: `garden.hasPlantingYear` never picks 8999.
+**Adding a planting year needs the clock.** The add page proposes the year after the browser's calendar year, so a spec fixes the clock in a year it named first: `browserClock.setToNoonIn('year: last', 'on: 04-10')`. The year it adds is the one after, also a fixture year: `garden.hasPlantingYear` never picks the last of its worker's slice (see Cleanup).
 
 **The garden, the journal and the activity log show the chosen year,** so their tests choose a year of their own, and fix the clock in 2026 (`browserClock.setTo('time: 2026-07-01T12:00:00-04:00')`): their dialogs default to now, and journal and log entries are timestamps, 1971 to 2037, kept apart from their year. `garden.hasPlanting(..., 'status: planted', 'plot: bed')` puts a planting in a plot, for the garden's cards.
+
+**The harvests and stats pages show the chosen year's harvests too.** `garden.hasHarvest('planting: early', 'quantity: 3', 'on: 2026-07-07')` files one at noon in New York on its day, in 2026: harvests are timestamps too. The stats count only plantings in a plot (the service's query joins the plot), so arrange them planted. `drivers/days.js` writes days as these pages do.
+
+**The planning page counts days by the service's clock, not the browser's.** Its drivers work out what it should read from the real date in New York. `garden.hasPlantingYear('year: spring', 'leap: no')` picks a year that isn't a leap year, and `'leap: yes'` one that is, since the page's days of the year shift by one between them.
 
 **Uncaught errors are recorded.** `drivers/page-errors.js` keeps every error the page throws and nothing catches, unhandled rejections included, for pins on code that throws. Nothing fails a test for them on its own.
 
@@ -132,7 +136,7 @@ The app restores a session from `localStorage`, so a reload stays signed on. Not
 
 What a test names is made up, and deleted afterwards.
 - `plotsPage.addPlot('plot: bed')` and `garden.hasPlot('plot: bed')` make a plot named `ui-bed-<random>`.
-- `garden.hasPlantingYear('year: spring')` makes a planting year from 8000 to 8999, picked at random so parallel workers rarely meet.
+- `garden.hasPlantingYear('year: spring')` makes a planting year from 8000 to 8999, picked at random from the worker's own slice of them: the years are split in 8, one slice for each worker running at once (`TEST_PARALLEL_INDEX`). Two workers picking the same year would fail one test with a 409, and its cleanup, which finds a year by number, would delete the other's journal and log entries.
 - Categories, subcategories, plants and schedules are named `ui-<alias>-<random>` the same way, whether made on the page or through `garden`.
 - The world remembers each one under its alias *before* the step creates it, so a step that fails halfway is still cleaned up.
 - When the test ends, pass or fail, the world deletes everything it named, newest first, over the API, as the gardener, finding each by its unique name. It's best effort: what's gone is skipped, and a failure is a warning.

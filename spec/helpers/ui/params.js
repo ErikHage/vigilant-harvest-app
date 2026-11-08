@@ -70,7 +70,7 @@ export const planting = () => required();
 /** How far an arranged planting has got: `created` (the default), `started` or `planted`. */
 export const arrangedStatus = () => optional().allowedValues('created', 'started', 'planted').withDefault('created');
 
-/** A day: `MM-DD` for the browser's clock in a named year, `YYYY-MM-DD` for an entry. */
+/** A day: `MM-DD` for the browser's clock in a named year, `YYYY-MM-DD` for an entry or a harvest. */
 export const on = () => required();
 
 /** A plot the test named, by its alias, or none if left out. */
@@ -89,7 +89,7 @@ export const quantity = () => required().asInteger();
 export const day = () => required().asInteger();
 
 /** Plantings the test named, by alias, repeated or comma-separated; none if left out. */
-export const plantingsCarried = () => optional().multiple({ separator: ', ' });
+export const plantings = () => optional().multiple({ separator: ', ' });
 
 /** How many of a year's plantings have a status; 0 if left out. */
 export const tally = () => optional().asInteger().withDefault(0);
@@ -111,3 +111,12 @@ export const time = () => required();
 
 /** What an alert says, word for word. */
 export const message = () => required();
+
+/** Whether an arranged planting year is a leap year; either if left out. */
+export const leap = () => optional().allowedValues('yes', 'no');
+
+/** Days as a timeline lists them, `YYYY-MM-DD`, comma-separated, in order, with `...` where it marks a gap. */
+export const days = () => optional().multiple({ separator: ', ' });
+
+/** An average as the page writes it, word for word: `2.3333333333333335`. */
+export const average = () => required();

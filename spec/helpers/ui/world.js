@@ -13,6 +13,20 @@ import {
 } from './support/service-client';
 
 const suffix = () => randomUUID().slice(0, 8);
+const isLeapYear = year => (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+
+// The fixture years are split in slices, one for each worker running at
+// once, so two workers never pick the same year: one's 409 would fail its
+// test, and its cleanup, finding the year by number, would delete the
+// other's journal and log entries. Playwright numbers the workers running
+// at once from 0; past 8 of them, slices are shared again
+const YEAR_SLICES = 8;
+function yearSlice() {
+    const size = Math.floor((FIXTURE_YEARS.max - FIXTURE_YEARS.min + 1) / YEAR_SLICES);
+    const first = FIXTURE_YEARS.min + (Number(process.env.TEST_PARALLEL_INDEX ?? 0) % YEAR_SLICES) * size;
+    // randomInt's upper bound is exclusive: the slice's last year is left out
+    return { first, last: first + size - 1 };
+}
 const failed = reply => reply.error !== undefined || reply.status >= 300;
 
 // For each [list, matches, remove]: lists, and removes what matches, warning
@@ -139,12 +153,14 @@ const copyOf = details => structuredClone(details);
 // A planting as it is once created: named, of a plant in a year, with
 // nothing sown or planted yet. Dates are `YYYY-MM-DD`, as the details tab
 // shows them; `comments` are those added on the page, oldest first. A harvest
-// is of its plant's default type, and `harvested` tallies what was
+// is of its plant's default type; `harvests` are each a day, `YYYY-MM-DD`
+// (null if the page chose it), and a quantity, and `harvested` tallies them
 const newPlantingDetails = (alias, plant, plantingYear) => ({
     name: `${FIXTURE_PREFIX}${alias}-${suffix()}`,
     formerNames: [],
     plantName: plant.friendlyName,
     harvestType: plant.harvesting.defaultHarvestType,
+    harvests: [],
     harvested: 0,
     plantingYear,
     seedSource: 'Seed Savers',
@@ -371,12 +387,28 @@ export function createWorld(page) {
 
         /**
          * Remembers `quantity` more harvested from the planting called `alias`,
-         * of its plant's default harvest type. Its harvests go with it.
+         * of its plant's default harvest type, `on` a day, `YYYY-MM-DD`, or
+         * null if the page chose it. Its harvests go with it.
          */
-        recordHarvest(alias, quantity) {
-            const planting = known(plantingsByAlias, alias, 'planting', 'garden.hasPlanting');
-            plantingsByAlias.get(alias).harvested = (planting.harvested ?? 0) + quantity;
-            return copyOf(plantingsByAlias.get(alias));
+        recordHarvest(alias, quantity, on = null) {
+            known(plantingsByAlias, alias, 'planting', 'garden.hasPlanting');
+            const planting = plantingsByAlias.get(alias);
+            planting.harvests.push({ on, quantity });
+            planting.harvested += quantity;
+            return copyOf(planting);
+        },
+
+        /** Remembers the harvest from the planting called `alias` `on` a day as `quantity` now. */
+        reviseHarvest(alias, on, quantity) {
+            known(plantingsByAlias, alias, 'planting', 'garden.hasPlanting');
+            const planting = plantingsByAlias.get(alias);
+            const harvest = planting.harvests.find(each => each.on === on);
+            if (harvest === undefined) {
+                throw new Error(`no harvest of the planting "${alias}" on ${on} in this test -- file one first with garden.hasHarvest`);
+            }
+            planting.harvested += quantity - harvest.quantity;
+            harvest.quantity = quantity;
+            return copyOf(planting);
         },
 
         /**
@@ -441,17 +473,20 @@ export function createWorld(page) {
 
         /**
          * As `newPlot`, for a planting year: a year from 8000 to 8999, picked at
-         * random so parallel workers rarely meet, with its frost and planting
-         * dates in that year.
+         * random from this worker's own slice of them, with its frost and
+         * planting dates in that year. `leap` is `yes` for a leap year, `no`
+         * for any other, and left out for either.
          */
-        newPlantingYear(alias) {
+        newPlantingYear(alias, leap) {
             const taken = new Set([...plantingYearsByAlias.values()].map(year => year.plantingYear));
+            const { first, last } = yearSlice();
             let plantingYear;
-            // Never the last, so the year after is a fixture year too, for
-            // newNextPlantingYear
+            // Never the slice's last, so the year after is this worker's too,
+            // for newNextPlantingYear
             do {
-                plantingYear = randomInt(FIXTURE_YEARS.min, FIXTURE_YEARS.max);
-            } while (taken.has(plantingYear) || taken.has(plantingYear + 1));
+                plantingYear = randomInt(first, last);
+            } while (taken.has(plantingYear) || taken.has(plantingYear + 1)
+                || (leap !== undefined && isLeapYear(plantingYear) !== (leap === 'yes')));
             return remember('plantingYear', plantingYearsByAlias, alias, {
                 plantingYear,
                 lastFrostDate: `${plantingYear}-04-15`,

@@ -97,6 +97,9 @@ export const deletePlanting = (token, plantingId) => garden('DELETE', `/planting
 /** Every harvest filed under the planting year, each with its id and planting's id. */
 export const searchHarvests = (token, year) => garden('GET', `/harvests/search?year=${year}`, { token });
 
+/** Files harvests: each a planting's id, a quantity and an instant, of its plant's default type. */
+export const upsertHarvests = (token, harvests) => garden('PUT', '/harvests', { token, body: { harvests } });
+
 export const deleteHarvest = (token, harvestId) => garden('DELETE', `/harvests/${harvestId}`, { token });
 
 /** The year's journal entries, each with its id. */

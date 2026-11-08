@@ -1,6 +1,6 @@
 import { parseDslArgs } from '@feral-auth/ts-simple-dsl';
 
-import { day, message, planting, plantingsCarried, year } from '../params';
+import { day, message, planting, plantings, year } from '../params';
 import { dashboardComponents, routedPageSteps } from './routed-page';
 
 /**
@@ -23,7 +23,7 @@ export function createAddPlantingYearPage(world, driver) {
 
         /** It lists these plantings the test named to carry forward, in order; none if left out. */
         async checkCarriesForward(...args) {
-            const params = parseDslArgs(args, { planting: plantingsCarried() });
+            const params = parseDslArgs(args, { planting: plantings() });
 
             await driver.carriesForward(params.planting.map(alias => world.plantingNamed(alias).name));
         },

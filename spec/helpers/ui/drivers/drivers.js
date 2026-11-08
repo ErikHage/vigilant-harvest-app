@@ -8,6 +8,7 @@ import { createDashboardPagesDrivers } from './dashboard-pages-drivers';
 import { createFeralLoginPageDriver } from './feral-login-page-driver';
 import { createGardenDriver } from './garden-driver';
 import { createGardenPageDriver } from './garden-page-driver';
+import { createHarvestsPageDriver } from './harvests-page-driver';
 import { createJournalPageDriver } from './journal-page-driver';
 import { createLoginPageDriver } from './login-page-driver';
 import { createPlantCategoriesPageDriver } from './plant-categories-page-driver';
@@ -16,12 +17,14 @@ import { createPlantEditPageDriver } from './plant-edit-page-driver';
 import { createPlantingDetailsPageDriver } from './planting-details-page-driver';
 import { createPlantingYearDetailsPageDriver } from './planting-year-details-page-driver';
 import { createPlantingYearsPageDriver } from './planting-years-page-driver';
+import { createPlanningPageDriver } from './planning-page-driver';
 import { createPlantingsPageDriver } from './plantings-page-driver';
 import { createPlantsPageDriver } from './plants-page-driver';
 import { recordPageErrors } from './page-errors';
 import { createPlotsPageDriver } from './plots-page-driver';
 import { recordServiceCalls } from './service-calls';
 import { controlServiceCalls } from './service-call-control';
+import { createStatsPageDriver } from './stats-page-driver';
 import { createUnknownPageDriver } from './unknown-page-driver';
 
 /** Builds each driver once per test, over Playwright's `page`. */
@@ -51,8 +54,12 @@ export function createDrivers(page) {
         gardenPage: createGardenPageDriver(page, callControl),
         journalPage: createJournalPageDriver(page),
         activityLogPage: createActivityLogPageDriver(page, serviceCalls, pageErrors),
+        harvestsPage: createHarvestsPageDriver(page, serviceCalls),
+        plantingStatsPage: createStatsPageDriver(page, 'planting'),
+        plantStatsPage: createStatsPageDriver(page, 'plant'),
+        planningPage: createPlanningPageDriver(page),
         unknownPage: createUnknownPageDriver(page),
-        // planningPage, harvestsPage, plantStatsPage, ...: reached and recognised only
+        // activitySchedulesPage: reached and recognised only
         ...createDashboardPagesDrivers(page),
 
         // Not pages: the service's API, for what a test only needs, and the browser's clock

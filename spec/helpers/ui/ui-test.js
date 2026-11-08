@@ -10,6 +10,7 @@ import { createDashboardPageOnly } from './pages/dashboard-pages';
 import { createFeralLoginPage } from './pages/feral-login-page';
 import { createGarden } from './pages/garden';
 import { createGardenPage } from './pages/garden-page';
+import { createHarvestsPage } from './pages/harvests-page';
 import { createJournalPage } from './pages/journal-page';
 import { createLoginPage } from './pages/login-page';
 import { createPlantCategoriesPage } from './pages/plant-categories-page';
@@ -17,10 +18,12 @@ import { createPlantDetailsPage } from './pages/plant-details-page';
 import { createPlantEditPage } from './pages/plant-edit-page';
 import { createPlantingDetailsPage } from './pages/planting-details-page';
 import { createPlantingYearDetailsPage } from './pages/planting-year-details-page';
+import { createPlanningPage } from './pages/planning-page';
 import { createPlantingYearsPage } from './pages/planting-years-page';
 import { createPlantingsPage } from './pages/plantings-page';
 import { createPlantsPage } from './pages/plants-page';
 import { createPlotsPage } from './pages/plots-page';
+import { createPlantingStatsPage, createPlantStatsPage } from './pages/stats-page';
 import { createUnknownPage } from './pages/unknown-page';
 
 /** A fixture for a page object, over the driver of the same name. */
@@ -71,13 +74,13 @@ export const test = base.extend({
     gardenPage: pageFixture('gardenPage', createGardenPage),
     journalPage: pageFixture('journalPage', createJournalPage),
     activityLogPage: pageFixture('activityLogPage', createActivityLogPage),
+    harvestsPage: pageFixture('harvestsPage', createHarvestsPage),
+    plantingStatsPage: pageFixture('plantingStatsPage', createPlantingStatsPage),
+    plantStatsPage: pageFixture('plantStatsPage', createPlantStatsPage),
+    planningPage: pageFixture('planningPage', createPlanningPage),
     unknownPage: pageFixture('unknownPage', createUnknownPage),
 
     // Reached and recognised only, so far
-    planningPage: pageFixture('planningPage', createDashboardPageOnly),
-    harvestsPage: pageFixture('harvestsPage', createDashboardPageOnly),
-    plantStatsPage: pageFixture('plantStatsPage', createDashboardPageOnly),
-    plantingStatsPage: pageFixture('plantingStatsPage', createDashboardPageOnly),
     activitySchedulesPage: pageFixture('activitySchedulesPage', createDashboardPageOnly),
 
     // Not a page: what a test needs but isn't about, arranged through the API

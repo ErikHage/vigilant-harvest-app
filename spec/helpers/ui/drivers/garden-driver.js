@@ -2,9 +2,8 @@ import { expectThat } from './assertions';
 import { asGardener } from '../support/sessions';
 import {
     assignPlantSchedules, insertActivitySchedule, insertPlantCategory, insertPlantSubcategory, insertPlanting,
-    insertJournalEntry, insertPlantingYear, listActivitySchedules, listHarvestTypes, listPlantCategories, listPlants,
-    listPlots,
-    performPlantingAction, upsertPlant, upsertPlot,
+    insertJournalEntry, insertPlantingYear, listActivitySchedules, listHarvestTypes, listPlantCategories, listPlantings,
+    listPlants, listPlots, performPlantingAction, upsertHarvests, upsertPlant, upsertPlot,
 } from '../support/service-client';
 import { status } from '../support/status-codes';
 
@@ -153,6 +152,24 @@ export function createGardenDriver() {
                 plantingYear, entry, entryDate: new Date(`${entryDate}T12:00:00-04:00`).toISOString(),
             }));
             expectThat(reply.error === undefined && reply.status < 300, 'the service to record it', describe(reply), what);
+        },
+
+        /**
+         * Files a harvest of `quantity` from `planting`, at noon in New York
+         * `on` its day, so it's that day there. The service gives it its
+         * plant's default type.
+         */
+        async createHarvest(planting, quantity, on) {
+            const what = `arranging a harvest of ${planting.name} on ${on}`;
+
+            const reply = await asGardener(async token => {
+                const { plantingId } = findIn(await listPlantings(token), each => each.name === planting.name,
+                    `the planting ${planting.name}`);
+                return upsertHarvests(token, [{
+                    plantingId, quantity, harvestDate: new Date(`${on}T12:00:00-04:00`).toISOString(),
+                }]);
+            });
+            expectThat(reply.error === undefined && reply.status < 300, 'the service to file it', describe(reply), what);
         },
 
         /** Creates `plant`, then assigns it the schedules named in `scheduleNames`. */
