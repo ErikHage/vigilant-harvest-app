@@ -22,22 +22,27 @@ export function createGarden(world, driver) {
          * There is a planting called `planting`, of the `plant` the test named,
          * in its planting `year`, with a made-up seed source, lot, lead time and
          * target planting date. With `status: started`, six seeds were sown on
-         * April 1 of its year; otherwise (`status: created`, the default)
-         * nothing has happened to it yet.
+         * April 1 of its year; with `status: planted`, all six were planted out
+         * too, on May 1, in no plot; otherwise (`status: created`, the
+         * default) nothing has happened to it yet.
          */
         async hasPlanting(...args) {
             const params = parseDslArgs(args, {
                 planting: planting(), plant: plant(), year: year(), status: arrangedStatus(),
             });
 
-            world.newPlanting(params.planting, params.plant, params.year);
-            const arranged = params.status === 'started'
-                ? world.updatePlanting(params.planting, {
-                    status: 'STARTED', numberSown: 6,
-                    sowDate: `${world.plantingNamed(params.planting).plantingYear}-04-01`,
-                })
-                : world.plantingNamed(params.planting);
-            await driver.createPlanting(arranged);
+            const { plantingYear } = world.newPlanting(params.planting, params.plant, params.year);
+            if (params.status !== 'created') {
+                world.updatePlanting(params.planting, {
+                    status: 'STARTED', numberSown: 6, sowDate: `${plantingYear}-04-01`,
+                });
+            }
+            if (params.status === 'planted') {
+                world.updatePlanting(params.planting, {
+                    status: 'PLANTED', numberTransplanted: 6, transplantDate: `${plantingYear}-05-01`,
+                });
+            }
+            await driver.createPlanting(world.plantingNamed(params.planting));
         },
 
         /**

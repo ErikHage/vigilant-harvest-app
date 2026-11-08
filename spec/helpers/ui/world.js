@@ -4,6 +4,7 @@ import { gardener } from './setup/config';
 import { createDrivers } from './drivers/drivers';
 import { FIXTURE_PREFIX, FIXTURE_YEARS } from './support/residue';
 import { asGardener } from './support/sessions';
+import { status } from './support/status-codes';
 import {
     deleteActivitySchedule, deletePlant, deletePlantCategory, deletePlantSubcategory, deletePlanting,
     deletePlantingYear, deletePlot, listActivitySchedules, listPlantCategories, listPlantingYears, listPlantings,
@@ -132,19 +133,36 @@ async function deleteAll(named) {
     const remaining = () => named.map(({ kind, details }) => kinds[kind].describe(details)).join(', ');
 
     const result = await asGardener(async token => {
-        const listed = {};
-        for (const { kind, details } of named) {
-            if (listed[kind] === undefined) {
-                const reply = await kinds[kind].list(token);
-                listed[kind] = Array.isArray(reply.body) ? reply.body : [];
-            }
-            const found = listed[kind].find(each => kinds[kind].matches(details, each));
-            if (found) {
-                const deleted = await kinds[kind].remove(token, found);
-                if (failed(deleted)) {
-                    console.warn(`cleanup: couldn't delete ${kinds[kind].describe(details)}: ${deleted.status ?? deleted.error}`);
+        // Each pass lists afresh, and deletes what it finds, in order
+        async function pass(toDelete, warn) {
+            const listed = {};
+            const refused = [];
+            for (const each of toDelete) {
+                const { kind, details } = each;
+                if (listed[kind] === undefined) {
+                    const reply = await kinds[kind].list(token);
+                    listed[kind] = Array.isArray(reply.body) ? reply.body : [];
+                }
+                const found = listed[kind].find(listedOne => kinds[kind].matches(details, listedOne));
+                if (found) {
+                    const deleted = await kinds[kind].remove(token, found);
+                    if (deleted.status === status.conflict && !warn) {
+                        refused.push(each);
+                    } else if (failed(deleted)) {
+                        console.warn(`cleanup: couldn't delete ${kinds[kind].describe(details)}: ${deleted.status ?? deleted.error}`);
+                    }
                 }
             }
+            return refused;
+        }
+
+        // Newest first is right but for what the service made on the side: a
+        // planting carried forward into a year the test added is older than
+        // that year, and holds it (409). So what's refused is tried once more,
+        // after the rest
+        const refused = await pass(named, false);
+        if (refused.length > 0) {
+            await pass(refused, true);
         }
     });
     if (result?.error) {
@@ -341,9 +359,11 @@ export function createWorld(page) {
         newPlantingYear(alias) {
             const taken = new Set([...plantingYearsByAlias.values()].map(year => year.plantingYear));
             let plantingYear;
+            // Never the last, so the year after is a fixture year too, for
+            // newNextPlantingYear
             do {
-                plantingYear = randomInt(FIXTURE_YEARS.min, FIXTURE_YEARS.max + 1);
-            } while (taken.has(plantingYear));
+                plantingYear = randomInt(FIXTURE_YEARS.min, FIXTURE_YEARS.max);
+            } while (taken.has(plantingYear) || taken.has(plantingYear + 1));
             return remember('plantingYear', plantingYearsByAlias, alias, {
                 plantingYear,
                 lastFrostDate: `${plantingYear}-04-15`,
@@ -352,6 +372,17 @@ export function createWorld(page) {
         },
 
         plantingYearNamed: alias => known(plantingYearsByAlias, alias, 'year', 'garden.hasPlantingYear'),
+
+        /**
+         * As `newPlantingYear`, for the year after the one called `afterAlias`,
+         * with the dates the test picks: `YYYY-MM-DD`.
+         */
+        newNextPlantingYear(alias, afterAlias, { lastFrostDate, targetPlantingDate }) {
+            const { plantingYear } = known(plantingYearsByAlias, afterAlias, 'year', 'garden.hasPlantingYear');
+            return remember('plantingYear', plantingYearsByAlias, alias, {
+                plantingYear: plantingYear + 1, lastFrostDate, targetPlantingDate,
+            });
+        },
 
         /** As `newPlot`, for a plant category, with no subcategories. */
         newCategory(alias) {

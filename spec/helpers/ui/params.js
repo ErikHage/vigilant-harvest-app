@@ -67,8 +67,20 @@ export const subcategories = () => optional().multiple({ separator: ', ' });
 /** A planting the test named, by its alias. */
 export const planting = () => required();
 
-/** How far an arranged planting has got: `created` (the default) or `started`. */
-export const arrangedStatus = () => optional().allowedValues('created', 'started').withDefault('created');
+/** How far an arranged planting has got: `created` (the default), `started` or `planted`. */
+export const arrangedStatus = () => optional().allowedValues('created', 'started', 'planted').withDefault('created');
+
+/** A month and day, `MM-DD`, for the browser's clock. */
+export const on = () => required();
+
+/** A day of the month, as the date picker shows it. */
+export const day = () => required().asInteger();
+
+/** Plantings the test named, by alias, repeated or comma-separated; none if left out. */
+export const plantingsCarried = () => optional().multiple({ separator: ', ' });
+
+/** How many of a year's plantings have a status; 0 if left out. */
+export const tally = () => optional().asInteger().withDefault(0);
 
 /** A planting's status, as the page shows it. */
 export const status = () => required().allowedValues('CREATED', 'STARTED', 'PLANTED', 'RETIRED');

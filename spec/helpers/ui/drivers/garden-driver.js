@@ -94,9 +94,10 @@ export function createGardenDriver() {
         },
 
         /**
-         * Creates `planting`; if its status is STARTED, starts it too, sown on
-         * its sow date. The date goes out at noon UTC, so it's that day in any
-         * zone the service runs in.
+         * Creates `planting`; if its status is STARTED or PLANTED, starts it
+         * too, sown on its sow date, and if PLANTED plants it out, in no plot.
+         * Dates go out at noon UTC, so they're that day in any zone the
+         * service runs in.
          */
         async createPlanting(planting) {
             const what = `arranging the planting ${planting.name}`;
@@ -113,21 +114,31 @@ export function createGardenDriver() {
                     leadTimeWeeks: planting.leadTimeWeeks,
                     targetPlantingDate: planting.targetPlantingDate,
                 });
-                if (!answered(created, status.created) || planting.status !== 'STARTED') {
+                if (!answered(created, status.created) || planting.status === 'CREATED') {
                     return { created };
+                }
+                const { plantingId } = created.body;
+                const started = await performPlantingAction(token, plantingId, 'START', {
+                    sowDate: `${planting.sowDate}T12:00:00.000Z`, numberSown: planting.numberSown, comment: null,
+                });
+                if (!answered(started, status.ok) || planting.status === 'STARTED') {
+                    return { created, started };
                 }
                 return {
                     created,
-                    started: await performPlantingAction(token, created.body.plantingId, 'START', {
-                        sowDate: `${planting.sowDate}T12:00:00.000Z`, numberSown: planting.numberSown, comment: null,
+                    started,
+                    planted: await performPlantingAction(token, plantingId, 'PLANT', {
+                        transplantDate: `${planting.transplantDate}T12:00:00.000Z`,
+                        numberTransplanted: planting.numberTransplanted, plotId: null, comment: null,
                     }),
                 };
             });
             expectThat(answered(replies.created ?? replies, status.created), 'the service to create it (201)',
                 describe(replies.created ?? replies), what);
-            if (replies.started) {
-                expectThat(answered(replies.started, status.ok), 'the service to start it (200)',
-                    describe(replies.started), what);
+            for (const [step, reply] of [['start', replies.started], ['plant', replies.planted]]) {
+                if (reply) {
+                    expectThat(answered(reply, status.ok), `the service to ${step} it (200)`, describe(reply), what);
+                }
             }
         },
 

@@ -1,6 +1,6 @@
 import { parseDslArgs } from '@feral-auth/ts-simple-dsl';
 
-import { time } from '../params';
+import { on, time, year } from '../params';
 
 /** The browser's clock, in words. Not a page: set it before signing on. */
 export function createBrowserClock(world, driver) {
@@ -13,6 +13,18 @@ export function createBrowserClock(world, driver) {
             const params = parseDslArgs(args, { time: time() });
 
             await driver.setTo(params.time);
+        },
+
+        /**
+         * From here on it's noon in New York `on` a day, `MM-DD`, of the `year`
+         * the test named. Noon in summer time, so pick a day from April to
+         * October: `on: 04-10`.
+         */
+        async setToNoonIn(...args) {
+            const params = parseDslArgs(args, { year: year(), on: on() });
+
+            const { plantingYear } = world.plantingYearNamed(params.year);
+            await driver.setTo(`${plantingYear}-${params.on}T12:00:00-04:00`);
         },
     };
 }

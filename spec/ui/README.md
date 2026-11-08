@@ -66,7 +66,7 @@ helpers/ui/drivers/assertions.js the only importer of expect
 
 **Every page has `open`, `reload`, `checkIsShown` and `checkIsShownAfterReload`.** `pages/routed-page.js` supplies them. Every page has `appBar`. Every dashboard page also has `dashboardNav`, its own bar: `dashboardNav.goTo('page: plantStats')` follows the link through its menu, or through the one menu on a phone. `drivers/routed-page-driver.js` checks a page by its URL and by something only that page shows; for the dashboard's pages, their title.
 
-A dashboard page with nothing else to do yet is a one-liner, listed in `pages/dashboard-pages.js` and `drivers/dashboard-pages-drivers.js`. It moves to its own files once it has steps of its own, as the plots, plants, categories and plantings pages have.
+A dashboard page with nothing else to do yet is a one-liner, listed in `pages/dashboard-pages.js` and `drivers/dashboard-pages-drivers.js`. It moves to its own files once it has steps of its own, as the plots, plants, categories, plantings and planting years pages have.
 
 **A page with an id in its URL has no `open`.** It's reached the way a person reaches it, from its list: `plantsPage.viewPlant('plant: sungold')` or `editPlant(...)`. The next step checks where that landed, for that thing: `plantDetailsPage.checkIsShownFor('plant: sungold')`.
 
@@ -96,6 +96,10 @@ await dashboardPage.chooseYear('year: spring');
 `status: started` has six sown; without it the planting is as created. The world keeps up with what each step does to a planting (its status, counts, dates and plot), so `plantingDetailsPage.checkShowsPlanting('planting: early')` checks the lot.
 
 **`browserClock` isn't a page either.** `browserClock.setTo('time: 2026-07-01T23:30:00-04:00')` fixes the browser's `new Date()`, for the dialogs that default to now. Timers still run. It checks first that the browser isn't on UTC, where a date pin shows nothing.
+
+**A driver can hold or fail one of the app's calls.** `drivers/service-call-control.js` holds a call until released, or answers it with an error, for pins on how a page takes a slow or failed load. It matches only calls to the service, by their path under its base: the app's own pages have paths like the service's (`dashboard/planting-years`), and failing one of those fails the page itself, so a check that nothing's shown would pass on nothing at all. Such a check also checks the page is there.
+
+**Adding a planting year needs the clock.** The add page proposes the year after the browser's calendar year, so a spec fixes the clock in a year it named first: `browserClock.setToNoonIn('year: last', 'on: 04-10')`. The year it adds is the one after, also from 8000 to 8999: `garden.hasPlantingYear` never picks 8999.
 
 **Uncaught errors are recorded.** `drivers/page-errors.js` keeps every error the page throws and nothing catches, unhandled rejections included, for pins on code that throws. Nothing fails a test for them on its own.
 
@@ -131,6 +135,7 @@ What a test names is made up, and deleted afterwards.
 - The world remembers each one under its alias *before* the step creates it, so a step that fails halfway is still cleaned up.
 - When the test ends, pass or fail, the world deletes everything it named, newest first, over the API, as the gardener, finding each by its unique name. It's best effort: what's gone is skipped, and a failure is a warning.
 - Newest first deletes a plant before its subcategory, and a subcategory before its category, which the service requires: it refuses to delete a category that has subcategories (409).
+- What the service refuses with 409 is tried once more after the rest. Newest first is wrong only for what the service ties together on the side: a planting carried forward into a year the test added is older than that year, and holds it.
 - A plant, plot or planting renamed on the page is remembered by its new name, and cleanup finds it by its old one too, in case the new one was never saved.
 - Plantings a step makes on the service's side are named too, before the step: each split, and the remainder the service splits off when fewer are planted out than were sown, `<name>(2 Remaining)`, as `planting: <alias>-remainder`.
 - It also ends the browser's own session in feral, since the app's Logout doesn't (backlog A2).

@@ -2,6 +2,7 @@ import { test as base } from '@playwright/test';
 
 import { guardNetwork } from './support/network-guard';
 import { createWorld } from './world';
+import { createAddPlantingYearPage } from './pages/add-planting-year-page';
 import { createBrowserClock } from './pages/browser-clock';
 import { createDashboardPage } from './pages/dashboard-page';
 import { createDashboardPageOnly } from './pages/dashboard-pages';
@@ -12,6 +13,8 @@ import { createPlantCategoriesPage } from './pages/plant-categories-page';
 import { createPlantDetailsPage } from './pages/plant-details-page';
 import { createPlantEditPage } from './pages/plant-edit-page';
 import { createPlantingDetailsPage } from './pages/planting-details-page';
+import { createPlantingYearDetailsPage } from './pages/planting-year-details-page';
+import { createPlantingYearsPage } from './pages/planting-years-page';
 import { createPlantingsPage } from './pages/plantings-page';
 import { createPlantsPage } from './pages/plants-page';
 import { createPlotsPage } from './pages/plots-page';
@@ -59,12 +62,14 @@ export const test = base.extend({
     plantCategoriesPage: pageFixture('plantCategoriesPage', createPlantCategoriesPage),
     plantingsPage: pageFixture('plantingsPage', createPlantingsPage),
     plantingDetailsPage: pageFixture('plantingDetailsPage', createPlantingDetailsPage),
+    plantingYearsPage: pageFixture('plantingYearsPage', createPlantingYearsPage),
+    addPlantingYearPage: pageFixture('addPlantingYearPage', createAddPlantingYearPage),
+    plantingYearDetailsPage: pageFixture('plantingYearDetailsPage', createPlantingYearDetailsPage),
     unknownPage: pageFixture('unknownPage', createUnknownPage),
 
     // Reached and recognised only, so far
     planningPage: pageFixture('planningPage', createDashboardPageOnly),
     gardenPage: pageFixture('gardenPage', createDashboardPageOnly),
-    plantingYearsPage: pageFixture('plantingYearsPage', createDashboardPageOnly),
     harvestsPage: pageFixture('harvestsPage', createDashboardPageOnly),
     plantStatsPage: pageFixture('plantStatsPage', createDashboardPageOnly),
     plantingStatsPage: pageFixture('plantingStatsPage', createDashboardPageOnly),
