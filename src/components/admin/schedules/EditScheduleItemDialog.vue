@@ -102,7 +102,6 @@
 </template>
 
 <script>
-import DatePickerDialogDayJs from "@/components/utils/DatePickerDialogDayJs.vue";
 import scheduling from '@/utils/scheduling';
 import { RRule } from 'rrule';
 import MonthDaySelect from "@/components/utils/MonthDaySelect.vue";
@@ -112,7 +111,6 @@ export default {
 
   components: {
     MonthDaySelect,
-    DatePickerDialogDayJs,
   },
 
   props: {

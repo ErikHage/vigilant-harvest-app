@@ -35,9 +35,8 @@ import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
 import PageTitle from "@/components/layout/PageTitle.vue";
 import PlantingsYearsTable from "@/components/years/PlantingYearsTable.vue";
 import {mapActions, mapState} from "pinia";
-import {useCommonStore, usePlantingYearsStore} from "@/store";
+import {usePlantingYearsStore} from "@/store";
 import {views} from "@/utils/constants";
-import {pl} from "vuetify/locale";
 
 export default {
   name: "PlantingYearsPage",

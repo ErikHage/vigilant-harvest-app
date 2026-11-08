@@ -240,7 +240,7 @@ export default {
   },
 
   methods: {
-    navigateToPlotDetails(plotId) {
+    navigateToPlotDetails() {
       console.log('plot clicked, do something in the future');
     },
 

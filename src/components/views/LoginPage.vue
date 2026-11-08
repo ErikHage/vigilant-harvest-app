@@ -72,7 +72,7 @@ export default {
         } else {
           this.clearToken();
         }
-      } catch (err) {
+      } catch {
         this.clearToken();
       }
     }

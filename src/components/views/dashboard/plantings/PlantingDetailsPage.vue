@@ -131,7 +131,6 @@ import PlantPlantingActionDialog from "@/components/plantings/PlantPlantingActio
 import RetirePlantingActionDialog from "@/components/plantings/RetirePlantingActionDialog.vue";
 import DeletePlantingActionDialog from "@/components/plantings/DeletePlantingActionDialog.vue";
 import CommentPlantingActionDialog from "@/components/plantings/CommentPlantingActionDialog.vue";
-import PlantDetailsTab from "@/components/plants/PlantDetailsTab.vue";
 import PlantingDetailsTab from "@/components/plantings/PlantingDetailsTab.vue";
 import PlantingHistoryTab from "@/components/plantings/PlantingHistoryTab.vue";
 
@@ -143,7 +142,6 @@ export default {
   components: {
     PlantingHistoryTab,
     PlantingDetailsTab,
-    PlantDetailsTab,
     CommentPlantingActionDialog,
     DeletePlantingActionDialog,
     RetirePlantingActionDialog,

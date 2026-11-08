@@ -53,13 +53,11 @@ import {mapActions, mapState} from "pinia";
 import {useActivityLogStore, useCommonStore} from "@/store";
 import PageTitle from "@/components/layout/PageTitle.vue";
 import AddActivityLogEntryDialog from "@/components/views/dashboard/garden/AddActivityLogEntryDialog.vue";
-import AddJournalEntryDialog from "@/components/views/dashboard/garden/AddJournalEntryDialog.vue";
 
 export default {
   name: "GardenActivityLogPage",
 
   components: {
-    AddJournalEntryDialog,
     AddActivityLogEntryDialog,
     PageTitle,
   },

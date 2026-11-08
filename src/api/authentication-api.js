@@ -26,7 +26,7 @@ async function verifyActorToken(actorToken) {
                 'x-feral-auth-token': actorToken,
             },
         });
-    } catch (err) {
+    } catch {
         console.log('token is invalid');
         return false;
     }

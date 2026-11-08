@@ -34,7 +34,7 @@ export const useCommonStore = defineStore('common', {
                 }, {});
                 this.availableYears = Object.keys(this.plantingYearsByYear);
                 this.selectedPlantingYear = this.plantingYearsByYear[this.plantingYear];
-            } catch (err) {
+            } catch {
                 this.setAlertMessage(null, 'error', 'error fetching planting years');
             }
         },
@@ -85,7 +85,7 @@ export const useAuthenticationStore = defineStore('authentication', {
                 storageUtils.setTokenInLocalStorage(actorToken);
                 this.isAuthenticated = true;
                 this.showAppBar = true;
-            } catch (err) {
+            } catch {
                 this.isAuthenticated = false;
                 this.setAlertMessage(null, 'error', 'error authenticating sso token');
             }
@@ -152,14 +152,14 @@ export const usePlantingYearsStore = defineStore('plantingYears', {
         async fetchPlantingYears() {
             try {
                 this.plantingYears = await plantingYearsApi.fetchPlantingYears(storageUtils.tryToLoadTokenFromStorage());
-            } catch (err) {
+            } catch {
                 this.setAlertMessage(null, 'error', 'error fetching planting years');
             }
         },
         async fetchPlantingYear(year) {
             try {
                 this.plantingYear = await plantingYearsApi.fetchPlantingYear(storageUtils.tryToLoadTokenFromStorage(), year);
-            } catch (err) {
+            } catch {
                 this.setAlertMessage(null, 'error', 'error fetching planting year');
             }
         },

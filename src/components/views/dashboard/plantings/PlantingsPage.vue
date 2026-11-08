@@ -66,7 +66,6 @@
 
 import { mapActions, mapState } from "pinia";
 import { useCommonStore, usePlantingsStore, usePlantsStore, usePlotsStore } from "@/store";
-import PlantingYearSelectCard from "@/components/PlantingYearSelectCard.vue";
 import PageTitle from "@/components/layout/PageTitle.vue";
 import PlantingsTable from "@/components/plantings/PlantingsTable.vue";
 import AddPlantingDialog from "@/components/plantings/AddPlantingDialog.vue";
@@ -81,7 +80,6 @@ export default {
     AddPlantingDialog,
     PlantingsTable,
     PageTitle,
-    PlantingYearSelectCard,
   },
 
   data: () => ({

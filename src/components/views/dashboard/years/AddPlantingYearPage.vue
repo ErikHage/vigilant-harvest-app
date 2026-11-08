@@ -217,7 +217,7 @@ export default {
         this.$router.push({
           name: 'PlantingYearsPage',
         });
-      } catch (err) {
+      } catch {
         // don't go back, error should show
       }
     }
