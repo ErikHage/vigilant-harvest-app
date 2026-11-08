@@ -2,12 +2,15 @@ import { test as base } from '@playwright/test';
 
 import { guardNetwork } from './support/network-guard';
 import { createWorld } from './world';
+import { createActivityLogPage } from './pages/activity-log-page';
 import { createAddPlantingYearPage } from './pages/add-planting-year-page';
 import { createBrowserClock } from './pages/browser-clock';
 import { createDashboardPage } from './pages/dashboard-page';
 import { createDashboardPageOnly } from './pages/dashboard-pages';
 import { createFeralLoginPage } from './pages/feral-login-page';
 import { createGarden } from './pages/garden';
+import { createGardenPage } from './pages/garden-page';
+import { createJournalPage } from './pages/journal-page';
 import { createLoginPage } from './pages/login-page';
 import { createPlantCategoriesPage } from './pages/plant-categories-page';
 import { createPlantDetailsPage } from './pages/plant-details-page';
@@ -65,11 +68,13 @@ export const test = base.extend({
     plantingYearsPage: pageFixture('plantingYearsPage', createPlantingYearsPage),
     addPlantingYearPage: pageFixture('addPlantingYearPage', createAddPlantingYearPage),
     plantingYearDetailsPage: pageFixture('plantingYearDetailsPage', createPlantingYearDetailsPage),
+    gardenPage: pageFixture('gardenPage', createGardenPage),
+    journalPage: pageFixture('journalPage', createJournalPage),
+    activityLogPage: pageFixture('activityLogPage', createActivityLogPage),
     unknownPage: pageFixture('unknownPage', createUnknownPage),
 
     // Reached and recognised only, so far
     planningPage: pageFixture('planningPage', createDashboardPageOnly),
-    gardenPage: pageFixture('gardenPage', createDashboardPageOnly),
     harvestsPage: pageFixture('harvestsPage', createDashboardPageOnly),
     plantStatsPage: pageFixture('plantStatsPage', createDashboardPageOnly),
     plantingStatsPage: pageFixture('plantingStatsPage', createDashboardPageOnly),

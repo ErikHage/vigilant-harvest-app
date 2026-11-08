@@ -1,7 +1,8 @@
 import { parseDslArgs } from '@feral-auth/ts-simple-dsl';
 
 import {
-    arrangedStatus, category, plant, planting, plot, schedule, schedules, subcategory, tags, year,
+    arrangedStatus, category, entry, on, optionalPlot, plant, planting, plot, schedule, schedules, subcategory, tags,
+    year,
 } from '../params';
 
 /**
@@ -23,13 +24,17 @@ export function createGarden(world, driver) {
          * in its planting `year`, with a made-up seed source, lot, lead time and
          * target planting date. With `status: started`, six seeds were sown on
          * April 1 of its year; with `status: planted`, all six were planted out
-         * too, on May 1, in no plot; otherwise (`status: created`, the
-         * default) nothing has happened to it yet.
+         * too, on May 1, in the `plot` the test named, or in none if left out;
+         * otherwise (`status: created`, the default) nothing has happened to
+         * it yet.
          */
         async hasPlanting(...args) {
             const params = parseDslArgs(args, {
-                planting: planting(), plant: plant(), year: year(), status: arrangedStatus(),
+                planting: planting(), plant: plant(), year: year(), status: arrangedStatus(), plot: optionalPlot(),
             });
+            if (params.plot !== undefined && params.status !== 'planted') {
+                throw new Error('hasPlanting: only a planting with `status: planted` is in a plot');
+            }
 
             const { plantingYear } = world.newPlanting(params.planting, params.plant, params.year);
             if (params.status !== 'created') {
@@ -40,9 +45,21 @@ export function createGarden(world, driver) {
             if (params.status === 'planted') {
                 world.updatePlanting(params.planting, {
                     status: 'PLANTED', numberTransplanted: 6, transplantDate: `${plantingYear}-05-01`,
+                    plotName: params.plot === undefined ? null : world.plotNamed(params.plot).friendlyName,
                 });
             }
             await driver.createPlanting(world.plantingNamed(params.planting));
+        },
+
+        /**
+         * There is a journal entry called `entry`, in the `year` the test named,
+         * dated `on` a day, `YYYY-MM-DD`, in 2026: the service keeps entries as
+         * timestamps, 1971 to 2037, apart from their year.
+         */
+        async hasJournalEntry(...args) {
+            const params = parseDslArgs(args, { entry: entry(), year: year(), on: on() });
+
+            await driver.createJournalEntry(world.newJournalEntry(params.entry, params.year, params.on));
         },
 
         /**

@@ -1,3 +1,4 @@
+import { createActivityLogPageDriver } from './activity-log-page-driver';
 import { createAddPlantingYearPageDriver } from './add-planting-year-page-driver';
 import { createAppBarDriver } from './app-bar-driver';
 import { createBrowserClockDriver } from './browser-clock-driver';
@@ -6,6 +7,8 @@ import { createDashboardPageDriver } from './dashboard-page-driver';
 import { createDashboardPagesDrivers } from './dashboard-pages-drivers';
 import { createFeralLoginPageDriver } from './feral-login-page-driver';
 import { createGardenDriver } from './garden-driver';
+import { createGardenPageDriver } from './garden-page-driver';
+import { createJournalPageDriver } from './journal-page-driver';
 import { createLoginPageDriver } from './login-page-driver';
 import { createPlantCategoriesPageDriver } from './plant-categories-page-driver';
 import { createPlantDetailsPageDriver } from './plant-details-page-driver';
@@ -45,8 +48,11 @@ export function createDrivers(page) {
         plantingYearsPage: createPlantingYearsPageDriver(page, serviceCalls, callControl),
         addPlantingYearPage: createAddPlantingYearPageDriver(page),
         plantingYearDetailsPage: createPlantingYearDetailsPageDriver(page, callControl),
+        gardenPage: createGardenPageDriver(page, callControl),
+        journalPage: createJournalPageDriver(page),
+        activityLogPage: createActivityLogPageDriver(page, serviceCalls, pageErrors),
         unknownPage: createUnknownPageDriver(page),
-        // planningPage, gardenPage, harvestsPage, ...: reached and recognised only
+        // planningPage, harvestsPage, plantStatsPage, ...: reached and recognised only
         ...createDashboardPagesDrivers(page),
 
         // Not pages: the service's API, for what a test only needs, and the browser's clock

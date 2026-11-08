@@ -2,7 +2,8 @@ import { expectThat } from './assertions';
 import { asGardener } from '../support/sessions';
 import {
     assignPlantSchedules, insertActivitySchedule, insertPlantCategory, insertPlantSubcategory, insertPlanting,
-    insertPlantingYear, listActivitySchedules, listHarvestTypes, listPlantCategories, listPlants,
+    insertJournalEntry, insertPlantingYear, listActivitySchedules, listHarvestTypes, listPlantCategories, listPlants,
+    listPlots,
     performPlantingAction, upsertPlant, upsertPlot,
 } from '../support/service-client';
 import { status } from '../support/status-codes';
@@ -124,12 +125,14 @@ export function createGardenDriver() {
                 if (!answered(started, status.ok) || planting.status === 'STARTED') {
                     return { created, started };
                 }
+                const plotId = planting.plotName === null ? null : findIn(await listPlots(token),
+                    each => each.friendlyName === planting.plotName, `the plot ${planting.plotName}`).plotId;
                 return {
                     created,
                     started,
                     planted: await performPlantingAction(token, plantingId, 'PLANT', {
                         transplantDate: `${planting.transplantDate}T12:00:00.000Z`,
-                        numberTransplanted: planting.numberTransplanted, plotId: null, comment: null,
+                        numberTransplanted: planting.numberTransplanted, plotId, comment: null,
                     }),
                 };
             });
@@ -140,6 +143,16 @@ export function createGardenDriver() {
                     expectThat(answered(reply, status.ok), `the service to ${step} it (200)`, describe(reply), what);
                 }
             }
+        },
+
+        /** Records a journal entry, dated noon in New York, so it's its day there. */
+        async createJournalEntry({ plantingYear, entryDate, entry }) {
+            const what = `arranging the journal entry ${entry}`;
+
+            const reply = await asGardener(token => insertJournalEntry(token, {
+                plantingYear, entry, entryDate: new Date(`${entryDate}T12:00:00-04:00`).toISOString(),
+            }));
+            expectThat(reply.error === undefined && reply.status < 300, 'the service to record it', describe(reply), what);
         },
 
         /** Creates `plant`, then assigns it the schedules named in `scheduleNames`. */

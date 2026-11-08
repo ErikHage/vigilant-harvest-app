@@ -94,6 +94,24 @@ export const performPlantingAction = (token, plantingId, actionType, data) =>
 
 export const deletePlanting = (token, plantingId) => garden('DELETE', `/plantings/${plantingId}`, { token });
 
+/** Every harvest filed under the planting year, each with its id and planting's id. */
+export const searchHarvests = (token, year) => garden('GET', `/harvests/search?year=${year}`, { token });
+
+export const deleteHarvest = (token, harvestId) => garden('DELETE', `/harvests/${harvestId}`, { token });
+
+/** The year's journal entries, each with its id. */
+export const listJournalEntries = (token, plantingYear) => garden('GET', `/journal/${plantingYear}`, { token });
+
+/** Records a journal entry: `{ plantingYear, entryDate, entry }`, the date an instant. */
+export const insertJournalEntry = (token, entry) => garden('PUT', '/journal', { token, body: entry });
+
+export const deleteJournalEntry = (token, entryId) => garden('DELETE', `/journal/entries/${entryId}`, { token });
+
+/** The year's activity-log entries, each with its id. */
+export const listActivityLog = (token, plantingYear) => garden('GET', `/activity-log/${plantingYear}`, { token });
+
+export const deleteActivityLogEntry = (token, entryId) => garden('DELETE', `/activity-log/entries/${entryId}`, { token });
+
 /** Each with its subcategories. */
 export const listPlantCategories = token => garden('GET', '/plant-categories', { token });
 

@@ -8,11 +8,26 @@ import { status } from './support/status-codes';
 import {
     deleteActivitySchedule, deletePlant, deletePlantCategory, deletePlantSubcategory, deletePlanting,
     deletePlantingYear, deletePlot, listActivitySchedules, listPlantCategories, listPlantingYears, listPlantings,
-    listPlants, listPlots, logout,
+    listPlants, listPlots, logout, searchHarvests, deleteHarvest, listJournalEntries, deleteJournalEntry,
+    listActivityLog, deleteActivityLogEntry,
 } from './support/service-client';
 
 const suffix = () => randomUUID().slice(0, 8);
 const failed = reply => reply.error !== undefined || reply.status >= 300;
+
+// For each [list, matches, remove]: lists, and removes what matches, warning
+// of what it couldn't. What hangs off a thing the test named, deleted first
+async function deleteEach(token, ...lists) {
+    for (const [list, matches, remove] of lists) {
+        const reply = await list();
+        for (const each of (Array.isArray(reply.body) ? reply.body : []).filter(matches)) {
+            const deleted = await remove(each);
+            if (failed(deleted)) {
+                console.warn(`cleanup: couldn't delete ${JSON.stringify(each).slice(0, 120)}: ${deleted.status ?? deleted.error}`);
+            }
+        }
+    }
+}
 
 // Every subcategory, each with its category's id and name, as one list
 async function listPlantSubcategories(token) {
@@ -48,13 +63,32 @@ const kinds = {
     planting: {
         list: listPlantings,
         matches: (planting, listed) => [planting.name, ...planting.formerNames].includes(listed.name),
-        remove: (token, listed) => deletePlanting(token, listed.plantingId),
+        // Its harvests first: they're the test's, and hold it (409). The list
+        // sends `plantingYears` empty, so its current year is searched too
+        remove: async (token, listed) => {
+            const years = new Set([listed.currentPlantingYear, ...(listed.plantingYears ?? [])]);
+            await deleteEach(token, ...[...years].map(year => [
+                () => searchHarvests(token, year),
+                harvest => harvest.plantingId === listed.plantingId,
+                harvest => deleteHarvest(token, harvest.harvestId),
+            ]));
+            return deletePlanting(token, listed.plantingId);
+        },
         describe: planting => `the planting ${planting.name}`,
     },
     plantingYear: {
         list: listPlantingYears,
         matches: (year, listed) => listed.plantingYear === year.plantingYear,
-        remove: (token, listed) => deletePlantingYear(token, listed.plantingYear),
+        // Its journal and activity-log entries first: a year the test named is
+        // a fixture year, so everything filed under it is the test's
+        remove: async (token, listed) => {
+            await deleteEach(token,
+                [() => listJournalEntries(token, listed.plantingYear), () => true,
+                    entry => deleteJournalEntry(token, entry.entryId)],
+                [() => listActivityLog(token, listed.plantingYear), () => true,
+                    entry => deleteActivityLogEntry(token, entry.entryId)]);
+            return deletePlantingYear(token, listed.plantingYear);
+        },
         describe: year => `the planting year ${year.plantingYear}`,
     },
     plant: {
@@ -104,11 +138,14 @@ const copyOf = details => structuredClone(details);
 
 // A planting as it is once created: named, of a plant in a year, with
 // nothing sown or planted yet. Dates are `YYYY-MM-DD`, as the details tab
-// shows them; `comments` are those added on the page, oldest first
-const newPlantingDetails = (alias, plantName, plantingYear) => ({
+// shows them; `comments` are those added on the page, oldest first. A harvest
+// is of its plant's default type, and `harvested` tallies what was
+const newPlantingDetails = (alias, plant, plantingYear) => ({
     name: `${FIXTURE_PREFIX}${alias}-${suffix()}`,
     formerNames: [],
-    plantName,
+    plantName: plant.friendlyName,
+    harvestType: plant.harvesting.defaultHarvestType,
+    harvested: 0,
     plantingYear,
     seedSource: 'Seed Savers',
     lotNumber: 'LOT-7',
@@ -201,10 +238,12 @@ export function createWorld(page) {
     const plantsByAlias = new Map();
     const schedulesByAlias = new Map();
     const plantingsByAlias = new Map();
+    // Journal and activity-log entries: not deleted on their own, but with their year
+    const entriesByAlias = new Map();
     let unknownPlantingId;
     const aliasMaps = [
         plotsByAlias, plantingYearsByAlias, categoriesByAlias, subcategoriesByAlias, plantsByAlias, schedulesByAlias,
-        plantingsByAlias,
+        plantingsByAlias, entriesByAlias,
     ];
     // Newest first, the order cleanup deletes in
     const named = [];
@@ -270,19 +309,19 @@ export function createWorld(page) {
          * sown or planted yet.
          */
         newPlanting(alias, plantAlias, yearAlias) {
-            const { friendlyName: plantName } = known(plantsByAlias, plantAlias, 'plant', 'garden.hasPlant');
+            const plant = known(plantsByAlias, plantAlias, 'plant', 'garden.hasPlant');
             const { plantingYear } = known(plantingYearsByAlias, yearAlias, 'year', 'garden.hasPlantingYear');
             return remember('planting', plantingsByAlias, alias, {
-                ...newPlantingDetails(alias, plantName, plantingYear),
+                ...newPlantingDetails(alias, plant, plantingYear),
                 targetPlantingDate: `${plantingYear}-05-01`,
             });
         },
 
         /** As `newPlanting`, for one added through the Add dialog, which asks for no target date. */
         newPlantingFromDialog(alias, plantAlias, yearAlias) {
-            const { friendlyName: plantName } = known(plantsByAlias, plantAlias, 'plant', 'garden.hasPlant');
+            const plant = known(plantsByAlias, plantAlias, 'plant', 'garden.hasPlant');
             const { plantingYear } = known(plantingYearsByAlias, yearAlias, 'year', 'garden.hasPlantingYear');
-            return remember('planting', plantingsByAlias, alias, newPlantingDetails(alias, plantName, plantingYear));
+            return remember('planting', plantingsByAlias, alias, newPlantingDetails(alias, plant, plantingYear));
         },
 
         /**
@@ -328,6 +367,55 @@ export function createWorld(page) {
             planting.formerNames.push(planting.name);
             planting.name = madeUpName(alias);
             return copyOf(planting);
+        },
+
+        /**
+         * Remembers `quantity` more harvested from the planting called `alias`,
+         * of its plant's default harvest type. Its harvests go with it.
+         */
+        recordHarvest(alias, quantity) {
+            const planting = known(plantingsByAlias, alias, 'planting', 'garden.hasPlanting');
+            plantingsByAlias.get(alias).harvested = (planting.harvested ?? 0) + quantity;
+            return copyOf(plantingsByAlias.get(alias));
+        },
+
+        /**
+         * Makes up a journal entry called `alias`, in the year called
+         * `yearAlias`: its text, which names it, and `entryDate`, `YYYY-MM-DD`.
+         * It goes with its year, so cleanup needs nothing more.
+         */
+        newJournalEntry(alias, yearAlias, entryDate) {
+            const { plantingYear } = known(plantingYearsByAlias, yearAlias, 'year', 'garden.hasPlantingYear');
+            if (entriesByAlias.has(alias)) {
+                throw new Error(`there is already an entry called "${alias}" in this test`);
+            }
+            entriesByAlias.set(alias, { plantingYear, entryDate, entry: `${madeUpName(alias)}: a day in the garden.` });
+            return copyOf(entriesByAlias.get(alias));
+        },
+
+        /**
+         * As `newJournalEntry`, for an activity-log entry: fertilized with
+         * CalMag, its comments naming it.
+         */
+        newLogEntry(alias, yearAlias, entryDate) {
+            const { plantingYear } = known(plantingYearsByAlias, yearAlias, 'year', 'garden.hasPlantingYear');
+            if (entriesByAlias.has(alias)) {
+                throw new Error(`there is already an entry called "${alias}" in this test`);
+            }
+            entriesByAlias.set(alias, {
+                plantingYear, entryDate, activityType: 'FERTILIZE', subType: 'CalMag',
+                comments: `${madeUpName(alias)}: fed the beds.`,
+            });
+            return copyOf(entriesByAlias.get(alias));
+        },
+
+        entryNamed: alias => known(entriesByAlias, alias, 'entry', 'journalPage.recordEntry'),
+
+        /** Remembers what a step learnt about the entry called `alias`, such as its day. */
+        updateEntry(alias, changes) {
+            known(entriesByAlias, alias, 'entry', 'journalPage.recordEntry');
+            Object.assign(entriesByAlias.get(alias), changes);
+            return copyOf(entriesByAlias.get(alias));
         },
 
         /** A planting id the service has never issued, remembered for the step that checks it. */

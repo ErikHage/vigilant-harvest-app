@@ -70,8 +70,20 @@ export const planting = () => required();
 /** How far an arranged planting has got: `created` (the default), `started` or `planted`. */
 export const arrangedStatus = () => optional().allowedValues('created', 'started', 'planted').withDefault('created');
 
-/** A month and day, `MM-DD`, for the browser's clock. */
+/** A day: `MM-DD` for the browser's clock in a named year, `YYYY-MM-DD` for an entry. */
 export const on = () => required();
+
+/** A plot the test named, by its alias, or none if left out. */
+export const optionalPlot = () => optional();
+
+/** A journal or activity-log entry the test named, by its alias. */
+export const entry = () => required();
+
+/** Entries the test named, by alias, repeated or comma-separated. */
+export const entries = () => optional().multiple({ separator: ', ' });
+
+/** A harvest's quantity, a whole number. */
+export const quantity = () => required().asInteger();
 
 /** A day of the month, as the date picker shows it. */
 export const day = () => required().asInteger();
