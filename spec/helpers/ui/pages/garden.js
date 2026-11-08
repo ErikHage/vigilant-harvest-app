@@ -1,6 +1,8 @@
 import { parseDslArgs } from '@feral-auth/ts-simple-dsl';
 
-import { category, plant, plot, schedule, schedules, subcategory, tags, year } from '../params';
+import {
+    arrangedStatus, category, plant, planting, plot, schedule, schedules, subcategory, tags, year,
+} from '../params';
 
 /**
  * The garden as the service holds it, in words: what a test needs but isn't
@@ -13,7 +15,29 @@ export function createGarden(world, driver) {
         async hasPlot(...args) {
             const params = parseDslArgs(args, { plot: plot() });
 
-            await driver.createPlot({ ...world.newPlot(params.plot), isActive: true });
+            await driver.createPlot(world.newPlot(params.plot));
+        },
+
+        /**
+         * There is a planting called `planting`, of the `plant` the test named,
+         * in its planting `year`, with a made-up seed source, lot, lead time and
+         * target planting date. With `status: started`, six seeds were sown on
+         * April 1 of its year; otherwise (`status: created`, the default)
+         * nothing has happened to it yet.
+         */
+        async hasPlanting(...args) {
+            const params = parseDslArgs(args, {
+                planting: planting(), plant: plant(), year: year(), status: arrangedStatus(),
+            });
+
+            world.newPlanting(params.planting, params.plant, params.year);
+            const arranged = params.status === 'started'
+                ? world.updatePlanting(params.planting, {
+                    status: 'STARTED', numberSown: 6,
+                    sowDate: `${world.plantingNamed(params.planting).plantingYear}-04-01`,
+                })
+                : world.plantingNamed(params.planting);
+            await driver.createPlanting(arranged);
         },
 
         /**

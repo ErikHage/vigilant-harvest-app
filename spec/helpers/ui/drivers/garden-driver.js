@@ -1,8 +1,9 @@
 import { expectThat } from './assertions';
 import { asGardener } from '../support/sessions';
 import {
-    assignPlantSchedules, insertActivitySchedule, insertPlantCategory, insertPlantSubcategory, insertPlantingYear,
-    listActivitySchedules, listHarvestTypes, listPlantCategories, upsertPlant, upsertPlot,
+    assignPlantSchedules, insertActivitySchedule, insertPlantCategory, insertPlantSubcategory, insertPlanting,
+    insertPlantingYear, listActivitySchedules, listHarvestTypes, listPlantCategories, listPlants,
+    performPlantingAction, upsertPlant, upsertPlot,
 } from '../support/service-client';
 import { status } from '../support/status-codes';
 
@@ -52,10 +53,12 @@ function plantRequest(plant, subcategoryId, defaultHarvestTypeId) {
  */
 export function createGardenDriver() {
     return {
-        async createPlot(plot) {
-            const what = `arranging the plot ${plot.friendlyName}`;
+        async createPlot({ friendlyName, lengthInInches, widthInInches, plotType }) {
+            const what = `arranging the plot ${friendlyName}`;
 
-            const reply = await asGardener(token => upsertPlot(token, plot));
+            const reply = await asGardener(token => upsertPlot(token, {
+                friendlyName, lengthInInches, widthInInches, plotType, isActive: true,
+            }));
             expectThat(answered(reply, status.created), 'the service to create it (201)', describe(reply), what);
         },
 
@@ -88,6 +91,44 @@ export function createGardenDriver() {
 
             const reply = await asGardener(token => insertActivitySchedule(token, schedule));
             expectThat(answered(reply, status.created), 'the service to create it (201)', describe(reply), what);
+        },
+
+        /**
+         * Creates `planting`; if its status is STARTED, starts it too, sown on
+         * its sow date. The date goes out at noon UTC, so it's that day in any
+         * zone the service runs in.
+         */
+        async createPlanting(planting) {
+            const what = `arranging the planting ${planting.name}`;
+
+            const replies = await asGardener(async token => {
+                const plant = findIn(await listPlants(token), each => each.friendlyName === planting.plantName,
+                    `the plant ${planting.plantName}`);
+                const created = await insertPlanting(token, {
+                    name: planting.name,
+                    plantId: plant.plantId,
+                    plantingYear: planting.plantingYear,
+                    seedSource: planting.seedSource,
+                    lotNumber: planting.lotNumber,
+                    leadTimeWeeks: planting.leadTimeWeeks,
+                    targetPlantingDate: planting.targetPlantingDate,
+                });
+                if (!answered(created, status.created) || planting.status !== 'STARTED') {
+                    return { created };
+                }
+                return {
+                    created,
+                    started: await performPlantingAction(token, created.body.plantingId, 'START', {
+                        sowDate: `${planting.sowDate}T12:00:00.000Z`, numberSown: planting.numberSown, comment: null,
+                    }),
+                };
+            });
+            expectThat(answered(replies.created ?? replies, status.created), 'the service to create it (201)',
+                describe(replies.created ?? replies), what);
+            if (replies.started) {
+                expectThat(answered(replies.started, status.ok), 'the service to start it (200)',
+                    describe(replies.started), what);
+            }
         },
 
         /** Creates `plant`, then assigns it the schedules named in `scheduleNames`. */

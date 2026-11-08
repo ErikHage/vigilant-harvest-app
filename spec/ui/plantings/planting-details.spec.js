@@ -1,0 +1,188 @@
+import { test } from '../../helpers/ui/ui-test';
+
+// Each test arranges its planting, created or started, in a year of its own,
+// chosen, and reaches its details page from the plantings page
+
+test.describe('A planting\'s details page', () => {
+    test.beforeEach(async ({ garden, loginPage, dashboardPage }) => {
+        await garden.hasCategory('category: tomatoes');
+        await garden.hasSubcategory('subcategory: cherry', 'category: tomatoes');
+        await garden.hasPlant('plant: sungold', 'subcategory: cherry');
+        await garden.hasPlantingYear('year: spring');
+        await loginPage.logIn('user: gardener');
+        await dashboardPage.checkIsShown();
+        await dashboardPage.chooseYear('year: spring');
+        await dashboardPage.checkYearIsChosen('year: spring');
+    });
+
+    const view = async (plantingsPage, plantingDetailsPage, alias) => {
+        await plantingsPage.open();
+        await plantingsPage.checkIsShown();
+        await plantingsPage.viewPlanting(`planting: ${alias}`);
+        await plantingDetailsPage.checkIsShownFor(`planting: ${alias}`);
+    };
+
+    // The history's first entry shows the planting's fields as JSON, as the
+    // service files its creation (backlog B34, tier B)
+    test('shows a new planting, the actions it allows, and its history', async ({
+        garden, plantingsPage, plantingDetailsPage,
+    }) => {
+        await garden.hasPlanting('planting: early', 'plant: sungold', 'year: spring');
+
+        await view(plantingsPage, plantingDetailsPage, 'early');
+
+        await plantingDetailsPage.checkShowsPlanting('planting: early');
+        await plantingDetailsPage.checkOffersActions('actions: Comment, Start, Plant, Delete');
+        await plantingDetailsPage.checkHistoryShows('planting: early');
+    });
+
+    // At 23:30 in New York it's already the next day in UTC. The dialog sends
+    // the instant, and the unit pin (backlog A22) has the service keep its UTC
+    // day. That can't arise here: the service runs in New York too, and keeps
+    // the day it is there
+    test('starts a planting, sown on the day the dialog shows, in a New York evening', async ({
+        garden, browserClock, plantingsPage, plantingDetailsPage,
+    }) => {
+        await garden.hasPlanting('planting: early', 'plant: sungold', 'year: spring');
+        await browserClock.setTo('time: 2026-07-01T23:30:00-04:00');
+        await view(plantingsPage, plantingDetailsPage, 'early');
+
+        await plantingDetailsPage.startPlanting('planting: early', 'count: 6');
+
+        await plantingDetailsPage.checkIsShownFor('planting: early');
+        await plantingDetailsPage.checkShowsPlanting('planting: early');
+        await plantingDetailsPage.checkOffersActions('actions: Comment, Split, Plant, Retire');
+    });
+
+    // Four of the six sown are planted out, so the service splits the other two
+    // off as a started planting of their own, "<name>(2 Remaining)"
+    test('plants a started planting in a plot, and keeps the rest started', async ({
+        garden, plantingsPage, plantingDetailsPage,
+    }) => {
+        await garden.hasPlot('plot: bed');
+        await garden.hasPlanting('planting: early', 'plant: sungold', 'year: spring', 'status: started');
+        await view(plantingsPage, plantingDetailsPage, 'early');
+
+        await plantingDetailsPage.plantPlanting('planting: early', 'plot: bed', 'count: 4');
+
+        await plantingDetailsPage.checkIsShownFor('planting: early');
+        await plantingDetailsPage.checkShowsPlanting('planting: early');
+        await plantingDetailsPage.checkOffersActions('actions: Comment, Retire');
+        await plantingsPage.open();
+        await plantingsPage.checkPlantingFound('planting: early');
+        await plantingsPage.checkPlantingFound('planting: early-remainder');
+    });
+
+    // DocumentsCurrentBehavior: the plot has no rule, so Confirm is offered
+    // with none chosen, and the planting is planted nowhere (backlog A23).
+    // Should offer Confirm only once a plot is chosen
+    test('plants a planting only once a plot is chosen', async ({ garden, plantingsPage, plantingDetailsPage }) => {
+        await garden.hasPlanting('planting: early', 'plant: sungold', 'year: spring', 'status: started');
+        await view(plantingsPage, plantingDetailsPage, 'early');
+        await plantingDetailsPage.startPlantingWithNoPlot('planting: early', 'count: 6');
+
+        await plantingDetailsPage.checkPlantNeedsAPlot();
+        await plantingDetailsPage.confirm();
+
+        await plantingDetailsPage.checkIsShownFor('planting: early');
+        await plantingDetailsPage.checkShowsPlanting('planting: early');
+    });
+
+    test('splits a started planting into new ones, which keep the rest', async ({
+        garden, plantingsPage, plantingDetailsPage,
+    }) => {
+        await garden.hasPlanting('planting: early', 'plant: sungold', 'year: spring', 'status: started');
+        await view(plantingsPage, plantingDetailsPage, 'early');
+
+        await plantingDetailsPage.splitPlanting('planting: early', 'split: left', 'count: 2', 'split: right', 'count: 3');
+
+        await plantingsPage.checkIsShown();
+        await plantingsPage.checkPlantingFound('planting: left');
+        await plantingsPage.checkPlantingFound('planting: right');
+        await plantingsPage.checkPlantingFound('planting: early');
+    });
+
+    // DocumentsCurrentBehavior: Confirm is offered with no splits added, the
+    // service takes an empty split, and the page moves on to the plantings as
+    // if it had split (backlog A24). Should offer Confirm only once there's a
+    // named split of at least one
+    test('splits a planting only once there\'s a split', async ({ garden, plantingsPage, plantingDetailsPage }) => {
+        await garden.hasPlanting('planting: early', 'plant: sungold', 'year: spring', 'status: started');
+        await view(plantingsPage, plantingDetailsPage, 'early');
+        await plantingDetailsPage.openSplitDialog();
+
+        await plantingDetailsPage.checkSplitNeedsASplit();
+        await plantingDetailsPage.confirm();
+
+        await plantingsPage.checkIsShown();
+        await plantingsPage.checkPlantingFound('planting: early');
+    });
+
+    test('retires a planting, after which only a comment is offered', async ({
+        garden, plantingsPage, plantingDetailsPage,
+    }) => {
+        await garden.hasPlanting('planting: early', 'plant: sungold', 'year: spring', 'status: started');
+        await view(plantingsPage, plantingDetailsPage, 'early');
+
+        await plantingDetailsPage.retirePlanting('planting: early');
+
+        await plantingDetailsPage.checkIsShownFor('planting: early');
+        await plantingDetailsPage.checkOffersActions('actions: Comment');
+    });
+
+    test('deletes a new planting, and goes back to the year\'s plantings', async ({
+        garden, plantingsPage, plantingDetailsPage,
+    }) => {
+        await garden.hasPlanting('planting: early', 'plant: sungold', 'year: spring');
+        await garden.hasPlanting('planting: late', 'plant: sungold', 'year: spring');
+        await view(plantingsPage, plantingDetailsPage, 'early');
+
+        await plantingDetailsPage.deletePlanting('planting: early');
+
+        await plantingsPage.checkIsShown();
+        await plantingsPage.checkPlantingFound('planting: late');
+        await plantingsPage.checkPlantingNotListed('planting: early');
+    });
+
+    test('adds a comment to the history', async ({ garden, plantingsPage, plantingDetailsPage }) => {
+        await garden.hasPlanting('planting: early', 'plant: sungold', 'year: spring');
+        await view(plantingsPage, plantingDetailsPage, 'early');
+
+        await plantingDetailsPage.commentOn('planting: early');
+
+        await plantingDetailsPage.checkHistoryShows('planting: early');
+    });
+
+    test('saves a new name, behind the lock', async ({ garden, plantingsPage, plantingDetailsPage }) => {
+        await garden.hasPlanting('planting: early', 'plant: sungold', 'year: spring');
+        await view(plantingsPage, plantingDetailsPage, 'early');
+
+        await plantingDetailsPage.renamePlanting('planting: early');
+
+        await plantingDetailsPage.checkIsShownFor('planting: early');
+        await plantingDetailsPage.checkShowsPlanting('planting: early');
+    });
+
+    // DocumentsCurrentBehavior: the tab renders before the page has copied the
+    // planting, and the picker reads its date only once, so it opens with no
+    // date chosen, and confirming it clears the date on screen (backlog A21).
+    // Should open on the planting's date
+    test('keeps the target date when its picker is confirmed without a pick', async ({
+        garden, plantingsPage, plantingDetailsPage,
+    }) => {
+        await garden.hasPlanting('planting: early', 'plant: sungold', 'year: spring');
+        await view(plantingsPage, plantingDetailsPage, 'early');
+        await plantingDetailsPage.checkShowsPlanting('planting: early');
+
+        await plantingDetailsPage.checkTargetDateKeptByItsPicker('planting: early');
+    });
+
+    // DocumentsCurrentBehavior: the page says it couldn't fetch the planting,
+    // then throws copying it, an unhandled rejection (backlog A25). Should
+    // say so without throwing
+    test('says when a planting doesn\'t exist', async ({ plantingDetailsPage }) => {
+        await plantingDetailsPage.openUnknown();
+
+        await plantingDetailsPage.checkSaysThePlantingWasNotFound();
+    });
+});

@@ -2,6 +2,7 @@ import { test as base } from '@playwright/test';
 
 import { guardNetwork } from './support/network-guard';
 import { createWorld } from './world';
+import { createBrowserClock } from './pages/browser-clock';
 import { createDashboardPage } from './pages/dashboard-page';
 import { createDashboardPageOnly } from './pages/dashboard-pages';
 import { createFeralLoginPage } from './pages/feral-login-page';
@@ -10,6 +11,8 @@ import { createLoginPage } from './pages/login-page';
 import { createPlantCategoriesPage } from './pages/plant-categories-page';
 import { createPlantDetailsPage } from './pages/plant-details-page';
 import { createPlantEditPage } from './pages/plant-edit-page';
+import { createPlantingDetailsPage } from './pages/planting-details-page';
+import { createPlantingsPage } from './pages/plantings-page';
 import { createPlantsPage } from './pages/plants-page';
 import { createPlotsPage } from './pages/plots-page';
 import { createUnknownPage } from './pages/unknown-page';
@@ -54,13 +57,14 @@ export const test = base.extend({
     plantDetailsPage: pageFixture('plantDetailsPage', createPlantDetailsPage),
     plantEditPage: pageFixture('plantEditPage', createPlantEditPage),
     plantCategoriesPage: pageFixture('plantCategoriesPage', createPlantCategoriesPage),
+    plantingsPage: pageFixture('plantingsPage', createPlantingsPage),
+    plantingDetailsPage: pageFixture('plantingDetailsPage', createPlantingDetailsPage),
     unknownPage: pageFixture('unknownPage', createUnknownPage),
 
     // Reached and recognised only, so far
     planningPage: pageFixture('planningPage', createDashboardPageOnly),
     gardenPage: pageFixture('gardenPage', createDashboardPageOnly),
     plantingYearsPage: pageFixture('plantingYearsPage', createDashboardPageOnly),
-    plantingsPage: pageFixture('plantingsPage', createDashboardPageOnly),
     harvestsPage: pageFixture('harvestsPage', createDashboardPageOnly),
     plantStatsPage: pageFixture('plantStatsPage', createDashboardPageOnly),
     plantingStatsPage: pageFixture('plantingStatsPage', createDashboardPageOnly),
@@ -68,4 +72,6 @@ export const test = base.extend({
 
     // Not a page: what a test needs but isn't about, arranged through the API
     garden: pageFixture('garden', createGarden),
+    // Not a page either: the browser's clock
+    browserClock: pageFixture('browserClock', createBrowserClock),
 });

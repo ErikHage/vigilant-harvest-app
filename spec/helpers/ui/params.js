@@ -1,4 +1,4 @@
-import { optional, required } from '@feral-auth/ts-simple-dsl';
+import { group, optional, required } from '@feral-auth/ts-simple-dsl';
 
 import { dashboardDestinations } from './drivers/dashboard-nav-driver';
 
@@ -63,6 +63,27 @@ export const filterBy = () => optional().allowedValues('name', 'subcategory').wi
 
 /** Subcategories the test named, by alias, repeated or comma-separated; none if left out. */
 export const subcategories = () => optional().multiple({ separator: ', ' });
+
+/** A planting the test named, by its alias. */
+export const planting = () => required();
+
+/** How far an arranged planting has got: `created` (the default) or `started`. */
+export const arrangedStatus = () => optional().allowedValues('created', 'started').withDefault('created');
+
+/** A planting's status, as the page shows it. */
+export const status = () => required().allowedValues('CREATED', 'STARTED', 'PLANTED', 'RETIRED');
+
+/** A count of seeds or seedlings, a whole number. */
+export const count = () => required().asInteger();
+
+/** The planting actions offered, by their buttons' names, comma-separated, in order. */
+export const actions = () => optional().multiple({ separator: ', ' });
+
+/** A split of a planting: its alias, then `count`, the seedlings it takes. Repeats. */
+export const splitInto = () => group({ split: required(), count: count() }).identifiedBy('split');
+
+/** A moment, as ISO 8601 with its offset: `2026-07-01T23:30:00-04:00`. */
+export const time = () => required();
 
 /** What an alert says, word for word. */
 export const message = () => required();

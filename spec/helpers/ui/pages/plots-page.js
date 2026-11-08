@@ -1,7 +1,7 @@
 import { parseDslArgs } from '@feral-auth/ts-simple-dsl';
 
-import { active, plot } from '../params';
-import { routedPageSteps, dashboardComponents } from './routed-page';
+import { active, message, plot } from '../params';
+import { dashboardComponents, routedPageSteps } from './routed-page';
 
 /** The plots page, in words. */
 export function createPlotsPage(world, driver) {
@@ -17,6 +17,38 @@ export function createPlotsPage(world, driver) {
         },
 
         /**
+         * Gives the `plot` a new made-up name, sizes and type through its Edit
+         * dialog, and saves them. From here on the test's `plot` has them.
+         */
+        async editPlot(...args) {
+            const params = parseDslArgs(args, { plot: plot() });
+
+            const formerName = world.plotNamed(params.plot).friendlyName;
+            await driver.editPlot(formerName, world.editPlot(params.plot));
+        },
+
+        /** Opens the Add dialog, entering nothing. No parameters. */
+        async openAddDialog(...args) {
+            parseDslArgs(args, {});
+
+            await driver.openAddDialog();
+        },
+
+        /** The open Add dialog offers Create only once the plot's required fields are given. No parameters. */
+        async checkCreateNeedsTheRequiredFields(...args) {
+            parseDslArgs(args, {});
+
+            await driver.offersCreateWithNothingEntered();
+        },
+
+        /** Clicks Create in the open Add dialog, which closes. No parameters. */
+        async create(...args) {
+            parseDslArgs(args, {});
+
+            await driver.create();
+        },
+
+        /**
          * The `plot` is listed, with its details, and `active: yes | no` (default
          * yes).
          */
@@ -24,6 +56,20 @@ export function createPlotsPage(world, driver) {
             const params = parseDslArgs(args, { plot: plot(), active: active() });
 
             await driver.listsPlot(world.plotNamed(params.plot), params.active === 'yes');
+        },
+
+        /** Searching for the `plot`'s name finds it, and no other. */
+        async checkPlotFound(...args) {
+            const params = parseDslArgs(args, { plot: plot() });
+
+            await driver.findsPlot(world.plotNamed(params.plot));
+        },
+
+        /** The page's alert says `message`. Check it straight away: it fades after three seconds. */
+        async checkAlertSays(...args) {
+            const params = parseDslArgs(args, { message: message() });
+
+            await driver.alertSays(params.message);
         },
     };
 }

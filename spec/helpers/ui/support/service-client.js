@@ -82,7 +82,17 @@ export const deletePlant = (token, plantId) => garden('DELETE', `/plants/${plant
 export const assignPlantSchedules = (token, plantId, { assign = [], unassign = [] }) =>
     garden('PUT', `/plants/${plantId}/activity-schedules`, { token, body: { assign, unassign } });
 
+/** Every planting, of every year. */
 export const listPlantings = token => garden('GET', '/plantings', { token });
+
+/** The reply is the planting, CREATED, with its id. */
+export const insertPlanting = (token, planting) => garden('POST', '/plantings', { token, body: planting });
+
+/** `action` is START, PLANT, SPLIT, RETIRE, COMMENT or DELETE; the reply is the planting. */
+export const performPlantingAction = (token, plantingId, actionType, data) =>
+    garden('POST', `/plantings/${plantingId}`, { token, body: { actionType, ...data } });
+
+export const deletePlanting = (token, plantingId) => garden('DELETE', `/plantings/${plantingId}`, { token });
 
 /** Each with its subcategories. */
 export const listPlantCategories = token => garden('GET', '/plant-categories', { token });

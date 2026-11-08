@@ -5,8 +5,9 @@ import { createDrivers } from './drivers/drivers';
 import { FIXTURE_PREFIX, FIXTURE_YEARS } from './support/residue';
 import { asGardener } from './support/sessions';
 import {
-    deleteActivitySchedule, deletePlant, deletePlantCategory, deletePlantSubcategory, deletePlantingYear, deletePlot,
-    listActivitySchedules, listPlantCategories, listPlantingYears, listPlants, listPlots, logout,
+    deleteActivitySchedule, deletePlant, deletePlantCategory, deletePlantSubcategory, deletePlanting,
+    deletePlantingYear, deletePlot, listActivitySchedules, listPlantCategories, listPlantingYears, listPlantings,
+    listPlants, listPlots, logout,
 } from './support/service-client';
 
 const suffix = () => randomUUID().slice(0, 8);
@@ -38,9 +39,16 @@ const tokenKey = 'vigilant-token';
 const kinds = {
     plot: {
         list: listPlots,
-        matches: (plot, listed) => listed.friendlyName === plot.friendlyName,
+        // A plot renamed on the page is found by either name, saved or not
+        matches: (plot, listed) => [plot.friendlyName, ...plot.formerNames].includes(listed.friendlyName),
         remove: (token, listed) => deletePlot(token, listed.plotId),
         describe: plot => `the plot ${plot.friendlyName}`,
+    },
+    planting: {
+        list: listPlantings,
+        matches: (planting, listed) => [planting.name, ...planting.formerNames].includes(listed.name),
+        remove: (token, listed) => deletePlanting(token, listed.plantingId),
+        describe: planting => `the planting ${planting.name}`,
     },
     plantingYear: {
         list: listPlantingYears,
@@ -92,6 +100,27 @@ const emptyPlant = {
 
 // A deep copy, so a step can't change the world's details behind its back
 const copyOf = details => structuredClone(details);
+
+// A planting as it is once created: named, of a plant in a year, with
+// nothing sown or planted yet. Dates are `YYYY-MM-DD`, as the details tab
+// shows them; `comments` are those added on the page, oldest first
+const newPlantingDetails = (alias, plantName, plantingYear) => ({
+    name: `${FIXTURE_PREFIX}${alias}-${suffix()}`,
+    formerNames: [],
+    plantName,
+    plantingYear,
+    seedSource: 'Seed Savers',
+    lotNumber: 'LOT-7',
+    leadTimeWeeks: 6,
+    targetPlantingDate: null,
+    status: 'CREATED',
+    numberSown: null,
+    sowDate: null,
+    plotName: null,
+    numberTransplanted: null,
+    transplantDate: null,
+    comments: [],
+});
 
 /**
  * Deletes what a test named, in the order given, over the API, as the
@@ -153,8 +182,11 @@ export function createWorld(page) {
     const subcategoriesByAlias = new Map();
     const plantsByAlias = new Map();
     const schedulesByAlias = new Map();
+    const plantingsByAlias = new Map();
+    let unknownPlantingId;
     const aliasMaps = [
         plotsByAlias, plantingYearsByAlias, categoriesByAlias, subcategoriesByAlias, plantsByAlias, schedulesByAlias,
+        plantingsByAlias,
     ];
     // Newest first, the order cleanup deletes in
     const named = [];
@@ -191,6 +223,7 @@ export function createWorld(page) {
         newPlot(alias) {
             return remember('plot', plotsByAlias, alias, {
                 friendlyName: `${FIXTURE_PREFIX}${alias}-${suffix()}`,
+                formerNames: [],
                 lengthInInches: 96,
                 widthInInches: 48,
                 plotType: 'Raised Bed',
@@ -198,6 +231,107 @@ export function createWorld(page) {
         },
 
         plotNamed: alias => known(plotsByAlias, alias, 'plot', 'plotsPage.addPlot'),
+
+        /**
+         * Makes up new details for the plot called `alias`, a name, sizes and
+         * type, and remembers them as the plot's from now on. Cleanup finds the
+         * plot by its old name too, in case they're never saved.
+         */
+        editPlot(alias) {
+            known(plotsByAlias, alias, 'plot', 'plotsPage.addPlot');
+            const plot = plotsByAlias.get(alias);
+            plot.formerNames.push(plot.friendlyName);
+            Object.assign(plot, { friendlyName: madeUpName(alias), lengthInInches: 120, widthInInches: 36, plotType: 'Planter' });
+            return copyOf(plot);
+        },
+
+        /**
+         * As `newPlot`, for a planting of the plant called `plantAlias` in the
+         * planting year called `yearAlias`, as it is once created: its seed
+         * source, lot, lead time and target planting date made up, nothing
+         * sown or planted yet.
+         */
+        newPlanting(alias, plantAlias, yearAlias) {
+            const { friendlyName: plantName } = known(plantsByAlias, plantAlias, 'plant', 'garden.hasPlant');
+            const { plantingYear } = known(plantingYearsByAlias, yearAlias, 'year', 'garden.hasPlantingYear');
+            return remember('planting', plantingsByAlias, alias, {
+                ...newPlantingDetails(alias, plantName, plantingYear),
+                targetPlantingDate: `${plantingYear}-05-01`,
+            });
+        },
+
+        /** As `newPlanting`, for one added through the Add dialog, which asks for no target date. */
+        newPlantingFromDialog(alias, plantAlias, yearAlias) {
+            const { friendlyName: plantName } = known(plantsByAlias, plantAlias, 'plant', 'garden.hasPlant');
+            const { plantingYear } = known(plantingYearsByAlias, yearAlias, 'year', 'garden.hasPlantingYear');
+            return remember('planting', plantingsByAlias, alias, newPlantingDetails(alias, plantName, plantingYear));
+        },
+
+        /**
+         * As `newPlanting`, for a planting split from the one called
+         * `sourceAlias`, with `count` of its seedlings. It's like its source,
+         * started, and the source keeps what's left.
+         */
+        newSplit(alias, sourceAlias, count) {
+            const source = known(plantingsByAlias, sourceAlias, 'planting', 'garden.hasPlanting');
+            plantingsByAlias.get(sourceAlias).numberSown -= count;
+            return remember('planting', plantingsByAlias, alias, {
+                ...source, name: madeUpName(alias), formerNames: [], numberSown: count, comments: [],
+            });
+        },
+
+        /**
+         * Planting out fewer seedlings than were sown, the service splits the
+         * rest off as a planting of their own, still started, named for its
+         * source: "<name>(2 Remaining)". Names it, as `<alias>-remainder`, from
+         * the source as it was, before the planting out is remembered.
+         */
+        newRemainder(alias, remaining) {
+            const source = known(plantingsByAlias, alias, 'planting', 'garden.hasPlanting');
+            return remember('planting', plantingsByAlias, `${alias}-remainder`, {
+                ...source, name: `${source.name}(${remaining} Remaining)`, formerNames: [], numberSown: remaining,
+                comments: [],
+            });
+        },
+
+        plantingNamed: alias => known(plantingsByAlias, alias, 'planting', 'garden.hasPlanting'),
+
+        /** Remembers what a step changed about the planting called `alias`: its status, counts, dates, plot. */
+        updatePlanting(alias, changes) {
+            known(plantingsByAlias, alias, 'planting', 'garden.hasPlanting');
+            Object.assign(plantingsByAlias.get(alias), changes);
+            return copyOf(plantingsByAlias.get(alias));
+        },
+
+        /** As `editPlot`, a new name for the planting called `alias`. */
+        renamePlanting(alias) {
+            known(plantingsByAlias, alias, 'planting', 'garden.hasPlanting');
+            const planting = plantingsByAlias.get(alias);
+            planting.formerNames.push(planting.name);
+            planting.name = madeUpName(alias);
+            return copyOf(planting);
+        },
+
+        /** A planting id the service has never issued, remembered for the step that checks it. */
+        newUnknownPlantingId() {
+            unknownPlantingId = randomUUID();
+            return unknownPlantingId;
+        },
+
+        unknownPlantingId() {
+            if (unknownPlantingId === undefined) {
+                throw new Error('no unknown planting in this test -- open one first with plantingDetailsPage.openUnknown()');
+            }
+            return unknownPlantingId;
+        },
+
+        /** A comment for the planting called `alias`, made up, and remembered as its latest. */
+        newComment(alias) {
+            known(plantingsByAlias, alias, 'planting', 'garden.hasPlanting');
+            const comment = `A note from the UI suite, ${suffix()}.`;
+            plantingsByAlias.get(alias).comments.push(comment);
+            return comment;
+        },
 
         /**
          * As `newPlot`, for a planting year: a year from 8000 to 8999, picked at
