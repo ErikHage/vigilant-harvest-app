@@ -1,10 +1,11 @@
 import { createActivityLogPageDriver } from './activity-log-page-driver';
+import { createActivityScheduleDetailsPageDriver } from './activity-schedule-details-page-driver';
+import { createActivitySchedulesPageDriver } from './activity-schedules-page-driver';
 import { createAddPlantingYearPageDriver } from './add-planting-year-page-driver';
 import { createAppBarDriver } from './app-bar-driver';
 import { createBrowserClockDriver } from './browser-clock-driver';
 import { createDashboardNavDriver } from './dashboard-nav-driver';
 import { createDashboardPageDriver } from './dashboard-page-driver';
-import { createDashboardPagesDrivers } from './dashboard-pages-drivers';
 import { createFeralLoginPageDriver } from './feral-login-page-driver';
 import { createGardenDriver } from './garden-driver';
 import { createGardenPageDriver } from './garden-page-driver';
@@ -58,9 +59,9 @@ export function createDrivers(page) {
         plantingStatsPage: createStatsPageDriver(page, 'planting'),
         plantStatsPage: createStatsPageDriver(page, 'plant'),
         planningPage: createPlanningPageDriver(page),
+        activitySchedulesPage: createActivitySchedulesPageDriver(page),
+        activityScheduleDetailsPage: createActivityScheduleDetailsPageDriver(page, serviceCalls),
         unknownPage: createUnknownPageDriver(page),
-        // activitySchedulesPage: reached and recognised only
-        ...createDashboardPagesDrivers(page),
 
         // Not pages: the service's API, for what a test only needs, and the browser's clock
         garden: createGardenDriver(),

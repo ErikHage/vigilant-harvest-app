@@ -141,6 +141,10 @@ export const listActivitySchedules = token => garden('GET', '/activity-schedules
 export const insertActivitySchedule = (token, schedule) =>
     garden('POST', '/activity-schedules', { token, body: schedule });
 
+/** Adds an item to the schedule: its activity, rule, dates and notes. */
+export const insertScheduleItem = (token, activityScheduleId, item) =>
+    garden('POST', `/activity-schedules/${activityScheduleId}/schedule-items`, { token, body: item });
+
 /** Answers 204. Its items, and its assignments to plants, go with it. */
 export const deleteActivitySchedule = (token, activityScheduleId) =>
     garden('DELETE', `/activity-schedules/${activityScheduleId}`, { token });

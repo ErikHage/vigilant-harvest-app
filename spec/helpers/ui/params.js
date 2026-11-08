@@ -118,5 +118,14 @@ export const leap = () => optional().allowedValues('yes', 'no');
 /** Days as a timeline lists them, `YYYY-MM-DD`, comma-separated, in order, with `...` where it marks a gap. */
 export const days = () => optional().multiple({ separator: ', ' });
 
+/** An activity schedule's item the test named, by its alias. */
+export const item = () => required();
+
+/** A schedule item's interval as typed: any whole number, below 1 included. */
+export const interval = () => required().asInteger();
+
+/** What a filter is given: `name`, the schedule's name, or `both`, the end of its name and the start of its description. */
+export const scheduleFilter = () => optional().allowedValues('name', 'both').withDefault('name');
+
 /** An average as the page writes it, word for word: `2.3333333333333335`. */
 export const average = () => required();

@@ -66,7 +66,7 @@ helpers/ui/drivers/assertions.js the only importer of expect
 
 **Every page has `open`, `reload`, `checkIsShown` and `checkIsShownAfterReload`.** `pages/routed-page.js` supplies them. Every page has `appBar`. Every dashboard page also has `dashboardNav`, its own bar: `dashboardNav.goTo('page: plantStats')` follows the link through its menu, or through the one menu on a phone. `drivers/routed-page-driver.js` checks a page by its URL and by something only that page shows; for the dashboard's pages, their title.
 
-A dashboard page with nothing else to do yet is a one-liner, listed in `pages/dashboard-pages.js` and `drivers/dashboard-pages-drivers.js`. It moves to its own files once it has steps of its own, as the plots, plants, categories, plantings, planting years, garden, harvests, stats and planning pages have.
+Every dashboard page has its own page object and driver. Until each had steps of its own, the pages that were only reached and recognised shared one-liners in `pages/dashboard-pages.js` and `drivers/dashboard-pages-drivers.js`; the activity schedules page was the last, in 2.8, and the files went with it.
 
 **A page with an id in its URL has no `open`.** It's reached the way a person reaches it, from its list: `plantsPage.viewPlant('plant: sungold')` or `editPlant(...)`. The next step checks where that landed, for that thing: `plantDetailsPage.checkIsShownFor('plant: sungold')`.
 
@@ -141,7 +141,7 @@ What a test names is made up, and deleted afterwards.
 - The world remembers each one under its alias *before* the step creates it, so a step that fails halfway is still cleaned up.
 - When the test ends, pass or fail, the world deletes everything it named, newest first, over the API, as the gardener, finding each by its unique name. It's best effort: what's gone is skipped, and a failure is a warning.
 - Newest first deletes a plant before its subcategory, and a subcategory before its category, which the service requires: it refuses to delete a category that has subcategories (409).
-- What hangs off a thing the test named goes with it, first: a planting's harvests, and a fixture year's journal and activity-log entries, which the service won't let outlive them (409). So harvests and entries need no names of their own, and a test's entries stay in its own year.
+- What hangs off a thing the test named goes with it, first: a planting's harvests, and a fixture year's journal and activity-log entries, which the service won't let outlive them (409). So harvests and entries need no names of their own, and a test's entries stay in its own year. A schedule's items are deleted by the service with the schedule, so they need none either; a schedule renamed on the page is found by its old name too.
 - What the service refuses with 409 is tried once more after the rest. Newest first is wrong only for what the service ties together on the side: a planting carried forward into a year the test added is older than that year, and holds it.
 - A plant, plot or planting renamed on the page is remembered by its new name, and cleanup finds it by its old one too, in case the new one was never saved.
 - Plantings a step makes on the service's side are named too, before the step: each split, and the remainder the service splits off when fewer are planted out than were sown, `<name>(2 Remaining)`, as `planting: <alias>-remainder`.

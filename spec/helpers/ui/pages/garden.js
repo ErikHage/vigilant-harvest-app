@@ -1,7 +1,7 @@
 import { parseDslArgs } from '@feral-auth/ts-simple-dsl';
 
 import {
-    arrangedStatus, category, entry, leap, on, optionalPlot, plant, planting, plot, quantity, schedule, schedules,
+    arrangedStatus, category, entry, item, leap, on, optionalPlot, plant, planting, plot, quantity, schedule, schedules,
     subcategory, tags, year,
 } from '../params';
 
@@ -109,6 +109,16 @@ export function createGarden(world, driver) {
             const params = parseDslArgs(args, { schedule: schedule() });
 
             await driver.createSchedule(world.newSchedule(params.schedule));
+        },
+
+        /**
+         * The `schedule` the test named has an item called `item`: bone meal
+         * every 2 weeks, May 15 to June 30, with made-up notes.
+         */
+        async hasScheduleItem(...args) {
+            const params = parseDslArgs(args, { item: item(), schedule: schedule() });
+
+            await driver.createScheduleItem(world.newScheduleItem(params.item, params.schedule));
         },
 
         /**

@@ -127,7 +127,9 @@ const kinds = {
     },
     activitySchedule: {
         list: listActivitySchedules,
-        matches: (schedule, listed) => listed.name === schedule.name,
+        // A schedule renamed on the page is found by either name, saved or
+        // not. Its items go with it
+        matches: (schedule, listed) => [schedule.name, ...schedule.formerNames].includes(listed.name),
         remove: (token, listed) => deleteActivitySchedule(token, listed.activityScheduleId),
         describe: schedule => `the activity schedule ${schedule.name}`,
     },
@@ -253,13 +255,15 @@ export function createWorld(page) {
     const subcategoriesByAlias = new Map();
     const plantsByAlias = new Map();
     const schedulesByAlias = new Map();
+    // Schedule items: not deleted on their own, but with their schedule
+    const scheduleItemsByAlias = new Map();
     const plantingsByAlias = new Map();
     // Journal and activity-log entries: not deleted on their own, but with their year
     const entriesByAlias = new Map();
     let unknownPlantingId;
     const aliasMaps = [
         plotsByAlias, plantingYearsByAlias, categoriesByAlias, subcategoriesByAlias, plantsByAlias, schedulesByAlias,
-        plantingsByAlias, entriesByAlias,
+        plantingsByAlias, entriesByAlias, scheduleItemsByAlias,
     ];
     // Newest first, the order cleanup deletes in
     const named = [];
@@ -605,11 +609,59 @@ export function createWorld(page) {
         /** As `newPlot`, for an activity schedule, with no items. */
         newSchedule(alias) {
             return remember('activitySchedule', schedulesByAlias, alias, {
-                name: madeUpName(alias), description: 'Made up by the UI suite.',
+                name: madeUpName(alias), formerNames: [], description: 'Made up by the UI suite.',
             });
         },
 
         scheduleNamed: alias => known(schedulesByAlias, alias, 'schedule', 'garden.hasSchedule'),
+
+        /**
+         * As `editPlot`, a new name and description for the schedule called
+         * `alias`. Cleanup finds it by its old name too.
+         */
+        editSchedule(alias) {
+            known(schedulesByAlias, alias, 'schedule', 'garden.hasSchedule');
+            const schedule = schedulesByAlias.get(alias);
+            schedule.formerNames.push(schedule.name);
+            Object.assign(schedule, { name: madeUpName(alias), description: 'Edited by the UI suite.' });
+            return copyOf(schedule);
+        },
+
+        /**
+         * Makes up an item called `alias` for the schedule called
+         * `scheduleAlias`: bone meal every 2 weeks, May 15 to June 30 of the
+         * current year, with notes that name it. `interval` is as given, 2 if
+         * left out. It goes with its schedule, so cleanup needs nothing more.
+         */
+        newScheduleItem(alias, scheduleAlias, interval = 2) {
+            const { name } = known(schedulesByAlias, scheduleAlias, 'schedule', 'garden.hasSchedule');
+            if (scheduleItemsByAlias.has(alias)) {
+                throw new Error(`there is already a schedule item called "${alias}" in this test`);
+            }
+            scheduleItemsByAlias.set(alias, {
+                scheduleName: name,
+                activityType: 'Fertilize',
+                subType: 'Bone Meal',
+                frequency: 'weekly',
+                interval,
+                startDate: '05-15',
+                startDateYearOffset: 0,
+                endDate: '06-30',
+                endDateYearOffset: 0,
+                notes: `${madeUpName(alias)}: feed the roses.`,
+            });
+            return copyOf(scheduleItemsByAlias.get(alias));
+        },
+
+        scheduleItemNamed: alias => known(scheduleItemsByAlias, alias, 'item', 'garden.hasScheduleItem'),
+
+        /** New notes for the schedule item called `alias`, and a different subtype: blood meal. */
+        editScheduleItem(alias) {
+            known(scheduleItemsByAlias, alias, 'item', 'garden.hasScheduleItem');
+            const item = scheduleItemsByAlias.get(alias);
+            Object.assign(item, { subType: 'Blood Meal', notes: `${madeUpName(alias)}: feed the roses again.` });
+            return copyOf(item);
+        },
 
         /** The username and password behind `user: <name>`. Only `gardener` for now. */
         credentialsFor(name) {

@@ -3,7 +3,7 @@ import { asGardener } from '../support/sessions';
 import {
     assignPlantSchedules, insertActivitySchedule, insertPlantCategory, insertPlantSubcategory, insertPlanting,
     insertJournalEntry, insertPlantingYear, listActivitySchedules, listHarvestTypes, listPlantCategories, listPlantings,
-    listPlants, listPlots, performPlantingAction, upsertHarvests, upsertPlant, upsertPlot,
+    insertScheduleItem, listPlants, listPlots, performPlantingAction, upsertHarvests, upsertPlant, upsertPlot,
 } from '../support/service-client';
 import { status } from '../support/status-codes';
 
@@ -170,6 +170,27 @@ export function createGardenDriver() {
                 }]);
             });
             expectThat(reply.error === undefined && reply.status < 300, 'the service to file it', describe(reply), what);
+        },
+
+        /** Adds `item` to its schedule, found by name, as the Add Item dialog would send it. */
+        async createScheduleItem(item) {
+            const what = `arranging the schedule item ${item.notes}`;
+
+            const reply = await asGardener(async token => {
+                const { activityScheduleId } = findIn(await listActivitySchedules(token),
+                    each => each.name === item.scheduleName, `the activity schedule ${item.scheduleName}`);
+                return insertScheduleItem(token, activityScheduleId, {
+                    activityType: item.activityType,
+                    subType: item.subType,
+                    recurrenceRule: `RRULE:FREQ=${item.frequency.toUpperCase()};INTERVAL=${item.interval}`,
+                    startDate: item.startDate,
+                    startDateYearOffset: item.startDateYearOffset,
+                    endDate: item.endDate,
+                    endDateYearOffset: item.endDateYearOffset,
+                    notes: item.notes,
+                });
+            });
+            expectThat(reply.error === undefined && reply.status < 300, 'the service to add it', describe(reply), what);
         },
 
         /** Creates `plant`, then assigns it the schedules named in `scheduleNames`. */

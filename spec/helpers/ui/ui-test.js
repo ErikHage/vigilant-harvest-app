@@ -3,10 +3,11 @@ import { test as base } from '@playwright/test';
 import { guardNetwork } from './support/network-guard';
 import { createWorld } from './world';
 import { createActivityLogPage } from './pages/activity-log-page';
+import { createActivityScheduleDetailsPage } from './pages/activity-schedule-details-page';
+import { createActivitySchedulesPage } from './pages/activity-schedules-page';
 import { createAddPlantingYearPage } from './pages/add-planting-year-page';
 import { createBrowserClock } from './pages/browser-clock';
 import { createDashboardPage } from './pages/dashboard-page';
-import { createDashboardPageOnly } from './pages/dashboard-pages';
 import { createFeralLoginPage } from './pages/feral-login-page';
 import { createGarden } from './pages/garden';
 import { createGardenPage } from './pages/garden-page';
@@ -79,9 +80,8 @@ export const test = base.extend({
     plantStatsPage: pageFixture('plantStatsPage', createPlantStatsPage),
     planningPage: pageFixture('planningPage', createPlanningPage),
     unknownPage: pageFixture('unknownPage', createUnknownPage),
-
-    // Reached and recognised only, so far
-    activitySchedulesPage: pageFixture('activitySchedulesPage', createDashboardPageOnly),
+    activitySchedulesPage: pageFixture('activitySchedulesPage', createActivitySchedulesPage),
+    activityScheduleDetailsPage: pageFixture('activityScheduleDetailsPage', createActivityScheduleDetailsPage),
 
     // Not a page: what a test needs but isn't about, arranged through the API
     garden: pageFixture('garden', createGarden),
