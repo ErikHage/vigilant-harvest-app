@@ -218,12 +218,14 @@ export default {
 
       this.hydratedHarvestsByDate = this.harvests
           .map(harvest => {
+            // a planting or plant that didn't load: the harvest shows without
+            // its name, and the store's alert says why
             const planting = this.plantingsById[harvest.plantingId];
-            const plant = this.plantsById[planting.plantId];
+            const plant = this.plantsById[planting?.plantId];
             return {
               ...harvest,
-              plantName: plant.friendlyName,
-              plantingName: planting.name,
+              plantName: plant?.friendlyName ?? '',
+              plantingName: planting?.name ?? '',
             };
           })
           .reduce((acc, hydratedHarvest) => {

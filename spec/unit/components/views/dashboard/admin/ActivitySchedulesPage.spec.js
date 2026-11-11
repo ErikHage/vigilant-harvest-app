@@ -85,15 +85,16 @@ describe('ActivitySchedulesPage', () => {
         expect(wrapper.text()).toContain('No schedules found');
     });
 
-    // The service takes a schedule with no description, though the app always
-    // sends one; the filter reads it without a guard
-    it('throws on filtering a schedule with no description', async () => {
+    // A description is optional, to the service and, since F3, to the app
+    // (backlog B32)
+    it('filters a schedule with no description by its name', async () => {
         const errorHandler = vi.fn();
         const { wrapper } = await mountPage({ state: { schedules: [aSchedule({ description: null })] }, errorHandler });
 
         await filterBy(wrapper, 'tom');
 
-        expect(errorHandler.mock.calls[0][0]).toBeInstanceOf(TypeError);
+        expect(errorHandler).not.toHaveBeenCalled();
+        expect(wrapper.text()).toContain('1 of 1 activity schedules');
     });
 
     it("goes to a schedule's details from its name", async () => {

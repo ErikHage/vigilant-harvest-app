@@ -1,4 +1,4 @@
-import { expectDisabled, expectEventually, expectHidden, expectText, expectUrl, expectValue, expectVisible } from './assertions';
+import { expectDisabled, expectHidden, expectText, expectThat, expectUrl, expectValue, expectVisible } from './assertions';
 import { pageAlertSays } from './page-alert';
 import { chooseOption } from './select';
 import { escaped, openPath, urlOf } from './urls';
@@ -193,15 +193,16 @@ export function createPlantingDetailsPageDriver(page, pageErrors) {
         },
 
         /**
-         * Pinned (A25): for a planting the service doesn't have, the page says
-         * so, and throws, since it copies the planting it didn't get.
+         * For a planting the service doesn't have, the page says so, and
+         * throws nothing. A throw would come as the alert is set, before it
+         * renders, so the errors are read once the alert shows.
          */
-        async throwsForAMissingPlanting(plantingId) {
+        async saysAPlantingIsMissing(plantingId) {
             const what = `opening the unknown planting ${plantingId}`;
 
             await pageAlertSays(page, `error fetching planting by id: ${plantingId}`, what);
-            await expectEventually(() => pageErrors.messages().some(message => /plantingId/.test(message)),
-                'the page to throw reading the missing planting\'s plantingId', what);
+            const thrown = pageErrors.messages();
+            expectThat(thrown.length === 0, 'no error thrown in the page', JSON.stringify(thrown), what);
         },
     };
 }

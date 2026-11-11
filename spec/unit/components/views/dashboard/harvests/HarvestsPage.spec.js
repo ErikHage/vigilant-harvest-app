@@ -155,19 +155,18 @@ describe('HarvestsPage', () => {
             expect(wrapper.find('.v-alert').text()).toBe(message);
         });
 
-        // DocumentsCurrentBehavior: it reads each harvest's planting, and its
-        // plant, without a guard, so with the plantings (or plants) not
-        // loaded the load throws, and the page shows no harvests (backlog
-        // A19). Should show the harvest without the names it can't find
+        // Each harvest shows without the names it can't find (backlog A19)
         it.each([
             ['plantings', { plantings: { plantingsById: {} } }],
             ['plants', { plants: { plantsById: {} } }],
-        ])("throws, and shows nothing, when the %s aren't loaded", async (_, state) => {
+        ])("shows the harvests when the %s aren't loaded", async (_, state) => {
             const errorHandler = vi.fn();
             const { wrapper } = await mountPage({ state, errorHandler });
 
-            expect(errorHandler.mock.calls[0][0]).toBeInstanceOf(TypeError);
-            expect(timeline(wrapper)).toEqual([]);
+            expect(errorHandler).not.toHaveBeenCalled();
+            expect(timeline(wrapper)).toEqual(['2026-07-10', '2026-07-09', '...', '2026-07-01']);
+            // the day's harvests, under one heading with no name
+            expect(plantGroups(wrapper).map(([name]) => name)).toEqual(['']);
         });
     });
 

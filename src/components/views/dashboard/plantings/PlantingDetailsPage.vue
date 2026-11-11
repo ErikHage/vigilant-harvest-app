@@ -292,6 +292,10 @@ export default {
       await this.fetchPlantingById(this.plantingId);
 
       const planting = this.plantingsById[this.plantingId];
+      if (!planting) {
+        // not found, or not loaded: the plantings store's alert says which
+        return;
+      }
       this.plantingCopy = {
         plantingId: planting.plantingId ?? undefined,
         plotId: planting.plotId ?? undefined,

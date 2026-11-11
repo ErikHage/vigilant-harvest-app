@@ -174,7 +174,7 @@ export function createPlantingDetailsPage(world, driver) {
         async checkSaysThePlantingWasNotFound(...args) {
             parseDslArgs(args, {});
 
-            await driver.throwsForAMissingPlanting(world.unknownPlantingId());
+            await driver.saysAPlantingIsMissing(world.unknownPlantingId());
         },
     };
 }

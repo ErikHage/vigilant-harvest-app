@@ -86,25 +86,23 @@ describe('PlantingsTable', () => {
         }));
     });
 
-    // DocumentsCurrentBehavior: the table lists nothing until at least one
-    // plot exists, though a created planting has no plot. A new garden's
-    // plantings all show as "0 of N". Should list them with no plots
-    it('lists no plantings when there are no plots', () => {
+    // A created planting has no plot, so a new garden has none (backlog A19)
+    it('lists the plantings when there are no plots', () => {
         const wrapper = mountTable({ plotsMap: {} });
 
-        expect(tableRows(wrapper)).toEqual([]);
-        expect(wrapper.text()).toContain('0 of 4 plantings');
+        expect(tableRows(wrapper).map(([name, , , plot]) => [name, plot])).toEqual([
+            ['Early beans', ''], ['late beans', ''], ['Old beans', ''], ['Tomatoes', ''],
+        ]);
+        expect(wrapper.text()).toContain('4 of 4 plantings');
     });
 
-    // DocumentsCurrentBehavior: it reads the plant's name without checking the
-    // plant is loaded, so it throws if the plants failed to load while the
-    // plots didn't. Should show the planting without a plant name
-    it("throws for a planting whose plant isn't loaded", () => {
-        vi.spyOn(console, 'warn').mockImplementation(() => {});
+    // The plants failed to load while the plots didn't (backlog A19)
+    it("lists a planting whose plant isn't loaded, without its plant's name", () => {
+        const wrapper = mountTable({ plantsMap: {} });
 
-        expect(() => mountTable({ plantsMap: {} })).toThrow(TypeError);
-
-        vi.restoreAllMocks();
+        expect(tableRows(wrapper).map(([name, plant]) => [name, plant])).toEqual([
+            ['Early beans', ''], ['late beans', ''], ['Old beans', ''], ['Tomatoes', ''],
+        ]);
     });
 
     it('lists nothing with no plantings', () => {

@@ -158,9 +158,8 @@ test.describe('A planting\'s details page', () => {
         await plantingDetailsPage.checkTargetDateKeptByItsPicker('planting: early');
     });
 
-    // DocumentsCurrentBehavior: the page says it couldn't fetch the planting,
-    // then throws copying it, an unhandled rejection (backlog A25). Should
-    // say so without throwing
+    // It used to throw after saying so, copying the planting it didn't get
+    // (backlog A25)
     test('says when a planting doesn\'t exist', async ({ plantingDetailsPage }) => {
         await plantingDetailsPage.openUnknown();
 

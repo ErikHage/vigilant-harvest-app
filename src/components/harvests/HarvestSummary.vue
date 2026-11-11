@@ -19,7 +19,9 @@
             <span class="clickable text-primary font-weight-medium name-line"
                   :title="planting.name"
                   @click="onClickPlanting(planting.plantingId)">{{ planting.name }}</span>
-            <span class="clickable smaller-text name-line"
+            <!-- a plant that didn't load: the planting shows without it -->
+            <span v-if="planting.plant"
+                  class="clickable smaller-text name-line"
                   :title="planting.plant.friendlyName"
                   @click="onClickPlant(planting.plant.plantId)">{{ planting.plant.friendlyName }}</span>
           </div>

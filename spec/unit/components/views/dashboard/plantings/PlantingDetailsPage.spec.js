@@ -141,20 +141,13 @@ describe('PlantingDetailsPage', () => {
             expect(wrapper.find('.v-alert').text()).toBe(message);
         });
 
-        // DocumentsCurrentBehavior: with the planting not loaded, refreshData
-        // reads planting.plantingId of undefined and throws. mounted() doesn't
-        // await it, so in the app that's an unhandled rejection. Unlike the
-        // plant pages, the alerts sit outside any v-if, so the store's alert
-        // does show. Should not throw.
-        //
-        // The mount's own refresh is held, so its rejection can't escape
-        it("throws when the planting isn't loaded", async () => {
-            const { wrapper } = await mountPage({
-                planting: null,
-                beforeMount: store => store.fetchPlantingById.mockReturnValueOnce(new Promise(() => {})),
-            });
+        // The store's alert says why; the page shows its title and the alert
+        // (backlog A25). The mount's own refresh isn't awaited, so a throw
+        // there would fail the run as an unhandled rejection
+        it("doesn't throw when the planting isn't loaded", async () => {
+            const { wrapper } = await mountPage({ planting: null });
 
-            await expect(wrapper.vm.refreshData()).rejects.toThrow(TypeError);
+            await expect(wrapper.vm.refreshData()).resolves.toBeUndefined();
             expect(wrapper.find('.page-title').text()).toBe('Planting Details');
         });
 

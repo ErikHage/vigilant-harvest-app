@@ -194,7 +194,9 @@ export default {
     hydratedPlots() {
       if (this.initialized) {
         const mappedPlots = this.plantings
-            .filter(planting => planting.plotId) // only with assigned
+            // only with a plot, and one that's loaded: the garden is laid out
+            // by plot, and the plots store's alert says when they didn't load
+            .filter(planting => planting.plotId && this.plotsById[planting.plotId])
             .reduce((acc, planting) => {
               if (!acc[planting.plotId]) {
                 const plot = this.plotsById[planting.plotId];
@@ -281,8 +283,9 @@ export default {
               plotName: plot.friendlyName,
               plantingId: tempPlanting.plantingId,
               plantingName: tempPlanting.name,
-              plantName: tempPlanting.plant.friendlyName,
-              harvestTypeId: tempPlanting.plant.harvesting?.defaultHarvestTypeId
+              // a plant that didn't load: the planting is offered without it
+              plantName: tempPlanting.plant?.friendlyName,
+              harvestTypeId: tempPlanting.plant?.harvesting?.defaultHarvestTypeId
                   ?? harvestUtils.unspecifiedHarvestTypeId,
               quantity: 0,
               currentStatus: tempPlanting.currentStatus,

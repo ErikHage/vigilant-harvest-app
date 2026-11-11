@@ -106,7 +106,8 @@ export default {
       if (this.filter) {
         const upper = this.filter.toUpperCase();
         result = result.filter(s => {
-          const matchString = s.name.toUpperCase() + s.description.toUpperCase();
+          // a description is optional
+          const matchString = s.name.toUpperCase() + (s.description?.toUpperCase() ?? '');
           return matchString.includes(upper);
         });
       }

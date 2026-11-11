@@ -212,31 +212,25 @@ describe('GardenPage', () => {
             expect(wrapper.find('.v-alert').text()).toBe(message);
         });
 
-        // DocumentsCurrentBehavior: it reads each planting's plant without a
-        // guard, so with the plants not loaded, Add Harvests throws and the
-        // dialog doesn't open (backlog A19). Should skip, or name, a planting
-        // whose plant is missing
-        it("throws on Add Harvests when the plants aren't loaded", async () => {
+        // Each planting is offered without its plant's name (backlog A19)
+        it("opens Add Harvests when the plants aren't loaded", async () => {
             const errorHandler = vi.fn();
             const { wrapper } = await mountPage({ state: { plants: { plants: [], plantsById: {} } }, errorHandler });
+            expect(summaries(wrapper)).toHaveLength(2);
 
             await press(wrapper, 'Add Harvests');
 
-            expect(errorHandler.mock.calls[0][0]).toBeInstanceOf(TypeError);
-            expect(entryDialog()).toBeUndefined();
+            expect(errorHandler).not.toHaveBeenCalled();
+            expect(entryDialog()).toBeDefined();
         });
 
-        // DocumentsCurrentBehavior: with the plots not loaded, each plot is
-        // built from its plantings alone, with no name, and sorting two of them
-        // by name throws. The update after the load fails, so the page keeps
-        // what it showed before it, with no plots (backlog A19). Should guard
-        // the plot
-        it("throws, and shows no plots, when the plots aren't loaded", async () => {
+        // The garden is laid out by plot, so a planting whose plot isn't
+        // loaded is left out; the plots store's alert says why (backlog A19)
+        it("shows no plots, without throwing, when the plots aren't loaded", async () => {
             const errorHandler = vi.fn();
             const { wrapper } = await mountPage({ state: { plots: { plots: [], plotsById: {} } }, errorHandler });
 
-            expect(errorHandler).toHaveBeenCalledTimes(1);
-            expect(errorHandler.mock.calls[0][0]).toBeInstanceOf(TypeError);
+            expect(errorHandler).not.toHaveBeenCalled();
             expect(summaries(wrapper)).toHaveLength(0);
         });
 

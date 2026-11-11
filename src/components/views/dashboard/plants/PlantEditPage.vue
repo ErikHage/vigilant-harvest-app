@@ -353,7 +353,12 @@ export default {
       await this.fetchPlantCategories();
       await this.fetchHarvestTypes();
 
-      this.plantCopy = JSON.parse(JSON.stringify(this.plantsById[this.plantId]));
+      const plant = this.plantsById[this.plantId];
+      if (!plant) {
+        // not found, or not loaded: the plants store's alert says which
+        return;
+      }
+      this.plantCopy = JSON.parse(JSON.stringify(plant));
       this.selectedSubcategoryId = this.plantCopy.subcategoryId;
       this.selectedHarvestTypeId = this.plantCopy.harvesting?.defaultHarvestTypeId ?? harvestUtils.unspecifiedHarvestTypeId;
       this.selectedCategory = this.categories.find(category =>

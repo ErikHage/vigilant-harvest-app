@@ -107,7 +107,7 @@ await dashboardPage.chooseYear('year: spring');
 
 **The planning page counts days from the browser's today,** in New York (the config's `timezoneId`). Its drivers work out what it should read from the real date there. `garden.hasPlantingYear('year: spring', 'leap: no')` picks a year that isn't a leap year, and `'leap: yes'` one that is. Today used to be shown a day early in a leap year (A31), and the leap-year test would show it again.
 
-**Uncaught errors are recorded.** `drivers/page-errors.js` keeps every error the page throws and nothing catches, unhandled rejections included, for pins on code that throws. Nothing fails a test for them on its own.
+**Uncaught errors are recorded.** `drivers/page-errors.js` keeps every error the page throws and nothing catches, unhandled rejections included, so a driver can check a page threw nothing (a missing planting, once A25's throw). Nothing fails a test for them on its own.
 
 **Absence is checked once, after a sync point.** A page that shows nothing looks the same before it reacts as after. A driver checking for absence first waits for the service call it depends on to be answered (`drivers/service-calls.js` records the page's calls from the start of each test), or for the page that follows, then reads the page once.
 
