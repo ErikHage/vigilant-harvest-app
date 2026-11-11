@@ -1,9 +1,9 @@
 import { test } from '../../helpers/ui/ui-test';
 
 // The stats pages total the chosen year's harvests, so each test chooses a
-// year of its own. Harvests are filed at noon in New York on their day, in
-// 2026. Their first and last days show as filed: backlog A28 can't arise
-// here, since the service runs in New York too
+// year of its own. Harvests are filed on their day, in 2026, and their first
+// and last days show as filed: the service sends each as YYYY-MM-DD, read as
+// that local day
 
 test.describe('The stats pages', () => {
     test.beforeEach(async ({ garden, loginPage, dashboardPage }) => {

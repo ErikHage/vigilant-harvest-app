@@ -58,7 +58,7 @@ describe('PlantingDetailsTab', () => {
         expect(inputLabelled(wrapper, 'Transplant Lead Time (weeks)').element.value).toBe('3');
         expect(inputLabelled(wrapper, 'Number Sown').element.value).toBe('24');
         expect(inputLabelled(wrapper, 'Number Planted').element.value).toBe('20');
-        expect(inputLabelled(wrapper, 'Created At').element.value).toBe(new Date('2026-03-01 13:00:00').toLocaleString());
+        expect(inputLabelled(wrapper, 'Created At').element.value).toBe(new Date('2026-03-01T18:00:00Z').toLocaleString());
         expect(wrapper.findComponent(VAutocomplete).props('modelValue')).toBe('plant-1');
         expect(wrapper.findComponent(VSelect).props('modelValue')).toBe('plot-1');
     });
@@ -203,13 +203,19 @@ describe('PlantingDetailsTab', () => {
         expect(log).toHaveBeenCalledWith('plot clicked, do something in the future');
     });
 
-    // The service sends dates as strings, but DatePickerDialogActivator's
-    // date prop is a Date, so Vue warns, once per picker, on every mount
-    it('gives the date pickers strings where they expect Dates', () => {
-        mountTab();
+    // The service sends dates as YYYY-MM-DD strings, and the pickers take
+    // Dates: each gets its day's local midnight, so Vue has nothing to warn
+    // about (backlog B25)
+    it('gives the date pickers Dates', () => {
+        const { wrapper } = mountTab();
 
-        const typeWarnings = warn.mock.calls.filter(([message]) => /Invalid prop: type check failed for prop "date"/.test(message));
-        expect(typeWarnings).toHaveLength(3);
+        const given = Object.entries(pickers(wrapper)).map(([title, picker]) => [title, picker.props('date')]);
+        expect(given).toEqual([
+            ['Set Target Planting Date', new Date(2026, 4, 17)],
+            ['Set Sow Date', new Date(2026, 3, 20)],
+            ['Set Planting Date', new Date(2026, 4, 18)],
+        ]);
+        expect(warn).not.toHaveBeenCalled();
     });
 
     // DocumentsCurrentBehavior: each date picker reads its date only when

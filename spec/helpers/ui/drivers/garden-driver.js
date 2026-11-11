@@ -96,8 +96,7 @@ export function createGardenDriver() {
         /**
          * Creates `planting`; if its status is STARTED or PLANTED, starts it
          * too, sown on its sow date, and if PLANTED plants it out, in no plot.
-         * Dates go out at noon UTC, so they're that day in any zone the
-         * service runs in.
+         * Dates go out as the planting's days, YYYY-MM-DD.
          */
         async createPlanting(planting) {
             const what = `arranging the planting ${planting.name}`;

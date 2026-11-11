@@ -1,7 +1,5 @@
 import { flushPromises } from '@vue/test-utils';
 import { createTestingPinia } from '@pinia/testing';
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
 import ActivityScheduleDetailsPage from '@/components/views/dashboard/admin/ActivityScheduleDetailsPage.vue';
 import EditScheduleDialog from '@/components/admin/schedules/EditScheduleDialog.vue';
 import AddScheduleItemDialog from '@/components/admin/schedules/AddScheduleItemDialog.vue';
@@ -10,11 +8,6 @@ import DeleteScheduleItemDialog from '@/components/admin/schedules/DeleteSchedul
 import { useActivitySchedulesStore } from '@/store';
 import { mountWithPlugins } from '../../../../../helpers/mount';
 import { activityTypes, aSchedule, aScheduleItem } from '../../../../../helpers/schedules';
-
-// The dates come from scheduling.getFormattedDateRange, which needs dayjs's
-// utc plugin and doesn't load it (A1). In the app, the router's import of
-// PlantingYearsTable does
-dayjs.extend(utc);
 
 const items = [
     aScheduleItem(),

@@ -7,17 +7,17 @@ import { useActivityLogStore } from '@/store';
 import { mountWithPlugins } from '../../../../../helpers/mount';
 import { tableHeaders, tableRows } from '../../../../../helpers/tables';
 
-// An entry as the service sends it. entryDate is a TIMESTAMP, so it comes as
-// the UTC instant it was given
+// An entry as the service sends it. entryDate is the user's wall-clock time,
+// with no timezone; the audit fields are UTC instants
 function anEntry(entryId, entryDate, activityType, subType, comments) {
-    return { entryId, plantingYear: 2026, entryDate, activityType, subType, comments, dateCreated: entryDate, dateModified: entryDate };
+    return { entryId, plantingYear: 2026, entryDate, activityType, subType, comments, dateCreated: '2026-06-10T16:00:00Z', dateModified: '2026-06-10T16:00:00Z' };
 }
 
 const entries = [
-    anEntry('a-1', '2026-06-01T14:00:00.000Z', 'FERTILIZE', 'CalMag', 'Tomatoes only'),
-    // 21:30 on June 2 in New York
-    anEntry('a-2', '2026-06-03T01:30:00.000Z', 'TREAT', 'Neem Oil', null),
-    anEntry('a-3', '2026-05-20T12:00:00.000Z', 'Fertilize', null, 'Before the type names were fixed'),
+    anEntry('a-1', '2026-06-01T10:00:00', 'FERTILIZE', 'CalMag', 'Tomatoes only'),
+    // already June 3 in UTC
+    anEntry('a-2', '2026-06-02T21:30:00', 'TREAT', 'Neem Oil', null),
+    anEntry('a-3', '2026-05-20T08:00:00', 'Fertilize', null, 'Before the type names were fixed'),
 ];
 
 async function mountPage({ state = {} } = {}) {
@@ -82,7 +82,7 @@ describe('GardenActivityLogPage', () => {
 
     it('saves a new entry with the year, then reloads', async () => {
         const { wrapper, store } = await mountPage();
-        const entry = { entryDate: '2026-06-05T12:00:00.000Z', activityType: 'TREAT', subType: 'Neem Oil', comments: '' };
+        const entry = { entryDate: '2026-06-05T08:00:00', activityType: 'TREAT', subType: 'Neem Oil', comments: '' };
 
         await wrapper.findComponent(AddActivityLogEntryDialog).props('onSubmit')(entry);
         await flushPromises();

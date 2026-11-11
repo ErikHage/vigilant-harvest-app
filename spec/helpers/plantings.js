@@ -1,6 +1,5 @@
-// A planting as the service sends it, with any fields overridden. The
-// service reads DATE columns with mysql2's dateStrings, so its dates come as
-// plain YYYY-MM-DD strings, unlike a planting year's
+// A planting as the service sends it, with any fields overridden. Its dates
+// are days, YYYY-MM-DD, and its audit fields and history UTC instants
 export function aPlanting(overrides = {}) {
     return {
         plantingId: 'planting-1',
@@ -19,13 +18,13 @@ export function aPlanting(overrides = {}) {
         transplantDate: '2026-05-18',
         numberTransplanted: 20,
         currentStatus: 'PLANTED',
-        dateCreated: '2026-03-01 13:00:00',
-        dateModified: '2026-05-18 09:30:00',
+        dateCreated: '2026-03-01T18:00:00Z',
+        dateModified: '2026-05-18T13:30:00Z',
         statusHistory: [
-            { plantingHistoryId: 'h-3', plantingStatus: 'PLANTED', comment: 'Into the north bed', dateCreated: '2026-05-18 09:30:00' },
-            { plantingHistoryId: 'h-1', plantingStatus: 'CREATED', comment: '', dateCreated: '2026-03-01 13:00:00' },
-            { plantingHistoryId: 'h-2', plantingStatus: 'STARTED', comment: 'Heat mat', dateCreated: '2026-04-20 08:00:00' },
-            { plantingHistoryId: 'h-4', plantingStatus: 'COMMENT', comment: 'First beans\nin a week', dateCreated: '2026-06-01 18:00:00' },
+            { plantingHistoryId: 'h-3', plantingStatus: 'PLANTED', comment: 'Into the north bed', dateCreated: '2026-05-18T13:30:00Z' },
+            { plantingHistoryId: 'h-1', plantingStatus: 'CREATED', comment: '', dateCreated: '2026-03-01T18:00:00Z' },
+            { plantingHistoryId: 'h-2', plantingStatus: 'STARTED', comment: 'Heat mat', dateCreated: '2026-04-20T12:00:00Z' },
+            { plantingHistoryId: 'h-4', plantingStatus: 'COMMENT', comment: 'First beans\nin a week', dateCreated: '2026-06-01T22:00:00Z' },
         ],
         ...overrides,
     };

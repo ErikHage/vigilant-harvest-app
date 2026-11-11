@@ -1,17 +1,10 @@
 import { flushPromises } from '@vue/test-utils';
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
 import { mountWithPlugins } from '../../../../helpers/mount';
 import { buttonLabelled } from '../../../../helpers/fields';
 import { dialogTitled } from '../../../../helpers/dialogs';
 import { isOpen, press } from '../../../../helpers/action-dialogs';
 import { aScheduleItem } from '../../../../helpers/schedules';
 import DeleteScheduleItemDialog from '@/components/admin/schedules/DeleteScheduleItemDialog.vue';
-
-// The date range comes from scheduling.getFormattedDateRange, which needs
-// dayjs's utc plugin and doesn't load it (A1). In the app, the router's
-// import of PlantingYearsTable does
-dayjs.extend(utc);
 
 // An error thrown by a handler goes to `errorHandler`, as an app's would
 function mountDialog({ errorHandler, ...props } = {}) {

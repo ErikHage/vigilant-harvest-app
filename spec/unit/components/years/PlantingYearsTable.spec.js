@@ -2,10 +2,10 @@ import { mountWithPlugins } from '../../../helpers/mount';
 import { tableHeaders, tableRows } from '../../../helpers/tables';
 import PlantingYearsTable from '@/components/years/PlantingYearsTable.vue';
 
-// As the service sends them: each date is midnight UTC
+// As the service sends them: each date is a day, YYYY-MM-DD
 const plantingYears = [
-    { plantingYear: 2025, lastFrostDate: '2025-05-12T00:00:00.000Z', targetPlantingDate: '2025-05-19T00:00:00.000Z' },
-    { plantingYear: 2026, lastFrostDate: '2026-05-10T00:00:00.000Z', targetPlantingDate: '2026-05-17T00:00:00.000Z' },
+    { plantingYear: 2025, lastFrostDate: '2025-05-12', targetPlantingDate: '2025-05-19' },
+    { plantingYear: 2026, lastFrostDate: '2026-05-10', targetPlantingDate: '2026-05-17' },
 ];
 
 function mountTable(props) {
@@ -28,10 +28,11 @@ describe('PlantingYearsTable', () => {
         ]);
     });
 
-    // Midnight UTC is the evening before in New York, where the suite runs
-    it('shows the dates as UTC days, not local ones', () => {
+    // Read as local days, so the first of the month stays the first in New
+    // York, where the suite runs
+    it('shows the days as sent', () => {
         const wrapper = mountTable({
-            plantingYears: [{ plantingYear: 2026, lastFrostDate: '2026-05-01T00:00:00.000Z', targetPlantingDate: '2026-06-01T00:00:00.000Z' }],
+            plantingYears: [{ plantingYear: 2026, lastFrostDate: '2026-05-01', targetPlantingDate: '2026-06-01' }],
         });
 
         expect(tableRows(wrapper)[0].slice(1, 3)).toEqual(['Jun 1', 'May 1']);

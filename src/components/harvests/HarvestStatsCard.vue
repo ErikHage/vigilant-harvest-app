@@ -26,6 +26,8 @@
 </template>
 
 <script>
+import dayjs from 'dayjs';
+
 export default {
   name: "HarvestStatsCard",
 
@@ -38,7 +40,7 @@ export default {
 
   methods: {
     formatDate(date) {
-      return date ? new Date(date).toDateString() : '---';
+      return date ? dayjs(date).format('ddd MMM DD YYYY') : '---';
     }
   },
 }

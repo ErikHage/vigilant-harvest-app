@@ -5,8 +5,8 @@ import { mountWithPlugins } from '../../../../../helpers/mount';
 
 const year2026 = {
     plantingYear: 2026,
-    lastFrostDate: '2026-05-01T00:00:00.000Z',
-    targetPlantingDate: '2026-05-17T00:00:00.000Z',
+    lastFrostDate: '2026-05-01',
+    targetPlantingDate: '2026-05-17',
     details: { createdPlantings: 9, startedPlantings: 9, plantedPlantings: 9, retiredPlantings: 9 },
 };
 const plantings = [

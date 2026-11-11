@@ -17,10 +17,7 @@ import { aPlanting } from '../../../../../helpers/plantings';
 const plants = [{ plantId: 'plant-1', friendlyName: 'Provider bush bean' }];
 const plots = [{ plotId: 'plot-1', friendlyName: 'North bed' }];
 
-// The page's details tab gives its date pickers strings where they expect
-// Dates, and Vue warns about it (PlantingDetailsTab.spec.js pins it). Any
-// other warning fails the test
-const dateTypeWarning = /Invalid prop: type check failed for prop "date"/;
+// Any warning fails the test
 
 async function mountPage({ planting = aPlanting(), state = {}, beforeMount = () => {} } = {}) {
     const pinia = createTestingPinia({
@@ -70,7 +67,7 @@ describe('PlantingDetailsPage', () => {
     });
 
     afterEach(() => {
-        expect(warn.mock.calls.filter(([message]) => !dateTypeWarning.test(message))).toEqual([]);
+        expect(warn.mock.calls).toEqual([]);
         vi.restoreAllMocks();
     });
 

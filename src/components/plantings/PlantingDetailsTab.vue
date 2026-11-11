@@ -12,7 +12,7 @@
         <date-picker-dialog-activator
             :on-submit="setTargetPlantingDateValue"
             title="Set Target Planting Date"
-            :date="planting.targetPlantingDate"
+            :date="fromLocalDate(planting.targetPlantingDate)"
             :disabled="isFieldEditDisabled(['CREATED', 'STARTED'])"
         />
         <h3 class="ml-2">{{ formattedTargetPlantingDate }}</h3>
@@ -76,7 +76,7 @@
           label="Select Plant"
           variant="solo"
           density="compact"
-          :disabled="isFieldEditDisabled('CREATED')"
+          :disabled="isFieldEditDisabled(['CREATED'])"
           clearable
       ></v-autocomplete>
       <v-text-field
@@ -85,7 +85,7 @@
           variant="solo"
           type="number"
           density="compact"
-          :disabled="isFieldEditDisabled('CREATED')"/>
+          :disabled="isFieldEditDisabled(['CREATED'])"/>
     </div>
 
     <div class="d-flex align-center my-2">
@@ -101,14 +101,14 @@
           variant="solo"
           type="number"
           density="compact"
-          :disabled="isFieldEditDisabled('STARTED')"/>
-      <div :class="getDateFieldClasses('STARTED')">
+          :disabled="isFieldEditDisabled(['STARTED'])"/>
+      <div :class="getDateFieldClasses(['STARTED'])">
         <p class="mr-2">Date sown</p>
         <date-picker-dialog-activator
             :on-submit="setSowDateValue"
             title="Set Sow Date"
-            :date="planting.sowDate"
-            :disabled="isFieldEditDisabled('STARTED')"
+            :date="fromLocalDate(planting.sowDate)"
+            :disabled="isFieldEditDisabled(['STARTED'])"
         />
         <h3 class="ml-2">{{ formattedSowDate }}</h3>
       </div>
@@ -132,7 +132,7 @@
           label="Plot"
           variant="solo"
           density="compact"
-          :disabled="isFieldEditDisabled('PLANTED')"
+          :disabled="isFieldEditDisabled(['PLANTED'])"
           clearable
       ></v-select>
       <v-text-field
@@ -141,14 +141,14 @@
           variant="solo"
           type="number"
           density="compact"
-          :disabled="isFieldEditDisabled('PLANTED')"/>
-      <div :class="getDateFieldClasses('PLANTED')">
+          :disabled="isFieldEditDisabled(['PLANTED'])"/>
+      <div :class="getDateFieldClasses(['PLANTED'])">
         <p class="mr-2">Date planted</p>
         <date-picker-dialog-activator
             :on-submit="setPlantingDateValue"
             title="Set Planting Date"
-            :date="planting.transplantDate"
-            :disabled="isFieldEditDisabled('PLANTED')"
+            :date="fromLocalDate(planting.transplantDate)"
+            :disabled="isFieldEditDisabled(['PLANTED'])"
         />
         <h3 class="ml-2">{{ formattedPlantingDate }}</h3>
       </div>
@@ -161,6 +161,7 @@ import dayjs from 'dayjs';
 import plantingUtils from '@/utils/plantings';
 import sorting from "@/utils/sorting";
 import DatePickerDialogActivator from "@/components/utils/DatePickerDialogActivator.vue";
+import { fromLocalDate } from '@/utils/dates';
 
 const {plantingStatusesList} = plantingUtils;
 
@@ -240,6 +241,8 @@ export default {
   },
 
   methods: {
+    fromLocalDate,
+
     navigateToPlotDetails() {
       console.log('plot clicked, do something in the future');
     },

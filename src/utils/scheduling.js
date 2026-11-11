@@ -50,7 +50,7 @@ const labelToRRuleFrequency = (label) => freqMap[label];
 const rRuleFrequencyToLabel = (frequency) => freqLabels[frequency];
 
 function formatDate(dateString) {
-    return dayjs.utc(dateString).format('MMM D');
+    return dayjs(dateString).format('MMM D');
 }
 
 // expects dates in year-less MM-dd format (ex: 05-15)

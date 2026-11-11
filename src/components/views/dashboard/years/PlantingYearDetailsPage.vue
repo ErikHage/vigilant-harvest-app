@@ -69,9 +69,7 @@
 import {mapActions, mapState} from "pinia";
 import {usePlantingsStore, usePlantingYearsStore} from "@/store";
 import dayjs from "dayjs";
-import utc from 'dayjs/plugin/utc';
 
-dayjs.extend(utc);
 
 export default {
   name: "PlantingYearDetailsPage",
@@ -132,7 +130,7 @@ export default {
     ]),
 
     formatDateString(dateString) {
-      return dayjs.utc(dateString).format('MMM D');
+      return dayjs(dateString).format('MMM D');
     },
   },
 

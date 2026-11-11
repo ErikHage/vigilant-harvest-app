@@ -27,9 +27,7 @@
 
 <script>
 import dayjs from "dayjs";
-import utc from 'dayjs/plugin/utc';
 
-dayjs.extend(utc);
 
 export default {
   name: 'PlantingsYearsTable',
@@ -46,7 +44,7 @@ export default {
 
   methods: {
     formatDateString(dateString) {
-      return dayjs.utc(dateString).format('MMM D');
+      return dayjs(dateString).format('MMM D');
     },
   },
 }

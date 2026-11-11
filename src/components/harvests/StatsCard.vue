@@ -50,6 +50,7 @@
 </template>
 
 <script>
+import dayjs from 'dayjs';
 import harvestUtils from "@/utils/harvest-utils";
 
 export default {
@@ -75,7 +76,7 @@ export default {
     },
 
     formatDate(date) {
-      return date ? new Date(date).toDateString() : '---';
+      return date ? dayjs(date).format('ddd MMM DD YYYY') : '---';
     }
   },
 }

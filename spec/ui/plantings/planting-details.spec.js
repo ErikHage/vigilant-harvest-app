@@ -37,9 +37,7 @@ test.describe('A planting\'s details page', () => {
     });
 
     // At 23:30 in New York it's already the next day in UTC. The dialog sends
-    // the instant, and the unit pin (backlog A22) has the service keep its UTC
-    // day. That can't arise here: the service runs in New York too, and keeps
-    // the day it is there
+    // the local day, YYYY-MM-DD, so the planting is sown on the day shown
     test('starts a planting, sown on the day the dialog shows, in a New York evening', async ({
         garden, browserClock, plantingsPage, plantingDetailsPage,
     }) => {

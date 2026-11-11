@@ -6,17 +6,17 @@ import { useJournalStore } from '@/store';
 import { mountWithPlugins } from '../../../../../helpers/mount';
 import { buttonLabelled } from '../../../../../helpers/fields';
 
-// An entry as the service sends it. entryDate is a TIMESTAMP, so it comes as
-// the UTC instant it was given
+// An entry as the service sends it. entryDate is the user's wall-clock time,
+// with no timezone; the audit fields are UTC instants
 function anEntry(entryId, entryDate, entry) {
-    return { entryId, plantingYear: 2026, entry, entryDate, dateCreated: entryDate, dateModified: entryDate };
+    return { entryId, plantingYear: 2026, entry, entryDate, dateCreated: '2026-06-10T16:00:00Z', dateModified: '2026-06-10T16:00:00Z' };
 }
 
-const morning = anEntry('e-1', '2026-06-01T14:00:00.000Z', 'Planted the beans.');
-// 21:30 on June 1 in New York
-const evening = anEntry('e-2', '2026-06-02T01:30:00.000Z', 'Late watering.');
-const nextDay = anEntry('e-3', '2026-06-02T12:00:00.000Z', 'First sprouts.');
-const weekLater = anEntry('e-4', '2026-06-10T12:00:00.000Z', 'Thinned the carrots.');
+const morning = anEntry('e-1', '2026-06-01T10:00:00', 'Planted the beans.');
+// already June 2 in UTC
+const evening = anEntry('e-2', '2026-06-01T21:30:00', 'Late watering.');
+const nextDay = anEntry('e-3', '2026-06-02T08:00:00', 'First sprouts.');
+const weekLater = anEntry('e-4', '2026-06-10T08:00:00', 'Thinned the carrots.');
 
 // In the service's order: its query has no ORDER BY
 const entries = [nextDay, evening, weekLater, morning];
@@ -128,7 +128,7 @@ describe('GardenJournalPage', () => {
 
     it("saves a new entry with the year, reloads, and shows the entry's day", async () => {
         const { wrapper, store } = await mountPage();
-        const entry = { entryDate: '2026-06-05T01:00:00.000Z', entry: 'Evening frost.' };
+        const entry = { entryDate: '2026-06-04T21:00:00', entry: 'Evening frost.' };
         store.fetchJournalEntriesByYear.mockImplementationOnce(async () => {
             store.journalEntries = [...entries, anEntry('e-5', entry.entryDate, entry.entry)];
         });
@@ -149,7 +149,7 @@ describe('GardenJournalPage', () => {
     it("goes to the entry's day even when the save failed", async () => {
         const { wrapper } = await mountPage();
 
-        await wrapper.findComponent(AddJournalEntryDialog).props('onSubmit')({ entryDate: '2026-06-05T12:00:00.000Z', entry: 'Lost.' });
+        await wrapper.findComponent(AddJournalEntryDialog).props('onSubmit')({ entryDate: '2026-06-05T08:00:00', entry: 'Lost.' });
         await flushPromises();
 
         expect(wrapper.find('.timeline-entry.selected').exists()).toBe(false);

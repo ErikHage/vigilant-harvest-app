@@ -77,13 +77,12 @@ describe('StatsCard', () => {
         expect(fieldRows(wrapper).slice(0, 2)).toEqual([['First Harvest', '---'], ['Last Harvest', '---']]);
     });
 
-    // DocumentsCurrentBehavior: the service sends a harvest day as its UTC
-    // midnight, and the card shows it in local time, so west of Greenwich
-    // each date is the day before: July 2 shows as July 1 in New York
-    // (backlog A28). Should show the UTC day
-    it('shows each harvest date a day early in New York', () => {
+    // The service sends a harvest day as YYYY-MM-DD, and the card reads it
+    // as that local day: not UTC midnight, which is the evening before in
+    // New York (backlog A28)
+    it('shows each harvest date on the day filed', () => {
         const wrapper = mountCard(plantingRow);
 
-        expect(fieldRows(wrapper).slice(0, 2)).toEqual([['First Harvest', 'Wed Jul 01 2026'], ['Last Harvest', 'Fri Jul 03 2026']]);
+        expect(fieldRows(wrapper).slice(0, 2)).toEqual([['First Harvest', 'Thu Jul 02 2026'], ['Last Harvest', 'Sat Jul 04 2026']]);
     });
 });

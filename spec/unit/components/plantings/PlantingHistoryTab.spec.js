@@ -21,10 +21,10 @@ describe('PlantingHistoryTab', () => {
         const wrapper = mountTab();
 
         expect(cards(wrapper)).toEqual([
-            [new Date('2026-05-18 09:30:00').toLocaleDateString(), 'PLANTED', 'Into the north bed'],
-            [new Date('2026-03-01 13:00:00').toLocaleDateString(), 'CREATED', null],
-            [new Date('2026-04-20 08:00:00').toLocaleDateString(), 'STARTED', 'Heat mat'],
-            [new Date('2026-06-01 18:00:00').toLocaleDateString(), null, 'First beans\nin a week'],
+            [new Date('2026-05-18T13:30:00Z').toLocaleDateString(), 'PLANTED', 'Into the north bed'],
+            [new Date('2026-03-01T18:00:00Z').toLocaleDateString(), 'CREATED', null],
+            [new Date('2026-04-20T12:00:00Z').toLocaleDateString(), 'STARTED', 'Heat mat'],
+            [new Date('2026-06-01T22:00:00Z').toLocaleDateString(), null, 'First beans\nin a week'],
         ]);
     });
 

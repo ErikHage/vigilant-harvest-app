@@ -21,9 +21,8 @@ test.describe('The harvests page', () => {
         await dashboardPage.checkYearIsChosen('year: spring');
     });
 
-    // Each harvest shows on the day it was filed. Backlog A28 can't arise
-    // here: the service runs in New York too, so it files a harvest under the
-    // day it is there, and sends that midnight, which is the day here
+    // Each harvest shows on the day it was filed: the service sends the day,
+    // YYYY-MM-DD, and the page reads it as that local day
     test('lists the harvest days newest first, and shows a day\'s harvests', async ({ harvestsPage }) => {
         await harvestsPage.open();
         await harvestsPage.checkIsShown();

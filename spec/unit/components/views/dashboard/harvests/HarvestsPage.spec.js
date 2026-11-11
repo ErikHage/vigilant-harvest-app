@@ -22,8 +22,7 @@ const plantings = {
     'planting-3': aPlanting({ plantingId: 'planting-3', name: 'Late beans' }),
 };
 
-// The year's harvests, newest first, as the search sends them. The page
-// shows each a day early (A28): those filed on July 10 show on July 9
+// The year's harvests, newest first, as the search sends them
 const harvests = [
     aHarvest({ harvestId: 'h-1', plantingId: 'planting-1', quantity: 2 }),
     aHarvest({ harvestId: 'h-2', plantingId: 'planting-3', quantity: 3 }),
@@ -100,38 +99,35 @@ describe('HarvestsPage', () => {
         it('lists the days with harvests, newest first, with a gap where days are skipped', async () => {
             const { wrapper } = await mountPage();
 
-            expect(timeline(wrapper)).toEqual(['2026-07-09', '2026-07-08', '...', '2026-06-30']);
+            expect(timeline(wrapper)).toEqual(['2026-07-10', '2026-07-09', '...', '2026-07-01']);
         });
 
-        // DocumentsCurrentBehavior: the service sends a harvest's day as its
-        // UTC midnight, and the page takes its local day, so west of
-        // Greenwich every harvest shows the day before: those filed on July
-        // 10 show on July 9 in New York (backlog A28). With A22, a harvest
-        // saved on a New York evening is filed a day late and shown on the
-        // right day. Should show the day the harvest is filed under
-        it('shows each harvest a day early in New York', async () => {
+        // The service sends a harvest's day as YYYY-MM-DD, and the page reads
+        // it as that local day: not UTC midnight, which is the evening before
+        // in New York (backlog A28)
+        it('shows each harvest on the day filed', async () => {
             const { wrapper } = await mountPage({ state: { harvests: { harvests: [aHarvest({ harvestDate: filedOn('2026-07-10') })] } } });
 
-            expect(timeline(wrapper)).toEqual(['2026-07-09']);
-            expect(wrapper.find('h3').text()).toBe('2026-07-09');
+            expect(timeline(wrapper)).toEqual(['2026-07-10']);
+            expect(wrapper.find('h3').text()).toBe('2026-07-10');
         });
 
         it('opens on the newest day', async () => {
             const { wrapper } = await mountPage();
 
-            expect(selected(wrapper)).toBe('2026-07-09');
-            expect(wrapper.find('h3').text()).toBe('2026-07-09');
+            expect(selected(wrapper)).toBe('2026-07-10');
+            expect(wrapper.find('h3').text()).toBe('2026-07-10');
         });
 
         it('shows the day clicked, and ignores a click on a gap', async () => {
             const { wrapper } = await mountPage();
 
-            await clickDay(wrapper, '2026-06-30');
-            expect(wrapper.find('h3').text()).toBe('2026-06-30');
+            await clickDay(wrapper, '2026-07-01');
+            expect(wrapper.find('h3').text()).toBe('2026-07-01');
             expect(plantGroups(wrapper)).toEqual([['Sungold tomato', ['4']]]);
 
             await clickDay(wrapper, '...');
-            expect(selected(wrapper)).toBe('2026-06-30');
+            expect(selected(wrapper)).toBe('2026-07-01');
         });
 
         // It says so even when there are none to select
@@ -229,7 +225,7 @@ describe('HarvestsPage', () => {
 
         it('saves the edits with the year, then closes and reloads, staying on the day', async () => {
             const { wrapper, harvests: store } = await mountPage();
-            await clickDay(wrapper, '2026-07-08');
+            await clickDay(wrapper, '2026-07-09');
             const dialog = await openEdit(wrapper);
             await dialog.find('input[type=number]').setValue('3');
 
@@ -240,20 +236,20 @@ describe('HarvestsPage', () => {
             ]);
             expect(findDialog('Edit Harvests')).toBeUndefined();
             expect(store.searchHarvests).toHaveBeenCalledTimes(2);
-            expect(selected(wrapper)).toBe('2026-07-08');
+            expect(selected(wrapper)).toBe('2026-07-09');
         });
 
         it('goes to the newest day when the edited day has no harvests left', async () => {
             const { wrapper, harvests: store } = await mountPage();
-            await clickDay(wrapper, '2026-07-08');
+            await clickDay(wrapper, '2026-07-09');
             store.searchHarvests.mockImplementationOnce(async () => {
                 store.harvests = harvests.filter(h => h.harvestId !== 'h-5');
             });
 
             await press(await openEdit(wrapper), 'Update');
 
-            expect(timeline(wrapper)).toEqual(['2026-07-09', '...', '2026-06-30']);
-            expect(selected(wrapper)).toBe('2026-07-09');
+            expect(timeline(wrapper)).toEqual(['2026-07-10', '...', '2026-07-01']);
+            expect(selected(wrapper)).toBe('2026-07-10');
         });
 
         it.each([

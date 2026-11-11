@@ -5,11 +5,10 @@ export const harvestTypes = [
     { harvestTypeId: 3, harvestTypeName: 'count' },
 ];
 
-// The date the service sends for a harvest filed on `day` (YYYY-MM-DD). It
-// files a harvest under its UTC day, stored as that day's midnight, and its
-// search and stats send that midnight back as a UTC instant
+// The date the service sends for a harvest filed on `day`: the day itself,
+// YYYY-MM-DD, with no time or timezone
 export function filedOn(day) {
-    return `${day}T00:00:00.000Z`;
+    return day;
 }
 
 // A harvest as GET /harvests/search sends it, with any fields overridden

@@ -6,8 +6,8 @@ import { mountWithPlugins } from '../../../../../helpers/mount';
 import { buttonLabelled } from '../../../../../helpers/fields';
 
 const plantingYears = [
-    { plantingYear: 2025, lastFrostDate: '2025-05-12T00:00:00.000Z', targetPlantingDate: '2025-05-19T00:00:00.000Z' },
-    { plantingYear: 2026, lastFrostDate: '2026-05-10T00:00:00.000Z', targetPlantingDate: '2026-05-17T00:00:00.000Z' },
+    { plantingYear: 2025, lastFrostDate: '2025-05-12', targetPlantingDate: '2025-05-19' },
+    { plantingYear: 2026, lastFrostDate: '2026-05-10', targetPlantingDate: '2026-05-17' },
 ];
 
 function mountPage(state = {}) {

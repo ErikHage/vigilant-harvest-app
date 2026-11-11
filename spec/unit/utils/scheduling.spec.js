@@ -1,5 +1,3 @@
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
 import { RRule } from 'rrule';
 import scheduling from '@/utils/scheduling';
 
@@ -40,22 +38,9 @@ describe('scheduling', () => {
         });
     });
 
-    // DocumentsCurrentBehavior: throws unless something else has loaded dayjs's
-    // utc plugin. Should load the plugin itself. It works in the app only because
-    // PlantingYearsTable and PlantingYearDetailsPage extend dayjs with it, and the
-    // router imports both before anything formats a range. These two blocks run
-    // in order: the first before the plugin is loaded, the second after
-    describe('getFormattedDateRange, before anything loads the utc plugin', () => {
-        it('throws', () => {
-            expect(() => scheduling.getFormattedDateRange('05-15', '06-01')).toThrow(/\.utc is not a function/);
-        });
-    });
-
-    describe('getFormattedDateRange, once the utc plugin is loaded', () => {
-        beforeAll(() => {
-            dayjs.extend(utc);
-        });
-
+    // Nothing here loads a dayjs plugin: the range is formatted without one,
+    // where it once needed utc, loaded only by other components (backlog A1)
+    describe('getFormattedDateRange', () => {
         it('shows a range as two month-day dates', () => {
             expect(scheduling.getFormattedDateRange('05-15', '06-01')).toBe('May 15 - Jun 1');
         });
@@ -64,7 +49,7 @@ describe('scheduling', () => {
             expect(scheduling.getFormattedDateRange('05-15', '05-15')).toBe('May 15');
         });
 
-        it('reads the dates as UTC, so the timezone cannot shift them a day', () => {
+        it('reads the dates as local days, so the timezone cannot shift them a day', () => {
             expect(scheduling.getFormattedDateRange('01-01', '12-31')).toBe('Jan 1 - Dec 31');
         });
 

@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { toLocalDate, toLocalDateTime } from '@/utils/dates';
+import { fromLocalDate, toLocalDate, toLocalDateTime } from '@/utils/dates';
 
 // The suite runs in America/New_York (vitest.config.js), where an evening is
 // already the next day in UTC: the case these helpers exist for.
@@ -45,5 +45,23 @@ describe('toLocalDateTime', () => {
 
     it.each([null, undefined])('passes %s through', value => {
         expect(toLocalDateTime(value)).toBe(value);
+    });
+});
+
+describe('fromLocalDate', () => {
+    it('reads a day the service sent as its local midnight', () => {
+        expect(fromLocalDate('2026-07-04')).toEqual(new Date(2026, 6, 4));
+    });
+
+    it('reads the day the clocks go forward', () => {
+        expect(fromLocalDate('2026-03-08')).toEqual(new Date(2026, 2, 8));
+    });
+
+    it('takes a Date', () => {
+        expect(fromLocalDate(new Date(2026, 6, 4, 21, 30))).toEqual(new Date(2026, 6, 4, 21, 30));
+    });
+
+    it.each([null, undefined])('passes %s through', value => {
+        expect(fromLocalDate(value)).toBe(value);
     });
 });
