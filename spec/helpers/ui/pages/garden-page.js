@@ -49,7 +49,7 @@ export function createGardenPage(world, driver) {
         async checkConfirmWaitsForTheSave(...args) {
             parseDslArgs(args, {});
 
-            await driver.offersConfirmWhileSaving();
+            await driver.withholdsConfirmWhileSaving();
         },
 
         /** Presses Confirm again, then lets the held save go. No parameters. */
@@ -63,7 +63,7 @@ export function createGardenPage(world, driver) {
         async checkHarvestSavedOnce(...args) {
             const params = parseDslArgs(args, { planting: planting() });
 
-            await driver.harvestFiledTwice(world.plantingNamed(params.planting));
+            await driver.harvestFiledOnce(world.plantingNamed(params.planting));
         },
     };
 }

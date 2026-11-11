@@ -2,6 +2,7 @@ import { flushPromises } from '@vue/test-utils';
 import { httpError } from '../../../../../helpers/http-errors';
 import { VDatePicker, VSelect } from 'vuetify/components';
 import { mountWithPlugins } from '../../../../../helpers/mount';
+import { buttonLabelled } from '../../../../../helpers/fields';
 import { dialogTitled } from '../../../../../helpers/dialogs';
 import { aSaveInFlight, isOpen, openAction, press } from '../../../../../helpers/action-dialogs';
 import AddActivityLogEntryDialog from '@/components/views/dashboard/garden/AddActivityLogEntryDialog.vue';
@@ -162,23 +163,16 @@ describe('AddActivityLogEntryDialog', () => {
         expect(dialog.find('textarea').element.value).toBe('');
     });
 
-    // DocumentsCurrentBehavior: Confirm is never disabled, and with no
-    // activity chosen it reads activityType.name of null and throws a
-    // TypeError. Nothing is sent, and the dialog stays open with no message
-    // (validation-fixes doc, fix 4). Should disable Confirm until an activity
-    // is chosen
-    it('throws on Confirm with no activity chosen', async () => {
-        const errorHandler = vi.fn();
-        const wrapper = mountDialog({ errorHandler });
+    // The service requires an activity (validation-fixes doc, fix 4)
+    it('offers Confirm only once an activity is chosen', async () => {
+        const wrapper = mountDialog();
         const dialog = await open(wrapper);
         await dialog.find('textarea').setValue('Tomatoes only');
+        expect(buttonLabelled(dialog, 'Confirm').attributes('disabled')).toBeDefined();
 
-        await press(dialog, 'Confirm');
+        await choose(wrapper, 'Activity', activityTypes[0]);
 
-        expect(errorHandler).toHaveBeenCalledTimes(1);
-        expect(errorHandler.mock.calls[0][0]).toBeInstanceOf(TypeError);
-        expect(wrapper.props('onSubmit')).not.toHaveBeenCalled();
-        expect(isOpen()).toBe(true);
+        expect(buttonLabelled(dialog, 'Confirm').attributes('disabled')).toBeUndefined();
     });
 
     // DocumentsCurrentBehavior: the date picker reads its date only when
@@ -206,6 +200,7 @@ describe('AddActivityLogEntryDialog', () => {
 
         await press(dialog, 'Confirm');
 
+        expect(wrapper.props('onSubmit')).toHaveBeenCalled();
         expect(isOpen()).toBe(true);
     });
 

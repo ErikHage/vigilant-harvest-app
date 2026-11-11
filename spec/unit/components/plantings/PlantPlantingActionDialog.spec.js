@@ -2,7 +2,7 @@ import { flushPromises } from '@vue/test-utils';
 import { httpError } from '../../../helpers/http-errors';
 import { VSelect } from 'vuetify/components';
 import { mountWithPlugins } from '../../../helpers/mount';
-import { inputLabelled } from '../../../helpers/fields';
+import { buttonLabelled, inputLabelled } from '../../../helpers/fields';
 import { aSaveInFlight, isOpen, openAction, press } from '../../../helpers/action-dialogs';
 import DatePickerDialogActivator from '@/components/utils/DatePickerDialogActivator.vue';
 import PlantPlantingActionDialog from '@/components/plantings/PlantPlantingActionDialog.vue';
@@ -23,6 +23,13 @@ function mountDialog({ now = '2026-05-10T10:00:00', ...props } = {}) {
 
 const open = wrapper => openAction(wrapper, 'Plant', 'Plant Planting');
 const plotSelect = wrapper => wrapper.findComponent(VSelect);
+
+// Opened, with a plot chosen, which Confirm needs
+async function openWithAPlot(wrapper) {
+    const dialog = await open(wrapper);
+    await plotSelect(wrapper).setValue('plot-1');
+    return dialog;
+}
 
 describe('PlantPlantingActionDialog', () => {
     afterEach(() => {
@@ -76,20 +83,21 @@ describe('PlantPlantingActionDialog', () => {
     it('sends a New York evening as that day', async () => {
         const wrapper = mountDialog({ now: '2026-05-10T22:15:00' });
 
-        await press(await open(wrapper), 'Confirm');
+        await press(await openWithAPlot(wrapper), 'Confirm');
 
         expect(wrapper.props('onSubmit').mock.calls[0][1].transplantDate).toBe('2026-05-10');
     });
 
-    // DocumentsCurrentBehavior: the plot has no rule and Confirm is never
-    // disabled, so a planting is planted in no plot (validation-fixes doc,
-    // fix 5). Should require a plot, unless planting without one is wanted
-    it('plants with no plot chosen', async () => {
+    // Planting out puts a planting in a plot: the garden lists only plantings
+    // that have one (validation-fixes doc, fix 5)
+    it('offers Confirm only once a plot is chosen', async () => {
         const wrapper = mountDialog();
+        const dialog = await open(wrapper);
+        expect(buttonLabelled(dialog, 'Confirm').attributes('disabled')).toBeDefined();
 
-        await press(await open(wrapper), 'Confirm');
+        await plotSelect(wrapper).setValue('plot-1');
 
-        expect(wrapper.props('onSubmit').mock.calls[0][1].plotId).toBeNull();
+        expect(buttonLabelled(dialog, 'Confirm').attributes('disabled')).toBeUndefined();
     });
 
     it('closes on Cancel without submitting', async () => {
@@ -117,15 +125,16 @@ describe('PlantPlantingActionDialog', () => {
     it('waits for the plant, open', async () => {
         const wrapper = mountDialog({ onSubmit: aSaveInFlight() });
 
-        await press(await open(wrapper), 'Confirm');
+        await press(await openWithAPlot(wrapper), 'Confirm');
 
+        expect(wrapper.props('onSubmit')).toHaveBeenCalled();
         expect(isOpen()).toBe(true);
     });
 
     it('stays open, and says so, when the plant fails', async () => {
         const wrapper = mountDialog({ onSubmit: vi.fn().mockRejectedValue(httpError(500)) });
 
-        await press(await open(wrapper), 'Confirm');
+        await press(await openWithAPlot(wrapper), 'Confirm');
 
         expect(isOpen()).toBe(true);
         expect(document.body.textContent).toContain("Couldn't save. Try again.");

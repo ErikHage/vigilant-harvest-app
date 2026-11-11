@@ -75,18 +75,12 @@ describe('PlantSubcategoryAddDialog', () => {
         expect(inputLabelled(dialog, 'Subcategory Name').element.value).toBe('Lentils');
     });
 
-    // DocumentsCurrentBehavior: Add is enabled by any text, but the name is
-    // trimmed when sent, so a name of spaces goes out as ''. The service
-    // rejects it (subcategoryName is required), and the dialog stays open,
-    // saying so (backlog A16). Should keep Add disabled until the trimmed name
-    // has something in it
-    it('submits a name of spaces as an empty name', async () => {
-        const wrapper = mountDialog();
-        const dialog = await open(wrapper);
+    // The service reads a name of spaces as missing (backlog A16)
+    it("doesn't offer Add for a name of spaces", async () => {
+        const dialog = await open(mountDialog());
+
         await inputLabelled(dialog, 'Subcategory Name').setValue('   ');
 
-        await press(dialog, 'Add');
-
-        expect(wrapper.props('onSubmit')).toHaveBeenCalledWith({ categoryId: 'category-1', subcategoryName: '' });
+        expect(buttonLabelled(dialog, 'Add').attributes('disabled')).toBeDefined();
     });
 });

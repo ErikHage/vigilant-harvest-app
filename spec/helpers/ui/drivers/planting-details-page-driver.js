@@ -1,6 +1,4 @@
-import {
-    expectDisabled, expectEnabled, expectEventually, expectHidden, expectText, expectUrl, expectValue, expectVisible,
-} from './assertions';
+import { expectDisabled, expectEventually, expectHidden, expectText, expectUrl, expectValue, expectVisible } from './assertions';
 import { pageAlertSays } from './page-alert';
 import { chooseOption } from './select';
 import { escaped, openPath, urlOf } from './urls';
@@ -109,9 +107,9 @@ export function createPlantingDetailsPageDriver(page, pageErrors) {
             return asDay(await dialog.locator('h3').textContent());
         },
 
-        /** Pinned (A23): with no plot chosen, the Plant dialog offers Confirm. */
-        async offersConfirmWithNoPlot() {
-            await expectEnabled(confirm, 'the Plant dialog, with no plot chosen');
+        /** With no plot chosen, the Plant dialog withholds Confirm. */
+        async withholdsConfirmWithNoPlot() {
+            await expectDisabled(confirm, 'the Plant dialog, with no plot chosen');
         },
 
         /**
@@ -127,9 +125,9 @@ export function createPlantingDetailsPageDriver(page, pageErrors) {
             }
         },
 
-        /** Pinned (A24): with no splits added, the Split dialog offers Confirm. */
-        async offersConfirmWithNoSplits() {
-            await expectEnabled(confirm, 'the Split dialog, with no splits');
+        /** With no splits added, the Split dialog withholds Confirm. */
+        async withholdsConfirmWithNoSplits() {
+            await expectDisabled(confirm, 'the Split dialog, with no splits');
         },
 
         /** Clicks Confirm in the open dialog, and waits for it to close. */

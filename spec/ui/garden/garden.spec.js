@@ -37,11 +37,6 @@ test.describe('The garden', () => {
         await gardenPage.checkShowsPlanting('planting: early');
     });
 
-    // DocumentsCurrentBehavior: Confirm stays enabled while the save is in
-    // flight, and each press saves the harvests again; the service adds a
-    // harvest to one already filed for the planting, day and type, so a double
-    // press doubles it (backlog A27). Should offer Confirm once, until the
-    // save is done
     test('saves harvests once, however often Confirm is pressed', async ({ gardenPage }) => {
         await gardenPage.open();
         await gardenPage.checkIsShown();
@@ -92,18 +87,11 @@ test.describe('The journal and activity log', () => {
         await activityLogPage.checkListsEntry('entry: fed');
     });
 
-    // DocumentsCurrentBehavior: Confirm is never disabled; with no activity
-    // chosen it throws reading the activity's name, sends nothing, and the
-    // dialog stays open, saying nothing (backlog A26). Should offer Confirm
-    // only once an activity is chosen
     test('logs an activity only once one is chosen', async ({ activityLogPage }) => {
         await activityLogPage.open();
         await activityLogPage.checkIsShown();
         await activityLogPage.openLogDialog();
 
         await activityLogPage.checkConfirmNeedsAnActivity();
-        await activityLogPage.confirm();
-
-        await activityLogPage.checkSaysAnActivityIsNeeded();
     });
 });

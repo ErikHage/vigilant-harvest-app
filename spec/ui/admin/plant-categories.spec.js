@@ -35,22 +35,14 @@ test.describe('The plant categories page', () => {
         await plantCategoriesPage.checkCategoryFound('category: tomatoes', 'subcategory: cherry', 'by: subcategory');
     });
 
-    // DocumentsCurrentBehavior: Create checks the name untrimmed, so a name of
-    // spaces is offered, and sent trimmed, as '', which the service refuses
-    // (backlog A16). Should check the trimmed name
     test('offers Create for a category only once its name has something in it', async ({ plantCategoriesPage }) => {
         await plantCategoriesPage.open();
         await plantCategoriesPage.checkIsShown();
         await plantCategoriesPage.startAddingCategory('name: spaces');
 
         await plantCategoriesPage.checkConfirmNeedsAName();
-        await plantCategoriesPage.confirm();
-
-        await plantCategoriesPage.checkConfirmIsRejected('message: categoryName is required');
     });
 
-    // DocumentsCurrentBehavior: as for a category, Add checks the name
-    // untrimmed and sends '' (backlog A16). Should check the trimmed name
     test('offers Add for a subcategory only once its name has something in it', async ({
         garden, plantCategoriesPage,
     }) => {
@@ -60,8 +52,5 @@ test.describe('The plant categories page', () => {
         await plantCategoriesPage.startAddingSubcategory('category: tomatoes', 'name: spaces');
 
         await plantCategoriesPage.checkConfirmNeedsAName();
-        await plantCategoriesPage.confirm();
-
-        await plantCategoriesPage.checkConfirmIsRejected('message: subcategoryName is required');
     });
 });

@@ -39,8 +39,8 @@ Every error, from every route, has one shape:
 
 ### 2. The add-planting dialog saves without a name, then closes anyway
 
-**Closing anyway is fixed** (pinned-behaviour fixes, F2a, backlog A6): a failed save keeps the
-dialog open, saying why. Saving without a name is F3's (A16).
+**Fixed** (pinned-behaviour fixes: closing anyway in F2a, backlog A6; saving without a name or
+plant in F3, backlog A16).
 
 - **Where:**
   - `src/components/plantings/AddPlantingDialog.vue:62` and `:84` start `name` as `''`. The field
@@ -54,6 +54,9 @@ dialog open, saying why. Saving without a name is F3's (A16).
 
 ### 3. The split dialog sends blank names
 
+**Fixed** (pinned-behaviour fixes, F3, backlog A24): each split needs a name and a count of at
+least 1, and the total no more than was sown.
+
 - **Where:** `src/components/plantings/SplitPlantingActionDialog.vue:95-96`. Each split starts as
   `{ name: '', count: 0 }`.
 - **Why:** the service now rejects a split with a blank name: `splits[0].name is required`. A count
@@ -64,6 +67,8 @@ dialog open, saying why. Saving without a name is F3's (A16).
 
 ### 4. The activity-log dialog crashes with no activity type picked
 
+**Fixed** (pinned-behaviour fixes, F3, backlog A26).
+
 - **Where:** `src/components/views/dashboard/garden/AddActivityLogEntryDialog.vue:126`:
   `activityType: this.activityType.name`, while `activityType` is still `null`.
 - **Why:** it throws a `TypeError` before anything is sent. If it did send, the service would now
@@ -71,6 +76,8 @@ dialog open, saying why. Saving without a name is F3's (A16).
 - **Fix:** disable Confirm until an activity type is picked.
 
 ### 5. The plant-out dialog allows no plot
+
+**Fixed** (pinned-behaviour fixes, F3, backlog A23): Plant requires a plot.
 
 - **Where:** `src/components/plantings/PlantPlantingActionDialog.vue:91` starts `plotId: null`, with
   no rule on the plot select.
@@ -83,12 +90,14 @@ dialog open, saying why. Saving without a name is F3's (A16).
 - **Both garden dialogs close before the save succeeds.** **Fixed** (pinned-behaviour fixes, F2b, backlog A6). See the `TODO`s at
   `AddActivityLogEntryDialog.vue:130` and `AddJournalEntryDialog.vue:95`. A 400 now carries a useful
   message, so keeping the dialog open and showing it is more worthwhile than before.
-- **Harvest quantities in the edit dialog are only checked by the service.**
+- **Harvest quantities in the edit dialog are only checked by the service.** **Fixed**
+  (pinned-behaviour fixes, F3, backlog B30).
   - Where: `src/components/harvests/EditHarvestsDialog.vue:33`.
   - A blank, zero or negative quantity is now a 400: `harvests[0].quantity must be greater than 0`.
     The dialog shows it and stays open.
   - A blank box used to save 0. A check in the form would avoid the round trip.
-- **The add-year page can submit before both dates are picked.**
+- **The add-year page can submit before both dates are picked.** **Fixed** (pinned-behaviour
+  fixes, F3, backlog A14).
   - `src/components/views/dashboard/years/AddPlantingYearPage.vue:123` starts them `null`, and Save
     isn't disabled.
   - The service now answers `lastFrostDate is required`. The page stays put and the store alerts

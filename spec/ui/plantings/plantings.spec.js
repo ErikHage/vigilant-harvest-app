@@ -39,18 +39,11 @@ test.describe('The plantings page', () => {
         await plantingDetailsPage.checkShowsPlanting('planting: early');
     });
 
-    // DocumentsCurrentBehavior: the dialog's name is marked required but has
-    // no rule, and nothing checks for a plant, so Create is offered with
-    // nothing entered, and the service refuses the planting (backlog A16).
-    // Should offer Create only once a name and plant are given
     test('offers Create only once a planting\'s required fields are given', async ({ plantingsPage }) => {
         await plantingsPage.open();
         await plantingsPage.checkIsShown();
         await plantingsPage.openAddDialog();
 
         await plantingsPage.checkCreateNeedsTheRequiredFields();
-        await plantingsPage.create();
-
-        await plantingsPage.checkCreateIsRejected('message: plantId is required');
     });
 });

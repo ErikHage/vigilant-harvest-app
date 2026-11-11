@@ -1,6 +1,6 @@
 import { parseDslArgs } from '@feral-auth/ts-simple-dsl';
 
-import { active, message, plot } from '../params';
+import { active, plot } from '../params';
 import { dashboardComponents, routedPageSteps } from './routed-page';
 
 /** The plots page, in words. */
@@ -38,30 +38,18 @@ export function createPlotsPage(world, driver) {
         async checkCreateNeedsTheRequiredFields(...args) {
             parseDslArgs(args, {});
 
-            await driver.offersCreateWithNothingEntered();
+            await driver.withholdsCreateWithNothingEntered();
         },
 
         /**
          * Clicks Create in the open Add dialog. No parameters. A save that succeeds
          * closes it; one the service refuses keeps it open, for a check to follow.
          */
-        async create(...args) {
-            parseDslArgs(args, {});
-
-            await driver.pressCreate();
-        },
-
         /**
          * The service refused the save: the dialog stays open, saying why
          * (`message`), as does the page's alert. Check it straight away: the
          * alert fades after three seconds.
          */
-        async checkCreateIsRejected(...args) {
-            const params = parseDslArgs(args, { message: message() });
-
-            await driver.createIsRejectedSaying(params.message);
-        },
-
         /**
          * The `plot` is listed, with its details, and `active: yes | no` (default
          * yes).
@@ -77,13 +65,6 @@ export function createPlotsPage(world, driver) {
             const params = parseDslArgs(args, { plot: plot() });
 
             await driver.findsPlot(world.plotNamed(params.plot));
-        },
-
-        /** The page's alert says `message`. Check it straight away: it fades after three seconds. */
-        async checkAlertSays(...args) {
-            const params = parseDslArgs(args, { message: message() });
-
-            await driver.alertSays(params.message);
         },
     };
 }

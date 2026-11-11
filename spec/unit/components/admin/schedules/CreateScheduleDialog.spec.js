@@ -29,16 +29,21 @@ describe('CreateScheduleDialog', () => {
         expect(buttonLabelled(dialog, 'Create').attributes('disabled')).toBeDefined();
     });
 
-    // The service takes a schedule with no description
-    it.each([
-        ['a name', 'Tomatoes', ''],
-        ['a description', '', 'Feed every two weeks'],
-    ])('keeps Create disabled without %s', async (_, name, description) => {
+    it('keeps Create disabled without a name', async () => {
         const dialog = await open(mountDialog());
 
-        await fillIn(dialog, name, description);
+        await fillIn(dialog, '', 'Feed every two weeks');
 
         expect(buttonLabelled(dialog, 'Create').attributes('disabled')).toBeDefined();
+    });
+
+    // The service takes a schedule with no description (backlog B33)
+    it('offers Create with a name and no description', async () => {
+        const dialog = await open(mountDialog());
+
+        await fillIn(dialog, 'Tomatoes', '');
+
+        expect(buttonLabelled(dialog, 'Create').attributes('disabled')).toBeUndefined();
     });
 
     it('submits the name, trimmed, and the description, then empties and closes', async () => {
@@ -82,18 +87,12 @@ describe('CreateScheduleDialog', () => {
         expect(isOpen()).toBe(true);
     });
 
-    // DocumentsCurrentBehavior: Create is enabled by any text, but the name
-    // is trimmed when sent, so a name of spaces goes out as ''. The service
-    // rejects it (name is required), and the dialog stays open, saying so
-    // (backlog A16). Should keep Create disabled until the trimmed name has
-    // something in it
-    it('submits a name of spaces as an empty name', async () => {
-        const wrapper = mountDialog();
-        const dialog = await open(wrapper);
+    // The service reads a name of spaces as missing (backlog A16)
+    it("doesn't offer Create for a name of spaces", async () => {
+        const dialog = await open(mountDialog());
+
         await fillIn(dialog, '   ', 'Feed every two weeks');
 
-        await press(dialog, 'Create');
-
-        expect(wrapper.props('onSubmit').mock.calls[0][0].name).toBe('');
+        expect(buttonLabelled(dialog, 'Create').attributes('disabled')).toBeDefined();
     });
 });

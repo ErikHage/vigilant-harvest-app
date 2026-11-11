@@ -54,10 +54,6 @@ test.describe('The planting years pages', () => {
         await plantingYearDetailsPage.checkShowsYear('year: next', 'planted: 1');
     });
 
-    // DocumentsCurrentBehavior: Create is never disabled, so it sends a year
-    // with no dates; the service refuses it ("lastFrostDate is required"), and
-    // the page says only "error adding planting year" (backlog A14). Should
-    // offer Create only once both dates are picked
     test('add a year only once both its dates are picked', async ({
         garden, browserClock, plantingYearsPage, addPlantingYearPage,
     }) => {
@@ -69,10 +65,6 @@ test.describe('The planting years pages', () => {
         await addPlantingYearPage.checkIsShown();
 
         await addPlantingYearPage.checkCreateNeedsBothDates();
-        await addPlantingYearPage.create();
-
-        await addPlantingYearPage.checkAlertSays('message: error adding planting year');
-        await addPlantingYearPage.checkIsShown();
     });
 
     // DocumentsCurrentBehavior: the details page shows whatever year the store

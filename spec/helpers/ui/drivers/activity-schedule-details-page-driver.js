@@ -1,4 +1,4 @@
-import { expectEnabled, expectEventually, expectHidden, expectText, expectUrl, expectVisible } from './assertions';
+import { expectDisabled, expectEventually, expectHidden, expectText, expectUrl, expectVisible } from './assertions';
 import { chooseOption } from './select';
 import { escaped, urlOf } from './urls';
 import { status } from '../support/status-codes';
@@ -91,15 +91,15 @@ export function createActivityScheduleDetailsPageDriver(page, serviceCalls) {
             await expectHidden(dialog, 'adding a schedule item');
         },
 
-        /** Pinned (A29): as `addItem`, and Create is offered for the interval, whatever it is. */
-        async addItemOfferingCreateForAnyInterval(item) {
-            const what = `adding a schedule item every ${item.interval}`;
-
+        /** Opens Add Item, and fills it in with `item`, without creating it. */
+        async startAddingItem(item) {
             await openDialog('Add Activity Schedule Item', main.getByRole('button', { name: 'Add Item' }));
             await fillItem(item);
-            await expectEnabled(dialog.getByRole('button', { name: 'Create' }), what);
-            await dialog.getByRole('button', { name: 'Create' }).click();
-            await expectHidden(dialog, what);
+        },
+
+        /** The open Add Item dialog withholds Create, as for an interval that isn't a whole number of at least 1. */
+        async withholdsCreate() {
+            await expectDisabled(dialog.getByRole('button', { name: 'Create' }), 'the Add Item dialog, with that interval');
         },
 
         /**

@@ -130,15 +130,16 @@ describe('EditScheduleItemDialog', () => {
         expect(form(wrapper)).toMatchObject({ frequency: 'daily', interval: '3', notes: 'Every other week' });
     });
 
-    // The service takes an item without notes, as it may have been saved
-    it('keeps Save disabled for an item with no notes, until some are written', async () => {
-        const wrapper = mountDialog({ scheduleItem: aScheduleItem({ notes: null }) });
+    // The service takes an item without a subcategory or notes (backlog B33)
+    it('offers Save for an item with no subcategory or notes', async () => {
+        const wrapper = mountDialog({ scheduleItem: aScheduleItem({ subType: null, notes: null }) });
         await open(wrapper);
-        expect(saveDisabled()).toBe(true);
-
-        await inputLabelled(dialog(), 'Notes').setValue('Side-dress');
 
         expect(saveDisabled()).toBe(false);
+
+        await press(dialog(), 'Save');
+
+        expect(wrapper.props('onSubmit')).toHaveBeenCalledWith(expect.objectContaining({ subType: null, notes: null }));
     });
 
     it('closes on Save with no onSubmit given', async () => {
@@ -188,16 +189,13 @@ describe('EditScheduleItemDialog', () => {
         expect(isOpen()).toBe(true);
     });
 
-    // DocumentsCurrentBehavior: only a blank or 0 interval disables Save, so
-    // a negative one goes into the rule (backlog A29). Should take a whole
-    // number of at least 1
-    it('saves an interval of -1', async () => {
+    // The interval is a whole number of at least 1 (backlog A29)
+    it.each([['-1'], ['0'], ['1.5'], ['']])("doesn't offer Save for an interval of %j", async interval => {
         const wrapper = mountDialog();
         await open(wrapper);
-        await inputLabelled(dialog(), 'Interval').setValue('-1');
 
-        await press(dialog(), 'Save');
+        await inputLabelled(dialog(), 'Interval').setValue(interval);
 
-        expect(wrapper.props('onSubmit').mock.calls[0][0].recurrenceRule).toBe('RRULE:FREQ=WEEKLY;INTERVAL=-1');
+        expect(saveDisabled()).toBe(true);
     });
 });

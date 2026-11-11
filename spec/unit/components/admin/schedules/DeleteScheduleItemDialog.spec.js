@@ -41,7 +41,7 @@ describe('DeleteScheduleItemDialog', () => {
         expect(details(dialog)).toEqual([
             ['Activity type', 'Fertilize'],
             ['Subcategory', 'Blood Meal'],
-            ['Recurrence', 'RRULE:FREQ=WEEKLY;INTERVAL=2'],
+            ['Recurrence', 'every 2 weeks'],
             ['Date(s)', 'May 1 - Sep 30'],
             ['Notes', 'Side-dress the tomatoes'],
         ]);

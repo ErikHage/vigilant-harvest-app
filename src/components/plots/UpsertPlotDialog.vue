@@ -35,8 +35,8 @@
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn color="error" text @click="handleOnCancel">Cancel</v-btn>
-        <v-btn v-if="isEditMode" color="primary" text @click="handleSavePlot">Update</v-btn>
-        <v-btn v-else color="primary" text @click="handleSavePlot">Create</v-btn>
+        <v-btn v-if="isEditMode" color="primary" text :disabled="!canSave" @click="handleSavePlot">Update</v-btn>
+        <v-btn v-else color="primary" text :disabled="!canSave" @click="handleSavePlot">Create</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -44,6 +44,7 @@
 
 <script>
 import { saveFailureMessage } from '@/utils/save-failures';
+import { hasText, isWholeNumber } from '@/utils/form-rules';
 
 export default {
   name: 'UpsertPlotDialog',
@@ -89,6 +90,14 @@ export default {
   },
 
   computed: {
+    // what the service requires: a name, a type, and its sizes in whole inches
+    canSave() {
+      return hasText(this.plotCopy.friendlyName)
+          && hasText(this.plotCopy.plotType)
+          && isWholeNumber(this.plotCopy.lengthInInches)
+          && isWholeNumber(this.plotCopy.widthInInches);
+    },
+
     showDialog() {
       return this.show;
     },

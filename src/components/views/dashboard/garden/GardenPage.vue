@@ -110,6 +110,7 @@
         :harvest-types="harvestTypes"
         :on-cancel="closeConfirmDialog"
         :on-back="goBackToHarvestDialog"
+        :saving="saving"
         :on-confirm="saveHarvests"/>
 
   </v-container>
@@ -154,6 +155,8 @@ export default {
 
     harvestsConfirmDialog: false,
     saveErrorMessage: '',
+    // a save in flight: Confirm waits for it, so a second press can't file the harvests twice
+    saving: false,
   }),
 
   computed: {
@@ -327,6 +330,9 @@ export default {
     },
 
     async saveHarvests() {
+      if (this.saving) {
+        return;
+      }
       const mappedHarvests = Object.values(this.harvestsForm)
           .filter(h => h.quantity > 0)
           .map(h => ({
@@ -338,6 +344,7 @@ export default {
           }));
 
       if (mappedHarvests.length > 0) {
+        this.saving = true;
         try {
           await this.upsertHarvests(mappedHarvests);
         } catch (err) {
@@ -345,6 +352,8 @@ export default {
           this.saveErrorMessage = harvestUtils.upsertErrorMessage(err, 'error saving harvests');
           this.goBackToHarvestDialog();
           return;
+        } finally {
+          this.saving = false;
         }
       } else {
         console.log('no harvests entered, skipping save');

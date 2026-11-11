@@ -29,7 +29,7 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="error" text @click="handleOnCancel(isActive)">Cancel</v-btn>
-          <v-btn color="primary" text :disabled="!form.subcategoryName" @click="handleSaveSubcategory(isActive)">Add</v-btn>
+          <v-btn color="primary" text :disabled="!canAdd" @click="handleSaveSubcategory(isActive)">Add</v-btn>
         </v-card-actions>
       </v-card>
     </template>
@@ -38,6 +38,7 @@
 
 <script>
 import { saveFailureMessage } from '@/utils/save-failures';
+import { hasText } from '@/utils/form-rules';
 
 export default {
   name: 'PlantSubcategoryAddDialog',
@@ -59,6 +60,12 @@ export default {
         subcategoryName: '',
       },
     };
+  },
+
+  computed: {
+    canAdd() {
+      return hasText(this.form.subcategoryName);
+    },
   },
 
   methods: {

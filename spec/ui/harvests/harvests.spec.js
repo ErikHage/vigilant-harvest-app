@@ -46,17 +46,15 @@ test.describe('The harvests page', () => {
         await harvestsPage.checkShowsHarvest('planting: early', 'on: 2026-07-09');
     });
 
-    // Update is never disabled, so a harvest of nothing goes to the service,
-    // which refuses it (400), and the dialog shows its words (backlog B30,
-    // tier B)
-    test('refuses a harvest of nothing', async ({ harvestsPage }) => {
+    // The service refuses a harvest of nothing, so Update waits for more (backlog B30)
+    test('offers Update only for a harvest of something', async ({ harvestsPage }) => {
         await harvestsPage.open();
         await harvestsPage.checkIsShown();
         await harvestsPage.checkShowsDay('on: 2026-07-09');
 
-        await harvestsPage.tryToEditHarvest('planting: early', 'quantity: 0');
+        await harvestsPage.startEditingHarvest('planting: early', 'quantity: 0');
 
-        await harvestsPage.checkEditRefused('message: harvests[0].quantity must be greater than 0');
+        await harvestsPage.checkUpdateNeedsAQuantity();
     });
 });
 

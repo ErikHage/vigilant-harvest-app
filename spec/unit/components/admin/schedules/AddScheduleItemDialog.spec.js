@@ -87,16 +87,18 @@ describe('AddScheduleItemDialog', () => {
         expect(createDisabled()).toBe(false);
     });
 
-    // The service takes an item without a subtype, a rule, dates or notes
+    // The service requires a type; the rule and the dates are the app's, and
+    // the interval a whole number of at least 1 (backlog A29). A subcategory
+    // and notes are optional, as they are to the service (backlog B33)
     it.each([
         ['a type', { type: null, subType: null }],
-        ['a subcategory', { subType: null }],
         ['a frequency', { frequency: null }],
         ['an interval', { interval: '' }],
         ['an interval above 0', { interval: '0' }],
+        ['an interval above -1', { interval: '-1' }],
+        ['a whole interval, not 1.5', { interval: '1.5' }],
         ['a start date', { start: null }],
         ['an end date', { end: null }],
-        ['notes', { notes: null }],
     ])('keeps Create disabled without %s', async (_, missing) => {
         const wrapper = mountDialog();
         await open(wrapper);
@@ -168,20 +170,13 @@ describe('AddScheduleItemDialog', () => {
         expect(inputLabelled(dialog(), 'Notes').element.value).toBe('Side-dress the tomatoes');
     });
 
-    // DocumentsCurrentBehavior: only a blank or 0 interval disables Create,
-    // so a negative or fractional one goes into the rule. The service doesn't
-    // check the rule, and the schedule page shows it as "every -1 weeks"
-    // (backlog A29). Should take a whole number of at least 1
-    it.each([
-        ['-1', 'RRULE:FREQ=WEEKLY;INTERVAL=-1'],
-        ['1.5', 'RRULE:FREQ=WEEKLY;INTERVAL=1.5'],
-    ])('saves an interval of %s', async (interval, rule) => {
+    it('submits an item with no subcategory or notes', async () => {
         const wrapper = mountDialog();
         await open(wrapper);
-        await fillIn(wrapper, { interval });
+        await fillIn(wrapper, { subType: null, notes: null });
 
         await press(dialog(), 'Create');
 
-        expect(wrapper.props('onSubmit').mock.calls[0][0].recurrenceRule).toBe(rule);
+        expect(wrapper.props('onSubmit')).toHaveBeenCalledWith(expect.objectContaining({ subType: null, notes: null }));
     });
 });

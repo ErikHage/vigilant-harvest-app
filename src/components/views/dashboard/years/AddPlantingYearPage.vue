@@ -92,6 +92,7 @@
               <div class="d-flex justify-end">
                 <v-btn
                   color="success"
+                  :disabled="!canCreate"
                   @click="onSubmit"
                 >
                   Create New Planting Year
@@ -115,6 +116,7 @@ import dayjs from "dayjs";
 import plantingUtils from "@/utils/plantings";
 import { toLocalDate } from '@/utils/dates';
 import { alertOf } from '@/store/alerts';
+import { isChosen } from '@/utils/form-rules';
 
 export default {
   name: "AddPlantingYearPage",
@@ -132,6 +134,11 @@ export default {
   },
 
   computed: {
+    // what the service requires: both dates
+    canCreate() {
+      return isChosen(this.newPlantingYear.lastFrostDate) && isChosen(this.newPlantingYear.targetPlantingDate);
+    },
+
     ...mapState(usePlantingYearsStore, {
       plantingYears: 'plantingYears',
     }),

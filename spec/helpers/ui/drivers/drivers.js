@@ -54,7 +54,7 @@ export function createDrivers(page) {
         plantingYearDetailsPage: createPlantingYearDetailsPageDriver(page, callControl),
         gardenPage: createGardenPageDriver(page, callControl),
         journalPage: createJournalPageDriver(page),
-        activityLogPage: createActivityLogPageDriver(page, serviceCalls, pageErrors),
+        activityLogPage: createActivityLogPageDriver(page),
         harvestsPage: createHarvestsPageDriver(page, serviceCalls),
         plantingStatsPage: createStatsPageDriver(page, 'planting'),
         plantStatsPage: createStatsPageDriver(page, 'plant'),

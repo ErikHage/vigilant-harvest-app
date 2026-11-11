@@ -53,7 +53,7 @@
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn color="error" text @click="handleOnCancel">Cancel</v-btn>
-        <v-btn color="primary" text @click="handleSavePlant">Create</v-btn>
+        <v-btn color="primary" text :disabled="!canCreate" @click="handleSavePlant">Create</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -62,6 +62,7 @@
 <script>
 import { saveFailureMessage } from '@/utils/save-failures';
 import harvestUtils from "@/utils/harvest-utils";
+import { hasText, isChosen } from '@/utils/form-rules';
 
 export default {
   name: 'AddPlantDialog',
@@ -108,6 +109,11 @@ export default {
   },
 
   computed: {
+    // what the service requires: a name and a subcategory
+    canCreate() {
+      return hasText(this.form.friendlyName) && isChosen(this.form.subcategoryId);
+    },
+
     showDialog() {
       return this.show;
     },

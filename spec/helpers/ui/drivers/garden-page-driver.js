@@ -1,4 +1,4 @@
-import { expectCount, expectEnabled, expectHidden, expectText, expectVisible } from './assertions';
+import { expectCount, expectDisabled, expectHidden, expectText, expectVisible } from './assertions';
 import { createRoutedPageDriver } from './routed-page-driver';
 import { chooseOption } from './select';
 
@@ -81,22 +81,26 @@ export function createGardenPageDriver(page, callControl) {
             await confirm.click();
         },
 
-        /** Pinned (A27): while the save is held, Confirm is still offered. */
-        async offersConfirmWhileSaving() {
-            await expectEnabled(confirm, 'the confirm dialog, while the harvests are saving');
+        /** While the save is held, the confirm dialog withholds Confirm. */
+        async withholdsConfirmWhileSaving() {
+            await expectDisabled(confirm, 'the confirm dialog, while the harvests are saving');
         },
 
-        /** Presses Confirm again, then lets the held saves go, and waits for the dialog to close. */
+        /**
+         * Presses Confirm again, then lets the held save go, and waits for the
+         * dialog to close. Confirm is disabled, so the press is forced: it
+         * stands for a person's click on a button that takes none.
+         */
         async confirmAgainAndLetTheSaveGo() {
-            await confirm.click();
+            await confirm.click({ force: true });
             callControl.release();
             await expectHidden(confirmDialog, 'confirming the harvests again');
         },
 
-        /** Pinned (A27): the planting's harvest shows twice what was entered, saved once per press. */
-        async harvestFiledTwice({ plotName, harvested, harvestType }) {
+        /** The planting's harvest shows what was entered, saved once. */
+        async harvestFiledOnce({ plotName, harvested, harvestType }) {
             await expectText(plotCard(plotName).locator('.harvest-chips .v-chip'),
-                [new RegExp(`^\\s*${harvestShown(harvested * 2, harvestType)}\\s*\\S*\\s*$`)],
+                [new RegExp(`^\\s*${harvestShown(harvested, harvestType)}\\s*\\S*\\s*$`)],
                 'the harvest, after Confirm was pressed twice');
         },
     };

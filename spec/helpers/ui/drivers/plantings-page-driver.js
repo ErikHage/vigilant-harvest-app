@@ -1,5 +1,4 @@
-import { expectCount, expectEnabled, expectHidden, expectText, expectVisible } from './assertions';
-import { pageAlertSays, saveIsRejectedSaying } from './page-alert';
+import { expectCount, expectDisabled, expectHidden, expectText, expectVisible } from './assertions';
 import { createRoutedPageDriver } from './routed-page-driver';
 import { chooseOption } from './select';
 
@@ -32,12 +31,12 @@ export function createPlantingsPageDriver(page) {
             await expectVisible(dialog.getByText('Add Planting', { exact: true }), 'opening the Add Planting dialog');
         },
 
-        /** Clicks Create, and waits for the dialog to close, as it does whatever the service says. */
         /** Clicks Create, and nothing more: a refused save keeps the dialog open. */
         async pressCreate() {
             await create.click();
         },
 
+        /** Clicks it, and waits for the dialog to close, as a save that works does. */
         async create() {
             await this.pressCreate();
             await expectHidden(dialog, 'creating a planting');
@@ -54,9 +53,9 @@ export function createPlantingsPageDriver(page) {
             await this.create();
         },
 
-        /** Pinned (A16): Create is offered before anything is entered. */
-        async offersCreateWithNothingEntered() {
-            await expectEnabled(create, 'the Add Planting dialog, before anything is entered');
+        /** With nothing entered, the Add Planting dialog withholds Create. */
+        async withholdsCreateWithNothingEntered() {
+            await expectDisabled(create, 'the Add Planting dialog, before anything is entered');
         },
 
         /**
@@ -90,15 +89,6 @@ export function createPlantingsPageDriver(page) {
             await search.fill(name);
             await expectVisible(rowOf(name), what);
             await rowOf(name).locator('.mdi-magnify').click();
-        },
-
-        async alertSays(message) {
-            await pageAlertSays(page, message, 'the plantings page, after a failed save');
-        },
-
-        /** The dialog stays open, saying why the service refused the save, as does the page's alert. */
-        async createIsRejectedSaying(message) {
-            await saveIsRejectedSaying(page, message, 'the plantings page, after the service refused a save');
         },
     };
 }

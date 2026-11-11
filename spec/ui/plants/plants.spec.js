@@ -38,19 +38,25 @@ test.describe('The plants page', () => {
         await plantDetailsPage.checkShowsPlant('plant: sungold');
     });
 
-    // DocumentsCurrentBehavior: the dialog's fields are marked required but
-    // have no rules, so Create is offered with nothing entered, and the
-    // service refuses the plant (backlog A16). Should offer Create only once
-    // the name, subcategory and the rest are given. The alert says the
-    // service's reason
-    test('waits for the required fields, and says why a plant was refused', async ({ plantsPage }) => {
+    test('waits for the required fields', async ({ plantsPage }) => {
         await plantsPage.open();
         await plantsPage.checkIsShown();
         await plantsPage.openAddDialog();
 
         await plantsPage.checkCreateNeedsTheRequiredFields();
-        await plantsPage.create();
+    });
 
-        await plantsPage.checkCreateIsRejected('message: subcategoryId is required');
+    // The service refuses a second plant of the same name: the dialog stays
+    // open, with what was entered, and says why
+    test('says why a plant was refused, keeping the dialog open', async ({ garden, plantsPage }) => {
+        await garden.hasCategory('category: tomatoes');
+        await garden.hasSubcategory('subcategory: cherry', 'category: tomatoes');
+        await garden.hasPlant('plant: sungold', 'subcategory: cherry');
+        await plantsPage.open();
+        await plantsPage.checkIsShown();
+
+        await plantsPage.addPlantWithTheNameOf('plant: sungold');
+
+        await plantsPage.checkCreateIsRejected('message: Friendly name already in use');
     });
 });

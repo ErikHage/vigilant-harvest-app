@@ -38,7 +38,7 @@
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn color="error" @click="handleOnCancel">Cancel</v-btn>
-        <v-btn color="primary" @click="handleSavePlanting">Create</v-btn>
+        <v-btn color="primary" :disabled="!canCreate" @click="handleSavePlanting">Create</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -47,6 +47,7 @@
 <script>
 import { saveFailureMessage } from '@/utils/save-failures';
 import sorting from "@/utils/sorting";
+import { hasText, isChosen } from '@/utils/form-rules';
 
 export default {
   name: "AddPlantingDialog",
@@ -72,6 +73,11 @@ export default {
   },
 
   computed: {
+    // what the service requires: a name and a plant
+    canCreate() {
+      return hasText(this.planting.name) && isChosen(this.planting.plantId);
+    },
+
     showDialog() {
       return this.show;
     },

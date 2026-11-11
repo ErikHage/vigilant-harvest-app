@@ -67,16 +67,12 @@ test.describe('An activity schedule\'s details page', () => {
         await activityScheduleDetailsPage.checkShowsSchedule('schedule: roses', 'items: 1');
     });
 
-    // DocumentsCurrentBehavior: Create is disabled only for a blank or 0
-    // interval, so a negative one goes into the rule, which the service
-    // stores as it is, and the page shows (backlog A29). Should offer Create
-    // only for a whole number of at least 1
     test('adds an item only for an interval of at least 1', async ({ activityScheduleDetailsPage }) => {
         await activityScheduleDetailsPage.checkIsShownFor('schedule: roses');
 
-        await activityScheduleDetailsPage.addItemEvery('item: feed', 'schedule: roses', 'interval: -1');
+        await activityScheduleDetailsPage.startAddingItemEvery('item: feed', 'schedule: roses', 'interval: -1');
 
-        await activityScheduleDetailsPage.checkListsItem('item: feed');
+        await activityScheduleDetailsPage.checkCreateNeedsAWholeInterval();
     });
 });
 

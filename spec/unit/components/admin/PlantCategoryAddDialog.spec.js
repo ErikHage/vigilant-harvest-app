@@ -71,19 +71,12 @@ describe('PlantCategoryAddDialog', () => {
         expect(inputLabelled(dialogTitled('Add Category'), 'Category Name').element.value).toBe('Alliums');
     });
 
-    // DocumentsCurrentBehavior: Create is enabled by any text, but the name
-    // is trimmed when sent, so a name of spaces goes out as ''. The service
-    // rejects it (categoryName is required), and the dialog stays open,
-    // saying so (backlog A16). Should keep Create disabled until the trimmed
-    // name has something in it
-    it('submits a name of spaces as an empty name', async () => {
-        const wrapper = mountDialog();
-        const dialog = await open(wrapper);
+    // The service reads a name of spaces as missing (backlog A16)
+    it("doesn't offer Create for a name of spaces", async () => {
+        const dialog = await open(mountDialog());
+
         await inputLabelled(dialog, 'Category Name').setValue('   ');
-        expect(buttonLabelled(dialog, 'Create').attributes('disabled')).toBeUndefined();
 
-        await press(dialog, 'Create');
-
-        expect(wrapper.props('onSubmit')).toHaveBeenCalledWith({ categoryName: '' });
+        expect(buttonLabelled(dialog, 'Create').attributes('disabled')).toBeDefined();
     });
 });

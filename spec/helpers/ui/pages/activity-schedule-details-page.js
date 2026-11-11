@@ -47,14 +47,20 @@ export function createActivityScheduleDetailsPage(world, driver) {
         },
 
         /**
-         * As `addItem`, every `interval` weeks, any whole number: Create is
-         * offered only for an interval of at least 1.
+         * Opens Add Item, and fills it in as `addItem` does, every `interval`
+         * weeks, any whole number, without creating it.
          */
-        async addItemEvery(...args) {
+        async startAddingItemEvery(...args) {
             const params = parseDslArgs(args, { item: item(), schedule: schedule(), interval: interval() });
 
-            await driver.addItemOfferingCreateForAnyInterval(
-                world.newScheduleItem(params.item, params.schedule, params.interval));
+            await driver.startAddingItem(world.newScheduleItem(params.item, params.schedule, params.interval));
+        },
+
+        /** The open Add Item dialog offers Create only for an interval of at least 1. No parameters. */
+        async checkCreateNeedsAWholeInterval(...args) {
+            parseDslArgs(args, {});
+
+            await driver.withholdsCreate();
         },
 
         /** The items list the `item` as the test has it. */

@@ -4,6 +4,7 @@ import { VSelect } from 'vuetify/components';
 import GardenPage from '@/components/views/dashboard/garden/GardenPage.vue';
 import HarvestSummary from '@/components/harvests/HarvestSummary.vue';
 import DatePickerDialogActivator from '@/components/utils/DatePickerDialogActivator.vue';
+import ConfirmHarvestsDialog from '@/components/garden/ConfirmHarvestsDialog.vue';
 import { ApiError } from '@/api/error-handler';
 import { useHarvestsStore, usePlantingsStore, usePlantsStore, usePlotsStore } from '@/store';
 import { mountWithPlugins } from '../../../../../helpers/mount';
@@ -497,22 +498,19 @@ describe('GardenPage', () => {
             expect(harvests.upsertHarvests.mock.calls[0][0][0].harvestDate).toBe('2026-07-04');
         });
 
-        // DocumentsCurrentBehavior: Confirm stays enabled while the save is in
-        // flight, and each press saves the harvests again. The service adds a
-        // harvest to one already filed for its planting, day and type, so a
-        // double press doubles them. Should disable Confirm until the save is
-        // done (backlog A27)
-        it('saves again on a second Confirm while the first is in flight', async () => {
+        // The service adds a harvest to one already filed for its planting, day
+        // and type, so a second save would double them (backlog A27)
+        it('saves once, with Confirm disabled, while the save is in flight', async () => {
             const { wrapper, harvests } = await mountPage({
                 beforeMount: ({ harvests }) => harvests.upsertHarvests.mockReturnValue(new Promise(() => {})),
             });
             const confirm = await enterHarvests(wrapper);
 
             await press(confirm, 'Confirm');
-            await press(confirm, 'Confirm');
 
-            expect(harvests.upsertHarvests).toHaveBeenCalledTimes(2);
-            expect(harvests.upsertHarvests.mock.calls[1][0]).toEqual(harvests.upsertHarvests.mock.calls[0][0]);
+            expect(buttonLabelled(confirm, 'Confirm').attributes('disabled')).toBeDefined();
+            await wrapper.findComponent(ConfirmHarvestsDialog).props('onConfirm')();
+            expect(harvests.upsertHarvests).toHaveBeenCalledTimes(1);
         });
     });
 });

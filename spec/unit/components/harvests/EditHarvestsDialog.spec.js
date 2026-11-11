@@ -46,6 +46,7 @@ async function setType(wrapper, row, harvestTypeId) {
     await flushPromises();
 }
 
+const updateButton = () => buttonLabelled(dialog(), 'Update');
 const warnings = () => dialog().findAll('.merge-warning').map(warning => warning.text());
 
 async function press(label) {
@@ -166,16 +167,22 @@ describe('EditHarvestsDialog', () => {
         expect(warnings()[0]).toBe('Same planting and type as another row. Saving combines these into one 14 unspecified harvest.');
     });
 
-    // Update is never disabled, and only the service checks a quantity: it
-    // answers 400 (harvests[0].quantity must be greater than 0), which the
-    // page shows here (validation-fixes doc, "worth doing"). Nor can a
-    // harvest be removed: the app has no call to delete one
-    it.each([['', ''], ['0', 0], ['-1', -1]])('submits a quantity of "%s"', async (entered, sent) => {
-        const wrapper = await mountDialog();
+    // The service requires each quantity to be more than nothing (validation-
+    // fixes doc, "worth doing"), so Update waits for that. A harvest can't be
+    // removed: the app has no call to delete one (backlog B30, in F10)
+    it.each([[''], ['0'], ['-1']])("doesn't offer Update for a quantity of \"%s\"", async entered => {
+        await mountDialog();
+
         await setQuantity(0, entered);
 
-        await press('Update');
+        expect(updateButton().attributes('disabled')).toBeDefined();
+    });
 
-        expect(wrapper.props('onSubmit').mock.calls[0][0][0].quantity).toBe(sent);
+    it('offers Update for a quantity with a fraction', async () => {
+        await mountDialog();
+
+        await setQuantity(0, '1.5');
+
+        expect(updateButton().attributes('disabled')).toBeUndefined();
     });
 });

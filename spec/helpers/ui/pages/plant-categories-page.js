@@ -1,6 +1,6 @@
 import { parseDslArgs } from '@feral-auth/ts-simple-dsl';
 
-import { category, filterBy, message, name, subcategories, subcategory } from '../params';
+import { category, filterBy, name, subcategories, subcategory } from '../params';
 import { dashboardComponents, routedPageSteps } from './routed-page';
 
 // What a name of `spaces` is typed as
@@ -57,30 +57,18 @@ export function createPlantCategoriesPage(world, driver) {
         async checkConfirmNeedsAName(...args) {
             parseDslArgs(args, {});
 
-            await driver.offersConfirmForANameOfSpaces();
+            await driver.withholdsConfirmForANameOfSpaces();
         },
 
         /**
          * Clicks Create or Add in the open dialog. No parameters. A save that succeeds
          * closes it; one the service refuses keeps it open, for a check to follow.
          */
-        async confirm(...args) {
-            parseDslArgs(args, {});
-
-            await driver.pressConfirm();
-        },
-
         /**
          * The service refused the save: the dialog stays open, saying why
          * (`message`), as does the page's alert. Check it straight away: the
          * alert fades after three seconds.
          */
-        async checkConfirmIsRejected(...args) {
-            const params = parseDslArgs(args, { message: message() });
-
-            await driver.confirmIsRejectedSaying(params.message);
-        },
-
         /**
          * Filtering by the `category`'s own name finds it, with the subcategories
          * the test named in `subcategory`, in order (none if left out), and no
@@ -97,13 +85,6 @@ export function createPlantCategoriesPage(world, driver) {
                 throw new Error('checkCategoryFound: `by: subcategory` needs a `subcategory` to filter by');
             }
             await driver.findsCategoryBy(found, subcategoryNames, text);
-        },
-
-        /** The page's alert says `message`. Check it straight away: it fades after three seconds. */
-        async checkAlertSays(...args) {
-            const params = parseDslArgs(args, { message: message() });
-
-            await driver.alertSays(params.message);
         },
     };
 }

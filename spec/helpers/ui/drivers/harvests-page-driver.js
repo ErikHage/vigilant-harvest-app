@@ -1,4 +1,4 @@
-import { expectCount, expectEnabled, expectEventually, expectHidden, expectText, expectVisible } from './assertions';
+import { expectCount, expectDisabled, expectEventually, expectHidden, expectText, expectVisible } from './assertions';
 import { createRoutedPageDriver } from './routed-page-driver';
 import { escaped } from './urls';
 import { status } from '../support/status-codes';
@@ -79,19 +79,13 @@ export function createHarvestsPageDriver(page, serviceCalls) {
         },
 
         /** As `editHarvest`, but leaves the dialog to the step after: Update is offered whatever the quantity. */
-        async editOfferingUpdateAnyway({ name }, quantity) {
-            const what = `editing ${name}'s harvest to ${quantity}`;
-
-            await changeQuantity(name, quantity, what);
-            const update = dialog.getByRole('button', { name: 'Update' });
-            await expectEnabled(update, what);
-            await update.click();
+        async startEditing({ name }, quantity) {
+            await changeQuantity(name, quantity, `editing ${name}'s harvest to ${quantity}`);
         },
 
-        /** The edit dialog stays open, saying `message`, the service's own words. */
-        async editRefusedByTheService(message) {
-            await expectText(dialog.locator('.v-alert'), message, 'the edit dialog, after Update');
-            await expectVisible(dialog.getByText('Edit Harvests', { exact: true }), 'the edit dialog, after Update');
+        /** The open edit dialog withholds Update, as for a quantity of nothing. */
+        async withholdsUpdate() {
+            await expectDisabled(dialog.getByRole('button', { name: 'Update' }), 'the edit dialog, with that quantity');
         },
 
         /**

@@ -166,27 +166,27 @@ describe('AddPlantingYearPage', () => {
             plantingYearsState: { alertVisible: true, alertType: 'error', alertMessage: 'error adding planting year' },
         });
         plantingYearsStore.addPlantingYear.mockRejectedValue(new Error('Request failed with status code 400'));
+        await pickDate(wrapper, 'Set Last Frost Date', new Date(2027, 4, 10));
+        await pickDate(wrapper, 'Set Target Planting Date', new Date(2027, 4, 17));
 
         await buttonLabelled(wrapper, 'Create New Planting Year').trigger('click');
         await flushPromises();
 
+        expect(plantingYearsStore.addPlantingYear).toHaveBeenCalledTimes(1);
         expect($router.push).not.toHaveBeenCalled();
         expect(wrapper.find('.v-alert').text()).toBe('error adding planting year');
     });
 
-    // DocumentsCurrentBehavior: Create is never disabled, so it sends a year
-    // with no dates, which the service rejects (lastFrostDate is required), and
-    // the alert says only "error adding planting year". Should stay disabled
-    // until both dates are picked (validation-fixes doc, "worth doing")
-    it('sends a year with no dates', async () => {
-        const { wrapper, plantingYearsStore } = await mountPage();
+    // The service requires both dates (validation-fixes doc, "worth doing")
+    it('offers Create only once both dates are picked', async () => {
+        const { wrapper } = await mountPage();
+        const create = () => buttonLabelled(wrapper, 'Create New Planting Year');
+        expect(create().attributes('disabled')).toBeDefined();
 
-        expect(buttonLabelled(wrapper, 'Create New Planting Year').attributes('disabled')).toBeUndefined();
-        await buttonLabelled(wrapper, 'Create New Planting Year').trigger('click');
+        await pickDate(wrapper, 'Set Last Frost Date', new Date(2027, 4, 10));
+        expect(create().attributes('disabled')).toBeDefined();
 
-        expect(plantingYearsStore.addPlantingYear).toHaveBeenCalledWith(expect.objectContaining({
-            lastFrostDate: null,
-            targetPlantingDate: null,
-        }));
+        await pickDate(wrapper, 'Set Target Planting Date', new Date(2027, 4, 17));
+        expect(create().attributes('disabled')).toBeUndefined();
     });
 });

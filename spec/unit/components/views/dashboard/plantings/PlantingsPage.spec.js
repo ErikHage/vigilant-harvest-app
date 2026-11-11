@@ -136,15 +136,16 @@ describe('PlantingsPage', () => {
 
     it('keeps the dialog open, with the name, and says why, when the save fails', async () => {
         const { wrapper, plantingsStore, calls } = await mountPage();
-        plantingsStore.createPlanting.mockRejectedValue(apiError(400, serviceErrorBody(400, 'plantId is required')));
+        plantingsStore.createPlanting.mockRejectedValue(apiError(400, serviceErrorBody(400, 'name must be at most 255 characters')));
         await buttonLabelled(wrapper, 'Add').trigger('click');
         await flushPromises();
         await inputLabelled(dialogTitled('Add Planting'), 'Name').setValue('Fall beans');
+        await wrapper.findComponent(AddPlantingDialog).findComponent(VAutocomplete).setValue('plant-1');
 
         await buttonLabelled(dialogTitled('Add Planting'), 'Create').trigger('click');
         await flushPromises();
 
-        expect(findDialog('Add Planting').text()).toContain('plantId is required');
+        expect(findDialog('Add Planting').text()).toContain('name must be at most 255 characters');
         expect(inputLabelled(dialogTitled('Add Planting'), 'Name').element.value).toBe('Fall beans');
         expect(calls).toHaveLength(3);
     });

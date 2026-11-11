@@ -36,16 +36,26 @@ export function createPlantsPage(world, driver) {
         async checkCreateNeedsTheRequiredFields(...args) {
             parseDslArgs(args, {});
 
-            await driver.offersCreateWithNothingEntered();
+            await driver.withholdsCreateWithNothingEntered();
         },
 
         /**
-         * Clicks Create in the open Add dialog. No parameters. A save that succeeds
-         * closes it; one the service refuses keeps it open, for a check to follow.
+         * Adds a plant through the dialog with the name of the `plant` the test
+         * already has, in its subcategory, and presses Create. The service
+         * refuses a name in use, so nothing is made to clean up.
          */
-        async create(...args) {
-            parseDslArgs(args, {});
+        async addPlantWithTheNameOf(...args) {
+            const params = parseDslArgs(args, { plant: plant() });
+            const { friendlyName, categoryName, subcategoryName } = world.plantNamed(params.plant);
 
+            await driver.startAddingPlant({
+                friendlyName,
+                categoryName,
+                subcategoryName,
+                lifespanType: 'Annual',
+                harvesting: { defaultHarvestType: 'count' },
+                description: 'A second plant of the same name.',
+            });
             await driver.pressCreate();
         },
 

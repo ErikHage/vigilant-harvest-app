@@ -69,17 +69,28 @@ describe('UpsertPlotDialog', () => {
             expect(inputLabelled(dialogTitled('Add Plot'), 'Name').element.value).toBe('');
         });
 
-        // DocumentsCurrentBehavior: Create is never disabled and the fields
-        // marked required have no rules, so an empty plot is sent. The service
-        // rejects it (friendlyName and plotType are required), and the dialog
-        // stays open, saying so. Should keep Create disabled until a name and
-        // type are given
-        it('submits an empty plot', async () => {
+        // What the service requires: a name, a type, and sizes in whole
+        // inches (backlog A16)
+        it('offers Create only once a name and type are given', async () => {
             const wrapper = await mountDialog();
+            const create = () => buttonLabelled(dialogTitled('Add Plot'), 'Create');
+            expect(create().attributes('disabled')).toBeDefined();
 
-            await buttonLabelled(dialogTitled('Add Plot'), 'Create').trigger('click');
+            await inputLabelled(dialogTitled('Add Plot'), 'Name').setValue('North bed');
+            expect(create().attributes('disabled')).toBeDefined();
 
-            expect(wrapper.props('onSubmit')).toHaveBeenCalledWith(expect.objectContaining({ friendlyName: '', plotType: '' }));
+            await typeSelect(wrapper).setValue('Bed');
+            expect(create().attributes('disabled')).toBeUndefined();
+        });
+
+        it.each([['', 'a cleared length'], ['12.5', 'a length with a fraction']])("doesn't offer Create for %j, %s", async length => {
+            const wrapper = await mountDialog();
+            await inputLabelled(dialogTitled('Add Plot'), 'Name').setValue('North bed');
+            await typeSelect(wrapper).setValue('Bed');
+
+            await inputLabelled(dialogTitled('Add Plot'), 'Length (inches)').setValue(length);
+
+            expect(buttonLabelled(dialogTitled('Add Plot'), 'Create').attributes('disabled')).toBeDefined();
         });
     });
 

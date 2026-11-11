@@ -170,22 +170,19 @@ describe('AddPlantDialog', () => {
         expect(inputLabelled(dialogTitled('Add Plant'), 'Name').element.value).toBe('');
     });
 
-    // DocumentsCurrentBehavior: Create is never disabled, and the fields marked
-    // required have no rules, so an empty plant is sent. The service rejects
-    // it (subcategoryId is required), and the alert says only "error upserting
-    // plant" (A7). Should keep Create disabled until a name and subcategory are
-    // given
-    it('submits an empty plant', async () => {
+    // What the service requires: a name, of more than spaces, and a
+    // subcategory (backlog A16)
+    it('offers Create only once a name and subcategory are given', async () => {
         const wrapper = await mountDialog();
+        const create = () => buttonLabelled(dialogTitled('Add Plant'), 'Create');
+        expect(create().attributes('disabled')).toBeDefined();
 
-        await buttonLabelled(dialogTitled('Add Plant'), 'Create').trigger('click');
+        await inputLabelled(dialogTitled('Add Plant'), 'Name').setValue('   ');
+        await select(wrapper, 'Category').setValue(categories[0]);
+        await select(wrapper, 'Subcategory').setValue('subcategory-1');
+        expect(create().attributes('disabled')).toBeDefined();
 
-        expect(wrapper.props('onSubmit')).toHaveBeenCalledWith({
-            subcategoryId: null,
-            friendlyName: '',
-            lifespanType: null,
-            description: '',
-            harvesting: { defaultHarvestTypeId: 1 },
-        });
+        await inputLabelled(dialogTitled('Add Plant'), 'Name').setValue('Provider bush bean');
+        expect(create().attributes('disabled')).toBeUndefined();
     });
 });

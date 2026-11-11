@@ -48,7 +48,7 @@
       </v-card-text>
       <v-card-actions>
         <v-btn color="error" @click="handleCancel">Cancel</v-btn>
-        <v-btn color="primary" @click="handleSubmit">Update</v-btn>
+        <v-btn color="primary" :disabled="!canUpdate" @click="handleSubmit">Update</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -56,6 +56,7 @@
 
 <script>
 import harvestUtils from "@/utils/harvest-utils";
+import { isPositiveNumber } from '@/utils/form-rules';
 
 export default {
   name: 'EditHarvestsDialog',
@@ -92,6 +93,11 @@ export default {
   },
 
   computed: {
+    // the service requires each quantity to be more than nothing
+    canUpdate() {
+      return this.harvestsCopy.every(harvest => isPositiveNumber(harvest.quantity));
+    },
+
     showDialog() {
       return this.show;
     },

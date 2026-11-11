@@ -1,6 +1,6 @@
 import { parseDslArgs } from '@feral-auth/ts-simple-dsl';
 
-import { days, message, on, planting, quantity } from '../params';
+import { days, on, planting, quantity } from '../params';
 import { dashboardComponents, routedPageSteps } from './routed-page';
 
 /** The harvests page, a timeline of the chosen year's harvest days, in words. */
@@ -63,20 +63,20 @@ export function createHarvestsPage(world, driver) {
         },
 
         /**
-         * Tries to edit the `planting`'s harvest on the day shown to
-         * `quantity`, and presses Update. The step after says what happened.
+         * Starts editing the `planting`'s harvest on the day shown, typing
+         * `quantity`, without pressing Update.
          */
-        async tryToEditHarvest(...args) {
+        async startEditingHarvest(...args) {
             const params = parseDslArgs(args, { planting: planting(), quantity: quantity() });
 
-            await driver.editOfferingUpdateAnyway(world.plantingNamed(params.planting), params.quantity);
+            await driver.startEditing(world.plantingNamed(params.planting), params.quantity);
         },
 
-        /** The edit was refused: the dialog stays open, saying `message`, word for word. */
-        async checkEditRefused(...args) {
-            const params = parseDslArgs(args, { message: message() });
+        /** The open edit dialog offers Update only for a quantity of more than nothing. No parameters. */
+        async checkUpdateNeedsAQuantity(...args) {
+            parseDslArgs(args, {});
 
-            await driver.editRefusedByTheService(params.message);
+            await driver.withholdsUpdate();
         },
 
         /** With no harvests in the year, the page says to choose a day. No parameters. */

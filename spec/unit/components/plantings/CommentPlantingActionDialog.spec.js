@@ -62,6 +62,7 @@ describe('CommentPlantingActionDialog', () => {
 
         await press(dialog, 'Confirm');
 
+        expect(wrapper.props('onSubmit')).toHaveBeenCalled();
         expect(isOpen()).toBe(true);
     });
 

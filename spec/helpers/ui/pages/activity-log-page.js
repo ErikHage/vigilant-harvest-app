@@ -39,21 +39,7 @@ export function createActivityLogPage(world, driver) {
         async checkConfirmNeedsAnActivity(...args) {
             parseDslArgs(args, {});
 
-            await driver.offersConfirmWithNoActivity();
-        },
-
-        /** Clicks Confirm in Log Activity. No parameters. */
-        async confirm(...args) {
-            parseDslArgs(args, {});
-
-            await driver.confirm();
-        },
-
-        /** After Confirm with no activity: the dialog says what's missing, and nothing was sent. No parameters. */
-        async checkSaysAnActivityIsNeeded(...args) {
-            parseDslArgs(args, {});
-
-            await driver.confirmThrowsWithNoActivity();
+            await driver.withholdsConfirmWithNoActivity();
         },
     };
 }

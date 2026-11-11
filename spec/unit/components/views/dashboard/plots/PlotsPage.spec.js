@@ -83,16 +83,16 @@ describe('PlotsPage', () => {
 
     it('keeps the dialog open, with the edit, and says why, when the save fails', async () => {
         const { wrapper, store } = await mountPage();
-        store.upsertPlot.mockRejectedValue(apiError(400, serviceErrorBody(400, 'friendlyName is required')));
+        store.upsertPlot.mockRejectedValue(apiError(400, serviceErrorBody(400, 'friendlyName must be at most 255 characters')));
         await wrapper.findAll('tbody tr')[0].find('.mdi-pencil').trigger('click');
         await flushPromises();
-        await inputLabelled(dialogTitled('Edit Plot'), 'Name').setValue('');
+        await inputLabelled(dialogTitled('Edit Plot'), 'Name').setValue('North bed, by the fence');
 
         await buttonLabelled(dialogTitled('Edit Plot'), 'Update').trigger('click');
         await flushPromises();
 
-        expect(findDialog('Edit Plot').text()).toContain('friendlyName is required');
-        expect(inputLabelled(dialogTitled('Edit Plot'), 'Name').element.value).toBe('');
+        expect(findDialog('Edit Plot').text()).toContain('friendlyName must be at most 255 characters');
+        expect(inputLabelled(dialogTitled('Edit Plot'), 'Name').element.value).toBe('North bed, by the fence');
         expect(store.fetchPlots).toHaveBeenCalledTimes(1);
     });
 

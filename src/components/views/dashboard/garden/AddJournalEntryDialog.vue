@@ -35,7 +35,7 @@
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn color="error" @click="handleCancel">Cancel</v-btn>
-        <v-btn color="primary" @click="handleSubmit">Confirm</v-btn>
+        <v-btn color="primary" :disabled="!canConfirm" @click="handleSubmit">Confirm</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -47,6 +47,7 @@ import dayjs from 'dayjs';
 
 import DatePickerDialogActivator from "@/components/utils/DatePickerDialogActivator.vue";
 import { toLocalDateTime } from '@/utils/dates';
+import { hasText } from '@/utils/form-rules';
 
 export default {
   name: "AddJournalEntryDialog",
@@ -73,6 +74,13 @@ export default {
       entryDate: dayjs(),
       entryText: '',
     };
+  },
+
+  computed: {
+    // the service takes an empty entry, which shows as a blank one
+    canConfirm() {
+      return hasText(this.entryText);
+    },
   },
 
   methods: {

@@ -107,6 +107,7 @@ import { saveFailureMessage } from '@/utils/save-failures';
 import scheduling from '@/utils/scheduling';
 import { RRule } from 'rrule';
 import MonthDaySelect from "@/components/utils/MonthDaySelect.vue";
+import { isWholeNumber } from '@/utils/form-rules';
 
 export default {
   name: "EditScheduleItemDialog",
@@ -164,15 +165,15 @@ export default {
       return scheduling.yearOffset.items;
     },
 
+    // the service requires a type; the rule and the dates are the app's. A
+    // subtype and notes are optional, as they are to the service
     isUpdateDisabled() {
       return !this.form.entryId ||
           !this.form.activityType ||
-          !this.form.subType ||
           !this.form.frequency ||
-          !this.form.interval ||
+          !isWholeNumber(this.form.interval, 1) ||
           !this.form.startDate ||
-          !this.form.endDate ||
-          !this.form.notes;
+          !this.form.endDate;
     },
   },
 
@@ -204,7 +205,7 @@ export default {
         await this.onSubmit({
           entryId: this.form.entryId,
           activityType: this.form.activityType.name,
-          subType: this.form.subType.name,
+          subType: this.form.subType?.name ?? null,
           recurrenceRule: this.toRecurrenceRuleString(this.form.frequency, this.form.interval),
           startDate: this.form.startDate,
           startDateYearOffset: this.form.startDateYearOffset,

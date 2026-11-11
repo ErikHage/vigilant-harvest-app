@@ -2,6 +2,7 @@ import { flushPromises } from '@vue/test-utils';
 import { httpError } from '../../../../../helpers/http-errors';
 import { VDatePicker } from 'vuetify/components';
 import { mountWithPlugins } from '../../../../../helpers/mount';
+import { buttonLabelled } from '../../../../../helpers/fields';
 import { dialogTitled } from '../../../../../helpers/dialogs';
 import { aSaveInFlight, isOpen, openAction, press } from '../../../../../helpers/action-dialogs';
 import AddJournalEntryDialog from '@/components/views/dashboard/garden/AddJournalEntryDialog.vue';
@@ -69,20 +70,24 @@ describe('AddJournalEntryDialog', () => {
     // timezone, so a New York evening's entry stays on that evening
     it('sends the moment of a default date, as its local wall-clock time', async () => {
         const wrapper = mountDialog({ now: '2026-07-04T21:30:00' });
+        const dialog = await open(wrapper);
+        await dialog.find('textarea').setValue('Beans up.');
 
-        await press(await open(wrapper), 'Confirm');
+        await press(dialog, 'Confirm');
 
         expect(wrapper.props('onSubmit').mock.calls[0][0].entryDate).toBe('2026-07-04T21:30:00');
     });
 
-    // The service stores it too (entry is optional), and the journal shows a
-    // blank entry for the day
-    it('submits an empty entry', async () => {
-        const wrapper = mountDialog();
+    // The service would store an empty entry, which the journal shows as a
+    // blank one for the day (backlog B28)
+    it.each([[''], ['   ']])('offers Confirm only once there is text, not for %j', async text => {
+        const dialog = await open(mountDialog());
+        await dialog.find('textarea').setValue(text);
+        expect(buttonLabelled(dialog, 'Confirm').attributes('disabled')).toBeDefined();
 
-        await press(await open(wrapper), 'Confirm');
+        await dialog.find('textarea').setValue('Beans up.');
 
-        expect(wrapper.props('onSubmit').mock.calls[0][0].entry).toBe('');
+        expect(buttonLabelled(dialog, 'Confirm').attributes('disabled')).toBeUndefined();
     });
 
     it('starts afresh after a submit', async () => {
@@ -138,6 +143,7 @@ describe('AddJournalEntryDialog', () => {
 
         await press(dialog, 'Confirm');
 
+        expect(wrapper.props('onSubmit')).toHaveBeenCalled();
         expect(isOpen()).toBe(true);
     });
 

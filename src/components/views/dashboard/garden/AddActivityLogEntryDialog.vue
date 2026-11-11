@@ -50,7 +50,7 @@
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn color="error" @click="handleCancel">Cancel</v-btn>
-        <v-btn color="primary" @click="handleSubmit">Confirm</v-btn>
+        <v-btn color="primary" :disabled="!canConfirm" @click="handleSubmit">Confirm</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -62,6 +62,7 @@ import dayjs from 'dayjs';
 
 import DatePickerDialogActivator from "@/components/utils/DatePickerDialogActivator.vue";
 import { toLocalDateTime } from '@/utils/dates';
+import { isChosen } from '@/utils/form-rules';
 
 export default {
   name: "AddActivityLogEntryDialog",
@@ -98,6 +99,11 @@ export default {
   },
 
   computed: {
+    // what the service requires: an activity
+    canConfirm() {
+      return isChosen(this.activityType);
+    },
+
     activitySubTypes() {
       if (this.activityType != null) {
         return this.activityType.subTypes;

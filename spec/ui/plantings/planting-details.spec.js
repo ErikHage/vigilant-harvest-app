@@ -71,19 +71,12 @@ test.describe('A planting\'s details page', () => {
         await plantingsPage.checkPlantingFound('planting: early-remainder');
     });
 
-    // DocumentsCurrentBehavior: the plot has no rule, so Confirm is offered
-    // with none chosen, and the planting is planted nowhere (backlog A23).
-    // Should offer Confirm only once a plot is chosen
     test('plants a planting only once a plot is chosen', async ({ garden, plantingsPage, plantingDetailsPage }) => {
         await garden.hasPlanting('planting: early', 'plant: sungold', 'year: spring', 'status: started');
         await view(plantingsPage, plantingDetailsPage, 'early');
         await plantingDetailsPage.startPlantingWithNoPlot('planting: early', 'count: 6');
 
         await plantingDetailsPage.checkPlantNeedsAPlot();
-        await plantingDetailsPage.confirm();
-
-        await plantingDetailsPage.checkIsShownFor('planting: early');
-        await plantingDetailsPage.checkShowsPlanting('planting: early');
     });
 
     test('splits a started planting into new ones, which keep the rest', async ({
@@ -100,20 +93,12 @@ test.describe('A planting\'s details page', () => {
         await plantingsPage.checkPlantingFound('planting: early');
     });
 
-    // DocumentsCurrentBehavior: Confirm is offered with no splits added, the
-    // service takes an empty split, and the page moves on to the plantings as
-    // if it had split (backlog A24). Should offer Confirm only once there's a
-    // named split of at least one
     test('splits a planting only once there\'s a split', async ({ garden, plantingsPage, plantingDetailsPage }) => {
         await garden.hasPlanting('planting: early', 'plant: sungold', 'year: spring', 'status: started');
         await view(plantingsPage, plantingDetailsPage, 'early');
         await plantingDetailsPage.openSplitDialog();
 
         await plantingDetailsPage.checkSplitNeedsASplit();
-        await plantingDetailsPage.confirm();
-
-        await plantingsPage.checkIsShown();
-        await plantingsPage.checkPlantingFound('planting: early');
     });
 
     test('retires a planting, after which only a comment is offered', async ({

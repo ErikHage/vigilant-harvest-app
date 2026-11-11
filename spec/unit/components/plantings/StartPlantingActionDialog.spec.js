@@ -99,6 +99,7 @@ describe('StartPlantingActionDialog', () => {
 
         await press(await open(wrapper), 'Confirm');
 
+        expect(wrapper.props('onSubmit')).toHaveBeenCalled();
         expect(isOpen()).toBe(true);
     });
 

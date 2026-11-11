@@ -257,12 +257,12 @@ describe('HarvestsPage', () => {
                 beforeMount: ({ harvests }) => harvests.upsertHarvests.mockRejectedValueOnce(failure),
             });
             const dialog = await openEdit(wrapper);
-            await dialog.find('input[type=number]').setValue('0');
+            await dialog.find('input[type=number]').setValue('5');
 
             await press(dialog, 'Update');
 
             expect(dialog.find('.v-alert').text()).toBe(message);
-            expect(dialog.find('input[type=number]').element.value).toBe('0');
+            expect(dialog.find('input[type=number]').element.value).toBe('5');
             expect(store.searchHarvests).toHaveBeenCalledTimes(1);
         });
 

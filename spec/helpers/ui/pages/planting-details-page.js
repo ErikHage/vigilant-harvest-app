@@ -83,7 +83,7 @@ export function createPlantingDetailsPage(world, driver) {
         async checkPlantNeedsAPlot(...args) {
             parseDslArgs(args, {});
 
-            await driver.offersConfirmWithNoPlot();
+            await driver.withholdsConfirmWithNoPlot();
         },
 
         /**
@@ -112,14 +112,7 @@ export function createPlantingDetailsPage(world, driver) {
         async checkSplitNeedsASplit(...args) {
             parseDslArgs(args, {});
 
-            await driver.offersConfirmWithNoSplits();
-        },
-
-        /** Clicks Confirm in the open dialog, which closes. No parameters. */
-        async confirm(...args) {
-            parseDslArgs(args, {});
-
-            await driver.confirm();
+            await driver.withholdsConfirmWithNoSplits();
         },
 
         /** Retires the `planting`, confirming it. */

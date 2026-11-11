@@ -17,7 +17,7 @@
           <v-list density="compact" lines="two">
             <v-list-item title="Activity type" :subtitle="scheduleItem.activityType" />
             <v-list-item v-if="scheduleItem.subType" title="Subcategory" :subtitle="scheduleItem.subType" />
-            <v-list-item title="Recurrence" :subtitle="scheduleItem.recurrenceRule" />
+            <v-list-item title="Recurrence" :subtitle="recurrenceText(scheduleItem.recurrenceRule)" />
             <v-list-item title="Date(s)" :subtitle="getDateRange(scheduleItem)" />
             <v-list-item v-if="scheduleItem.notes" title="Notes" :subtitle="scheduleItem.notes" />
           </v-list>
@@ -46,6 +46,7 @@
 <script>
 import { saveFailureMessage } from '@/utils/save-failures';
 import scheduling from "@/utils/scheduling";
+import { RRule } from 'rrule';
 
 export default {
   name: 'DeleteScheduleItemDialog',
@@ -89,6 +90,11 @@ export default {
 
     getDateRange(scheduleItem) {
       return scheduling.getFormattedDateRange(scheduleItem.startDate, scheduleItem.endDate);
+    },
+
+    // as the schedule's page shows it; the service lets an item have no rule
+    recurrenceText(recurrenceRule) {
+      return recurrenceRule ? RRule.fromString(recurrenceRule).toText() : '';
     },
   },
 };

@@ -42,6 +42,7 @@
 
 <script>
 import { saveFailureMessage } from '@/utils/save-failures';
+import { hasText } from '@/utils/form-rules';
 
 export default {
   name: 'EditScheduleDialog',
@@ -69,7 +70,7 @@ export default {
 
   computed: {
     isSaveDisabled() {
-      return !this.form.activityScheduleName || !this.form.description;
+      return !hasText(this.form.activityScheduleName);
     },
   },
 

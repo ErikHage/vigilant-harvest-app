@@ -47,7 +47,7 @@
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn color="error" @click="handleCancel">Cancel</v-btn>
-        <v-btn color="primary" @click="handleSubmit">Confirm</v-btn>
+        <v-btn color="primary" :disabled="!canConfirm" @click="handleSubmit">Confirm</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -61,6 +61,7 @@ import sorting from "@/utils/sorting";
 
 import DatePickerDialogActivator from "@/components/utils/DatePickerDialogActivator.vue";
 import { toLocalDate } from '@/utils/dates';
+import { isChosen } from '@/utils/form-rules';
 
 const { plantingActions } = plantingUtils;
 
@@ -99,6 +100,11 @@ export default {
   },
 
   computed: {
+    // a plot: the garden lists only plantings that have one
+    canConfirm() {
+      return isChosen(this.form.plotId);
+    },
+
     formattedTransplantDate() {
       return this.form.transplantDate.toDateString();
     },

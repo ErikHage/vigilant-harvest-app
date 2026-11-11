@@ -26,7 +26,7 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="error" text @click="handleOnCancel(isActive)">Cancel</v-btn>
-          <v-btn color="primary" text :disabled="!form.categoryName" @click="handleSaveCategory(isActive)">Create</v-btn>
+          <v-btn color="primary" text :disabled="!canCreate" @click="handleSaveCategory(isActive)">Create</v-btn>
         </v-card-actions>
       </v-card>
     </template>
@@ -35,6 +35,7 @@
 
 <script>
 import { saveFailureMessage } from '@/utils/save-failures';
+import { hasText } from '@/utils/form-rules';
 
 export default {
   name: 'AddCategoryDialog',
@@ -52,6 +53,12 @@ export default {
         categoryName: '',
       },
     };
+  },
+
+  computed: {
+    canCreate() {
+      return hasText(this.form.categoryName);
+    },
   },
 
   methods: {
