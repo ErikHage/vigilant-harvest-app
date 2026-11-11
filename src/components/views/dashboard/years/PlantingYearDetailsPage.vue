@@ -93,8 +93,14 @@ export default {
     },
 
     ...mapState(usePlantingYearsStore, {
-      plantingYear: 'plantingYear',
+      storedPlantingYear: 'plantingYear',
     }),
+
+    // the store holds the last year fetched, which is another until this
+    // page's fetch returns, and for good if it fails
+    plantingYear() {
+      return String(this.storedPlantingYear?.plantingYear) === this.year ? this.storedPlantingYear : null;
+    },
 
     ...mapState(usePlantingsStore, {
       plantings: 'plantings',

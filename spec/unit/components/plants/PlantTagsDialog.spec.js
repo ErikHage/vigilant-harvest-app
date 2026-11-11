@@ -99,10 +99,8 @@ describe('PlantTagsDialog', () => {
         expect(findDialog('Plant Tags')).toBeUndefined();
     });
 
-    // DocumentsCurrentBehavior: Cancel closes the dialog but keeps the
-    // toggled chips, so the next open shows the cancelled choice, and Confirm
-    // submits it. Should go back to the plant's tags (backlog A13)
-    it('keeps a cancelled choice for the next time it opens', async () => {
+    // Back to the plant's tags (backlog A13)
+    it('forgets a cancelled choice the next time it opens', async () => {
         const wrapper = mountDialog();
         let dialog = await open(wrapper);
         await toggle(dialog, 'Determinate');
@@ -111,7 +109,7 @@ describe('PlantTagsDialog', () => {
 
         dialog = await open(wrapper);
 
-        expect(chips(dialog).find(([tag]) => tag === 'Determinate')).toEqual(['Determinate', true]);
+        expect(chips(dialog).find(([tag]) => tag === 'Determinate')).toEqual(['Determinate', false]);
     });
 
     it("follows new tags from its parent", async () => {

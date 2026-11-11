@@ -220,8 +220,10 @@ export default {
       isActive.value = false;
     },
 
+    // back to the item, so the next open doesn't show a cancelled edit
     handleOnCancel(isActive) {
       this.saveError = '';
+      this.resetForm(this.scheduleItem);
       isActive.value = false;
     },
 

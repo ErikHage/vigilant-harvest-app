@@ -470,7 +470,8 @@ export default {
         assign: addedScheduleIds,
         unassign: removedScheduleIds,
       });
-      await this.refreshData();
+      // the plant alone, for its schedules: the form keeps its unsaved edits
+      await this.fetchPlantById(this.plantId);
     },
   },
 

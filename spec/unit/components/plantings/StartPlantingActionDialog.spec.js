@@ -8,7 +8,7 @@ import StartPlantingActionDialog from '@/components/plantings/StartPlantingActio
 
 const planting = { plantingId: 'planting-1', name: 'Early beans' };
 
-// The dialog reads the clock when it's created, for its default sow date
+// The dialog reads the clock when it opens, for its default sow date
 function mountDialog({ now = '2026-03-15T10:00:00', ...props } = {}) {
     vi.useFakeTimers({ now: new Date(now), toFake: ['Date'] });
     return mountWithPlugins(StartPlantingActionDialog, {
@@ -53,6 +53,16 @@ describe('StartPlantingActionDialog', () => {
         expect(isOpen()).toBe(false);
     });
 
+    // Not the day the page was opened (backlog A22)
+    it('starts on the day it is opened', async () => {
+        const wrapper = mountDialog();
+        vi.setSystemTime(new Date('2026-03-16T08:00:00'));
+
+        const dialog = await open(wrapper);
+
+        expect(dialog.find('h3').text()).toBe('Mon Mar 16 2026');
+    });
+
     it('shows an overridden date', async () => {
         const wrapper = mountDialog();
         const dialog = await open(wrapper);
@@ -81,9 +91,8 @@ describe('StartPlantingActionDialog', () => {
         expect(isOpen()).toBe(false);
     });
 
-    // DocumentsCurrentBehavior: Cancel keeps what was entered, so the next
-    // open shows it. Should go back to the defaults (backlog A13)
-    it('keeps a cancelled entry for the next time it opens', async () => {
+    // (backlog A13)
+    it('forgets a cancelled entry the next time it opens', async () => {
         const wrapper = mountDialog();
         let dialog = await open(wrapper);
         await inputLabelled(dialog, 'Number Sown').setValue('24');
@@ -91,7 +100,7 @@ describe('StartPlantingActionDialog', () => {
 
         dialog = await open(wrapper);
 
-        expect(inputLabelled(dialog, 'Number Sown').element.value).toBe('24');
+        expect(inputLabelled(dialog, 'Number Sown').element.value).toBe('0');
     });
 
     it('waits for the start, open', async () => {

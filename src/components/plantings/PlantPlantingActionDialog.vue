@@ -65,6 +65,14 @@ import { isChosen } from '@/utils/form-rules';
 
 const { plantingActions } = plantingUtils;
 
+// planted today: the day it's opened, not the day the page was
+const emptyForm = () => ({
+  transplantDate: new Date(),
+  numberTransplanted: 0,
+  plotId: null,
+  comment: null,
+});
+
 export default {
   name: "PlantPlantingActionDialog",
 
@@ -90,12 +98,7 @@ export default {
     return {
       saveError: '',
       show: false,
-      form: {
-        transplantDate: new Date(),
-        numberTransplanted: 0,
-        plotId: null,
-        comment: null,
-      },
+      form: emptyForm(),
     };
   },
 
@@ -142,6 +145,15 @@ export default {
 
     setDateValue(newDateValue) {
       this.form.transplantDate = newDateValue;
+    },
+  },
+
+  watch: {
+    // each open starts afresh, so a cancelled entry is gone
+    show(open) {
+      if (open) {
+        this.form = emptyForm();
+      }
     },
   },
 }

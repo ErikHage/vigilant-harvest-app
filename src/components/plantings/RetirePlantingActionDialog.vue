@@ -77,5 +77,14 @@ export default {
       this.show = false;
     },
   },
+
+  watch: {
+    // each open starts afresh, so a cancelled comment is gone
+    show(open) {
+      if (open) {
+        this.form = { comment: null };
+      }
+    },
+  },
 }
 </script>

@@ -52,6 +52,13 @@ import { toLocalDate } from '@/utils/dates';
 
 const { plantingActions } = plantingUtils;
 
+// sown today: the day it's opened, not the day the page was
+const emptyForm = () => ({
+  sowDate: new Date(),
+  numberSown: 0,
+  comment: null,
+});
+
 export default {
   name: "StartPlantingActionDialog",
 
@@ -73,11 +80,7 @@ export default {
     return {
       saveError: '',
       show: false,
-      form: {
-        sowDate: new Date(),
-        numberSown: 0,
-        comment: null,
-      },
+      form: emptyForm(),
     };
   },
 
@@ -114,6 +117,15 @@ export default {
 
     setDateValue(newDateValue) {
       this.form.sowDate = newDateValue;
+    },
+  },
+
+  watch: {
+    // each open starts afresh, so a cancelled entry is gone
+    show(open) {
+      if (open) {
+        this.form = emptyForm();
+      }
     },
   },
 }

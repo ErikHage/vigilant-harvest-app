@@ -157,6 +157,16 @@ describe('PlantingDetailsPage', () => {
             await expect(wrapper.vm.refreshData()).rejects.toThrow(TypeError);
             expect(wrapper.find('.page-title').text()).toBe('Planting Details');
         });
+
+        // Comment was rendered without a planting too (backlog B26)
+        it('offers no action until the planting loads', async () => {
+            const { wrapper } = await mountPage({
+                planting: null,
+                beforeMount: store => store.fetchPlantingById.mockReturnValueOnce(new Promise(() => {})),
+            });
+
+            expect(shownActions(wrapper)).toEqual([]);
+        });
     });
 
     describe('actions', () => {
@@ -214,26 +224,39 @@ describe('PlantingDetailsPage', () => {
     });
 
     describe('editing', () => {
-        it('unlocks the details tab and Update with the lock switch', async () => {
+        // The tab edits the page's copy in place, as its fields do
+        async function edit(wrapper, field, value) {
+            wrapper.findComponent(PlantingDetailsTab).props('planting')[field] = value;
+            await flushPromises();
+        }
+
+        const updateEnabled = wrapper => buttonLabelled(wrapper, 'Update').attributes('disabled') === undefined;
+
+        it('unlocks the details tab with the lock switch, and Update once something is edited', async () => {
             const { wrapper } = await mountPage();
-            expect(buttonLabelled(wrapper, 'Update').attributes('disabled')).toBeDefined();
+            expect(updateEnabled(wrapper)).toBe(false);
             expect(wrapper.find('.mdi-lock').exists()).toBe(true);
 
             await wrapper.find('.v-switch input').setValue(true);
 
             expect(wrapper.findComponent(PlantingDetailsTab).props('enableEdit')).toBe(true);
-            expect(buttonLabelled(wrapper, 'Update').attributes('disabled')).toBeUndefined();
             expect(wrapper.find('.mdi-lock-open').exists()).toBe(true);
+            expect(updateEnabled(wrapper)).toBe(false);
+
+            await edit(wrapper, 'name', 'Earliest beans');
+
+            expect(updateEnabled(wrapper)).toBe(true);
         });
 
         it.each([
-            ['CREATED', { name: 'Early beans', seedSource: "Johnny's", lotNumber: 'L-14', plantId: 'plant-1', targetPlantingDate: '2026-05-17', leadTimeWeeks: 3 }],
-            ['STARTED', { name: 'Early beans', seedSource: "Johnny's", lotNumber: 'L-14', sowDate: '2026-04-20', numberSown: 24, targetPlantingDate: '2026-05-17' }],
-            ['PLANTED', { name: 'Early beans', seedSource: "Johnny's", lotNumber: 'L-14', plotId: 'plot-1', transplantDate: '2026-05-18', numberTransplanted: 20 }],
-            ['RETIRED', { name: 'Early beans', seedSource: "Johnny's", lotNumber: 'L-14' }],
+            ['CREATED', { name: 'Earliest beans', seedSource: "Johnny's", lotNumber: 'L-14', plantId: 'plant-1', targetPlantingDate: '2026-05-17', leadTimeWeeks: 3 }],
+            ['STARTED', { name: 'Earliest beans', seedSource: "Johnny's", lotNumber: 'L-14', sowDate: '2026-04-20', numberSown: 24, targetPlantingDate: '2026-05-17' }],
+            ['PLANTED', { name: 'Earliest beans', seedSource: "Johnny's", lotNumber: 'L-14', plotId: 'plot-1', transplantDate: '2026-05-18', numberTransplanted: 20 }],
+            ['RETIRED', { name: 'Earliest beans', seedSource: "Johnny's", lotNumber: 'L-14' }],
         ])("sends a %s planting's own fields on Update, then locks and reloads", async (currentStatus, body) => {
             const { wrapper, store } = await mountPage({ planting: aPlanting({ currentStatus }) });
             await wrapper.find('.v-switch input').setValue(true);
+            await edit(wrapper, 'name', 'Earliest beans');
 
             await buttonLabelled(wrapper, 'Update').trigger('click');
             await flushPromises();
@@ -248,7 +271,7 @@ describe('PlantingDetailsPage', () => {
         it('sends a date picked in the details tab as the day picked', async () => {
             const { wrapper, store } = await mountPage({ planting: aPlanting({ currentStatus: 'STARTED' }) });
             await wrapper.find('.v-switch input').setValue(true);
-            wrapper.findComponent(PlantingDetailsTab).props('planting').sowDate = new Date(2026, 3, 22);
+            await edit(wrapper, 'sowDate', new Date(2026, 3, 22));
 
             await buttonLabelled(wrapper, 'Update').trigger('click');
 
@@ -258,7 +281,7 @@ describe('PlantingDetailsPage', () => {
         it('sends the edits made in the details tab', async () => {
             const { wrapper, store } = await mountPage();
             await wrapper.find('.v-switch input').setValue(true);
-            wrapper.findComponent(PlantingDetailsTab).props('planting').name = 'Earliest beans';
+            await edit(wrapper, 'name', 'Earliest beans');
 
             await buttonLabelled(wrapper, 'Update').trigger('click');
 
@@ -270,25 +293,32 @@ describe('PlantingDetailsPage', () => {
             const { wrapper, store } = await mountPage();
             store.updatePlanting.mockRejectedValue(httpError(400));
             await wrapper.find('.v-switch input').setValue(true);
-            wrapper.findComponent(PlantingDetailsTab).props('planting').name = 'Earliest beans';
+            await edit(wrapper, 'name', 'Earliest beans');
 
             await buttonLabelled(wrapper, 'Update').trigger('click');
             await flushPromises();
 
+            expect(store.updatePlanting).toHaveBeenCalledTimes(1);
             expect(wrapper.findComponent(PlantingDetailsTab).props('enableEdit')).toBe(true);
             expect(wrapper.findComponent(PlantingDetailsTab).props('planting').name).toBe('Earliest beans');
             expect(store.fetchPlantingById).toHaveBeenCalledTimes(1);
         });
 
-        // Update is enabled whenever editing is unlocked, whether or not
-        // anything changed
-        it('sends an Update with nothing changed', async () => {
-            const { wrapper, store } = await mountPage();
+        // A field put back as it was is no edit, and a date picked as a Date
+        // is the same day as the service's string (backlog B26)
+        it('offers Update only while something differs from the planting', async () => {
+            const { wrapper } = await mountPage({ planting: aPlanting({ currentStatus: 'STARTED' }) });
             await wrapper.find('.v-switch input').setValue(true);
 
-            await buttonLabelled(wrapper, 'Update').trigger('click');
+            await edit(wrapper, 'name', 'Earliest beans');
+            expect(updateEnabled(wrapper)).toBe(true);
+            await edit(wrapper, 'name', 'Early beans');
+            expect(updateEnabled(wrapper)).toBe(false);
 
-            expect(store.updatePlanting).toHaveBeenCalledTimes(1);
+            await edit(wrapper, 'sowDate', new Date(2026, 3, 20));
+            expect(updateEnabled(wrapper)).toBe(false);
+            await edit(wrapper, 'sowDate', new Date(2026, 3, 21));
+            expect(updateEnabled(wrapper)).toBe(true);
         });
     });
 });

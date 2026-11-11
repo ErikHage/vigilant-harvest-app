@@ -63,5 +63,15 @@ export default {
       this.show = false;
     },
   },
+
+  watch: {
+    // each open starts from the date given now: a cancelled pick is gone, and
+    // a date the parent set since (once its data loaded, say) is the one shown
+    show(open) {
+      if (open) {
+        this.selectedDate = this.date || null;
+      }
+    },
+  },
 }
 </script>

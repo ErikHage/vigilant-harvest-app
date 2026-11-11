@@ -267,6 +267,9 @@ export default {
     openAddHarvestDialog() {
       if (!this.loading) {
         this.saveErrorMessage = '';
+        // harvested today, the day it's opened: an override from before, and
+        // the day the page was opened, are gone
+        this.selectedHarvestDate = new Date();
         const tempPlots = this.hydratedPlots;
 
         for (let i = 0; i < tempPlots.length; i++) {

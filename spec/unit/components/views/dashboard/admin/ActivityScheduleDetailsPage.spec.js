@@ -100,14 +100,13 @@ describe('ActivityScheduleDetailsPage', () => {
         expect(wrapper.text()).toBe('error fetching activity schedule by id: schedule-1');
     });
 
-    // DocumentsCurrentBehavior: it renders whatever schedule the store holds,
-    // so until the fetch returns, and for good if it fails, another
-    // schedule's page shows the last one viewed (backlog A15). Should render
-    // only the route's schedule
-    it('shows the last schedule viewed while another loads', async () => {
+    // The store still holds the last schedule viewed until the fetch returns,
+    // and for good if it fails (backlog A15)
+    it('shows no other schedule while the one in its address loads', async () => {
         const { wrapper } = await mountPage({ routeId: 'schedule-2' });
 
-        expect(wrapper.find('.page-title').text()).toBe('Tomatoes');
+        expect(wrapper.find('.page-title').exists()).toBe(false);
+        expect(wrapper.text()).not.toContain('Tomatoes');
     });
 
     describe('saving', () => {

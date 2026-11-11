@@ -49,9 +49,8 @@ describe('RetirePlantingActionDialog', () => {
         expect(isOpen()).toBe(false);
     });
 
-    // DocumentsCurrentBehavior: Cancel keeps the comment, so the next open
-    // shows it, and Confirm sends it. Should clear it (backlog A13)
-    it('keeps a cancelled comment for the next time it opens', async () => {
+    // (backlog A13)
+    it('forgets a cancelled comment the next time it opens', async () => {
         const wrapper = mountDialog();
         let dialog = await open(wrapper);
         await dialog.find('textarea').setValue('never mind');
@@ -59,7 +58,7 @@ describe('RetirePlantingActionDialog', () => {
 
         dialog = await open(wrapper);
 
-        expect(dialog.find('textarea').element.value).toBe('never mind');
+        expect(dialog.find('textarea').element.value).toBe('');
     });
 
     it('waits for the retire, open', async () => {

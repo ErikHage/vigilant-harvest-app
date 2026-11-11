@@ -96,8 +96,10 @@ export default {
       isActive.value = false;
     },
 
+    // back to the schedule, so the next open doesn't show a cancelled edit
     handleOnCancel(isActive) {
       this.saveError = '';
+      this.resetForm(this.activitySchedule);
       isActive.value = false;
     },
   },

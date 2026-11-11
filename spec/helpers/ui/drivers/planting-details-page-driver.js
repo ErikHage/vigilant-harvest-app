@@ -179,18 +179,17 @@ export function createPlantingDetailsPageDriver(page, pageErrors) {
         },
 
         /**
-         * Pinned (A21): with the form unlocked, the target date's picker opens
-         * with no date chosen, so confirming it without picking clears the date
-         * on screen.
+         * With the form unlocked, the target date's picker opens on the
+         * planting's date, so confirming it without picking keeps it.
          */
-        async targetDatePickerForgetsTheDate() {
-            const what = 'confirming the target date\'s picker without picking';
+        async targetDatePickerKeepsTheDate({ name, targetPlantingDate }) {
+            const what = `confirming ${name}'s target date picker without picking`;
 
             await actionsCard.getByRole('checkbox').click();
             await calendarAfter('Target Planting Date').click();
             await expectVisible(dialog.getByText('Set Target Planting Date', { exact: true }), what);
             await confirmAndClose(what);
-            await expectText(dateAfter('Target Planting Date'), '--', what);
+            await expectText(dateAfter('Target Planting Date'), targetPlantingDate, what);
         },
 
         /**

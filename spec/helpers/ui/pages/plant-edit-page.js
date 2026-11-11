@@ -105,7 +105,7 @@ export function createPlantEditPage(world, driver) {
         async checkUnsavedNameKept(...args) {
             const params = parseDslArgs(args, { plant: plant() });
 
-            await driver.unsavedNameLost(world.plantNamed(params.plant));
+            await driver.unsavedNameKept(world.unsavedPlantName(params.plant));
         },
 
         /** Assigns the `schedule` the test named, through the Manage Schedules dialog, and saves. */

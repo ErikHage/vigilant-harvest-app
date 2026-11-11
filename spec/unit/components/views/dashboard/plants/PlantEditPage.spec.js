@@ -408,17 +408,18 @@ describe('PlantEditPage', () => {
             expect(store.fetchPlantById).toHaveBeenCalledTimes(1);
         });
 
-        // DocumentsCurrentBehavior: saving the schedules reloads the plant into
-        // the form, so any unsaved edit elsewhere on the page is lost. Should
-        // reload only the schedules, or keep the edits
-        it('throws away unsaved edits when the schedules are saved', async () => {
-            const { wrapper } = await mountPage();
+        // It reloads the plant, for its schedules, but not into the form
+        // (backlog A17)
+        it('keeps unsaved edits when the schedules are saved', async () => {
+            const { wrapper, store } = await mountPage();
             await type(wrapper, 'Name', 'Provider');
 
             await wrapper.findComponent(ManagePlantSchedulesDialog).props('onSubmit')(['schedule-3'], []);
             await flushPromises();
 
-            expect(inputLabelled(wrapper, 'Name').element.value).toBe('Provider bush bean');
+            expect(store.fetchPlantById).toHaveBeenCalledTimes(2);
+            expect(inputLabelled(wrapper, 'Name').element.value).toBe('Provider');
+            expect(buttonLabelled(wrapper, 'Update').attributes('disabled')).toBeUndefined();
         });
     });
 });

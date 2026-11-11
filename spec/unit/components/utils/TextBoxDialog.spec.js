@@ -78,10 +78,8 @@ describe('TextBoxDialog', () => {
         expect(findDialog('Notes')).toBeUndefined();
     });
 
-    // DocumentsCurrentBehavior: Cancel closes the dialog but keeps what was
-    // typed, so the next open shows the cancelled edit, and Confirm submits it.
-    // Should go back to the value it was given
-    it('keeps a cancelled edit for the next time it opens', async () => {
+    // Back to the value it was given (backlog A13)
+    it('forgets a cancelled edit the next time it opens', async () => {
         const wrapper = mountTextBox({ value: 'Sow after the last frost' });
         await type(await open(wrapper), 'a cancelled edit');
         await buttonLabelled(dialogTitled('Notes'), 'Cancel').trigger('click');
@@ -89,7 +87,7 @@ describe('TextBoxDialog', () => {
 
         const dialog = await open(wrapper);
 
-        expect(dialog.find('textarea').element.value).toBe('a cancelled edit');
+        expect(dialog.find('textarea').element.value).toBe('Sow after the last frost');
     });
 
     it('follows a new value from its parent', async () => {

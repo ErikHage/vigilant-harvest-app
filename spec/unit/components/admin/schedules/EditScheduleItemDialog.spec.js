@@ -161,10 +161,8 @@ describe('EditScheduleItemDialog', () => {
         expect(wrapper.props('onSubmit')).not.toHaveBeenCalled();
     });
 
-    // DocumentsCurrentBehavior: Cancel keeps the edits, so the next open
-    // shows them, not the item, and Save sends them (backlog A13). Should go
-    // back to the item on Cancel
-    it('keeps a cancelled edit for the next time it opens', async () => {
+    // Back to the item (backlog A13)
+    it('forgets a cancelled edit the next time it opens', async () => {
         const wrapper = mountDialog();
         await open(wrapper);
         await inputLabelled(dialog(), 'Notes').setValue('never mind');
@@ -172,7 +170,7 @@ describe('EditScheduleItemDialog', () => {
 
         await open(wrapper);
 
-        expect(form(wrapper).notes).toBe('never mind');
+        expect(form(wrapper).notes).toBe('Side-dress the tomatoes');
     });
 
     // A failed save keeps it open, with what was entered, and it says why: the

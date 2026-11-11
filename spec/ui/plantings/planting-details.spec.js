@@ -146,10 +146,8 @@ test.describe('A planting\'s details page', () => {
         await plantingDetailsPage.checkShowsPlanting('planting: early');
     });
 
-    // DocumentsCurrentBehavior: the tab renders before the page has copied the
-    // planting, and the picker reads its date only once, so it opens with no
-    // date chosen, and confirming it clears the date on screen (backlog A21).
-    // Should open on the planting's date
+    // The tab renders before the page has copied the planting, so the picker
+    // is created with no date: it opens on the planting's date (backlog A21)
     test('keeps the target date when its picker is confirmed without a pick', async ({
         garden, plantingsPage, plantingDetailsPage,
     }) => {

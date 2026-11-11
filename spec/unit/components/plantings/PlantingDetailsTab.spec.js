@@ -2,7 +2,8 @@ import { reactive } from 'vue';
 import { flushPromises } from '@vue/test-utils';
 import { VAutocomplete, VSelect } from 'vuetify/components';
 import { mountWithPlugins } from '../../../helpers/mount';
-import { inputLabelled } from '../../../helpers/fields';
+import { buttonLabelled, inputLabelled } from '../../../helpers/fields';
+import { dialogTitled } from '../../../helpers/dialogs';
 import { aPlanting } from '../../../helpers/plantings';
 import DatePickerDialogActivator from '@/components/utils/DatePickerDialogActivator.vue';
 import PlantingDetailsTab from '@/components/plantings/PlantingDetailsTab.vue';
@@ -218,12 +219,10 @@ describe('PlantingDetailsTab', () => {
         expect(warn).not.toHaveBeenCalled();
     });
 
-    // DocumentsCurrentBehavior: each date picker reads its date only when
-    // it's created (backlog B15). The page renders this tab before its copy
-    // of the planting is filled, so every picker keeps the empty date it
-    // started with, and opens with nothing chosen. Confirming without picking
-    // then clears the date on screen. Should follow the planting's date
-    it('keeps the dates its pickers started with', async () => {
+    // The page renders this tab before its copy of the planting is filled, so
+    // the pickers are created with no dates. Each opens on the planting's date
+    // as it is then, so confirming without a pick keeps it (backlog A21)
+    it("opens each picker on the planting's date, though it arrived later", async () => {
         // reactive, as the page's copy is, so the tab sees the date arrive
         const planting = reactive(aPlanting({ currentStatus: 'STARTED', sowDate: null }));
         const { wrapper } = mountTab({ planting, enableEdit: true });
@@ -231,9 +230,11 @@ describe('PlantingDetailsTab', () => {
         await flushPromises();
         expect(shownDates(wrapper)[1]).toBe('2026-04-20');
 
-        pickers(wrapper)['Set Sow Date'].vm.handleOnSubmit();
+        await pickers(wrapper)['Set Sow Date'].find('.v-btn').trigger('click');
+        await flushPromises();
+        await buttonLabelled(dialogTitled('Set Sow Date'), 'Confirm').trigger('click');
         await flushPromises();
 
-        expect(shownDates(wrapper)[1]).toBe('--');
+        expect(shownDates(wrapper)[1]).toBe('2026-04-20');
     });
 });

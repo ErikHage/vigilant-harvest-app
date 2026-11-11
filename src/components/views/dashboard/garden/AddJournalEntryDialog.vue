@@ -115,6 +115,16 @@ export default {
       this.resetData();
     },
   },
+
+  watch: {
+    // written now: the time it's opened, not when the page was, or when the
+    // dialog last closed
+    show(open) {
+      if (open) {
+        this.entryDate = dayjs();
+      }
+    },
+  },
 }
 </script>
 

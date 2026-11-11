@@ -85,6 +85,13 @@ export default {
         this.selectedTags = selectedTags;
       },
     },
+
+    // each open starts from the plant's tags, so a cancelled toggle is gone
+    show(open) {
+      if (open) {
+        this.selectedTags = [...this.tags];
+      }
+    },
   },
 }
 </script>

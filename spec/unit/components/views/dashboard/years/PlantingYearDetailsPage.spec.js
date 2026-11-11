@@ -84,15 +84,13 @@ describe('PlantingYearDetailsPage', () => {
         expect(statusRows(wrapper).map(([, count]) => count)).toEqual(['0', '0', '0', '0']);
     });
 
-    // DocumentsCurrentBehavior: the page shows whatever year the store holds,
-    // without checking it's the one in the route. So until the fetch returns,
-    // and for good if it fails, /planting-years/2030 shows the last year
-    // viewed. Should show nothing, or a not-found message, until the route's
-    // year is loaded
-    it("shows the last year viewed under another year's address", () => {
+    // The store still holds the last year viewed until the fetch returns, and
+    // for good if it fails (backlog A15)
+    it("shows no other year under a year's address", () => {
         const { wrapper } = mountPage({ year: '2030', plantingYear: year2026 });
 
-        expect(wrapper.find('.text-h4').text()).toBe('Planting Year 2026');
+        expect(wrapper.find('.text-h4').exists()).toBe(false);
+        expect(wrapper.text()).not.toContain('2026');
     });
 
     it("shows the planting-years store's alert", () => {

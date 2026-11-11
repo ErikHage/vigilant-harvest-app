@@ -158,9 +158,9 @@ export function createPlantingDetailsPage(world, driver) {
          * picking a date keeps the `planting`'s target date.
          */
         async checkTargetDateKeptByItsPicker(...args) {
-            parseDslArgs(args, { planting: planting() });
+            const params = parseDslArgs(args, { planting: planting() });
 
-            await driver.targetDatePickerForgetsTheDate();
+            await driver.targetDatePickerKeepsTheDate(world.plantingNamed(params.planting));
         },
 
         /** Opens the details page of a planting that doesn't exist, by a made-up id. No parameters. */

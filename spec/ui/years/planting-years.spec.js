@@ -67,9 +67,8 @@ test.describe('The planting years pages', () => {
         await addPlantingYearPage.checkCreateNeedsBothDates();
     });
 
-    // DocumentsCurrentBehavior: the details page shows whatever year the store
-    // holds, so until the year's own details arrive it shows the last year
-    // viewed (backlog A15). Should show only the year in its URL
+    // The store holds the last year viewed until the year's own details
+    // arrive, and the page shows none (backlog A15)
     test('show only the year opened, while it loads', async ({
         garden, plantingYearsPage, plantingYearDetailsPage,
     }) => {

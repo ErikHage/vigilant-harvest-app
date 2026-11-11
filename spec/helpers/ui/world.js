@@ -260,10 +260,12 @@ export function createWorld(page) {
     const plantingsByAlias = new Map();
     // Journal and activity-log entries: not deleted on their own, but with their year
     const entriesByAlias = new Map();
+    // Names typed for a plant but never saved, so nothing to delete
+    const unsavedNamesByAlias = new Map();
     let unknownPlantingId;
     const aliasMaps = [
         plotsByAlias, plantingYearsByAlias, categoriesByAlias, subcategoriesByAlias, plantsByAlias, schedulesByAlias,
-        plantingsByAlias, entriesByAlias, scheduleItemsByAlias,
+        plantingsByAlias, entriesByAlias, scheduleItemsByAlias, unsavedNamesByAlias,
     ];
     // Newest first, the order cleanup deletes in
     const named = [];
@@ -600,10 +602,16 @@ export function createWorld(page) {
             return copyOf(plant);
         },
 
-        /** A name for the plant called `alias` that is typed but never saved. */
+        /**
+         * A name for the plant called `alias` that is typed but never saved:
+         * the same one each time it's asked for, in a test.
+         */
         unsavedPlantName(alias) {
             known(plantsByAlias, alias, 'plant', 'garden.hasPlant');
-            return madeUpName(`${alias}-unsaved`);
+            if (!unsavedNamesByAlias.has(alias)) {
+                unsavedNamesByAlias.set(alias, madeUpName(`${alias}-unsaved`));
+            }
+            return unsavedNamesByAlias.get(alias);
         },
 
         /** As `newPlot`, for an activity schedule, with no items. */

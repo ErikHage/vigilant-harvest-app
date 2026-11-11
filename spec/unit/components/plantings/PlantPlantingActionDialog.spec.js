@@ -13,6 +13,7 @@ const plots = () => [
     { plotId: 'plot-1', friendlyName: 'North bed' },
 ];
 
+// The dialog reads the clock when it opens, for its default planting date
 function mountDialog({ now = '2026-05-10T10:00:00', ...props } = {}) {
     vi.useFakeTimers({ now: new Date(now), toFake: ['Date'] });
     return mountWithPlugins(PlantPlantingActionDialog, {
@@ -80,6 +81,16 @@ describe('PlantPlantingActionDialog', () => {
 
     // As in the start dialog, the date is the user's own day, as YYYY-MM-DD,
     // so a New York evening is planted that day (backlog A22)
+    // Not the day the page was opened (backlog A22)
+    it('starts on the day it is opened', async () => {
+        const wrapper = mountDialog();
+        vi.setSystemTime(new Date('2026-05-11T08:00:00'));
+
+        const dialog = await open(wrapper);
+
+        expect(dialog.find('h3').text()).toBe('Mon May 11 2026');
+    });
+
     it('sends a New York evening as that day', async () => {
         const wrapper = mountDialog({ now: '2026-05-10T22:15:00' });
 
@@ -109,9 +120,8 @@ describe('PlantPlantingActionDialog', () => {
         expect(isOpen()).toBe(false);
     });
 
-    // DocumentsCurrentBehavior: Cancel keeps what was entered, so the next
-    // open shows it. Should go back to the defaults (backlog A13)
-    it('keeps a cancelled entry for the next time it opens', async () => {
+    // (backlog A13)
+    it('forgets a cancelled entry the next time it opens', async () => {
         const wrapper = mountDialog();
         let dialog = await open(wrapper);
         await inputLabelled(dialog, 'Number Transplanted').setValue('20');
@@ -119,7 +129,7 @@ describe('PlantPlantingActionDialog', () => {
 
         dialog = await open(wrapper);
 
-        expect(inputLabelled(dialog, 'Number Transplanted').element.value).toBe('20');
+        expect(inputLabelled(dialog, 'Number Transplanted').element.value).toBe('0');
     });
 
     it('waits for the plant, open', async () => {

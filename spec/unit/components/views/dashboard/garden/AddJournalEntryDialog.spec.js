@@ -119,21 +119,30 @@ describe('AddJournalEntryDialog', () => {
         expect(dialog.find('textarea').element.value).toBe('');
     });
 
-    // DocumentsCurrentBehavior: the date picker reads its date only when
-    // created, so after a submit it still holds the last date picked, while
-    // the dialog has gone back to today. Confirming the picker without
-    // picking brings the old date back (backlog A21). Should open on the
-    // dialog's own date
-    it('keeps the last picked date in its picker after a submit', async () => {
+    // After a submit the dialog goes back to today, and so does its picker,
+    // so confirming it without a pick keeps today (backlog A21)
+    it('opens its picker on today after a submit', async () => {
         const wrapper = mountDialog();
         let dialog = await open(wrapper);
         await pickDate(wrapper, dialog, new Date(2026, 6, 1));
+        await dialog.find('textarea').setValue('Beans up.');
         await press(dialog, 'Confirm');
+        expect(wrapper.props('onSubmit')).toHaveBeenCalled();
 
         dialog = await open(wrapper);
         await pickDate(wrapper, dialog);
 
-        expect(dialog.find('h3').text()).toBe('2026-07-01');
+        expect(dialog.find('h3').text()).toBe('2026-07-04');
+    });
+
+    // Not the day the page was opened (backlog A22)
+    it('opens on the day it is opened', async () => {
+        const wrapper = mountDialog();
+        vi.setSystemTime(new Date('2026-07-05T08:00:00'));
+
+        const dialog = await open(wrapper);
+
+        expect(dialog.find('h3').text()).toBe('2026-07-05');
     });
 
     it('waits for the save, open', async () => {

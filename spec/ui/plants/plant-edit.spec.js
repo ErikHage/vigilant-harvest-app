@@ -39,8 +39,8 @@ test.describe('A plant\'s edit page', () => {
         await plantEditPage.checkUpdateOffered('offered: no');
     });
 
-    // DocumentsCurrentBehavior: saving the schedules reloads the plant into the
-    // form, so an edit not yet saved is lost (backlog A17). Should keep it
+    // Saving the schedules reloads the plant, but not into the form (backlog
+    // A17)
     test('keeps an unsaved edit when the schedules are saved', async ({ plantEditPage }) => {
         await plantEditPage.typeUnsavedName('plant: sungold');
 

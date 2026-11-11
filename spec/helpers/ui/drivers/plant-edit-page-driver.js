@@ -121,9 +121,9 @@ export function createPlantEditPageDriver(page) {
             await expectText(tagChips, kept, `the tags of ${plant.friendlyName}, after toggling ${tag}`);
         },
 
-        /** Pinned (A17): the Name field is back to the plant's saved name, what was typed lost. */
-        async unsavedNameLost({ friendlyName }) {
-            await expectValue(field('Name'), friendlyName, 'the Name field, after the schedules were saved');
+        /** The Name field still holds `name`, typed and not saved. */
+        async unsavedNameKept(name) {
+            await expectValue(field('Name'), name, 'the Name field, after the schedules were saved');
         },
 
         /** Adds the schedule in the Manage Schedules dialog, saves, and waits for it to close. */

@@ -393,18 +393,43 @@ describe('GardenPage', () => {
             expect(dialog.find('.v-card-title').text()).toContain('Wed Jul 01 2026');
         });
 
-        // DocumentsCurrentBehavior: an overridden date outlasts Cancel, and a
-        // save, so the next harvests go on it too unless it's changed back
-        // (backlog A13). Should go back to today
-        it('keeps an overridden date after Cancel', async () => {
+        // (backlog A13)
+        it('goes back to today after Cancel', async () => {
             const { wrapper } = await mountPage();
             let dialog = await openEntry(wrapper);
             wrapper.findComponent(DatePickerDialogActivator).props('onSubmit')(new Date(2026, 6, 1));
+            await flushPromises();
+            expect(dialog.find('.v-card-title').text()).toContain('Wed Jul 01 2026');
             await press(dialog, 'Cancel');
 
             dialog = await openEntry(wrapper);
 
-            expect(dialog.find('.v-card-title').text()).toContain('Wed Jul 01 2026');
+            expect(dialog.find('.v-card-title').text()).toContain('Sat Jul 04 2026');
+        });
+
+        it('goes back to today after a save', async () => {
+            const { wrapper, harvests } = await mountPage();
+            const dialog = await openEntry(wrapper);
+            wrapper.findComponent(DatePickerDialogActivator).props('onSubmit')(new Date(2026, 6, 1));
+            await choosePlot(wrapper, northBed);
+            await enterQuantity(dialog, 'Early beans', '2');
+            await press(dialog, 'Save');
+            await press(dialogTitled(confirmTitle('Wed Jul 01 2026')), 'Confirm');
+            expect(harvests.upsertHarvests.mock.calls[0][0][0].harvestDate).toBe('2026-07-01');
+
+            const reopened = await openEntry(wrapper);
+
+            expect(reopened.find('.v-card-title').text()).toContain('Sat Jul 04 2026');
+        });
+
+        // Not the day the page was opened (backlog A22)
+        it('is the day the dialog is opened', async () => {
+            const { wrapper } = await mountPage();
+            vi.setSystemTime(new Date('2026-07-05T08:00:00'));
+
+            const dialog = await openEntry(wrapper);
+
+            expect(dialog.find('.v-card-title').text()).toContain('Sun Jul 05 2026');
         });
     });
 
@@ -486,10 +511,7 @@ describe('GardenPage', () => {
         });
 
         // A harvest date is the user's own day, as YYYY-MM-DD, so harvests
-        // saved on a New York evening go on that day (backlog A22). The
-        // default is still the day the page was created, so a page left open
-        // overnight files them under the day before: A22's stale default,
-        // left for the pinned-behaviour plan's chunk F5
+        // saved on a New York evening go on that day (backlog A22)
         it('saves a New York evening on that day', async () => {
             const { wrapper, harvests } = await mountPage({ now: '2026-07-04T21:30:00' });
 

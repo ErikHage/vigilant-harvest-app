@@ -129,7 +129,7 @@ export default {
 
   computed: {
     ...mapState(useActivitySchedulesStore, {
-      activitySchedule: 'selectedActivitySchedule',
+      selectedActivitySchedule: 'selectedActivitySchedule',
       activityTypes: 'activityTypes',
       alertType: 'alertType',
       alertMessage: 'alertMessage',
@@ -138,6 +138,13 @@ export default {
 
     activityScheduleId() {
       return this.$route.params.activityScheduleId;
+    },
+
+    // the store holds the last schedule fetched, which is another until this
+    // page's fetch returns, and for good if it fails
+    activitySchedule() {
+      const schedule = this.selectedActivitySchedule;
+      return schedule?.activityScheduleId === this.activityScheduleId ? schedule : null;
     },
 
     alert() {
