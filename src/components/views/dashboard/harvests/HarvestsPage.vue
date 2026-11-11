@@ -4,7 +4,13 @@
       <v-col cols="12">
         <page-title title="Review Harvests"/>
         <v-spacer></v-spacer>
-        <fade-out-alert :is-visible="alert.isVisible" :alert-type="alert.type" :message="alert.message"/>
+        <fade-out-alert
+            v-for="(alert, i) in alerts"
+            :key="'alert' + i"
+            :is-visible="alert.isVisible"
+            :alert-type="alert.type"
+            :message="alert.message"
+        />
       </v-col>
     </v-row>
 
@@ -106,6 +112,7 @@ import PageTitle from "@/components/layout/PageTitle.vue";
 import EditHarvestsDialog from "@/components/harvests/EditHarvestsDialog.vue";
 import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
 import harvestUtils from "@/utils/harvest-utils";
+import { alertOf } from "@/store/alerts";
 
 export default {
   name: 'HarvestsPage',
@@ -143,17 +150,10 @@ export default {
 
     ...mapState(useHarvestsStore, {
       harvests: 'harvests',
-      alertType: 'alertType',
-      alertMessage: 'alertMessage',
-      alertVisible: 'alertVisible',
     }),
 
-    alert() {
-      return {
-        isVisible: this.alertVisible,
-        type: this.alertType,
-        message: this.alertMessage,
-      };
+    alerts() {
+      return [useHarvestsStore(), usePlantsStore(), usePlantingsStore()].map(alertOf);
     },
 
     groupedHarvests() {

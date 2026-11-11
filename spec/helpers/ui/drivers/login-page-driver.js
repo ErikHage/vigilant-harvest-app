@@ -53,19 +53,18 @@ export function createLoginPageDriver(page, serviceCalls) {
         },
 
         /**
-         * After a refused token: back on the login page, saying nothing. The app
-         * sets an alert, but nothing shows it (backlog A10). So wait for feral's
-         * refusal, then for this page, and read it once.
+         * After a refused token: back on the login page, saying the token was
+         * refused. The alert fades after three seconds, so this follows the
+         * step straight away.
          */
-        async refusedSignOnSaysNothing() {
+        async refusedSignOnSaysWhy() {
             const what = 'signing on with a token feral refuses';
             const refused = () => serviceCalls.wereRefused('POST', ssoExecute);
 
             await expectEventually(refused, 'feral to refuse the token', what);
             await expectUrl(page, urlOf(''), what);
             await expectVisible(ssoButton, what);
-            const messages = await signOnRefused.count();
-            expectThat(messages === 0, 'no message about the refused token', `${messages} shown`, what);
+            await expectVisible(signOnRefused, what);
         },
 
         /**

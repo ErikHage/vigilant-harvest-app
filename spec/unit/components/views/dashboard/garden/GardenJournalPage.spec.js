@@ -168,14 +168,11 @@ describe('GardenJournalPage', () => {
         expect(timeline(wrapper)).toEqual(before);
     });
 
-    // DocumentsCurrentBehavior: nothing binds the journal store's alert, so
-    // a failed load or save shows nothing (backlog A10). Should show it
-    it("doesn't show the journal store's alert", async () => {
+    it("shows the journal store's alert", async () => {
         const { wrapper } = await mountPage({
             state: { alertVisible: true, alertType: 'error', alertMessage: 'error upserting journal entry' },
         });
 
-        expect(wrapper.find('.v-alert').exists()).toBe(false);
-        expect(wrapper.text()).not.toContain('error upserting journal entry');
+        expect(wrapper.find('.v-alert').text()).toBe('error upserting journal entry');
     });
 });

@@ -4,6 +4,8 @@
         :is-planting-year-selected="plantingYear != null"
         :planting-year="selectedPlantingYear"
     />
+    <!-- the common store's: the planting years, loaded here for every dashboard page -->
+    <fade-out-alert :is-visible="alert.isVisible" :alert-type="alert.type" :message="alert.message"/>
     <v-row>
       <router-view/>
     </v-row>
@@ -13,19 +15,25 @@
 <script>
 
 import DashboardAppBar from "@/components/layout/DashboardAppBar.vue";
+import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
 import {mapActions, mapState} from "pinia";
 import {useCommonStore} from "@/store";
+import { alertOf } from "@/store/alerts";
 
 export default {
   name: 'DashboardPage',
 
-  components: {DashboardAppBar},
+  components: {DashboardAppBar, FadeOutAlert},
 
   computed: {
     ...mapState(useCommonStore, {
       plantingYear: 'plantingYear',
       selectedPlantingYear: 'selectedPlantingYear',
     }),
+
+    alert() {
+      return alertOf(useCommonStore());
+    },
   },
 
   methods: {

@@ -1,4 +1,5 @@
 import { createTestingPinia } from '@pinia/testing';
+import { nextTick } from 'vue';
 import PlantingYearDetailsPage from '@/components/views/dashboard/years/PlantingYearDetailsPage.vue';
 import { usePlantingsStore, usePlantingYearsStore } from '@/store';
 import { mountWithPlugins } from '../../../../../helpers/mount';
@@ -94,14 +95,20 @@ describe('PlantingYearDetailsPage', () => {
         expect(wrapper.find('.text-h4').text()).toBe('Planting Year 2026');
     });
 
-    // DocumentsCurrentBehavior: the page has no alert, so a failed load of
-    // the year is silent. Should show the planting-years store's alert
-    it("doesn't show the planting-years store's alert", () => {
+    it("shows the planting-years store's alert", () => {
         const { wrapper } = mountPage({
             extraState: { alertVisible: true, alertType: 'error', alertMessage: 'error fetching planting year' },
         });
 
-        expect(wrapper.find('.v-alert').exists()).toBe(false);
-        expect(wrapper.text()).not.toContain('error fetching planting year');
+        expect(wrapper.find('.v-alert').text()).toBe('error fetching planting year');
+    });
+
+    it("shows the plantings store's alert, for the year's plantings", async () => {
+        const { wrapper, plantingsStore } = mountPage();
+
+        plantingsStore.$patch({ alertVisible: true, alertType: 'error', alertMessage: 'error fetching plantings by year' });
+        await nextTick();
+
+        expect(wrapper.find('.v-alert').text()).toBe('error fetching plantings by year');
     });
 });

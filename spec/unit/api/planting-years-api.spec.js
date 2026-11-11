@@ -60,10 +60,10 @@ describe('plantingYearsApi', () => {
             expect(log).toHaveBeenCalledWith('error fetching planting year 2026');
         });
 
-        it('when adding a year, with the request shown as [object Object]', async () => {
+        it('when adding a year, naming it', async () => {
             await plantingYearsApi.addPlantingYear('a-token', plantingYearRequest).catch(() => {});
 
-            expect(log).toHaveBeenCalledWith('error adding planting year [object Object]');
+            expect(log).toHaveBeenCalledWith('error adding planting year 2027');
         });
     });
 });

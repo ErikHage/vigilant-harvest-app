@@ -26,6 +26,8 @@ Every error, from every route, has one shape:
 
 ### 1. The plant store shows a generic alert for a rejected plant
 
+**Fixed** (pinned-behaviour fixes, F1, backlog A7): `upsertPlant` uses `upsertErrorMessage`.
+
 - **Where:** `src/store/index.js:288`, in `upsertPlant`:
   `err.data?.message || 'error upserting plant'`.
 - **Why:** `PUT /plants` used to answer its two 400s as `{ message }`. They now use the standard
@@ -94,7 +96,8 @@ Every error, from every route, has one shape:
     similar. That is now a 400 (`plantingYear must be an integer`), and was a 500. The app alerts
     either way.
   - Skipping the fetch while `plantingYear` is `null` would avoid the alert.
-- **A comment in `harvest-utils.js` is out of date.**
+- **A comment in `harvest-utils.js` is out of date.** **Fixed** (pinned-behaviour fixes, F1,
+  backlog B2).
   - Line 22 says a 400 from `PUT /harvests` "means an unknown harvest type id". It can now be any
     field's check, such as a quantity or a date.
   - The function itself still does the right thing.

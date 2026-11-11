@@ -137,25 +137,15 @@ describe('usePlantsStore', () => {
             expect(consoleError).toHaveBeenCalledWith(err);
         });
 
-        // The service's old shape for its two 400s, before it standardised them
-        it("shows a top-level message from the service's body", async () => {
-            plantsApi.upsertPlant.mockRejectedValue(apiError(400, { message: 'Friendly name already in use' }));
+        it.each([
+            'subcategoryId is required',
+            'Friendly name already in use',
+        ])("shows the service's reason for a refused plant: %s", async message => {
+            plantsApi.upsertPlant.mockRejectedValue(apiError(400, serviceErrorBody(400, message)));
 
             await store.upsertPlant(bean);
 
-            expect(store.alertMessage).toBe('Friendly name already in use');
-        });
-
-        // DocumentsCurrentBehavior: reads err.data.message, but the service now
-        // sends every error as { errors: [{ message }] }, so a rejected plant
-        // always shows the generic alert. Should show the service's message, as
-        // harvestUtils.upsertErrorMessage does (validation-fixes doc, fix 1)
-        it("shows the generic alert for the service's standard error body", async () => {
-            plantsApi.upsertPlant.mockRejectedValue(apiError(400, serviceErrorBody(400, 'subcategoryId is required')));
-
-            await store.upsertPlant(bean);
-
-            expect(store.alertMessage).toBe('error upserting plant');
+            expect(store.alertMessage).toBe(message);
         });
     });
 

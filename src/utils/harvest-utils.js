@@ -19,7 +19,8 @@ function harvestTypeNameById(harvestTypes, harvestTypeId) {
     return match ? match.harvestTypeName : '';
 }
 
-// a 400 from PUT /harvests means an unknown harvest type id; surface the service's own message
+// a 400 names the field the service refused and why (a quantity, a date, a
+// subcategory...); show that, and the fallback for anything else
 function upsertErrorMessage(err, fallback) {
     const serverMessage = err?.data?.errors?.[0]?.message;
     return err?.status === 400 && serverMessage ? serverMessage : fallback;

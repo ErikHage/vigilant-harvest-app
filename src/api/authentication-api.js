@@ -34,7 +34,17 @@ async function verifyActorToken(actorToken) {
     return true;
 }
 
+// Ends the session behind the token, in feral-authentication-service
+async function logout(actorToken) {
+    await axios.post(`${feralAuthenticationServiceUrl.v0}/logout`, {}, {
+        headers: {
+            'x-feral-auth-token': actorToken,
+        },
+    });
+}
+
 export default {
     verifySsoToken: withApiErrorHandling(verifySsoToken),
     verifyActorToken: withApiErrorHandling(verifyActorToken),
+    logout: withApiErrorHandling(logout),
 };

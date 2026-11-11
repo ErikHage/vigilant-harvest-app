@@ -95,9 +95,6 @@ test.describe('The planting years pages', () => {
         await plantingYearDetailsPage.checkShowsOnlyItsOwnYear('year: autumn', 'previous: spring');
     });
 
-    // DocumentsCurrentBehavior: the page's alerts list is empty (its `alerts`
-    // computed returns nothing), so a failed load of the years shows nothing
-    // at all (backlog A10). Should say the years couldn't be loaded
     test('say when the years can\'t be loaded', async ({ plantingYearsPage }) => {
         await plantingYearsPage.openWithTheListFailing();
 

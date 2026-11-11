@@ -38,7 +38,7 @@ export function createLoginPage(world, driver) {
         async checkSignOnIsRejected(...args) {
             parseDslArgs(args, {});
 
-            await driver.refusedSignOnSaysNothing();
+            await driver.refusedSignOnSaysWhy();
         },
 
         /**

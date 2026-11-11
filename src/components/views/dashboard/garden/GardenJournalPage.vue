@@ -3,6 +3,7 @@
     <v-row>
       <v-col cols="12" class="text-center">
         <page-title title="Garden Journal"/>
+        <fade-out-alert :is-visible="alert.isVisible" :alert-type="alert.type" :message="alert.message"/>
       </v-col>
     </v-row>
 
@@ -77,12 +78,15 @@ import {mapActions, mapState} from "pinia";
 import {useCommonStore, useJournalStore} from "@/store";
 import PageTitle from "@/components/layout/PageTitle.vue";
 import AddJournalEntryDialog from "@/components/views/dashboard/garden/AddJournalEntryDialog.vue";
+import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
+import { alertOf } from "@/store/alerts";
 
 export default {
   name: "GardenJournalPage",
 
   components: {
     AddJournalEntryDialog,
+    FadeOutAlert,
     PageTitle,
   },
 
@@ -100,6 +104,10 @@ export default {
     ...mapState(useJournalStore, {
       journalEntries: 'journalEntries',
     }),
+
+    alert() {
+      return alertOf(useJournalStore());
+    },
 
     groupedEntries() {
       return this.journalEntries.reduce((groups, entry) => {

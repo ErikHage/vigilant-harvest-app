@@ -226,9 +226,9 @@ async function deleteAll(named) {
 }
 
 /**
- * Ends the browser's own session in feral. The app's Logout doesn't (backlog
- * A2), so without this every test would leave one open there. Best effort:
- * the page may be closed, or elsewhere.
+ * Ends the browser's own session in feral. Most tests never press Logout, so
+ * without this every test would leave one open there. Best effort: the page
+ * may be closed, or elsewhere, and a session already ended is refused (401).
  */
 async function endBrowserSession(page) {
     try {

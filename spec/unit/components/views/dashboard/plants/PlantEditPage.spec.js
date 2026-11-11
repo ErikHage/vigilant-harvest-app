@@ -145,13 +145,12 @@ describe('PlantEditPage', () => {
         // DocumentsCurrentBehavior: with no plant loaded, refreshData copies
         // plantsById[plantId], which is undefined, through JSON.parse, which
         // throws. mounted() doesn't await refreshData, so in the app that's an
-        // unhandled rejection in the console. The page stays blank, and its
-        // alert sits inside the v-if="plant" with everything else (backlog
-        // A10). Should show the alert, and not throw.
+        // unhandled rejection in the console (backlog A10). Should not throw.
+        // The page shows only its alert.
         //
         // The mount's own refresh is held, so its rejection can't escape the
         // test, and the second refresh is the one checked
-        it('throws, and shows nothing, when the plant is not loaded', async () => {
+        it('throws, and shows only the alert, when the plant is not loaded', async () => {
             const { wrapper } = await mountPage({
                 plantsById: {},
                 state: { alertVisible: true, alertType: 'error', alertMessage: 'error fetching plant' },
@@ -159,7 +158,7 @@ describe('PlantEditPage', () => {
             });
 
             await expect(wrapper.vm.refreshData()).rejects.toThrow(SyntaxError);
-            expect(wrapper.text()).toBe('');
+            expect(wrapper.text()).toBe('error fetching plant');
         });
     });
 

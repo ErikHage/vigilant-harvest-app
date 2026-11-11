@@ -38,9 +38,7 @@ describe('DashboardPage', () => {
         expect(wrapper.findComponent(DashboardAppBar).props('isPlantingYearSelected')).toBe(false);
     });
 
-    // DocumentsCurrentBehavior: nothing shows the common store's alert, so a
-    // failed load of the planting years is silent. Should show it
-    it("doesn't show the common store's alert", async () => {
+    it("shows the common store's alert", async () => {
         const { wrapper } = await mountDashboard({
             plantingYear: 2026,
             alertVisible: true,
@@ -48,7 +46,6 @@ describe('DashboardPage', () => {
             alertMessage: 'error fetching planting years',
         });
 
-        expect(wrapper.text()).not.toContain('error fetching planting years');
-        expect(wrapper.find('.v-alert').exists()).toBe(false);
+        expect(wrapper.find('.v-alert').text()).toBe('error fetching planting years');
     });
 });

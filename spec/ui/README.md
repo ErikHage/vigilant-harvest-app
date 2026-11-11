@@ -145,7 +145,7 @@ What a test names is made up, and deleted afterwards.
 - What the service refuses with 409 is tried once more after the rest. Newest first is wrong only for what the service ties together on the side: a planting carried forward into a year the test added is older than that year, and holds it.
 - A plant, plot or planting renamed on the page is remembered by its new name, and cleanup finds it by its old one too, in case the new one was never saved.
 - Plantings a step makes on the service's side are named too, before the step: each split, and the remainder the service splits off when fewer are planted out than were sown, `<name>(2 Remaining)`, as `planting: <alias>-remainder`.
-- It also ends the browser's own session in feral, since the app's Logout doesn't (backlog A2).
+- It also ends the browser's own session in feral, since most tests never press Logout.
 
 **After the last test, a residue check fails the run** if anything with a `ui-` name, or a planting year from 8000 to 8999, is still there: plots, plants, plantings, categories and subcategories, schedules, years. Harvests, journal and activity-log entries and schedule items hang off those. It throws from global teardown, which Playwright reports outside any test, and exits 1. (Setting `process.exitCode` there exits 0: Playwright sets its own.)
 

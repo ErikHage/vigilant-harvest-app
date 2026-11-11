@@ -1,5 +1,13 @@
 <template>
   <v-container>
+    <fade-out-alert
+        v-for="(alert, i) in alerts"
+        :key="'alert' + i"
+        :is-visible="alert.isVisible"
+        :alert-type="alert.type"
+        :message="alert.message"
+    />
+
     <v-row v-if="plantingYear">
       <v-col cols="12">
         <v-sheet class="pa-4">
@@ -69,12 +77,21 @@
 import {mapActions, mapState} from "pinia";
 import {usePlantingsStore, usePlantingYearsStore} from "@/store";
 import dayjs from "dayjs";
-
+import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
+import { alertOf } from "@/store/alerts";
 
 export default {
   name: "PlantingYearDetailsPage",
 
+  components: {
+    FadeOutAlert,
+  },
+
   computed: {
+    alerts() {
+      return [usePlantingYearsStore(), usePlantingsStore()].map(alertOf);
+    },
+
     ...mapState(usePlantingYearsStore, {
       plantingYear: 'plantingYear',
     }),

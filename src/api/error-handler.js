@@ -1,8 +1,8 @@
 import axios from "axios";
 
 export class ApiError extends Error {
-    constructor(message, status, data) {
-        super(message);
+    constructor(message, status, data, options) {
+        super(message, options);
         this.name = "ApiError";
         this.status = status;
         this.data = data;
@@ -21,7 +21,8 @@ export function withApiErrorHandling(fn) {
                     error.response ? error.response.data : null
                 );
             } else {
-                throw new ApiError("Unexpected error occurred");
+                // not an HTTP failure, so there is no status or body, as with no answer
+                throw new ApiError(error.message, null, null, { cause: error });
             }
         }
     };

@@ -1,4 +1,4 @@
-import { expectText, expectThat, expectVisible } from './assertions';
+import { expectCount, expectText, expectThat, expectVisible } from './assertions';
 import { createRoutedPageDriver } from './routed-page-driver';
 import { escaped } from './urls';
 import { serviceUrl } from '../setup/config';
@@ -67,12 +67,14 @@ export function createPlantingYearsPageDriver(page, serviceCalls, callControl) {
         },
 
         /**
-         * Pinned (A10): once the list has failed, the page shows no alert, and
-         * no years. Nothing follows the failure to wait for, so this waits for
-         * the failed call to finish, then two frames, for the store to take it
-         * and the page to render, and reads the page once.
+         * Once the list has failed, the page says so, and lists no years. The
+         * dashboard loads the years too, for the year picker, and that fails
+         * as well, so two alerts say it: the dashboard's and the page's own.
+         * Both are counted, so the page's can't go missing behind the other.
+         * They fade after three seconds, so this follows
+         * `openWithTheListFailing` straight away.
          */
-        async saysNothingWhenTheYearsFailToLoad() {
+        async saysTheYearsDidNotLoad() {
             const what = 'the planting years page, after the list failed to load';
 
             // The page itself, so a failure that took it down can't pass for this
@@ -80,8 +82,7 @@ export function createPlantingYearsPageDriver(page, serviceCalls, callControl) {
             await listFinished;
             expectThat(serviceCalls.wereAnswered('GET', yearsCallPath, status.serverError),
                 'the list call to have been answered with 500', 'another answer', what);
-            await page.evaluate(() => new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))));
-            expectThat(await main.locator('.v-alert').count() === 0, 'no alert', 'an alert', what);
+            await expectCount(main.locator('.v-alert', { hasText: 'error fetching planting years' }), 2, what);
             expectThat(await rows.count() === 0, 'no years listed', 'years listed', what);
         },
     };

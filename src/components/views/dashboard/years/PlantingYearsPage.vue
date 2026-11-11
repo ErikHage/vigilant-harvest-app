@@ -37,6 +37,7 @@ import PlantingsYearsTable from "@/components/years/PlantingYearsTable.vue";
 import {mapActions, mapState} from "pinia";
 import {usePlantingYearsStore} from "@/store";
 import {views} from "@/utils/constants";
+import { alertOf } from "@/store/alerts";
 
 export default {
   name: "PlantingYearsPage",
@@ -57,7 +58,7 @@ export default {
     }),
 
     alerts() {
-
+      return [alertOf(usePlantingYearsStore())];
     },
   },
 

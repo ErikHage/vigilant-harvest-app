@@ -1,15 +1,16 @@
 <template>
   <v-container>
+    <!-- outside the v-if="plant", so a plant that fails to load says so -->
+    <v-row v-if="alertVisible">
+      <fade-out-alert :is-visible="alertVisible" :alert-type="alertType" :message="alertMessage"/>
+    </v-row>
+
+    <v-row v-if="loading" class="mt-10 d-flex justify-center">
+      <v-progress-circular size="100" width="10" color="green" indeterminate/>
+    </v-row>
+
     <v-row v-if="plant">
       <v-col cols="12">
-
-        <v-row v-if="alertVisible">
-          <fade-out-alert :is-visible="alertVisible" :alert-type="alertType" :message="alertMessage"/>
-        </v-row>
-
-        <v-row v-if="loading" class="mt-10 d-flex justify-center">
-          <v-progress-circular size="100" width="10" color="green" indeterminate/>
-        </v-row>
 
         <v-row>
           <v-col cols="12" class="text-center">

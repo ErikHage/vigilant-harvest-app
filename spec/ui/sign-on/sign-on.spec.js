@@ -20,9 +20,6 @@ test.describe('Signing on', () => {
         await dashboardPage.checkIsShownAfterReload();
     });
 
-    // DocumentsCurrentBehavior: the browser goes back to the login page, but
-    // the authentication store's message for the refused token is never shown
-    // (backlog A10). Should say why the sign-on failed
     test('rejects a token feral never issued', async ({ loginPage }) => {
         await loginPage.logInWithToken('token: made-up');
 
@@ -42,9 +39,6 @@ test.describe('Logging out', () => {
         await loginPage.checkIsShown();
     });
 
-    // DocumentsCurrentBehavior: no call reaches feral, since the app's
-    // authentication API has no logout, so the session stays open there until
-    // it expires (backlog A2). Should end it
     test('ends the session in feral', async ({ loginPage, dashboardPage }) => {
         await loginPage.logIn('user: gardener');
         await dashboardPage.checkIsShown();

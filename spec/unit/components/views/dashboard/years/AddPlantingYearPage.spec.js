@@ -148,6 +148,19 @@ describe('AddPlantingYearPage', () => {
         expect(request).toMatchObject({ lastFrostDate: '2027-05-10', targetPlantingDate: '2027-05-17' });
     });
 
+    // It loads the plantings and plants it carries forward, so their failures show here too
+    it.each([
+        ['plantingsStore', 'error fetching plantings by year'],
+        ['plantsStore', 'error fetching plants'],
+    ])("shows the %s's alert", async (store, message) => {
+        const mounted = await mountPage();
+
+        mounted[store].$patch({ alertVisible: true, alertType: 'error', alertMessage: message });
+        await flushPromises();
+
+        expect(mounted.wrapper.find('.v-alert').text()).toBe(message);
+    });
+
     it("stays put, showing the store's alert, when adding fails", async () => {
         const { wrapper, plantingYearsStore, $router } = await mountPage({
             plantingYearsState: { alertVisible: true, alertType: 'error', alertMessage: 'error adding planting year' },

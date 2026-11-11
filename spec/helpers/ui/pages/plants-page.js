@@ -79,7 +79,7 @@ export function createPlantsPage(world, driver) {
         async checkAlertSaysWhyItWasRefused(...args) {
             parseDslArgs(args, {});
 
-            await driver.alertSaysOnlyThatItFailed();
+            await driver.alertSaysTheSubcategoryIsRequired();
         },
     };
 }

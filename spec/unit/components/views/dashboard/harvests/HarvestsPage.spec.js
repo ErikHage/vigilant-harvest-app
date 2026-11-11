@@ -146,16 +146,13 @@ describe('HarvestsPage', () => {
             expect(wrapper.find('.v-alert').text()).toBe('error searching harvests page');
         });
 
-        // DocumentsCurrentBehavior: it binds only the harvests store's alert,
-        // so a failed load of the plants or plantings shows nothing (backlog
-        // A10). Should show each store's alert
         it.each([
             ['plants', 'error fetching plants'],
             ['plantings', 'error fetching plantings by year'],
-        ])("doesn't show the %s store's alert", async (store, message) => {
+        ])("shows the %s store's alert", async (store, message) => {
             const { wrapper } = await mountPage({ state: { [store]: { alertVisible: true, alertType: 'error', alertMessage: message } } });
 
-            expect(wrapper.find('.v-alert').exists()).toBe(false);
+            expect(wrapper.find('.v-alert').text()).toBe(message);
         });
 
         // DocumentsCurrentBehavior: it reads each harvest's planting, and its

@@ -102,14 +102,11 @@ describe('GardenActivityLogPage', () => {
         expect(tableRows(wrapper)).toHaveLength(3);
     });
 
-    // DocumentsCurrentBehavior: nothing binds the activity-log store's alert,
-    // so a failed load or save shows nothing (backlog A10). Should show it
-    it("doesn't show the activity-log store's alert", async () => {
+    it("shows the activity-log store's alert", async () => {
         const { wrapper } = await mountPage({
             state: { alertVisible: true, alertType: 'error', alertMessage: 'error upserting activity log entry' },
         });
 
-        expect(wrapper.find('.v-alert').exists()).toBe(false);
-        expect(wrapper.text()).not.toContain('error upserting activity log entry');
+        expect(wrapper.find('.v-alert').text()).toBe('error upserting activity log entry');
     });
 });

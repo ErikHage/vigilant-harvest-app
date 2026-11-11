@@ -41,10 +41,8 @@ test.describe('The plants page', () => {
     // DocumentsCurrentBehavior: the dialog's fields are marked required but
     // have no rules, so Create is offered with nothing entered, and the
     // service refuses the plant (backlog A16). Should offer Create only once
-    // the name, subcategory and the rest are given. The alert then says only
-    // "error upserting plant", since the store reads the reason from where the
-    // service no longer puts it (backlog A7). Should say the service's reason,
-    // "subcategoryId is required"
+    // the name, subcategory and the rest are given. The alert says the
+    // service's reason
     test('waits for the required fields, and says why a plant was refused', async ({ plantsPage }) => {
         await plantsPage.open();
         await plantsPage.checkIsShown();

@@ -1,11 +1,12 @@
 <template>
-  <v-container v-if="activitySchedule != null">
-    <v-row>
-      <v-col cols="12">
+  <v-container>
+    <!-- outside the v-if, so a schedule that fails to load says so -->
+    <v-row v-if="alertVisible">
+      <fade-out-alert :is-visible="alertVisible" :alert-type="alertType" :message="alertMessage"/>
+    </v-row>
 
-        <v-row v-if="alertVisible">
-          <fade-out-alert :is-visible="alertVisible" :alert-type="alertType" :message="alertMessage"/>
-        </v-row>
+    <v-row v-if="activitySchedule != null">
+      <v-col cols="12">
 
         <v-row class="mb-4 align-center">
           <v-col>

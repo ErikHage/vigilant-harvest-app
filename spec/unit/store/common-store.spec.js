@@ -82,10 +82,12 @@ describe('useCommonStore', () => {
             expect(store.selectedPlantingYear).toBeUndefined();
         });
 
-        it('shows an alert, and keeps what it had, when the fetch fails', async () => {
+        it('shows an alert, logs, and keeps what it had, when the fetch fails', async () => {
+            const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+            const err = httpError(500);
             plantingYearsApi.fetchPlantingYears.mockResolvedValueOnce(plantingYears);
             await store.fetchPlantingYears();
-            plantingYearsApi.fetchPlantingYears.mockRejectedValueOnce(httpError(500));
+            plantingYearsApi.fetchPlantingYears.mockRejectedValueOnce(err);
 
             await store.fetchPlantingYears();
 
@@ -93,6 +95,8 @@ describe('useCommonStore', () => {
             expect(store.alertType).toBe('error');
             expect(store.alertMessage).toBe('error fetching planting years');
             expect(store.availableYears).toEqual(['2025', '2026']);
+            expect(consoleError).toHaveBeenCalledWith(err);
+            consoleError.mockRestore();
         });
     });
 

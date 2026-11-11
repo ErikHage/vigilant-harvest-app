@@ -14,7 +14,10 @@
           ></v-img>
         </div>
 
-        <v-card class="text-center">
+        <!-- a failed sign-on, or logout, comes back here -->
+        <fade-out-alert :is-visible="alert.isVisible" :alert-type="alert.type" :message="alert.message"/>
+
+        <v-card class="text-center mt-3">
           <v-card-title>Authenticate with Identity Provider</v-card-title>
           <v-card-text>
             <v-btn @click="goToAuthentication">SSO</v-btn>
@@ -31,14 +34,22 @@ import { mapActions, mapState } from "pinia";
 import { useAuthenticationStore } from "@/store";
 import { views } from "@/utils/constants";
 import { getAssetPath } from "@/utils/assets";
+import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
+import { alertOf } from "@/store/alerts";
 
 export default {
   name: 'LoginPage',
+
+  components: { FadeOutAlert },
 
   computed: {
     ...mapState(useAuthenticationStore, {
       isAuthenticated: 'isAuthenticated',
     }),
+
+    alert() {
+      return alertOf(useAuthenticationStore());
+    },
   },
 
   methods: {

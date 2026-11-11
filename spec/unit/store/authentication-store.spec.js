@@ -4,8 +4,8 @@ import authenticationApi from '@/api/authentication-api';
 import { tokenFor } from '../../helpers/tokens';
 import { httpError } from '../../helpers/http-errors';
 
-// Automocked, so the module keeps its real exports: verifySsoToken and
-// verifyActorToken, and no logout
+// Automocked, so the module keeps its real exports: verifySsoToken,
+// verifyActorToken and logout
 vi.mock('@/api/authentication-api');
 
 // jsdom can't navigate to another page, and its window.location can't be
@@ -87,8 +87,9 @@ describe('useAuthenticationStore', () => {
             expect(store.alertVisible).toBe(false);
         });
 
-        it('shows an alert, and stays logged out, when the exchange fails', async () => {
-            authenticationApi.verifySsoToken.mockRejectedValue(httpError(401));
+        it('shows an alert, logs, and stays logged out, when the exchange fails', async () => {
+            const err = httpError(401);
+            authenticationApi.verifySsoToken.mockRejectedValue(err);
 
             await store.authenticate('sso-token');
 
@@ -97,6 +98,7 @@ describe('useAuthenticationStore', () => {
             expect(localStorage.getItem(tokenKey)).toBeNull();
             expect(store.alertMessage).toBe('error authenticating sso token');
             expect(store.alertType).toBe('error');
+            expect(consoleError).toHaveBeenCalledWith(err);
         });
     });
 
@@ -135,21 +137,36 @@ describe('useAuthenticationStore', () => {
             expect(store.showAppBar).toBe(false);
         });
 
-        // DocumentsCurrentBehavior: logout calls authenticationApi.logout, which
-        // doesn't exist. The TypeError is caught as a failed logout, so every
-        // logout shows "error logging out", and the session is never ended on
-        // the service. Should end the session there and show no alert
-        it('shows "error logging out" every time, without calling the service', async () => {
+        it('ends the session on the service, and shows no alert', async () => {
+            authenticationApi.logout.mockResolvedValue();
+
             await store.logout();
 
-            expect(authenticationApi.logout).toBeUndefined();
-            expect(store.alertVisible).toBe(true);
+            expect(authenticationApi.logout).toHaveBeenCalledWith('a-token');
+            expect(store.alertVisible).toBe(false);
+            expect(consoleError).not.toHaveBeenCalled();
+        });
+
+        it('shows no alert when the service had already ended the session (401)', async () => {
+            authenticationApi.logout.mockRejectedValue(httpError(401));
+
+            await store.logout();
+
+            expect(store.alertVisible).toBe(false);
+            expect(localStorage.getItem(tokenKey)).toBeNull();
+        });
+
+        it('shows "error logging out" when the service fails, and still logs out locally', async () => {
+            const err = httpError(500);
+            authenticationApi.logout.mockRejectedValue(err);
+
+            await store.logout();
+
             expect(store.alertType).toBe('error');
             expect(store.alertMessage).toBe('error logging out');
-            expect(consoleError).toHaveBeenCalledWith(expect.objectContaining({
-                name: 'TypeError',
-                message: expect.stringMatching(/logout is not a function/),
-            }));
+            expect(consoleError).toHaveBeenCalledWith(err);
+            expect(localStorage.getItem(tokenKey)).toBeNull();
+            expect(store.isAuthenticated).toBe(false);
         });
     });
 

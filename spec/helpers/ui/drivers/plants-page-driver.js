@@ -83,12 +83,9 @@ export function createPlantsPageDriver(page) {
             await clickIcon(friendlyName, 'mdi-pencil', `editing the plant ${friendlyName}`);
         },
 
-        /**
-         * Pinned (A7): the alert says only that saving failed, not the
-         * service's reason.
-         */
-        async alertSaysOnlyThatItFailed() {
-            await pageAlertSays(page, 'error upserting plant', 'the plants page, after the service refused a plant');
+        /** The alert gives the service's reason for refusing a plant with nothing entered. */
+        async alertSaysTheSubcategoryIsRequired() {
+            await pageAlertSays(page, 'subcategoryId is required', 'the plants page, after the service refused a plant');
         },
     };
 }

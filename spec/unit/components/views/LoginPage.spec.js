@@ -86,16 +86,12 @@ describe('LoginPage', () => {
         expect(store.clearToken).toHaveBeenCalledTimes(1);
     });
 
-    // DocumentsCurrentBehavior: nothing shows the authentication store's alerts,
-    // so a failed sign-on, which lands here, and the "error logging out" of
-    // every logout (backlog A2) never reach the screen. Should show them, as
-    // the dashboard pages show their own stores' alerts
-    it("doesn't show the authentication store's alert", async () => {
+    // A failed sign-on, and a failed logout, both come back here
+    it("shows the authentication store's alert", async () => {
         const { wrapper } = await mountLoginPage({
             authentication: { alertVisible: true, alertType: 'error', alertMessage: 'error authenticating sso token' },
         });
 
-        expect(wrapper.text()).not.toContain('error authenticating sso token');
-        expect(wrapper.find('.v-alert').exists()).toBe(false);
+        expect(wrapper.find('.v-alert').text()).toBe('error authenticating sso token');
     });
 });

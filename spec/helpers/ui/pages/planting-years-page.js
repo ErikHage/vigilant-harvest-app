@@ -51,7 +51,7 @@ export function createPlantingYearsPage(world, driver) {
         async checkSaysTheYearsDidNotLoad(...args) {
             parseDslArgs(args, {});
 
-            await driver.saysNothingWhenTheYearsFailToLoad();
+            await driver.saysTheYearsDidNotLoad();
         },
     };
 }

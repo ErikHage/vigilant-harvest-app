@@ -5,9 +5,12 @@
         <page-title title="Add Planting Year"/>
         <v-spacer></v-spacer>
         <fade-out-alert
+            v-for="(alert, i) in alerts"
+            :key="'alert' + i"
             :is-visible="alert.isVisible"
             :alert-type="alert.type"
-            :message="alert.message"/>
+            :message="alert.message"
+        />
       </v-col>
 
       <v-col cols="12">
@@ -111,6 +114,7 @@ import DatePickerDialogActivator from "@/components/utils/DatePickerDialogActiva
 import dayjs from "dayjs";
 import plantingUtils from "@/utils/plantings";
 import { toLocalDate } from '@/utils/dates';
+import { alertOf } from '@/store/alerts';
 
 export default {
   name: "AddPlantingYearPage",
@@ -130,9 +134,6 @@ export default {
   computed: {
     ...mapState(usePlantingYearsStore, {
       plantingYears: 'plantingYears',
-      alertType: 'alertType',
-      alertMessage: 'alertMessage',
-      alertVisible: 'alertVisible',
     }),
 
     ...mapState(usePlantingsStore, {
@@ -143,12 +144,9 @@ export default {
       plantsById: 'plantsById',
     }),
 
-    alert() {
-      return {
-        isVisible: this.alertVisible,
-        type: this.alertType,
-        message: this.alertMessage,
-      };
+    // the plantings and plants carried forward load here too
+    alerts() {
+      return [usePlantingYearsStore(), usePlantingsStore(), usePlantsStore()].map(alertOf);
     },
 
     currentPlantingYear() {

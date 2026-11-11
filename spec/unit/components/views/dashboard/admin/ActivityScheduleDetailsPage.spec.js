@@ -90,17 +90,13 @@ describe('ActivityScheduleDetailsPage', () => {
         expect(wrapper.find('.v-alert').text()).toBe('error updating activity schedule');
     });
 
-    // DocumentsCurrentBehavior: the alert sits inside the page's
-    // v-if="activitySchedule", so when the first schedule viewed fails to
-    // load, the page is blank and says nothing (backlog A10). Should show the
-    // alert without a schedule
-    it("shows nothing, not even the alert, when the schedule didn't load", async () => {
+    it("shows only the alert when the schedule didn't load", async () => {
         const { wrapper } = await mountPage({
             schedule: null,
             state: { alertVisible: true, alertType: 'error', alertMessage: 'error fetching activity schedule by id: schedule-1' },
         });
 
-        expect(wrapper.text()).toBe('');
+        expect(wrapper.text()).toBe('error fetching activity schedule by id: schedule-1');
     });
 
     // DocumentsCurrentBehavior: it renders whatever schedule the store holds,
