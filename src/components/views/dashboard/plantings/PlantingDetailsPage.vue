@@ -122,6 +122,7 @@ import { mapActions, mapState } from "pinia";
 import { usePlantingsStore, usePlantsStore, usePlotsStore } from "@/store";
 import plantingUtils from '@/utils/plantings';
 import sorting from '@/utils/sorting';
+import { toLocalDate } from '@/utils/dates';
 
 import PageTitle from "@/components/layout/PageTitle.vue";
 import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
@@ -324,7 +325,7 @@ export default {
             seedSource: this.plantingCopy.seedSource,
             lotNumber: this.plantingCopy.lotNumber,
             plantId: this.plantingCopy.plantId,
-            targetPlantingDate: this.plantingCopy.targetPlantingDate,
+            targetPlantingDate: toLocalDate(this.plantingCopy.targetPlantingDate),
             leadTimeWeeks: this.plantingCopy.leadTimeWeeks,
           };
           break;
@@ -333,9 +334,9 @@ export default {
             name: this.plantingCopy.name,
             seedSource: this.plantingCopy.seedSource,
             lotNumber: this.plantingCopy.lotNumber,
-            sowDate: this.plantingCopy.sowDate,
+            sowDate: toLocalDate(this.plantingCopy.sowDate),
             numberSown: this.plantingCopy.numberSown,
-            targetPlantingDate: this.plantingCopy.targetPlantingDate,
+            targetPlantingDate: toLocalDate(this.plantingCopy.targetPlantingDate),
           };
           break;
         case plantingStatuses.planted:
@@ -344,7 +345,7 @@ export default {
             seedSource: this.plantingCopy.seedSource,
             lotNumber: this.plantingCopy.lotNumber,
             plotId: this.plantingCopy.plotId,
-            transplantDate: this.plantingCopy.transplantDate,
+            transplantDate: toLocalDate(this.plantingCopy.transplantDate),
             numberTransplanted: this.plantingCopy.numberTransplanted,
           };
           break;

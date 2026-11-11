@@ -232,6 +232,18 @@ describe('PlantingDetailsPage', () => {
             expect(store.fetchPlantingById).toHaveBeenCalledTimes(2);
         });
 
+        // A date picked in the details tab is a Date; it goes out as the day
+        // picked, YYYY-MM-DD, not its UTC instant (backlog B19)
+        it('sends a date picked in the details tab as the day picked', async () => {
+            const { wrapper, store } = await mountPage({ planting: aPlanting({ currentStatus: 'STARTED' }) });
+            await wrapper.find('.v-switch input').setValue(true);
+            wrapper.findComponent(PlantingDetailsTab).props('planting').sowDate = new Date(2026, 3, 22);
+
+            await buttonLabelled(wrapper, 'Update').trigger('click');
+
+            expect(store.updatePlanting.mock.calls[0][1].sowDate).toBe('2026-04-22');
+        });
+
         it('sends the edits made in the details tab', async () => {
             const { wrapper, store } = await mountPage();
             await wrapper.find('.v-switch input').setValue(true);

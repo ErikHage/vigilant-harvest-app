@@ -59,6 +59,7 @@
 import dayjs from 'dayjs';
 
 import DatePickerDialogActivator from "@/components/utils/DatePickerDialogActivator.vue";
+import { toLocalDateTime } from '@/utils/dates';
 
 export default {
   name: "AddActivityLogEntryDialog",
@@ -122,7 +123,7 @@ export default {
 
     async handleSubmit() {
       this.onSubmit({
-        entryDate: this.entryDate.toISOString(),
+        entryDate: toLocalDateTime(this.entryDate),
         activityType: this.activityType.name,
         subType: this.activitySubType,
         comments: this.comments,

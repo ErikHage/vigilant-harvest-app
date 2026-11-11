@@ -418,8 +418,8 @@ describe('GardenPage', () => {
             await press(confirm, 'Confirm');
 
             expect(harvests.upsertHarvests).toHaveBeenCalledWith([
-                { plantingYear: 2026, plantingId: 'planting-1', quantity: 2, harvestDate: new Date('2026-07-04T10:00:00'), harvestTypeId: 2 },
-                { plantingYear: 2026, plantingId: 'planting-2', quantity: 5, harvestDate: new Date('2026-07-04T10:00:00'), harvestTypeId: 1 },
+                { plantingYear: 2026, plantingId: 'planting-1', quantity: 2, harvestDate: '2026-07-04', harvestTypeId: 2 },
+                { plantingYear: 2026, plantingId: 'planting-2', quantity: 5, harvestDate: '2026-07-04', harvestTypeId: 1 },
             ]);
             expect(findDialog(confirmTitle('Sat Jul 04 2026'))).toBeUndefined();
             expect(entryDialog()).toBeUndefined();
@@ -439,7 +439,7 @@ describe('GardenPage', () => {
             await press(dialogTitled(confirmTitle('Wed Jul 01 2026')), 'Confirm');
 
             expect(harvests.upsertHarvests).toHaveBeenCalledWith([
-                { plantingYear: 2026, plantingId: 'planting-1', quantity: 12, harvestDate: new Date(2026, 6, 1), harvestTypeId: 3 },
+                { plantingYear: 2026, plantingId: 'planting-1', quantity: 12, harvestDate: '2026-07-01', harvestTypeId: 3 },
             ]);
         });
 
@@ -487,17 +487,17 @@ describe('GardenPage', () => {
             expect(dialog.find('.v-alert').exists()).toBe(false);
         });
 
-        // DocumentsCurrentBehavior: the default date is the moment the page
-        // was created, and the service files a harvest under that instant's
-        // UTC day, so harvests saved on a New York evening go on the next day.
-        // A page left open overnight files them under the day before.
-        // Should send the local day, as YYYY-MM-DD (backlog A22)
-        it('saves a New York evening as the next day', async () => {
+        // A harvest date is the user's own day, as YYYY-MM-DD, so harvests
+        // saved on a New York evening go on that day (backlog A22). The
+        // default is still the day the page was created, so a page left open
+        // overnight files them under the day before: A22's stale default,
+        // left for the pinned-behaviour plan's chunk F5
+        it('saves a New York evening on that day', async () => {
             const { wrapper, harvests } = await mountPage({ now: '2026-07-04T21:30:00' });
 
             await press(await enterHarvests(wrapper), 'Confirm');
 
-            expect(harvests.upsertHarvests.mock.calls[0][0][0].harvestDate.toISOString()).toBe('2026-07-05T01:30:00.000Z');
+            expect(harvests.upsertHarvests.mock.calls[0][0][0].harvestDate).toBe('2026-07-04');
         });
 
         // DocumentsCurrentBehavior: Confirm stays enabled while the save is in

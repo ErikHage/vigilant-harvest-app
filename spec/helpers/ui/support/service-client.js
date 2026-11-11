@@ -105,7 +105,7 @@ export const deleteHarvest = (token, harvestId) => garden('DELETE', `/harvests/$
 /** The year's journal entries, each with its id. */
 export const listJournalEntries = (token, plantingYear) => garden('GET', `/journal/${plantingYear}`, { token });
 
-/** Records a journal entry: `{ plantingYear, entryDate, entry }`, the date an instant. */
+/** Records a journal entry: `{ plantingYear, entryDate, entry }`, the date a local YYYY-MM-DDTHH:mm:ss. */
 export const insertJournalEntry = (token, entry) => garden('PUT', '/journal', { token, body: entry });
 
 export const deleteJournalEntry = (token, entryId) => garden('DELETE', `/journal/entries/${entryId}`, { token });

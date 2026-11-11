@@ -58,6 +58,7 @@ import plantingUtils from '../../utils/plantings';
 import sorting from "@/utils/sorting";
 
 import DatePickerDialogActivator from "@/components/utils/DatePickerDialogActivator.vue";
+import { toLocalDate } from '@/utils/dates';
 
 const { plantingActions } = plantingUtils;
 
@@ -107,7 +108,7 @@ export default {
   methods: {
     getDataToSubmit() {
       return {
-        transplantDate: this.form.transplantDate.toISOString(),
+        transplantDate: toLocalDate(this.form.transplantDate),
         numberTransplanted: this.form.numberTransplanted,
         plotId: this.form.plotId,
         comment: this.form.comment,

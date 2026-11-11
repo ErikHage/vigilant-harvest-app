@@ -44,6 +44,7 @@
 import dayjs from 'dayjs';
 
 import DatePickerDialogActivator from "@/components/utils/DatePickerDialogActivator.vue";
+import { toLocalDateTime } from '@/utils/dates';
 
 export default {
   name: "AddJournalEntryDialog",
@@ -89,7 +90,7 @@ export default {
 
     async handleSubmit() {
       this.onSubmit({
-        entryDate: this.entryDate.toISOString(),
+        entryDate: toLocalDateTime(this.entryDate),
         entry: this.entryText,
       });
       // TODO don't close until submitted successfully

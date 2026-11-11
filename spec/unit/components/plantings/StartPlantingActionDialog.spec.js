@@ -45,7 +45,7 @@ describe('StartPlantingActionDialog', () => {
         await press(dialog, 'Confirm');
 
         expect(wrapper.props('onSubmit')).toHaveBeenCalledWith('START', {
-            sowDate: new Date(2026, 2, 12).toISOString(),
+            sowDate: '2026-03-12',
             numberSown: 24,
             comment: 'Heat mat',
         });
@@ -61,16 +61,14 @@ describe('StartPlantingActionDialog', () => {
         expect(dialog.find('h3').text()).toBe('Thu Mar 12 2026');
     });
 
-    // DocumentsCurrentBehavior: the default sow date is the moment the dialog
-    // was created, sent as its UTC instant. The service keeps the instant's
-    // UTC day, so a planting started in a New York evening is recorded as
-    // sown the next day. Should send today's date, as YYYY-MM-DD
-    it('sends a New York evening as the next day', async () => {
+    // The sow date is the user's own day, as YYYY-MM-DD, so a New York
+    // evening, already the next day in UTC, is sown that day (backlog A22)
+    it('sends a New York evening as that day', async () => {
         const wrapper = mountDialog({ now: '2026-11-07T21:30:00' });
 
         await press(await open(wrapper), 'Confirm');
 
-        expect(wrapper.props('onSubmit').mock.calls[0][1].sowDate).toBe('2026-11-08T02:30:00.000Z');
+        expect(wrapper.props('onSubmit').mock.calls[0][1].sowDate).toBe('2026-11-07');
     });
 
     it('closes on Cancel without submitting', async () => {

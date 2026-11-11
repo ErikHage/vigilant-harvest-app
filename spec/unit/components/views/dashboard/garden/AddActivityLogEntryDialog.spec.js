@@ -98,7 +98,7 @@ describe('AddActivityLogEntryDialog', () => {
         await press(dialog, 'Confirm');
 
         expect(wrapper.props('onSubmit')).toHaveBeenCalledWith({
-            entryDate: new Date(2026, 6, 1).toISOString(),
+            entryDate: '2026-07-01T00:00:00',
             activityType: 'FERTILIZE',
             subType: 'CalMag',
             comments: 'Tomatoes only',
@@ -116,17 +116,16 @@ describe('AddActivityLogEntryDialog', () => {
         expect(wrapper.props('onSubmit').mock.calls[0][0]).toMatchObject({ activityType: 'TREAT', subType: null, comments: '' });
     });
 
-    // An entry date is a TIMESTAMP, which the service keeps as an instant, so
-    // the log shows a New York evening's entry on the local day
-    // (GardenActivityLogPage.spec.js)
-    it('sends the moment of a default date, as its UTC instant', async () => {
+    // An entry date is the user's wall-clock time, sent and returned with no
+    // timezone, so a New York evening's entry stays on that evening
+    it('sends the moment of a default date, as its local wall-clock time', async () => {
         const wrapper = mountDialog({ now: '2026-07-04T21:30:00' });
         await open(wrapper);
         await choose(wrapper, 'Activity', activityTypes[0]);
 
         await press(dialogTitled('Log Activity'), 'Confirm');
 
-        expect(wrapper.props('onSubmit').mock.calls[0][0].entryDate).toBe('2026-07-05T01:30:00.000Z');
+        expect(wrapper.props('onSubmit').mock.calls[0][0].entryDate).toBe('2026-07-04T21:30:00');
     });
 
     it('starts afresh after a submit', async () => {

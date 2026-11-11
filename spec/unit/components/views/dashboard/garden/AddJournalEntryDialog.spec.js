@@ -49,7 +49,7 @@ describe('AddJournalEntryDialog', () => {
         await press(dialog, 'Confirm');
 
         expect(wrapper.props('onSubmit')).toHaveBeenCalledWith({
-            entryDate: new Date(2026, 6, 1).toISOString(),
+            entryDate: '2026-07-01T00:00:00',
             entry: 'Beans up.\nPeas slow.',
         });
         expect(isOpen()).toBe(false);
@@ -64,15 +64,14 @@ describe('AddJournalEntryDialog', () => {
         expect(dialog.find('h3').text()).toBe('2026-07-01');
     });
 
-    // Unlike a planting's dates, an entry date is a TIMESTAMP: the service
-    // keeps the instant, and sends it back as one, so the journal files a New
-    // York evening's entry under the local day (GardenJournalPage.spec.js)
-    it('sends the moment of a default date, as its UTC instant', async () => {
+    // An entry date is the user's wall-clock time, sent and returned with no
+    // timezone, so a New York evening's entry stays on that evening
+    it('sends the moment of a default date, as its local wall-clock time', async () => {
         const wrapper = mountDialog({ now: '2026-07-04T21:30:00' });
 
         await press(await open(wrapper), 'Confirm');
 
-        expect(wrapper.props('onSubmit').mock.calls[0][0].entryDate).toBe('2026-07-05T01:30:00.000Z');
+        expect(wrapper.props('onSubmit').mock.calls[0][0].entryDate).toBe('2026-07-04T21:30:00');
     });
 
     // The service stores it too (entry is optional), and the journal shows a

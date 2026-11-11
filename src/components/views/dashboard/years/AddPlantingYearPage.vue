@@ -110,6 +110,7 @@ import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
 import DatePickerDialogActivator from "@/components/utils/DatePickerDialogActivator.vue";
 import dayjs from "dayjs";
 import plantingUtils from "@/utils/plantings";
+import { toLocalDate } from '@/utils/dates';
 
 export default {
   name: "AddPlantingYearPage",
@@ -213,7 +214,11 @@ export default {
 
     async onSubmit() {
       try {
-        await this.addPlantingYear(this.newPlantingYear);
+        await this.addPlantingYear({
+          ...this.newPlantingYear,
+          lastFrostDate: toLocalDate(this.newPlantingYear.lastFrostDate),
+          targetPlantingDate: toLocalDate(this.newPlantingYear.targetPlantingDate),
+        });
         this.$router.push({
           name: 'PlantingYearsPage',
         });

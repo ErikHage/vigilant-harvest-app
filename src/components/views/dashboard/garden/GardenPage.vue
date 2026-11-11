@@ -120,6 +120,7 @@ import DatePickerDialogActivator from "@/components/utils/DatePickerDialogActiva
 import ConfirmHarvestsDialog from "@/components/garden/ConfirmHarvestsDialog.vue";
 import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
 import harvestUtils from "@/utils/harvest-utils";
+import { toLocalDate } from '@/utils/dates';
 
 export default {
   name: 'GardenPage',
@@ -332,7 +333,7 @@ export default {
             plantingYear: this.plantingYear,
             plantingId: h.plantingId,
             quantity: h.quantity,
-            harvestDate: this.selectedHarvestDate,
+            harvestDate: toLocalDate(this.selectedHarvestDate),
             harvestTypeId: h.harvestTypeId,
           }));
 

@@ -128,16 +128,16 @@ describe('AddPlantingYearPage', () => {
         expect(plantingYearsStore.addPlantingYear).toHaveBeenCalledWith({
             previousPlantingYear: 2026,
             plantingYear: 2027,
-            lastFrostDate: new Date(2027, 4, 10),
-            targetPlantingDate: new Date(2027, 4, 17),
+            lastFrostDate: '2027-05-10',
+            targetPlantingDate: '2027-05-17',
         });
         expect($router.push).toHaveBeenCalledWith({ name: 'PlantingYearsPage' });
     });
 
-    // The picked dates are local midnight, sent as the UTC instant. The service
-    // keeps that instant's UTC day, which is the picked day west of Greenwich,
-    // as in New York here, and the day before east of it
-    it('sends a picked date as the UTC instant of its local midnight', async () => {
+    // A picked date is sent as the day picked, YYYY-MM-DD, whatever the
+    // timezone. As its UTC instant, it was the day before east of Greenwich
+    // (backlog B19)
+    it('sends a picked date as the day picked', async () => {
         const { wrapper, plantingYearsStore } = await mountPage();
         await pickDate(wrapper, 'Set Last Frost Date', new Date(2027, 4, 10));
         await pickDate(wrapper, 'Set Target Planting Date', new Date(2027, 4, 17));
@@ -145,7 +145,7 @@ describe('AddPlantingYearPage', () => {
         await buttonLabelled(wrapper, 'Create New Planting Year').trigger('click');
 
         const [request] = plantingYearsStore.addPlantingYear.mock.calls[0];
-        expect(JSON.stringify(request.lastFrostDate)).toBe('"2027-05-10T04:00:00.000Z"');
+        expect(request).toMatchObject({ lastFrostDate: '2027-05-10', targetPlantingDate: '2027-05-17' });
     });
 
     it("stays put, showing the store's alert, when adding fails", async () => {

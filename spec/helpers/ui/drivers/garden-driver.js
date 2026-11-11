@@ -119,7 +119,7 @@ export function createGardenDriver() {
                 }
                 const { plantingId } = created.body;
                 const started = await performPlantingAction(token, plantingId, 'START', {
-                    sowDate: `${planting.sowDate}T12:00:00.000Z`, numberSown: planting.numberSown, comment: null,
+                    sowDate: planting.sowDate, numberSown: planting.numberSown, comment: null,
                 });
                 if (!answered(started, status.ok) || planting.status === 'STARTED') {
                     return { created, started };
@@ -130,7 +130,7 @@ export function createGardenDriver() {
                     created,
                     started,
                     planted: await performPlantingAction(token, plantingId, 'PLANT', {
-                        transplantDate: `${planting.transplantDate}T12:00:00.000Z`,
+                        transplantDate: planting.transplantDate,
                         numberTransplanted: planting.numberTransplanted, plotId, comment: null,
                     }),
                 };
@@ -144,20 +144,19 @@ export function createGardenDriver() {
             }
         },
 
-        /** Records a journal entry, dated noon in New York, so it's its day there. */
+        /** Records a journal entry at noon on its day, a local time with no timezone. */
         async createJournalEntry({ plantingYear, entryDate, entry }) {
             const what = `arranging the journal entry ${entry}`;
 
             const reply = await asGardener(token => insertJournalEntry(token, {
-                plantingYear, entry, entryDate: new Date(`${entryDate}T12:00:00-04:00`).toISOString(),
+                plantingYear, entry, entryDate: `${entryDate}T12:00:00`,
             }));
             expectThat(reply.error === undefined && reply.status < 300, 'the service to record it', describe(reply), what);
         },
 
         /**
-         * Files a harvest of `quantity` from `planting`, at noon in New York
-         * `on` its day, so it's that day there. The service gives it its
-         * plant's default type.
+         * Files a harvest of `quantity` from `planting` `on` its day, as
+         * YYYY-MM-DD. The service gives it its plant's default type.
          */
         async createHarvest(planting, quantity, on) {
             const what = `arranging a harvest of ${planting.name} on ${on}`;
@@ -166,7 +165,7 @@ export function createGardenDriver() {
                 const { plantingId } = findIn(await listPlantings(token), each => each.name === planting.name,
                     `the planting ${planting.name}`);
                 return upsertHarvests(token, [{
-                    plantingId, quantity, harvestDate: new Date(`${on}T12:00:00-04:00`).toISOString(),
+                    plantingId, quantity, harvestDate: on,
                 }]);
             });
             expectThat(reply.error === undefined && reply.status < 300, 'the service to file it', describe(reply), what);

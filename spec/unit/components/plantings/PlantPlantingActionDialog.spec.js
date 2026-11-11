@@ -62,7 +62,7 @@ describe('PlantPlantingActionDialog', () => {
         await press(dialog, 'Confirm');
 
         expect(wrapper.props('onSubmit')).toHaveBeenCalledWith('PLANT', {
-            transplantDate: new Date(2026, 4, 9).toISOString(),
+            transplantDate: '2026-05-09',
             numberTransplanted: 20,
             plotId: 'plot-1',
             comment: 'Hardened off a week',
@@ -70,15 +70,14 @@ describe('PlantPlantingActionDialog', () => {
         expect(isOpen()).toBe(false);
     });
 
-    // DocumentsCurrentBehavior: as in the start dialog, the default date is
-    // the moment the dialog was created, sent as its UTC instant, so a New
-    // York evening is recorded as the next day. Should send today's date
-    it('sends a New York evening as the next day', async () => {
+    // As in the start dialog, the date is the user's own day, as YYYY-MM-DD,
+    // so a New York evening is planted that day (backlog A22)
+    it('sends a New York evening as that day', async () => {
         const wrapper = mountDialog({ now: '2026-05-10T22:15:00' });
 
         await press(await open(wrapper), 'Confirm');
 
-        expect(wrapper.props('onSubmit').mock.calls[0][1].transplantDate).toBe('2026-05-11T02:15:00.000Z');
+        expect(wrapper.props('onSubmit').mock.calls[0][1].transplantDate).toBe('2026-05-10');
     });
 
     // DocumentsCurrentBehavior: the plot has no rule and Confirm is never
