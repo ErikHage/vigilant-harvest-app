@@ -60,8 +60,11 @@ describe('MonthDaySelect', () => {
         expect(selects(wrapper).day.props('disabled')).toBe(false);
     });
 
+    // February has 29, for a leap year: the dates are a month and day in
+    // any year, and scheduling.getFormattedDateRange shows '02-29'
     it.each([
         ['01', 31],
+        ['02', 29],
         ['04', 30],
         ['12', 31],
     ])('offers each day of month %s, 1 to %i', async (monthValue, days) => {
@@ -73,16 +76,6 @@ describe('MonthDaySelect', () => {
         expect(items).toHaveLength(days);
         expect(items[0]).toBe('01');
         expect(items[days - 1]).toBe(String(days));
-    });
-
-    // scheduling.getFormattedDateRange formats '02-29' (spec/unit/utils), but
-    // this select can't produce it
-    it('offers February only 28 days', async () => {
-        const wrapper = mountSelect();
-
-        await selects(wrapper).month.setValue('02');
-
-        expect(selects(wrapper).day.props('items')).toHaveLength(28);
     });
 
     it('emits MM-DD once both are chosen, and null before', async () => {

@@ -1,10 +1,9 @@
 import { test } from '../../helpers/ui/ui-test';
 
 // The planning page plans the chosen year, so each test chooses a year of
-// its own. Its days are days of the year, and today's comes from the
-// service's own clock, in New York: the drivers work out what they should
-// read from the real date there. Arranged plantings have a lead time of six
-// weeks and a target planting date of May 1
+// its own. It counts from the browser's today, in New York: the drivers work
+// out what they should read from the real date there. Arranged plantings
+// have a lead time of six weeks and a target planting date of May 1
 
 test.describe('The planning page', () => {
     test.beforeEach(async ({ garden, loginPage, dashboardPage }) => {
@@ -20,8 +19,8 @@ test.describe('The planning page', () => {
         await dashboardPage.checkYearIsChosen('year: spring');
     });
 
-    // A year in the past for the countdown, so it counts below zero (backlog
-    // B31, tier B), and each row's days until do too
+    // The test's years are thousands of years away, so the countdown and each
+    // row's days until run to millions
     test('plans the year: the plantings to start, and those to plant out', async ({ planningPage }) => {
         await planningPage.open();
         await planningPage.checkIsShown();
@@ -51,10 +50,9 @@ test.describe('The planning page, in a leap year', () => {
         await dashboardPage.checkYearIsChosen('year: leap');
     });
 
-    // DocumentsCurrentBehavior: Today shows today's day of the year counted
-    // from January 1 of the chosen year, so in a leap year, from March on, it
-    // shows the day before (backlog A31). It can't show in January or
-    // February, or when today is in a leap year too. Should show today's date
+    // Today was today's day of the year, counted in the chosen year (backlog
+    // A31): in a leap year, from March on, the day before. So this tells the
+    // two apart only from March on, while today isn't in a leap year too
     test('shows today\'s date', async ({ planningPage }) => {
         await planningPage.open();
         await planningPage.checkIsShown();

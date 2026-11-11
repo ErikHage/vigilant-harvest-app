@@ -10,14 +10,15 @@ const toStart = [{ plantingId: 'planting-1', plantingName: 'Sungold', plantName:
 const toPlant = [{ plantingId: 'planting-2', plantingName: 'Early beans', plantName: 'Provider bush bean', plannedActionDay: 137, daysUntilAction: 37 }];
 
 // GET /planning/:year. The days are days of the year: 100 is April 10 and
-// 137 is May 17 in 2026. The service counts currentDay from its own clock
+// 137 is May 17 in 2026. The service counts currentDay from the app's today,
+// as its number in today's year, so the page doesn't read it
 function planningDetails(overrides = {}) {
     return { plantingYear: 2026, targetPlantingDay: 137, currentDay: 100, toStart: { plantings: toStart }, toPlant: { plantings: toPlant }, ...overrides };
 }
 
-// The year as the common store holds it once it's been read from
-// localStorage: a string (B6). As a number, PlanningTable warns (its spec)
-async function mountPage({ plantingYear = '2026', state = {} } = {}) {
+// Today is April 10, 2026, unless a test says otherwise
+async function mountPage({ plantingYear = 2026, today = '2026-04-10', state = {} } = {}) {
+    vi.useFakeTimers({ now: new Date(`${today}T09:00:00`), toFake: ['Date'] });
     const pinia = createTestingPinia({
         initialState: {
             common: { plantingYear },
@@ -33,10 +34,14 @@ async function mountPage({ plantingYear = '2026', state = {} } = {}) {
 const chips = wrapper => wrapper.findAllComponents(VChip).map(chip => [chip.text(), chip.props('color')]);
 
 describe('PlanningPage', () => {
+    afterEach(() => {
+        vi.useRealTimers();
+    });
+
     it("asks for the year's plan", async () => {
         const { wrapper, store } = await mountPage();
 
-        expect(store.fetchPlanningDetailsByYear).toHaveBeenCalledWith('2026');
+        expect(store.fetchPlanningDetailsByYear).toHaveBeenCalledWith(2026);
         expect(wrapper.find('.page-title').text()).toBe('Planting Plan - 2026');
     });
 
@@ -57,22 +62,34 @@ describe('PlanningPage', () => {
         ]);
     });
 
+    // Today's number, 100, is April 9 in 2028, and May 16 there is 767 days
+    // away: the service's currentDay would say April 9, and 37 days
+    it('shows today, and counts from it, in another year', async () => {
+        const { wrapper } = await mountPage({ plantingYear: 2028 });
+
+        expect(chips(wrapper)).toEqual([
+            ['Today: Apr 10', 'primary'],
+            ['Planting Day: May 16', 'primary'],
+            ['767 days until planting!', 'success'],
+        ]);
+    });
+
     // Past the planting day it counts down below zero
     it.each([
-        [107, 30, 'primary'],
-        [130, 7, 'warning'],
-        [137, 0, 'error'],
-        [140, -3, 'error'],
-    ])('colours the countdown from day %i, %i days out, as %s', async (currentDay, days, colour) => {
-        const { wrapper } = await mountPage({ state: { planningDetails: planningDetails({ currentDay }) } });
+        ['2026-04-17', 30, 'primary'],
+        ['2026-05-10', 7, 'warning'],
+        ['2026-05-17', 0, 'error'],
+        ['2026-05-20', -3, 'error'],
+    ])('colours the countdown on %s, %i days out, as %s', async (today, days, colour) => {
+        const { wrapper } = await mountPage({ today });
 
         expect(chips(wrapper)[2]).toEqual([`${days} days until planting!`, colour]);
     });
 
-    it('shows a dash for a day it was not given', async () => {
-        const { wrapper } = await mountPage({ state: { planningDetails: planningDetails({ currentDay: undefined }) } });
+    it('shows a dash for a planting day it was not given', async () => {
+        const { wrapper } = await mountPage({ state: { planningDetails: planningDetails({ targetPlantingDay: undefined }) } });
 
-        expect(chips(wrapper)[0][0]).toBe('Today: —');
+        expect(chips(wrapper)[1][0]).toBe('Planting Day: —');
     });
 
     it('lists what to start, by sowing day, and what to plant, by planting day', async () => {
@@ -81,12 +98,12 @@ describe('PlanningPage', () => {
         expect(wrapper.findAll('.v-tab').map(tab => tab.text())).toEqual(['To Start', 'To Plant']);
         // The To Plant table renders once its tab is chosen
         expect(wrapper.findAllComponents(PlanningTable)).toHaveLength(1);
-        expect(wrapper.findComponent(PlanningTable).props()).toMatchObject({ items: toStart, year: '2026', actionDayTitle: 'Sowing Day' });
+        expect(wrapper.findComponent(PlanningTable).props()).toMatchObject({ items: toStart, year: 2026, actionDayTitle: 'Sowing Day' });
 
         await wrapper.findAll('.v-tab')[1].trigger('click');
         await flushPromises();
 
-        expect(wrapper.findAllComponents(PlanningTable)[1].props()).toMatchObject({ items: toPlant, year: '2026', actionDayTitle: 'Planting Day' });
+        expect(wrapper.findAllComponents(PlanningTable)[1].props()).toMatchObject({ items: toPlant, year: 2026, actionDayTitle: 'Planting Day' });
     });
 
     it("shows the planning store's alert", async () => {

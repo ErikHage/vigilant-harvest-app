@@ -23,7 +23,7 @@
                   variant="outlined"
                   color="primary"
               >
-                Today: {{ formatDayOfMonthToDate(planningDetails.currentDay) }}
+                Today: {{ today.format('MMM D') }}
               </v-chip>
 
               <v-chip
@@ -81,6 +81,7 @@ import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
 import PageTitle from "@/components/layout/PageTitle.vue";
 import PlanningTable from "@/components/planning/PlanningTable.vue";
 import dayjs from "dayjs";
+import { dayOfYearIn, daysFromToday } from "@/utils/dates";
 
 export default {
   name: "PlanningPage",
@@ -94,6 +95,9 @@ export default {
   data() {
     return {
       activeTab: 'planning',
+      // the user's own day, as the plan was asked for it; the service's
+      // currentDay is today's number in this year, so not today in another
+      today: dayjs(),
     };
   },
 
@@ -120,11 +124,10 @@ export default {
     },
 
     dayDifference() {
-      if (!this.planningDetails) {
+      if (!this.planningDetails?.targetPlantingDay) {
         return 0;
       }
-      return this.planningDetails.targetPlantingDay
-          - this.planningDetails.currentDay;
+      return daysFromToday(dayOfYearIn(this.plantingYear, this.planningDetails.targetPlantingDay));
     },
 
     currentVsTargetColor() {
@@ -151,9 +154,7 @@ export default {
     formatDayOfMonthToDate(dayOfMonth) {
       if (!dayOfMonth) return '—';
 
-      return dayjs(`${this.plantingYear}-01-01`)
-          .add(dayOfMonth - 1, 'day')
-          .format('MMM D');
+      return dayOfYearIn(this.plantingYear, dayOfMonth).format('MMM D');
     },
   },
 

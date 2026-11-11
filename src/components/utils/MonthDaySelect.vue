@@ -51,7 +51,8 @@ export default {
       selectedDay: null,
       months: [
         { label: 'January',   value: '01', days: 31 },
-        { label: 'February',  value: '02', days: 28 },
+        // 29, for a leap year: the dates are a month and day in any year
+        { label: 'February',  value: '02', days: 29 },
         { label: 'March',     value: '03', days: 31 },
         { label: 'April',     value: '04', days: 30 },
         { label: 'May',       value: '05', days: 31 },

@@ -15,17 +15,17 @@ const utc = day => {
 };
 const ymd = date => date.toISOString().slice(0, 10);
 
-/** Today in New York, where the service runs: `YYYY-MM-DD`. */
+/**
+ * Today in New York, where the browser runs (the config's `timezoneId`), as
+ * the service does: `YYYY-MM-DD`.
+ */
 export const todayInNewYork = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York' }).format(new Date());
-
-/** The day's number in its year, January 1 being 1. */
-export const dayOfYear = day => (utc(day) - Date.UTC(parts(day)[0], 0, 1)) / MILLIS_PER_DAY + 1;
 
 /** The day `count` days after `day` (before, if negative). */
 export const daysAfter = (day, count) => ymd(new Date(utc(day).getTime() + count * MILLIS_PER_DAY));
 
-/** The day numbered `number` in `year`, as `YYYY-MM-DD`. */
-export const numberedDay = (year, number) => daysAfter(`${String(year).padStart(4, '0')}-01-01`, number - 1);
+/** The days from `from` to `to`, below zero if `to` is earlier. */
+export const daysBetween = (from, to) => (utc(to) - utc(from)) / MILLIS_PER_DAY;
 
 /** As `Date.toDateString()` shows it: `Tue Jul 07 2026`. */
 export const dateString = day => {

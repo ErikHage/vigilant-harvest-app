@@ -44,12 +44,17 @@ describe('useCommonStore', () => {
             expect(store.selectedPlantingYear).toBeNull();
         });
 
-        // The stored year comes back from localStorage as a string, while the
-        // default is a number. The service accepts either
-        it('starts on the stored year, as a string', () => {
+        // localStorage gives back a string
+        it('starts on the stored year, as a number', () => {
             store = storeWithStoredYear(2025);
 
-            expect(store.plantingYear).toBe('2025');
+            expect(store.plantingYear).toBe(2025);
+        });
+
+        it.each(['', 'none', '2025.5', '-1'])('starts on the current year when "%s" is stored', stored => {
+            store = storeWithStoredYear(stored);
+
+            expect(store.plantingYear).toBe(2026);
         });
     });
 
@@ -61,11 +66,11 @@ describe('useCommonStore', () => {
 
             expect(plantingYearsApi.fetchPlantingYears).toHaveBeenCalledWith('a-token');
             expect(store.plantingYearsByYear).toEqual({ 2025: plantingYears[0], 2026: plantingYears[1] });
-            expect(store.availableYears).toEqual(['2025', '2026']);
+            expect(store.availableYears).toEqual([2025, 2026]);
             expect(store.selectedPlantingYear).toEqual(plantingYears[1]);
         });
 
-        it('selects the stored year, though it is a string', async () => {
+        it('selects the stored year', async () => {
             plantingYearsApi.fetchPlantingYears.mockResolvedValue(plantingYears);
             store = storeWithStoredYear(2025);
 
@@ -94,7 +99,7 @@ describe('useCommonStore', () => {
             expect(store.alertVisible).toBe(true);
             expect(store.alertType).toBe('error');
             expect(store.alertMessage).toBe('error fetching planting years');
-            expect(store.availableYears).toEqual(['2025', '2026']);
+            expect(store.availableYears).toEqual([2025, 2026]);
             expect(consoleError).toHaveBeenCalledWith(err);
             consoleError.mockRestore();
         });
@@ -107,9 +112,9 @@ describe('useCommonStore', () => {
         });
 
         it('selects the year and remembers it', () => {
-            store.selectPlantingYear('2025');
+            store.selectPlantingYear(2025);
 
-            expect(store.plantingYear).toBe('2025');
+            expect(store.plantingYear).toBe(2025);
             expect(store.selectedPlantingYear).toEqual(plantingYears[0]);
             expect(localStorage.getItem('planting-year')).toBe('2025');
         });
@@ -126,7 +131,7 @@ describe('useCommonStore', () => {
         it('clears the year and forgets it', async () => {
             plantingYearsApi.fetchPlantingYears.mockResolvedValue(plantingYears);
             await store.fetchPlantingYears();
-            store.selectPlantingYear('2025');
+            store.selectPlantingYear(2025);
 
             store.clearPlantingYear();
 
@@ -136,7 +141,7 @@ describe('useCommonStore', () => {
         });
 
         it('leaves a new store on the current year', () => {
-            store.selectPlantingYear('2025');
+            store.selectPlantingYear(2025);
             store.clearPlantingYear();
 
             setActivePinia(createPinia());

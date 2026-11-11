@@ -3,7 +3,9 @@ import { tableHeaders, tableRows } from '../../../helpers/tables';
 import PlanningTable from '@/components/planning/PlanningTable.vue';
 
 // Planning items as GET /planning/:year sends them. plannedActionDay is a day
-// of the year; an indoor sowing with no lead time has neither field
+// of the year; an indoor sowing with no lead time has neither field. Today is
+// March 6, 2026, day 65, so day 60 (March 1) was 5 days ago
+const TODAY_NUMBER = 65;
 const items = [
     { plantingId: 'planting-1', plantingName: 'Early beans', plantId: 'plant-1', plantName: 'Provider bush bean', plannedActionDay: 60, daysUntilAction: -5 },
     { plantingId: 'planting-2', plantingName: 'Sungold', plantId: 'plant-2', plantName: 'Sungold tomato', plannedActionDay: undefined, daysUntilAction: undefined },
@@ -12,17 +14,26 @@ const items = [
 function mountTable(props = {}) {
     const $router = { push: vi.fn() };
     const wrapper = mountWithPlugins(PlanningTable, {
-        props: { items, year: '2026', ...props },
+        props: { items, year: 2026, ...props },
         global: { mocks: { $router } },
     });
     return { wrapper, $router };
 }
 
-// The days-until cell of a row with `days` to go
-const daysUntil = days =>
-    mountTable({ items: [{ ...items[0], daysUntilAction: days }] }).wrapper.find('tbody td:nth-child(4) span');
+// The days-until cell of a row with `days` to go, or with no action day
+const daysUntil = days => mountTable({
+    items: [{ ...items[0], plannedActionDay: days === undefined ? undefined : TODAY_NUMBER + days }],
+}).wrapper.find('tbody td:nth-child(4) span');
 
 describe('PlanningTable', () => {
+    beforeEach(() => {
+        vi.useFakeTimers({ now: new Date('2026-03-06T09:00:00'), toFake: ['Date'] });
+    });
+
+    afterEach(() => {
+        vi.useRealTimers();
+    });
+
     it('heads the date column with the action', () => {
         expect(tableHeaders(mountTable().wrapper)).toEqual(['Planting Name', 'Plant Name', 'Action Day', 'Days Until', '']);
         expect(tableHeaders(mountTable({ actionDayTitle: 'Sowing Day' }).wrapper)[2]).toBe('Sowing Day');
@@ -38,9 +49,16 @@ describe('PlanningTable', () => {
     });
 
     it('counts the days in a leap year', () => {
-        const { wrapper } = mountTable({ year: '2028' });
+        const { wrapper } = mountTable({ year: 2028 });
 
         expect(tableRows(wrapper)[0][2]).toBe('Feb 29');
+    });
+
+    // The service's daysUntilAction, -5, counts from today's number in 2026
+    it('counts the days until from today, in another year', () => {
+        const { wrapper } = mountTable({ year: 2027 });
+
+        expect(tableRows(wrapper)[0].slice(2, 4)).toEqual(['Mar 1', '360']);
     });
 
     it.each([
@@ -62,16 +80,13 @@ describe('PlanningTable', () => {
         expect($router.push).toHaveBeenCalledWith({ name: 'PlantingDetailsPage', params: { plantingId: 'planting-2' } });
     });
 
-    // The year prop is a String, but PlanningPage passes the common store's
-    // year, which is a number unless it was read from localStorage (B6)
-    it('warns when given the year as a number, and still dates the actions', () => {
+    // The common store's year, which PlanningPage passes, is a number
+    it('takes the year as a number, without a warning', () => {
         const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
         const { wrapper } = mountTable({ year: 2026 });
 
-        expect(warn.mock.calls.map(([message]) => message)).toEqual([
-            expect.stringMatching(/Invalid prop: type check failed for prop "year"/),
-        ]);
+        expect(warn).not.toHaveBeenCalled();
         expect(tableRows(wrapper)[0][2]).toBe('Mar 1');
         warn.mockRestore();
     });

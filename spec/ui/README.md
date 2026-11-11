@@ -105,7 +105,7 @@ await dashboardPage.chooseYear('year: spring');
 
 **The harvests and stats pages show the chosen year's harvests too.** `garden.hasHarvest('planting: early', 'quantity: 3', 'on: 2026-07-07')` files one at noon in New York on its day, in 2026: harvests are timestamps too. The stats count only plantings in a plot (the service's query joins the plot), so arrange them planted. `drivers/days.js` writes days as these pages do.
 
-**The planning page counts days by the service's clock, not the browser's.** Its drivers work out what it should read from the real date in New York. `garden.hasPlantingYear('year: spring', 'leap: no')` picks a year that isn't a leap year, and `'leap: yes'` one that is, since the page's days of the year shift by one between them.
+**The planning page counts days from the browser's today,** in New York (the config's `timezoneId`). Its drivers work out what it should read from the real date there. `garden.hasPlantingYear('year: spring', 'leap: no')` picks a year that isn't a leap year, and `'leap: yes'` one that is. Today used to be shown a day early in a leap year (A31), and the leap-year test would show it again.
 
 **Uncaught errors are recorded.** `drivers/page-errors.js` keeps every error the page throws and nothing catches, unhandled rejections included, for pins on code that throws. Nothing fails a test for them on its own.
 

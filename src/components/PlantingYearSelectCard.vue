@@ -51,8 +51,9 @@ export default {
   },
 
   computed: {
+    // As numbers, so the same year given once as a string is no change
     isNewValueSelected() {
-      return this.selectedYear !== this.newSelectedYear;
+      return Number(this.selectedYear) !== Number(this.newSelectedYear);
     },
   },
 

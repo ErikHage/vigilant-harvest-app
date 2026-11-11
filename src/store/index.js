@@ -24,6 +24,13 @@ const localStorageKeys = {
     plantingYear: 'planting-year',
 };
 
+// A year is a number, as the service sends it. localStorage gives back a
+// string, and anything else stored there is no year
+function storedPlantingYear() {
+    const year = Number(storageUtils.getLocalStorageEntry(localStorageKeys.plantingYear));
+    return Number.isInteger(year) && year > 0 ? year : null;
+}
+
 export const useCommonStore = defineStore('common', {
     actions: {
         async fetchPlantingYears() {
@@ -33,7 +40,7 @@ export const useCommonStore = defineStore('common', {
                     acc[py.plantingYear] = py;
                     return acc;
                 }, {});
-                this.availableYears = Object.keys(this.plantingYearsByYear);
+                this.availableYears = Object.keys(this.plantingYearsByYear).map(Number);
                 this.selectedPlantingYear = this.plantingYearsByYear[this.plantingYear];
             } catch (err) {
                 this.setAlertMessage(err, 'error', 'error fetching planting years');
@@ -55,7 +62,7 @@ export const useCommonStore = defineStore('common', {
         return {
             plantingYearsByYear: {},
             availableYears: [],
-            plantingYear: storageUtils.getLocalStorageEntry(localStorageKeys.plantingYear) ?? new Date().getFullYear(),
+            plantingYear: storedPlantingYear() ?? new Date().getFullYear(),
             selectedPlantingYear: null,
             alertVisible: false,
             alertType: 'success',

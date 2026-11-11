@@ -4,8 +4,8 @@ import { planting, plantings, year } from '../params';
 import { dashboardComponents, routedPageSteps } from './routed-page';
 
 /**
- * The planning page, for the chosen year, in words. Its days are the
- * service's, by its own clock: the browser's has no say.
+ * The planning page, for the chosen year, in words. It counts its days from
+ * the browser's today.
  */
 export function createPlanningPage(world, driver) {
     return {
@@ -23,7 +23,7 @@ export function createPlanningPage(world, driver) {
         async checkShowsToday(...args) {
             const params = parseDslArgs(args, { year: year() });
 
-            await driver.showsTodayCountedInThePlantingYear(world.plantingYearNamed(params.year));
+            await driver.showsToday(world.plantingYearNamed(params.year));
         },
 
         /**
