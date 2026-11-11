@@ -91,14 +91,12 @@ describe('router', () => {
             expect(router.resolve('/dashboard/planting-years/add').params).toEqual({});
         });
 
-        // DocumentsCurrentBehavior: there's no catch-all route, so an unknown path
-        // matches nothing and shows an empty page. Should show a not-found page,
-        // as feral-authentication's router now does
-        it.each(['/no-such-page', '/dashboard/no-such-page'])('matches nothing for %s', path => {
-            const route = router.resolve(path);
-
-            expect(route.matched).toEqual([]);
-            expect(route.name).toBeUndefined();
+        // As feral-authentication's router does (backlog A8)
+        it.each([
+            ['/no-such-page', 'NotFound'],
+            ['/dashboard/no-such-page', 'DashboardNotFound'],
+        ])('shows the not-found page for %s', (path, name) => {
+            expect(router.resolve(path).name).toBe(name);
         });
     });
 
@@ -107,6 +105,7 @@ describe('router', () => {
 
         beforeEach(async () => {
             localStorage.clear();
+            sessionStorage.clear();
             setActivePinia(createPinia());
             store = useAuthenticationStore();
             vi.spyOn(console, 'log').mockImplementation(() => {});
@@ -138,14 +137,13 @@ describe('router', () => {
             expect(authenticationApi.verifyActorToken).not.toHaveBeenCalled();
         });
 
-        // DocumentsCurrentBehavior: the redirect drops where they were going, so
-        // after signing on they land on the dashboard, not the page they asked
-        // for. Should carry the destination through, as feral-authentication's
-        // ?redirect= now does
-        it('forgets where they were going', async () => {
+        // In sessionStorage, which survives the round trip to
+        // feral-authentication; the landing page follows it (backlog A9)
+        it('remembers where they were going, for after signing on', async () => {
             await router.push('/dashboard/plants/plant-1/details?tab=growing');
 
             expect(router.currentRoute.value.fullPath).toBe('/landing');
+            expect(sessionStorage.getItem('sign-on-destination')).toBe('/dashboard/plants/plant-1/details?tab=growing');
         });
 
         it.each(protectedPaths)('lets someone logged in open %s', async path => {
@@ -157,11 +155,18 @@ describe('router', () => {
             expect(authenticationApi.verifyActorToken).not.toHaveBeenCalled();
         });
 
-        // An unknown path has no matched route, so nothing marks it protected
-        it('lets anyone open a path that matches nothing', async () => {
+        // The not-found page is open at the top level, and behind the guard
+        // under the dashboard (backlog A8)
+        it('lets anyone open an unknown top-level path', async () => {
+            await router.push('/no-such-page');
+
+            expect(router.currentRoute.value.name).toBe('NotFound');
+        });
+
+        it('sends someone not logged in from an unknown dashboard path to the landing page', async () => {
             await router.push('/dashboard/no-such-page');
 
-            expect(router.currentRoute.value.path).toBe('/dashboard/no-such-page');
+            expect(router.currentRoute.value.name).toBe('LandingPage');
         });
 
         it('lets someone with a stored token the service accepts open the page they reload', async () => {
@@ -193,17 +198,18 @@ describe('router', () => {
             expect(router.currentRoute.value.name).toBe('LandingPage');
         });
 
-        // The rejected token stays stored, so every protected page asks the
-        // service about it again
-        it('keeps a rejected token, and asks about it on every protected page', async () => {
+        // It's forgotten, so the next protected page sends them to sign on
+        // without asking the service again (backlog B7)
+        it('forgets a rejected token, and asks about it once', async () => {
             reloadWithStoredToken();
             authenticationApi.verifyActorToken.mockResolvedValue(false);
 
             await router.push('/dashboard/plants');
             await router.push('/dashboard/plots');
 
-            expect(localStorage.getItem('vigilant-token')).toBe('a-token');
-            expect(authenticationApi.verifyActorToken).toHaveBeenCalledTimes(2);
+            expect(localStorage.getItem('vigilant-token')).toBeNull();
+            expect(authenticationApi.verifyActorToken).toHaveBeenCalledTimes(1);
+            expect(router.currentRoute.value.name).toBe('LandingPage');
         });
     });
 });

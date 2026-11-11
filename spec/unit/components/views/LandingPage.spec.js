@@ -26,6 +26,7 @@ describe('LandingPage', () => {
 
     afterEach(() => {
         window.history.replaceState({}, '', '/');
+        sessionStorage.clear();
         vi.restoreAllMocks();
     });
 
@@ -41,6 +42,26 @@ describe('LandingPage', () => {
         expect(store.authenticate).toHaveBeenCalledWith('sso-token');
         expect($router.push).toHaveBeenCalledWith('/dashboard');
     });
+
+    // Where the guard found them going (backlog A9), once
+    it('goes where they were going, once signed on', async () => {
+        sessionStorage.setItem('sign-on-destination', '/dashboard/plants/plant-1/details?tab=growing');
+
+        const { $router } = await landWith('?sso=sso-token', { signedOn: true });
+
+        expect($router.push).toHaveBeenCalledWith('/dashboard/plants/plant-1/details?tab=growing');
+        expect(sessionStorage.getItem('sign-on-destination')).toBeNull();
+    });
+
+    // Only the dashboard's pages, so the stored value can't send them elsewhere
+    it.each(['https://example.invalid/', '//example.invalid/', '/landing', '/dashboards'])(
+        'goes to the dashboard in place of %s', async destination => {
+            sessionStorage.setItem('sign-on-destination', destination);
+
+            const { $router } = await landWith('?sso=sso-token', { signedOn: true });
+
+            expect($router.push).toHaveBeenCalledWith('/dashboard');
+        });
 
     it('goes to the login page when the exchange fails', async () => {
         const { $router } = await landWith('?sso=sso-token', { signedOn: false });

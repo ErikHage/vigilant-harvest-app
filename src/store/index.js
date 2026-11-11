@@ -1,7 +1,6 @@
 import {defineStore} from 'pinia';
 
 import storageUtils from "@/utils/storage-utils";
-import jwtUtils from "@/utils/jwt-utils";
 
 import authenticationApi from "@/api/authentication-api";
 import plantsApi from "@/api/plants-api";
@@ -90,6 +89,12 @@ export const useAuthenticationStore = defineStore('authentication', {
         },
         async verifyToken() {
             this.isAuthenticated = await authenticationApi.verifyActorToken(storageUtils.tryToLoadTokenFromStorage());
+            if (!this.isAuthenticated) {
+                // a rejected token is no use: forget it, so it isn't asked
+                // about again on every protected page
+                this.clearToken();
+                this.showAppBar = false;
+            }
         },
         async logout() {
             try {
@@ -122,16 +127,6 @@ export const useAuthenticationStore = defineStore('authentication', {
             alertMessage: null,
             showAppBar: storageUtils.tryToLoadTokenFromStorage() !== null,
         };
-    },
-    getters: {
-        actor() {
-            const token = storageUtils.tryToLoadTokenFromStorage();
-
-            if (token !== null) {
-                return jwtUtils.parseActorToken(token);
-            }
-            return null;
-        },
     },
 });
 

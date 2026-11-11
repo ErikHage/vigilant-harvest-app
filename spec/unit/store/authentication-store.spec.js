@@ -1,7 +1,6 @@
 import { createPinia, setActivePinia } from 'pinia';
 import { useAuthenticationStore } from '@/store';
 import authenticationApi from '@/api/authentication-api';
-import { tokenFor } from '../../helpers/tokens';
 import { httpError } from '../../helpers/http-errors';
 
 // Automocked, so the module keeps its real exports: verifySsoToken,
@@ -103,14 +102,28 @@ describe('useAuthenticationStore', () => {
     });
 
     describe('verifyToken', () => {
-        it.each([true, false])('sets isAuthenticated to %s, as the service answers', async answer => {
-            authenticationApi.verifyActorToken.mockResolvedValue(answer);
+        it('keeps a token the service accepts', async () => {
+            authenticationApi.verifyActorToken.mockResolvedValue(true);
             store = storeWith('a-token');
 
             await store.verifyToken();
 
             expect(authenticationApi.verifyActorToken).toHaveBeenCalledWith('a-token');
-            expect(store.isAuthenticated).toBe(answer);
+            expect(store.isAuthenticated).toBe(true);
+            expect(localStorage.getItem(tokenKey)).toBe('a-token');
+        });
+
+        // So it isn't asked about again on every protected page (backlog B7)
+        it('forgets a token the service rejects, and hides the app bar', async () => {
+            authenticationApi.verifyActorToken.mockResolvedValue(false);
+            store = storeWith('a-token');
+            expect(store.showAppBar).toBe(true);
+
+            await store.verifyToken();
+
+            expect(store.isAuthenticated).toBe(false);
+            expect(localStorage.getItem(tokenKey)).toBeNull();
+            expect(store.showAppBar).toBe(false);
         });
 
         it('asks about a null token when none is stored', async () => {
@@ -192,29 +205,9 @@ describe('useAuthenticationStore', () => {
         });
     });
 
-    describe('actor', () => {
-        it("is the stored token's payload", () => {
-            store = storeWith(tokenFor({ userId: 'user-1', username: 'gardener' }));
-
-            expect(store.actor).toEqual({ userId: 'user-1', username: 'gardener' });
-        });
-
-        it('is null when no token is stored', () => {
-            expect(store.actor).toBeNull();
-        });
-
-        // DocumentsCurrentBehavior: the getter reads localStorage, which isn't
-        // reactive, so Pinia computes it once and keeps it. After a logout and a
-        // new login without a reload, actor is still the first user. Should
-        // follow the token. Nothing in the app reads actor today
-        it('stays the first token it read, after the token changes', () => {
-            store = storeWith(tokenFor({ userId: 'user-1' }));
-            expect(store.actor).toEqual({ userId: 'user-1' });
-
-            store.clearToken();
-            localStorage.setItem(tokenKey, tokenFor({ userId: 'user-2' }));
-
-            expect(store.actor).toEqual({ userId: 'user-1' });
-        });
+    // Its actor getter read localStorage once and kept it, and nothing read
+    // it: removed (backlog A5)
+    it('has no actor getter', () => {
+        expect('actor' in store).toBe(false);
     });
 });

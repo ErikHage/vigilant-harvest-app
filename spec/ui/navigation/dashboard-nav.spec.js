@@ -70,10 +70,7 @@ test.describe('On a phone', () => {
         await plantStatsPage.checkIsShown();
     });
 
-    // DocumentsCurrentBehavior: the phone layout doesn't check whether anyone
-    // is signed on, so it offers the home link and Logout to someone who isn't
-    // (backlog A12). Should offer them only when signed on, as the desktop
-    // layout does
+    // As the desktop layout does (backlog A12)
     test('the app bar offers nothing to someone signed out', async ({ loginPage }) => {
         await loginPage.open();
         await loginPage.checkIsShown();

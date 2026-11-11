@@ -1,14 +1,14 @@
 import { test } from '../../helpers/ui/ui-test';
 
 test.describe('The route guard', () => {
-    // DocumentsCurrentBehavior: the guard sends the visit to plain /landing,
-    // which goes on to the login page, so where it was going is lost, and
-    // signing on lands on the dashboard (backlog A9). Should remember the
-    // destination, and return there
+    // Signing on returns to where the visit was going (backlog A9)
     test('sends a visit that isn\'t signed on to the login page, to return after', async ({ loginPage, plotsPage }) => {
         await plotsPage.open();
 
         await loginPage.checkIsShownToReturnTo('path: dashboard/plots');
+
+        await loginPage.logIn('user: gardener');
+        await plotsPage.checkIsShown();
     });
 
     test('lets a signed-on visit through', async ({ loginPage, dashboardPage, plotsPage }) => {
@@ -21,10 +21,7 @@ test.describe('The route guard', () => {
     });
 });
 
-// DocumentsCurrentBehavior: no route matches, so the page is empty but for the
-// app bar, and since nothing marks it protected, it shows without signing on
-// (backlog A8). Should show a not-found page, behind the guard under the
-// dashboard
+// A not-found page, behind the guard under the dashboard (backlog A8)
 test.describe('A path the app has no page for', () => {
     test('says so at the top level', async ({ unknownPage }) => {
         await unknownPage.open('path: no-such-page');
@@ -32,8 +29,12 @@ test.describe('A path the app has no page for', () => {
         await unknownPage.checkIsShownAt('path: no-such-page');
     });
 
-    test('says so under the dashboard, without signing on', async ({ unknownPage }) => {
+    // It used to show without signing on, since nothing marked it protected
+    test('says so under the dashboard, once signed on', async ({ unknownPage, loginPage }) => {
         await unknownPage.open('path: dashboard/no-such-page');
+        await loginPage.checkIsShownToReturnTo('path: dashboard/no-such-page');
+
+        await loginPage.logIn('user: gardener');
 
         await unknownPage.checkIsShownAt('path: dashboard/no-such-page');
     });

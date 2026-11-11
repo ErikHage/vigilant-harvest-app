@@ -124,7 +124,8 @@ export default {
     adminActivitySchedulesPagePath: views.dashboard.path + "/" + views.dashboard.children.activitySchedules.path,
   }),
 
-  methods: {
+  computed: {
+    // a computed, so v-if reads its value, not the function
     showYearSpecificViews() {
       return this.isPlantingYearSelected === true;
     },

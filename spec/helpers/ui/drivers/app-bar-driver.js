@@ -1,5 +1,4 @@
 import { expectCount, expectEventually, expectText, expectThat, expectVisible } from './assertions';
-import { urlOf } from './urls';
 import { status } from '../support/status-codes';
 
 const logout = /\/logout$/;
@@ -56,18 +55,14 @@ export function createAppBarDriver(page, serviceCalls) {
         },
 
         /**
-         * Signed out, on a phone: the home link and Logout, as if signed on
-         * (backlog A12: the phone layout doesn't check `showAppBar`). Read once
-         * the page under it shows.
+         * Signed out, on a phone: no home link and no Logout, as on a desktop.
+         * Read once the page under it shows.
          */
-        async offersHomeAndLogoutWhenSignedOut() {
+        async offersNothingOnAPhone() {
             const what = 'the app bar, signed out, on a phone';
-            const homeLink = bar.getByRole('link');
 
-            await expectVisible(homeLink, what);
-            expectThat(await homeLink.getAttribute('href') === new URL(urlOf('dashboard')).pathname,
-                'a home link to the dashboard', await homeLink.getAttribute('href'), what);
-            await expectVisible(logoutButton, what);
+            await expectCount(bar.getByRole('link'), 0, what);
+            await expectCount(logoutButton, 0, what);
         },
     };
 }

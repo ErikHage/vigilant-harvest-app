@@ -68,10 +68,11 @@ export function createLoginPageDriver(page, serviceCalls) {
         },
 
         /**
-         * The login page, sent here from `path` by the route guard, with no note
-         * of where the visit was going (backlog A9).
+         * The login page, sent here from `path` by the route guard. Where the
+         * visit was going is kept out of sight, in the tab's sessionStorage;
+         * signing on in this tab shows whether it was kept (backlog A9).
          */
-        async isShownForgettingTheWayTo(path) {
+        async isShownToReturnTo(path) {
             const what = `visiting ${path} without signing on`;
 
             await expectUrl(page, urlOf(''), what);

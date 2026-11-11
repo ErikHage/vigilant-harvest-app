@@ -87,15 +87,17 @@ describe('DashboardAppBar', () => {
             ]);
         });
 
-        // DocumentsCurrentBehavior: v-if="showYearSpecificViews" tests the method
-        // itself, which is always truthy, so the pages that need a planting year
-        // show without one. Should hide Planning, Garden, Plantings, Harvests
-        // and Stats until a year is selected
-        it('shows the year-specific pages with no planting year selected', () => {
+        // Planning, Garden, Plantings, Harvests and Stats need one (backlog A11)
+        it('hides the year-specific pages with no planting year selected', () => {
             const wrapper = mountDashboardAppBar(false);
 
-            expect(barLinks(wrapper)).toEqual(desktopLinks);
-            expect(buttonLabelled(wrapper, 'Stats').exists()).toBe(true);
+            expect(barLinks(wrapper)).toEqual([
+                ['Plants', '/dashboard/plants'],
+                ['Plots', '/dashboard/plots'],
+                ['Years', '/dashboard/planting-years'],
+            ]);
+            expect(wrapper.findAll('.v-btn').map(button => button.text())).not.toContain('Stats');
+            expect(buttonLabelled(wrapper, 'Admin').exists()).toBe(true);
         });
     });
 
@@ -114,15 +116,20 @@ describe('DashboardAppBar', () => {
             expect(menuLinks()).toEqual(phoneLinks);
         });
 
-        // DocumentsCurrentBehavior: as on a desktop, the year-specific pages show
-        // with no planting year selected. Should hide them until one is
-        it('lists the year-specific pages with no planting year selected', async () => {
+        // As on a desktop (backlog A11)
+        it('leaves out the year-specific pages with no planting year selected', async () => {
             const wrapper = mountDashboardAppBar(false);
 
             await wrapper.find('.v-app-bar .v-btn').trigger('click');
             await flushPromises();
 
-            expect(menuLinks()).toEqual(phoneLinks);
+            expect(menuLinks()).toEqual([
+                ['Years', '/dashboard/planting-years'],
+                ['Plants', '/dashboard/plants'],
+                ['Plots', '/dashboard/plots'],
+                ['Categories', '/dashboard/categories'],
+                ['Activity Schedules', '/dashboard/activity-schedules'],
+            ]);
         });
     });
 });

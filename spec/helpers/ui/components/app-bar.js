@@ -37,7 +37,7 @@ export function createAppBar(world, driver) {
         async checkOffersNothingSignedOutOnAPhone(...args) {
             parseDslArgs(args, {});
 
-            await driver.offersHomeAndLogoutWhenSignedOut();
+            await driver.offersNothingOnAPhone();
         },
     };
 }

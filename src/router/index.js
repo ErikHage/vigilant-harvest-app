@@ -26,6 +26,8 @@ import AddPlantingYearPage from "@/components/views/dashboard/years/AddPlantingY
 import PlantCategoriesPage from "@/components/views/dashboard/admin/PlantCategoriesPage.vue";
 import ActivitySchedulesPage from "@/components/views/dashboard/admin/ActivitySchedulesPage.vue";
 import ActivityScheduleDetailsPage from "@/components/views/dashboard/admin/ActivityScheduleDetailsPage.vue";
+import NotFoundPage from "@/components/views/NotFoundPage.vue";
+import { rememberDestination } from "@/utils/sign-on-destination";
 
 const routes = [
     {
@@ -212,7 +214,23 @@ const routes = [
                     requiresAuthenticated: true,
                 },
             },
+            {
+                path: views.dashboard.children.notFound.path,
+                name: views.dashboard.children.notFound.name,
+                component: NotFoundPage,
+                meta: {
+                    requiresAuthenticated: true,
+                },
+            },
         ],
+    },
+    {
+        path: views.notFound.path,
+        name: views.notFound.name,
+        component: NotFoundPage,
+        meta: {
+            requiresAuthenticated: false,
+        },
     },
 ];
 
@@ -238,6 +256,8 @@ router.beforeEach(async (to /*, from */) => {
         }
 
         console.log('sending you back to Landing');
+        // to return to once signed on
+        rememberDestination(to.fullPath);
         return {name: 'LandingPage'};
     }
 });
