@@ -1,4 +1,5 @@
 import { flushPromises } from '@vue/test-utils';
+import { httpError } from '../../../../../helpers/http-errors';
 import { VDatePicker, VSelect } from 'vuetify/components';
 import { mountWithPlugins } from '../../../../../helpers/mount';
 import { dialogTitled } from '../../../../../helpers/dialogs';
@@ -198,18 +199,25 @@ describe('AddActivityLogEntryDialog', () => {
         expect(dialog.find('h3').text()).toBe('2026-07-01');
     });
 
-    // DocumentsCurrentBehavior: it doesn't wait for onSubmit, so it closes,
-    // and forgets the entry, before the save is done. If the save fails, the
-    // entry is lost, whatever the store does (backlog A6; its own TODO).
-    // Should wait, and stay open if the save fails
-    it('closes before the save is done', async () => {
+    it('waits for the save, open', async () => {
         const wrapper = mountDialog({ onSubmit: aSaveInFlight() });
         const dialog = await open(wrapper);
         await choose(wrapper, 'Activity', activityTypes[0]);
 
         await press(dialog, 'Confirm');
 
-        expect(isOpen()).toBe(false);
-        expect(select(wrapper, 'Activity').props('modelValue')).toBeNull();
+        expect(isOpen()).toBe(true);
+    });
+
+    it('stays open, with the entry, and says so, when the save fails', async () => {
+        const wrapper = mountDialog({ onSubmit: vi.fn().mockRejectedValue(httpError(500)) });
+        const dialog = await open(wrapper);
+        await choose(wrapper, 'Activity', activityTypes[0]);
+
+        await press(dialog, 'Confirm');
+
+        expect(isOpen()).toBe(true);
+        expect(document.body.textContent).toContain("Couldn't save. Try again.");
+        expect(select(wrapper, 'Activity').props('modelValue')).toEqual(activityTypes[0]);
     });
 });

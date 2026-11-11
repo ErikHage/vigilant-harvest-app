@@ -175,18 +175,15 @@ describe('usePlantingsStore', () => {
     });
 
     describe('performPlantingAction', () => {
-        // DocumentsCurrentBehavior: the failure is swallowed, so the dialog that
-        // called it can't tell a failed action from a good one, and closes anyway
-        // (validation-fixes doc, fix 3). Should rethrow, as updatePlanting does,
-        // so the dialog can stay open and say why
-        it('shows an alert and logs when it fails, and still resolves', async () => {
+        // The dialog that called it stays open, and says why
+        it('shows an alert, logs, and rejects, when it fails', async () => {
             plantingsApi.fetchPlantingsByYear.mockResolvedValue([early]);
             await store.fetchPlantingsByYear(2026);
             const err = httpError(400);
             plantingsApi.performPlantingAction.mockRejectedValue(err);
 
             await expect(store.performPlantingAction('planting-1', 'SPLIT', { splits: [{ name: '', count: 0 }] }))
-                .resolves.toBeUndefined();
+                .rejects.toBe(err);
 
             expect(store.alertMessage).toBe('error performing planting action SPLIT');
             expect(store.alertType).toBe('error');

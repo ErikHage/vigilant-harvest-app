@@ -5,6 +5,7 @@ import AddJournalEntryDialog from '@/components/views/dashboard/garden/AddJourna
 import { useJournalStore } from '@/store';
 import { mountWithPlugins } from '../../../../../helpers/mount';
 import { buttonLabelled } from '../../../../../helpers/fields';
+import { httpError } from '../../../../../helpers/http-errors';
 
 // An entry as the service sends it. entryDate is the user's wall-clock time,
 // with no timezone; the audit fields are UTC instants
@@ -142,18 +143,19 @@ describe('GardenJournalPage', () => {
         expect(shownEntries(wrapper)).toEqual(['Evening frost.']);
     });
 
-    // DocumentsCurrentBehavior: upsertJournalEntry swallows a failed save,
-    // so the page reloads and goes to the new entry's day anyway, which has
-    // nothing in it, with no message (backlog A6, and A10 for the alert).
-    // Should stay on the day it was on, and show why
-    it("goes to the entry's day even when the save failed", async () => {
-        const { wrapper } = await mountPage();
+    // upsertJournalEntry rejects, so the dialog, which waits for it, stays
+    // open and says why
+    it("rejects, staying on its day without reloading, when the save fails", async () => {
+        const { wrapper, store } = await mountPage();
+        const err = httpError(500);
+        store.upsertJournalEntry.mockRejectedValue(err);
 
-        await wrapper.findComponent(AddJournalEntryDialog).props('onSubmit')({ entryDate: '2026-06-05T08:00:00', entry: 'Lost.' });
+        await expect(wrapper.findComponent(AddJournalEntryDialog).props('onSubmit')({ entryDate: '2026-06-05T08:00:00', entry: 'Lost.' }))
+            .rejects.toBe(err);
         await flushPromises();
 
-        expect(wrapper.find('.timeline-entry.selected').exists()).toBe(false);
-        expect(wrapper.text()).toContain('No entry selected.');
+        expect(store.fetchJournalEntriesByYear).toHaveBeenCalledTimes(1);
+        expect(selected(wrapper)).toBe('2026-06-10');
     });
 
     it("does nothing on the dialog's Cancel", async () => {

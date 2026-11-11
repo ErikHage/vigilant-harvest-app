@@ -80,7 +80,7 @@ dialog open, saying why. Saving without a name is F3's (A16).
 
 ## Worth doing while there
 
-- **Both garden dialogs close before the save succeeds.** See the `TODO`s at
+- **Both garden dialogs close before the save succeeds.** **Fixed** (pinned-behaviour fixes, F2b, backlog A6). See the `TODO`s at
   `AddActivityLogEntryDialog.vue:130` and `AddJournalEntryDialog.vue:95`. A 400 now carries a useful
   message, so keeping the dialog open and showing it is more worthwhile than before.
 - **Harvest quantities in the edit dialog are only checked by the service.**

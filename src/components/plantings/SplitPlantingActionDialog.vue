@@ -9,6 +9,7 @@
         <span class="headline">Split Planting</span>
       </v-card-title>
       <v-card-text>
+        <v-alert v-if="saveError" type="error" density="compact" class="mb-4">{{ saveError }}</v-alert>
         <div class="d-flex justify-space-between mb-2">
           <h3>Splits: </h3>
           <v-btn
@@ -58,6 +59,7 @@
 </template>
 
 <script>
+import { saveFailureMessage } from '@/utils/save-failures';
 import plantingUtils from '../../utils/plantings';
 
 const { plantingActions } = plantingUtils;
@@ -77,6 +79,7 @@ export default {
 
   data() {
     return {
+      saveError: '',
       show: false,
       form: {
         comment: null,
@@ -105,14 +108,21 @@ export default {
       };
     },
 
-    handleSubmit() {
-      // check total counts vs existing numberSown
-      this.onSubmit(plantingActions.split, this.getDataToSubmit());
+    // check total counts vs existing numberSown
+    async handleSubmit() {
+      this.saveError = '';
+      try {
+        await this.onSubmit(plantingActions.split, this.getDataToSubmit());
+      } catch (err) {
+        this.saveError = saveFailureMessage(err);
+        return;
+      }
       this.show = false;
       this.resetForm();
     },
 
     handleCancel() {
+      this.saveError = '';
       this.show = false;
       this.resetForm();
     },

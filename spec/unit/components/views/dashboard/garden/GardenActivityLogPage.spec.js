@@ -6,6 +6,7 @@ import AddActivityLogEntryDialog from '@/components/views/dashboard/garden/AddAc
 import { useActivityLogStore } from '@/store';
 import { mountWithPlugins } from '../../../../../helpers/mount';
 import { tableHeaders, tableRows } from '../../../../../helpers/tables';
+import { httpError } from '../../../../../helpers/http-errors';
 
 // An entry as the service sends it. entryDate is the user's wall-clock time,
 // with no timezone; the audit fields are UTC instants
@@ -89,6 +90,18 @@ describe('GardenActivityLogPage', () => {
 
         expect(store.upsertActivityLogEntry).toHaveBeenCalledWith({ plantingYear: 2026, ...entry });
         expect(store.fetchActivityLogEntriesByYear).toHaveBeenCalledTimes(2);
+    });
+
+    // So the dialog, which waits for it, stays open and says why
+    it('rejects, without reloading, when the save fails', async () => {
+        const { wrapper, store } = await mountPage();
+        const err = httpError(500);
+        store.upsertActivityLogEntry.mockRejectedValue(err);
+
+        await expect(wrapper.findComponent(AddActivityLogEntryDialog).props('onSubmit')({ entryDate: '2026-06-05T08:00:00', activityType: 'TREAT' }))
+            .rejects.toBe(err);
+
+        expect(store.fetchActivityLogEntriesByYear).toHaveBeenCalledTimes(1);
     });
 
     it("does nothing on the dialog's Cancel", async () => {

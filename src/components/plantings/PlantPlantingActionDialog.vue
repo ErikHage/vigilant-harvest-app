@@ -9,6 +9,7 @@
         <span class="headline">Plant Planting</span>
       </v-card-title>
       <v-card-text>
+        <v-alert v-if="saveError" type="error" density="compact" class="mb-4">{{ saveError }}</v-alert>
         <v-select
             v-model="form.plotId"
             :items="sortedPlots"
@@ -53,6 +54,7 @@
 </template>
 
 <script>
+import { saveFailureMessage } from '@/utils/save-failures';
 
 import plantingUtils from '../../utils/plantings';
 import sorting from "@/utils/sorting";
@@ -85,6 +87,7 @@ export default {
 
   data() {
     return {
+      saveError: '',
       show: false,
       form: {
         transplantDate: new Date(),
@@ -115,12 +118,19 @@ export default {
       };
     },
 
-    handleSubmit() {
-      this.onSubmit(plantingActions.plant, this.getDataToSubmit());
+    async handleSubmit() {
+      this.saveError = '';
+      try {
+        await this.onSubmit(plantingActions.plant, this.getDataToSubmit());
+      } catch (err) {
+        this.saveError = saveFailureMessage(err);
+        return;
+      }
       this.show = false;
     },
 
     handleCancel() {
+      this.saveError = '';
       this.show = false;
     },
 

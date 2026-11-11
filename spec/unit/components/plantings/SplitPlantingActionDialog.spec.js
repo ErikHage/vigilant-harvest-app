@@ -1,4 +1,5 @@
 import { flushPromises } from '@vue/test-utils';
+import { apiError, serviceErrorBody } from '../../../helpers/http-errors';
 import { mountWithPlugins } from '../../../helpers/mount';
 import { aSaveInFlight, isOpen, openAction, press } from '../../../helpers/action-dialogs';
 import SplitPlantingActionDialog from '@/components/plantings/SplitPlantingActionDialog.vue';
@@ -97,16 +98,25 @@ describe('SplitPlantingActionDialog', () => {
         expect(wrapper.props('onSubmit').mock.calls[0][1].splits).toEqual(splits);
     });
 
-    // DocumentsCurrentBehavior: it doesn't wait for onSubmit, so it closes,
-    // and empties the splits, before the split is done. If it fails, the
-    // splits are lost (backlog A6). Should wait
-    it('closes before the split is done', async () => {
+    it('waits for the split, open', async () => {
         const wrapper = mountDialog({ onSubmit: aSaveInFlight() });
         const dialog = await open(wrapper);
         await addSplit(dialog, 'North beans', 12);
 
         await press(dialog, 'Confirm');
 
-        expect(isOpen()).toBe(false);
+        expect(isOpen()).toBe(true);
+    });
+
+    it('stays open, with the splits, and says why, when the split fails', async () => {
+        const wrapper = mountDialog({ onSubmit: vi.fn().mockRejectedValue(apiError(400, serviceErrorBody(400, 'splits[0].count must be at least 1'))) });
+        const dialog = await open(wrapper);
+        await addSplit(dialog, 'North beans', 12);
+
+        await press(dialog, 'Confirm');
+
+        expect(isOpen()).toBe(true);
+        expect(document.body.textContent).toContain('splits[0].count must be at least 1');
+        expect(wrapper.vm.form.splits).toEqual([{ name: 'North beans', count: 12 }]);
     });
 });

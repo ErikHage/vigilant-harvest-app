@@ -1,4 +1,5 @@
 import { mountWithPlugins } from '../../../helpers/mount';
+import { httpError } from '../../../helpers/http-errors';
 import { aSaveInFlight, isOpen, openAction, press } from '../../../helpers/action-dialogs';
 import RetirePlantingActionDialog from '@/components/plantings/RetirePlantingActionDialog.vue';
 
@@ -61,14 +62,20 @@ describe('RetirePlantingActionDialog', () => {
         expect(dialog.find('textarea').element.value).toBe('never mind');
     });
 
-    // DocumentsCurrentBehavior: it doesn't wait for onSubmit, so it closes
-    // before the retire is done, and can't stay open if it fails (backlog
-    // A6). Should wait
-    it('closes before the retire is done', async () => {
+    it('waits for the retire, open', async () => {
         const wrapper = mountDialog({ onSubmit: aSaveInFlight() });
 
         await press(await open(wrapper), 'Confirm');
 
-        expect(isOpen()).toBe(false);
+        expect(isOpen()).toBe(true);
+    });
+
+    it('stays open, and says so, when the retire fails', async () => {
+        const wrapper = mountDialog({ onSubmit: vi.fn().mockRejectedValue(httpError(500)) });
+
+        await press(await open(wrapper), 'Confirm');
+
+        expect(isOpen()).toBe(true);
+        expect(document.body.textContent).toContain("Couldn't save. Try again.");
     });
 });

@@ -16,6 +16,7 @@
         <span class="headline">Record Journal Entry</span>
       </v-card-title>
       <v-card-text>
+        <v-alert v-if="saveError" type="error" density="compact" class="mb-4">{{ saveError }}</v-alert>
         <p>Entry Date</p>
         <div class="d-flex align-center">
           <date-picker-dialog-activator
@@ -41,6 +42,7 @@
 </template>
 
 <script>
+import { saveFailureMessage } from '@/utils/save-failures';
 import dayjs from 'dayjs';
 
 import DatePickerDialogActivator from "@/components/utils/DatePickerDialogActivator.vue";
@@ -66,6 +68,7 @@ export default {
 
   data() {
     return {
+      saveError: '',
       show: false,
       entryDate: dayjs(),
       entryText: '',
@@ -83,17 +86,23 @@ export default {
     },
 
     handleCancel() {
+      this.saveError = '';
       this.show = false;
       this.resetData();
       this.onCancel();
     },
 
     async handleSubmit() {
-      this.onSubmit({
-        entryDate: toLocalDateTime(this.entryDate),
-        entry: this.entryText,
-      });
-      // TODO don't close until submitted successfully
+      this.saveError = '';
+      try {
+        await this.onSubmit({
+          entryDate: toLocalDateTime(this.entryDate),
+          entry: this.entryText,
+        });
+      } catch (err) {
+        this.saveError = saveFailureMessage(err);
+        return;
+      }
       this.show = false;
       this.resetData();
     },

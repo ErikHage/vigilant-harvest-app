@@ -9,6 +9,7 @@
         <span class="headline">Comment</span>
       </v-card-title>
       <v-card-text>
+        <v-alert v-if="saveError" type="error" density="compact" class="mb-4">{{ saveError }}</v-alert>
         <v-textarea v-model="comment" rows="4"></v-textarea>
       </v-card-text>
 
@@ -22,6 +23,7 @@
 </template>
 
 <script>
+import { saveFailureMessage } from '@/utils/save-failures';
 
 import plantingUtils from '../../utils/plantings';
 
@@ -42,20 +44,28 @@ export default {
 
   data() {
     return {
+      saveError: '',
       show: false,
       comment: null,
     };
   },
 
   methods: {
-    handleSubmit() {
-      this.onSubmit(plantingActions.comment, {
-        comment: this.comment,
-      });
+    async handleSubmit() {
+      this.saveError = '';
+      try {
+        await this.onSubmit(plantingActions.comment, {
+          comment: this.comment,
+        });
+      } catch (err) {
+        this.saveError = saveFailureMessage(err);
+        return;
+      }
       this.closeDialog();
     },
 
     handleCancel() {
+      this.saveError = '';
       this.closeDialog();
     },
 

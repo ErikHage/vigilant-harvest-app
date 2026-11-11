@@ -9,6 +9,7 @@
         <span class="headline">Retire Planting</span>
       </v-card-title>
       <v-card-text>
+        <v-alert v-if="saveError" type="error" density="compact" class="mb-4">{{ saveError }}</v-alert>
         <h3>Do you really want to retire {{ planting.name }}?</h3>
 
         <v-textarea
@@ -28,6 +29,7 @@
 </template>
 
 <script>
+import { saveFailureMessage } from '@/utils/save-failures';
 
 import plantingUtils from '../../utils/plantings';
 
@@ -48,6 +50,7 @@ export default {
 
   data() {
     return {
+      saveError: '',
       show: false,
       form: {
         comment: null,
@@ -56,14 +59,21 @@ export default {
   },
 
   methods: {
-    handleSubmit() {
-      this.onSubmit(plantingActions.retire, {
-        comment: this.form.comment,
-      });
+    async handleSubmit() {
+      this.saveError = '';
+      try {
+        await this.onSubmit(plantingActions.retire, {
+          comment: this.form.comment,
+        });
+      } catch (err) {
+        this.saveError = saveFailureMessage(err);
+        return;
+      }
       this.show = false;
     },
 
     handleCancel() {
+      this.saveError = '';
       this.show = false;
     },
   },

@@ -1,4 +1,5 @@
 import { flushPromises } from '@vue/test-utils';
+import { httpError } from '../../../helpers/http-errors';
 import { VSelect } from 'vuetify/components';
 import { mountWithPlugins } from '../../../helpers/mount';
 import { inputLabelled } from '../../../helpers/fields';
@@ -113,14 +114,20 @@ describe('PlantPlantingActionDialog', () => {
         expect(inputLabelled(dialog, 'Number Transplanted').element.value).toBe('20');
     });
 
-    // DocumentsCurrentBehavior: it doesn't wait for onSubmit, so it closes
-    // before the plant is done, and can't stay open if it fails (backlog A6).
-    // Should wait
-    it('closes before the plant is done', async () => {
+    it('waits for the plant, open', async () => {
         const wrapper = mountDialog({ onSubmit: aSaveInFlight() });
 
         await press(await open(wrapper), 'Confirm');
 
-        expect(isOpen()).toBe(false);
+        expect(isOpen()).toBe(true);
+    });
+
+    it('stays open, and says so, when the plant fails', async () => {
+        const wrapper = mountDialog({ onSubmit: vi.fn().mockRejectedValue(httpError(500)) });
+
+        await press(await open(wrapper), 'Confirm');
+
+        expect(isOpen()).toBe(true);
+        expect(document.body.textContent).toContain("Couldn't save. Try again.");
     });
 });

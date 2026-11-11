@@ -9,6 +9,7 @@
         <span class="headline">Start Planting</span>
       </v-card-title>
       <v-card-text>
+        <v-alert v-if="saveError" type="error" density="compact" class="mb-4">{{ saveError }}</v-alert>
         <v-text-field
             v-model.number="form.numberSown"
             type="number"
@@ -42,6 +43,7 @@
 </template>
 
 <script>
+import { saveFailureMessage } from '@/utils/save-failures';
 
 import plantingUtils from '../../utils/plantings';
 
@@ -69,6 +71,7 @@ export default {
 
   data() {
     return {
+      saveError: '',
       show: false,
       form: {
         sowDate: new Date(),
@@ -93,12 +96,19 @@ export default {
       };
     },
 
-    handleSubmit() {
-      this.onSubmit(plantingActions.start, this.getDataToSubmit());
+    async handleSubmit() {
+      this.saveError = '';
+      try {
+        await this.onSubmit(plantingActions.start, this.getDataToSubmit());
+      } catch (err) {
+        this.saveError = saveFailureMessage(err);
+        return;
+      }
       this.show = false;
     },
 
     handleCancel() {
+      this.saveError = '';
       this.show = false;
     },
 

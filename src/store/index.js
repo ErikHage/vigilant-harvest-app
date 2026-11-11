@@ -405,7 +405,8 @@ export const usePlantingsStore = defineStore('plantings', {
                     action,
                     actionData);
             } catch (err) {
-                this.setAlertMessage(err, 'error', 'error performing planting action ' + action);
+                this.setAlertMessage(err, 'error', harvestUtils.upsertErrorMessage(err, 'error performing planting action ' + action));
+                throw err;
             }
         },
         async fetchPlantingsByYear(plantingYear) {
@@ -512,7 +513,8 @@ export const useJournalStore = defineStore('journal', {
             try {
                 await journalApi.upsertJournalEntry(storageUtils.tryToLoadTokenFromStorage(), journalEntry);
             } catch (err) {
-                this.setAlertMessage(err, 'error', 'error upserting journal entry');
+                this.setAlertMessage(err, 'error', harvestUtils.upsertErrorMessage(err, 'error upserting journal entry'));
+                throw err;
             }
         },
         async fetchJournalEntriesByYear(plantingYear) {
@@ -561,7 +563,8 @@ export const useActivityLogStore = defineStore('activity-log', {
             try {
                 await activityLogApi.upsertActivityLogEntry(storageUtils.tryToLoadTokenFromStorage(), activityLogEntry);
             } catch (err) {
-                this.setAlertMessage(err, 'error', 'error upserting activity log entry');
+                this.setAlertMessage(err, 'error', harvestUtils.upsertErrorMessage(err, 'error upserting activity log entry'));
+                throw err;
             }
         },
         async fetchActivityLogEntriesByYear(plantingYear) {

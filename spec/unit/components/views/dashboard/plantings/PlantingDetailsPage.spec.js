@@ -198,6 +198,19 @@ describe('PlantingDetailsPage', () => {
             expect($router.push).toHaveBeenCalledWith({ name: 'PlantingsPage' });
             expect(store.fetchPlantingById).toHaveBeenCalledTimes(1);
         });
+
+        // So the action's dialog, which waits for it, stays open and says why
+        it.each(['START', 'DELETE', 'SPLIT'])('rejects when %s fails, staying put without reloading', async action => {
+            const { wrapper, store, $router } = await mountPage({ planting: aPlanting({ currentStatus: 'CREATED' }) });
+            const err = httpError(400);
+            store.performPlantingAction.mockRejectedValue(err);
+
+            await expect(wrapper.findComponent(CommentPlantingActionDialog).props('onSubmit')(action, {})).rejects.toBe(err);
+            await flushPromises();
+
+            expect($router.push).not.toHaveBeenCalled();
+            expect(store.fetchPlantingById).toHaveBeenCalledTimes(1);
+        });
     });
 
     describe('editing', () => {
