@@ -1,4 +1,5 @@
 import { flushPromises } from '@vue/test-utils';
+import { apiError, serviceErrorBody } from '../../../../helpers/http-errors';
 import { VSelect } from 'vuetify/components';
 import { mountWithPlugins } from '../../../../helpers/mount';
 import { buttonLabelled, inputLabelled } from '../../../../helpers/fields';
@@ -151,17 +152,18 @@ describe('AddScheduleItemDialog', () => {
         expect(inputLabelled(dialog(), 'Notes').element.value).toBe('');
     });
 
-    // It waits for onSubmit; the page's never rejects, since the store
-    // swallows (A6)
-    it('stays open, with the entry, when the save rejects', async () => {
+    // A failed save keeps it open, with what was entered, and it says why: the
+    // service's reason for a 400
+    it('stays open, with the entry, and says why, when the save fails', async () => {
         const errorHandler = vi.fn();
-        const wrapper = mountDialog({ errorHandler, onSubmit: vi.fn().mockRejectedValue(new Error('error adding activity schedule item')) });
+        const wrapper = mountDialog({ errorHandler, onSubmit: vi.fn().mockRejectedValue(apiError(400, serviceErrorBody(400, 'activityType is required'))) });
         await open(wrapper);
         await fillIn(wrapper);
 
         await press(dialog(), 'Create');
 
-        expect(errorHandler).toHaveBeenCalledTimes(1);
+        expect(errorHandler).not.toHaveBeenCalled();
+        expect(document.body.textContent).toContain("activityType is required");
         expect(isOpen()).toBe(true);
         expect(inputLabelled(dialog(), 'Notes').element.value).toBe('Side-dress the tomatoes');
     });

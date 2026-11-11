@@ -358,7 +358,12 @@ export default {
           break;
       }
 
-      await this.updatePlanting(this.plantingId, requestBody);
+      try {
+        await this.updatePlanting(this.plantingId, requestBody);
+      } catch {
+        // still unlocked, with the edits, to fix and save again; the store's alert says why
+        return;
+      }
 
       this.toggleEditMode(false);
       await this.refreshData();

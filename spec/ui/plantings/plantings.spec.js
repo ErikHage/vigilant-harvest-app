@@ -51,6 +51,6 @@ test.describe('The plantings page', () => {
         await plantingsPage.checkCreateNeedsTheRequiredFields();
         await plantingsPage.create();
 
-        await plantingsPage.checkAlertSays('message: error creating planting');
+        await plantingsPage.checkCreateIsRejected('message: plantId is required');
     });
 });

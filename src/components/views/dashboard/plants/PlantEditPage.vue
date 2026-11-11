@@ -390,6 +390,7 @@ export default {
     },
 
     async updatePlant() {
+      // A failed save keeps the edits, to fix and save again; the store's alert says why
       const success = await this.upsertPlant({
         plantId: this.plantCopy.plantId,
         subcategoryId: this.selectedSubcategoryId,
@@ -432,7 +433,7 @@ export default {
           shelfStability: this.sanitize(this.plantCopy.harvesting.shelfStability),
           harvestInstructions: this.sanitize(this.plantCopy.harvesting.harvestInstructions),
         },
-      });
+      }).then(() => true, () => false);
 
       if (success) {
         await this.refreshData();

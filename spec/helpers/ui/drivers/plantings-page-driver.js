@@ -1,5 +1,5 @@
 import { expectCount, expectEnabled, expectHidden, expectText, expectVisible } from './assertions';
-import { pageAlertSays } from './page-alert';
+import { pageAlertSays, saveIsRejectedSaying } from './page-alert';
 import { createRoutedPageDriver } from './routed-page-driver';
 import { chooseOption } from './select';
 
@@ -33,8 +33,13 @@ export function createPlantingsPageDriver(page) {
         },
 
         /** Clicks Create, and waits for the dialog to close, as it does whatever the service says. */
-        async create() {
+        /** Clicks Create, and nothing more: a refused save keeps the dialog open. */
+        async pressCreate() {
             await create.click();
+        },
+
+        async create() {
+            await this.pressCreate();
             await expectHidden(dialog, 'creating a planting');
         },
 
@@ -89,6 +94,11 @@ export function createPlantingsPageDriver(page) {
 
         async alertSays(message) {
             await pageAlertSays(page, message, 'the plantings page, after a failed save');
+        },
+
+        /** The dialog stays open, saying why the service refused the save, as does the page's alert. */
+        async createIsRejectedSaying(message) {
+            await saveIsRejectedSaying(page, message, 'the plantings page, after the service refused a save');
         },
     };
 }

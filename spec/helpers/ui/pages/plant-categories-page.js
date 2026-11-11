@@ -60,11 +60,25 @@ export function createPlantCategoriesPage(world, driver) {
             await driver.offersConfirmForANameOfSpaces();
         },
 
-        /** Clicks Create or Add in the open dialog, which closes. No parameters. */
+        /**
+         * Clicks Create or Add in the open dialog. No parameters. A save that succeeds
+         * closes it; one the service refuses keeps it open, for a check to follow.
+         */
         async confirm(...args) {
             parseDslArgs(args, {});
 
-            await driver.confirm();
+            await driver.pressConfirm();
+        },
+
+        /**
+         * The service refused the save: the dialog stays open, saying why
+         * (`message`), as does the page's alert. Check it straight away: the
+         * alert fades after three seconds.
+         */
+        async checkConfirmIsRejected(...args) {
+            const params = parseDslArgs(args, { message: message() });
+
+            await driver.confirmIsRejectedSaying(params.message);
         },
 
         /**

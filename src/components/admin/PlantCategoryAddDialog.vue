@@ -12,6 +12,7 @@
           <span class="headline">Add Category</span>
         </v-card-title>
         <v-card-text>
+          <v-alert v-if="saveError" type="error" density="compact" class="mb-4">{{ saveError }}</v-alert>
           <v-form ref="categoryForm">
             <v-text-field
                 v-model="form.categoryName"
@@ -33,6 +34,8 @@
 </template>
 
 <script>
+import { saveFailureMessage } from '@/utils/save-failures';
+
 export default {
   name: 'AddCategoryDialog',
 
@@ -44,6 +47,7 @@ export default {
 
   data() {
     return {
+      saveError: '',
       form: {
         categoryName: '',
       },
@@ -56,12 +60,19 @@ export default {
     },
 
     async handleSaveCategory(isActive) {
-      await this.onSubmit({ categoryName: this.form.categoryName.trim() });
+      this.saveError = '';
+      try {
+        await this.onSubmit({ categoryName: this.form.categoryName.trim() });
+      } catch (err) {
+        this.saveError = saveFailureMessage(err);
+        return;
+      }
       this.resetForm();
       isActive.value = false;
     },
 
     handleOnCancel(isActive) {
+      this.saveError = '';
       this.resetForm();
       isActive.value = false;
     },

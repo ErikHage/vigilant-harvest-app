@@ -5,6 +5,7 @@
         <span class="headline">Add Planting</span>
       </v-card-title>
       <v-card-text>
+        <v-alert v-if="saveError" type="error" density="compact" class="mb-4">{{ saveError }}</v-alert>
         <v-form ref="applicationForm">
           <v-text-field
               v-model="planting.name"
@@ -44,6 +45,7 @@
 </template>
 
 <script>
+import { saveFailureMessage } from '@/utils/save-failures';
 import sorting from "@/utils/sorting";
 
 export default {
@@ -58,6 +60,7 @@ export default {
 
   data() {
     return {
+      saveError: '',
       planting: {
         name: '',
         plantId: '',
@@ -90,11 +93,18 @@ export default {
     },
 
     async handleSavePlanting() {
-      await this.onSubmit(this.planting);
+      this.saveError = '';
+      try {
+        await this.onSubmit(this.planting);
+      } catch (err) {
+        this.saveError = saveFailureMessage(err);
+        return;
+      }
       this.resetForm();
     },
 
     handleOnCancel() {
+      this.saveError = '';
       this.resetForm();
       this.onCancel();
     },

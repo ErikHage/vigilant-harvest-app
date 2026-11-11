@@ -13,6 +13,7 @@
         </v-card-title>
 
         <v-card-text>
+          <v-alert v-if="saveError" type="error" density="compact" class="mb-4">{{ saveError }}</v-alert>
           <v-list density="compact" lines="two">
             <v-list-item title="Activity type" :subtitle="scheduleItem.activityType" />
             <v-list-item v-if="scheduleItem.subType" title="Subcategory" :subtitle="scheduleItem.subType" />
@@ -43,6 +44,7 @@
 </template>
 
 <script>
+import { saveFailureMessage } from '@/utils/save-failures';
 import scheduling from "@/utils/scheduling";
 
 export default {
@@ -61,18 +63,26 @@ export default {
 
   data() {
     return {
+      saveError: '',
       confirmed: false,
     };
   },
 
   methods: {
     async handleDelete(isActive) {
-      await this.onSubmit(this.scheduleItem.entryId);
+      this.saveError = '';
+      try {
+        await this.onSubmit(this.scheduleItem.entryId);
+      } catch (err) {
+        this.saveError = saveFailureMessage(err, "Couldn't delete. Try again.");
+        return;
+      }
       isActive.value = false;
       this.confirmed = false;
     },
 
     handleCancel(isActive) {
+      this.saveError = '';
       isActive.value = false;
       this.confirmed = false;
     },

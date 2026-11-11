@@ -7,6 +7,7 @@ import EditScheduleItemDialog from '@/components/admin/schedules/EditScheduleIte
 import DeleteScheduleItemDialog from '@/components/admin/schedules/DeleteScheduleItemDialog.vue';
 import { useActivitySchedulesStore } from '@/store';
 import { mountWithPlugins } from '../../../../../helpers/mount';
+import { apiError, serviceErrorBody } from '../../../../../helpers/http-errors';
 import { activityTypes, aSchedule, aScheduleItem } from '../../../../../helpers/schedules';
 
 const items = [
@@ -159,26 +160,28 @@ describe('ActivityScheduleDetailsPage', () => {
             expect(store.getScheduleById).toHaveBeenCalledTimes(2);
         });
 
-        // DocumentsCurrentBehavior: the store's actions catch a failed save,
-        // alert and resolve, so each handler resolves, and its dialog, which
-        // waits for it, closes as if it had saved (backlog A6). Should
-        // rethrow, so the dialog stays open
+        // The store's actions alert, and reject, so each handler rejects,
+        // without reloading, and its dialog, which waits for it, stays open
         it.each([
             ['the schedule', 'updateSchedule', w => w.findComponent(EditScheduleDialog)],
             ['a new item', 'addScheduleItem', w => w.findComponent(AddScheduleItemDialog)],
             ['an item', 'updateScheduleItem', w => w.findAllComponents(EditScheduleItemDialog)[0]],
             ['a deletion', 'deleteScheduleItem', w => w.findAllComponents(DeleteScheduleItemDialog)[0]],
-        ])('resolves when saving %s fails, so its dialog closes', async (_, action, dialog) => {
+        ])('rejects when saving %s fails, so its dialog stays open', async (_, action, dialog) => {
             const { wrapper, store } = await mountPage();
+            const err = apiError(400, serviceErrorBody(400, `refused ${action}`));
             store[action].mockImplementation(async () => {
                 store.alertVisible = true;
-                store.alertMessage = `error in ${action}`;
+                store.alertMessage = `refused ${action}`;
+                throw err;
             });
+            const reloads = store.getScheduleById.mock.calls.length;
 
-            await expect(dialog(wrapper).props('onSubmit')({ entryId: 'item-1' })).resolves.toBeUndefined();
+            await expect(dialog(wrapper).props('onSubmit')({ entryId: 'item-1' })).rejects.toBe(err);
             await flushPromises();
 
-            expect(wrapper.find('.v-alert').text()).toBe(`error in ${action}`);
+            expect(wrapper.find('.v-alert').text()).toBe(`refused ${action}`);
+            expect(store.getScheduleById).toHaveBeenCalledTimes(reloads);
         });
     });
 });

@@ -1,4 +1,5 @@
 import { flushPromises } from '@vue/test-utils';
+import { apiError, serviceErrorBody } from '../../../../helpers/http-errors';
 import { mountWithPlugins } from '../../../../helpers/mount';
 import { buttonLabelled, inputLabelled } from '../../../../helpers/fields';
 import { dialogTitled } from '../../../../helpers/dialogs';
@@ -76,10 +77,8 @@ describe('EditScheduleDialog', () => {
     });
 
     // DocumentsCurrentBehavior: Cancel keeps the edits, so the next open
-    // shows them, not the schedule, and Save sends them (backlog A13). The
-    // same after a failed save: the store swallows (A6), the page's schedule
-    // is unchanged, and the form keeps what didn't save. Should go back to
-    // the schedule on Cancel
+    // shows them, not the schedule, and Save sends them (backlog A13). Should
+    // go back to the schedule on Cancel
     it('keeps a cancelled edit for the next time it opens', async () => {
         const wrapper = mountDialog();
         let dialog = await open(wrapper);
@@ -91,23 +90,24 @@ describe('EditScheduleDialog', () => {
         expect(fields(dialog)).toEqual(['Peppers', 'Feed every two weeks']);
     });
 
-    // It waits for onSubmit; the page's never rejects, since the store
-    // swallows (A6)
-    it('stays open when the save rejects', async () => {
+    // A failed save keeps it open, with what was entered, and it says why: the
+    // service's reason for a 400
+    it('stays open, and says why, when the save fails', async () => {
         const errorHandler = vi.fn();
-        const wrapper = mountDialog({ errorHandler, onSubmit: vi.fn().mockRejectedValue(new Error('error updating activity schedule')) });
+        const wrapper = mountDialog({ errorHandler, onSubmit: vi.fn().mockRejectedValue(apiError(400, serviceErrorBody(400, 'name is required'))) });
 
         await press(await open(wrapper), 'Save');
 
-        expect(errorHandler).toHaveBeenCalledTimes(1);
+        expect(errorHandler).not.toHaveBeenCalled();
+        expect(document.body.textContent).toContain("name is required");
         expect(isOpen()).toBe(true);
     });
 
     // DocumentsCurrentBehavior: Save is enabled by any text, but the name is
     // trimmed when sent, so a name of spaces goes out as ''. The service
-    // rejects it (name is required), and the dialog closes, since the store
-    // swallows (backlog A16, A6). Should keep Save disabled until the trimmed
-    // name has something in it
+    // rejects it (name is required), and the dialog stays open, saying so
+    // (backlog A16). Should keep Save disabled until the trimmed name has
+    // something in it
     it('submits a name of spaces as an empty name', async () => {
         const wrapper = mountDialog();
         const dialog = await open(wrapper);

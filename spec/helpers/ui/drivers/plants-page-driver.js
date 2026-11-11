@@ -1,5 +1,5 @@
 import { expectEnabled, expectHidden, expectText, expectVisible } from './assertions';
-import { pageAlertSays } from './page-alert';
+import { saveIsRejectedSaying } from './page-alert';
 import { createRoutedPageDriver } from './routed-page-driver';
 import { chooseOption } from './select';
 
@@ -42,8 +42,13 @@ export function createPlantsPageDriver(page) {
         },
 
         /** Clicks Create, and waits for the dialog to close, as it does whatever the service says. */
-        async create() {
+        /** Clicks Create, and nothing more: a refused save keeps the dialog open. */
+        async pressCreate() {
             await create.click();
+        },
+
+        async create() {
+            await this.pressCreate();
             await expectHidden(dialog, 'creating a plant');
         },
 
@@ -83,9 +88,9 @@ export function createPlantsPageDriver(page) {
             await clickIcon(friendlyName, 'mdi-pencil', `editing the plant ${friendlyName}`);
         },
 
-        /** The alert gives the service's reason for refusing a plant with nothing entered. */
-        async alertSaysTheSubcategoryIsRequired() {
-            await pageAlertSays(page, 'subcategoryId is required', 'the plants page, after the service refused a plant');
+        /** The dialog stays open, saying why the service refused the save, as does the page's alert. */
+        async createIsRejectedSaying(message) {
+            await saveIsRejectedSaying(page, message, 'the plants page, after the service refused a plant');
         },
     };
 }

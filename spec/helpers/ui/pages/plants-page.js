@@ -1,6 +1,6 @@
 import { parseDslArgs } from '@feral-auth/ts-simple-dsl';
 
-import { by, plant, subcategory } from '../params';
+import { by, message, plant, subcategory } from '../params';
 import { dashboardComponents, routedPageSteps } from './routed-page';
 
 // What `by: name | category | subcategory` searches for
@@ -39,11 +39,14 @@ export function createPlantsPage(world, driver) {
             await driver.offersCreateWithNothingEntered();
         },
 
-        /** Clicks Create in the open Add dialog, which closes. No parameters. */
+        /**
+         * Clicks Create in the open Add dialog. No parameters. A save that succeeds
+         * closes it; one the service refuses keeps it open, for a check to follow.
+         */
         async create(...args) {
             parseDslArgs(args, {});
 
-            await driver.create();
+            await driver.pressCreate();
         },
 
         /**
@@ -73,13 +76,14 @@ export function createPlantsPage(world, driver) {
         },
 
         /**
-         * After the service refused a plant, the page's alert says why. Check
-         * it straight away: it fades after three seconds. No parameters.
+         * The service refused the save: the dialog stays open, saying why
+         * (`message`), as does the page's alert. Check it straight away: the
+         * alert fades after three seconds.
          */
-        async checkAlertSaysWhyItWasRefused(...args) {
-            parseDslArgs(args, {});
+        async checkCreateIsRejected(...args) {
+            const params = parseDslArgs(args, { message: message() });
 
-            await driver.alertSaysTheSubcategoryIsRequired();
+            await driver.createIsRejectedSaying(params.message);
         },
     };
 }

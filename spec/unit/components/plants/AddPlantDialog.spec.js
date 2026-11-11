@@ -3,6 +3,7 @@ import { VSelect } from 'vuetify/components';
 import { mountWithPlugins } from '../../../helpers/mount';
 import { buttonLabelled, inputLabelled } from '../../../helpers/fields';
 import { dialogTitled, findDialog } from '../../../helpers/dialogs';
+import { httpError } from '../../../helpers/http-errors';
 import AddPlantDialog from '@/components/plants/AddPlantDialog.vue';
 
 const categories = [
@@ -100,6 +101,24 @@ describe('AddPlantDialog', () => {
         await select(wrapper, 'Category').setValue(categories[1]);
 
         expect(select(wrapper, 'Subcategory').props('modelValue')).toBeNull();
+    });
+
+    // With no reason from the service, it says the save failed. Cancel forgets
+    // the message, so the next open starts clean
+    it('says the save failed, keeping the form, and forgets it on Cancel', async () => {
+        const wrapper = await mountDialog({ onSubmit: vi.fn().mockRejectedValue(httpError(500)) });
+        await fillIn(wrapper);
+
+        await buttonLabelled(dialogTitled('Add Plant'), 'Create').trigger('click');
+        await flushPromises();
+
+        expect(findDialog('Add Plant').text()).toContain("Couldn't save. Try again.");
+        expect(inputLabelled(dialogTitled('Add Plant'), 'Name').element.value).toBe('Provider bush bean');
+
+        await buttonLabelled(dialogTitled('Add Plant'), 'Cancel').trigger('click');
+        await flushPromises();
+
+        expect(findDialog('Add Plant').text()).not.toContain("Couldn't save");
     });
 
     it('submits the plant, with its default harvest type under harvesting', async () => {

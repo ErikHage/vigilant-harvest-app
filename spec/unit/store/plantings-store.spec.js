@@ -157,26 +157,38 @@ describe('usePlantingsStore', () => {
             api: 'createPlanting',
             failure: 'error creating planting',
         },
-        {
-            action: 'performPlantingAction',
-            args: ['planting-1', 'SPLIT', { splits: [{ name: '', count: 0 }] }],
-            api: 'performPlantingAction',
-            failure: 'error performing planting action SPLIT',
-        },
     ])('$action', ({ action, args, api, failure }) => {
-        // DocumentsCurrentBehavior: the failure is swallowed, so the dialog that
-        // called it can't tell a failed save from a good one, and closes anyway
-        // (validation-fixes doc, fixes 2 and 3). Should rethrow, as
-        // addPlantingYear does, so the dialog can stay open and say why
-        it('shows an alert and logs when it fails, and still resolves', async () => {
+        // The page or dialog that called it stays put, and says why
+        it('shows an alert, logs, and rejects, when it fails', async () => {
             plantingsApi.fetchPlantingsByYear.mockResolvedValue([early]);
             await store.fetchPlantingsByYear(2026);
             const err = httpError(400);
             plantingsApi[api].mockRejectedValue(err);
 
-            await expect(store[action](...args)).resolves.toBeUndefined();
+            await expect(store[action](...args)).rejects.toBe(err);
 
             expect(store.alertMessage).toBe(failure);
+            expect(store.alertType).toBe('error');
+            expect(consoleError).toHaveBeenCalledWith(err);
+            expect(store.plantingsById['planting-1']).toEqual(early);
+        });
+    });
+
+    describe('performPlantingAction', () => {
+        // DocumentsCurrentBehavior: the failure is swallowed, so the dialog that
+        // called it can't tell a failed action from a good one, and closes anyway
+        // (validation-fixes doc, fix 3). Should rethrow, as updatePlanting does,
+        // so the dialog can stay open and say why
+        it('shows an alert and logs when it fails, and still resolves', async () => {
+            plantingsApi.fetchPlantingsByYear.mockResolvedValue([early]);
+            await store.fetchPlantingsByYear(2026);
+            const err = httpError(400);
+            plantingsApi.performPlantingAction.mockRejectedValue(err);
+
+            await expect(store.performPlantingAction('planting-1', 'SPLIT', { splits: [{ name: '', count: 0 }] }))
+                .resolves.toBeUndefined();
+
+            expect(store.alertMessage).toBe('error performing planting action SPLIT');
             expect(store.alertType).toBe('error');
             expect(consoleError).toHaveBeenCalledWith(err);
             expect(store.plantingsById['planting-1']).toEqual(early);

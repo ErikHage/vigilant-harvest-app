@@ -5,6 +5,7 @@ import PlantsTable from '@/components/plants/PlantsTable.vue';
 import AddPlantDialog from '@/components/plants/AddPlantDialog.vue';
 import { usePlantsStore } from '@/store';
 import { mountWithPlugins } from '../../../../../helpers/mount';
+import { apiError, serviceErrorBody } from '../../../../../helpers/http-errors';
 import { buttonLabelled, inputLabelled } from '../../../../../helpers/fields';
 import { dialogTitled, findDialog } from '../../../../../helpers/dialogs';
 
@@ -101,22 +102,19 @@ describe('PlantsPage', () => {
         expect(store.fetchPlants).toHaveBeenCalledTimes(2);
     });
 
-    // DocumentsCurrentBehavior: upsertPlant resolves false when the save fails,
-    // but savePlant ignores it, so the dialog closes and the form is emptied:
-    // what was typed is lost. Should keep the dialog open, with the form as it
-    // was, so the alert's reason can be fixed
-    it('closes the dialog, and empties the form, when the save fails', async () => {
+    it('keeps the dialog open, with what was typed, and says why, when the save fails', async () => {
         const { wrapper, store } = await mountPage();
-        store.upsertPlant.mockResolvedValue(false);
-        let dialog = await openAddDialog(wrapper);
+        store.upsertPlant.mockRejectedValue(apiError(400, serviceErrorBody(400, 'subcategoryId is required')));
+        const dialog = await openAddDialog(wrapper);
         await inputLabelled(dialog, 'Name').setValue('Sugar snap pea');
 
         await buttonLabelled(dialog, 'Create').trigger('click');
         await flushPromises();
 
-        expect(findDialog('Add Plant')).toBeUndefined();
-        dialog = await openAddDialog(wrapper);
-        expect(inputLabelled(dialog, 'Name').element.value).toBe('');
+        expect(findDialog('Add Plant')).toBeDefined();
+        expect(inputLabelled(findDialog('Add Plant'), 'Name').element.value).toBe('Sugar snap pea');
+        expect(findDialog('Add Plant').text()).toContain('subcategoryId is required');
+        expect(store.fetchPlants).toHaveBeenCalledTimes(1);
     });
 
     it("shows the plants store's alert", async () => {

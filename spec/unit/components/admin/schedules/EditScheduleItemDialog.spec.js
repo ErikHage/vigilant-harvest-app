@@ -1,4 +1,5 @@
 import { flushPromises } from '@vue/test-utils';
+import { apiError, serviceErrorBody } from '../../../../helpers/http-errors';
 import { VSelect } from 'vuetify/components';
 import { mountWithPlugins } from '../../../../helpers/mount';
 import { buttonLabelled, inputLabelled } from '../../../../helpers/fields';
@@ -160,10 +161,8 @@ describe('EditScheduleItemDialog', () => {
     });
 
     // DocumentsCurrentBehavior: Cancel keeps the edits, so the next open
-    // shows them, not the item, and Save sends them (backlog A13). The same
-    // after a failed save: the store swallows (A6), the page reloads the
-    // unchanged item, and only then is the form reset. Should go back to the
-    // item on Cancel
+    // shows them, not the item, and Save sends them (backlog A13). Should go
+    // back to the item on Cancel
     it('keeps a cancelled edit for the next time it opens', async () => {
         const wrapper = mountDialog();
         await open(wrapper);
@@ -175,16 +174,17 @@ describe('EditScheduleItemDialog', () => {
         expect(form(wrapper).notes).toBe('never mind');
     });
 
-    // It waits for onSubmit; the page's never rejects, since the store
-    // swallows (A6)
-    it('stays open when the save rejects', async () => {
+    // A failed save keeps it open, with what was entered, and it says why: the
+    // service's reason for a 400
+    it('stays open, and says why, when the save fails', async () => {
         const errorHandler = vi.fn();
-        const wrapper = mountDialog({ errorHandler, onSubmit: vi.fn().mockRejectedValue(new Error('error updating activity schedule item')) });
+        const wrapper = mountDialog({ errorHandler, onSubmit: vi.fn().mockRejectedValue(apiError(400, serviceErrorBody(400, 'recurrenceRule is required'))) });
         await open(wrapper);
 
         await press(dialog(), 'Save');
 
-        expect(errorHandler).toHaveBeenCalledTimes(1);
+        expect(errorHandler).not.toHaveBeenCalled();
+        expect(document.body.textContent).toContain("recurrenceRule is required");
         expect(isOpen()).toBe(true);
     });
 

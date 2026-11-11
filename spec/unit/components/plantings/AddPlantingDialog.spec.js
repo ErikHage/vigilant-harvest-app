@@ -90,9 +90,8 @@ describe('AddPlantingDialog', () => {
 
     // DocumentsCurrentBehavior: Create is never disabled, so a planting with
     // no name and no plant is sent. The service rejects it (name is
-    // required), and the page closes the dialog anyway (A6), losing the form
-    // (validation-fixes doc, fix 2). Should keep Create disabled until a name
-    // and a plant are chosen
+    // required), and the dialog stays open, saying so (validation-fixes doc,
+    // fix 2). Should keep Create disabled until a name and a plant are chosen
     it('submits a planting with no name and no plant', async () => {
         const wrapper = await mountDialog();
 

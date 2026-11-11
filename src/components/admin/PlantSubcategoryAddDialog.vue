@@ -15,6 +15,7 @@
           Category: <strong>{{ category.categoryName }}</strong>
         </v-card-subtitle>
         <v-card-text>
+          <v-alert v-if="saveError" type="error" density="compact" class="mb-4">{{ saveError }}</v-alert>
           <v-form ref="subcategoryForm">
             <v-text-field
                 v-model="form.subcategoryName"
@@ -36,6 +37,8 @@
 </template>
 
 <script>
+import { saveFailureMessage } from '@/utils/save-failures';
+
 export default {
   name: 'PlantSubcategoryAddDialog',
 
@@ -51,6 +54,7 @@ export default {
 
   data() {
     return {
+      saveError: '',
       form: {
         subcategoryName: '',
       },
@@ -63,15 +67,22 @@ export default {
     },
 
     async handleSaveSubcategory(isActive) {
-      await this.onSubmit({
-        categoryId: this.category.categoryId,
-        subcategoryName: this.form.subcategoryName.trim(),
-      });
+      this.saveError = '';
+      try {
+        await this.onSubmit({
+          categoryId: this.category.categoryId,
+          subcategoryName: this.form.subcategoryName.trim(),
+        });
+      } catch (err) {
+        this.saveError = saveFailureMessage(err);
+        return;
+      }
       this.resetForm();
       isActive.value = false;
     },
 
     handleOnCancel(isActive) {
+      this.saveError = '';
       this.resetForm();
       isActive.value = false;
     },

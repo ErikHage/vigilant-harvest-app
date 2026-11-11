@@ -13,6 +13,7 @@
           <span class="headline">Add Activity Schedule Item</span>
         </v-card-title>
         <v-card-text>
+          <v-alert v-if="saveError" type="error" density="compact" class="mb-4">{{ saveError }}</v-alert>
           <v-form ref="scheduleForm">
             <v-select
                 v-model="form.activityType"
@@ -102,6 +103,7 @@
 </template>
 
 <script>
+import { saveFailureMessage } from '@/utils/save-failures';
 import scheduling from '@/utils/scheduling';
 import MonthDaySelect from "@/components/utils/MonthDaySelect.vue";
 import {RRule} from "rrule";
@@ -127,6 +129,7 @@ export default {
 
   data() {
     return {
+      saveError: '',
       form: {
         activityType: null,
         subType: null,
@@ -188,21 +191,28 @@ export default {
     },
 
     async handleSaveItem(isActive) {
-      await this.onSubmit({
-        activityType: this.form.activityType.name,
-        subType: this.form.subType.name,
-        recurrenceRule: this.toRecurrenceRuleString(this.form.frequency, this.form.interval),
-        startDate: this.form.startDate,
-        startDateYearOffset: this.form.startDateYearOffset,
-        endDate: this.form.endDate,
-        endDateYearOffset: this.form.endDateYearOffset,
-        notes: this.form.notes,
-      });
+      this.saveError = '';
+      try {
+        await this.onSubmit({
+          activityType: this.form.activityType.name,
+          subType: this.form.subType.name,
+          recurrenceRule: this.toRecurrenceRuleString(this.form.frequency, this.form.interval),
+          startDate: this.form.startDate,
+          startDateYearOffset: this.form.startDateYearOffset,
+          endDate: this.form.endDate,
+          endDateYearOffset: this.form.endDateYearOffset,
+          notes: this.form.notes,
+        });
+      } catch (err) {
+        this.saveError = saveFailureMessage(err);
+        return;
+      }
       this.resetForm();
       isActive.value = false;
     },
 
     handleOnCancel(isActive) {
+      this.saveError = '';
       this.resetForm();
       isActive.value = false;
     },

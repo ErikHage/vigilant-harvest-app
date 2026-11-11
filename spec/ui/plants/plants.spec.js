@@ -51,6 +51,6 @@ test.describe('The plants page', () => {
         await plantsPage.checkCreateNeedsTheRequiredFields();
         await plantsPage.create();
 
-        await plantsPage.checkAlertSaysWhyItWasRefused();
+        await plantsPage.checkCreateIsRejected('message: subcategoryId is required');
     });
 });

@@ -3,6 +3,7 @@ import { createTestingPinia } from '@pinia/testing';
 import PlantCategoriesPage from '@/components/views/dashboard/admin/PlantCategoriesPage.vue';
 import { usePlantsStore } from '@/store';
 import { mountWithPlugins } from '../../../../../helpers/mount';
+import { apiError, serviceErrorBody } from '../../../../../helpers/http-errors';
 import { inputLabelled } from '../../../../../helpers/fields';
 import { dialogTitled } from '../../../../../helpers/dialogs';
 import { isOpen, openAction, press } from '../../../../../helpers/action-dialogs';
@@ -143,19 +144,19 @@ describe('PlantCategoriesPage', () => {
         expect(store.fetchPlantCategories).toHaveBeenCalledTimes(2);
     });
 
-    // DocumentsCurrentBehavior: createCategory and createSubcategory catch a
-    // failed save, alert and resolve, so the page's handler resolves, and the
-    // dialog, which waits for it, closes and empties as if it had saved
-    // (backlog A6). Should rethrow, so the dialog stays open
+    // createCategory and createSubcategory alert, and reject, so the
+    // page's handler rejects, and the dialog, which waits for it, stays open
+    // and says why
     it.each([
-        ['category', 'createCategory', 'error creating category'],
-        ['subcategory', 'createSubcategory', 'error creating subcategory'],
-    ])('closes the %s dialog when the save fails', async (kind, action, message) => {
+        ['category', 'createCategory', 'categoryName is required'],
+        ['subcategory', 'createSubcategory', 'subcategoryName is required'],
+    ])('keeps the %s dialog open, and says why, when the save fails', async (kind, action, message) => {
         const { wrapper, store } = await mountPage();
         store[action].mockImplementation(async () => {
             store.alertVisible = true;
             store.alertType = 'error';
             store.alertMessage = message;
+            throw apiError(400, serviceErrorBody(400, message));
         });
 
         if (kind === 'category') {
@@ -166,7 +167,9 @@ describe('PlantCategoriesPage', () => {
             await addSubcategoryTo(wrapper, 'Legumes', 'Lentils');
         }
 
-        expect(isOpen()).toBe(false);
+        expect(isOpen()).toBe(true);
+        expect(document.querySelector('.v-overlay--active').textContent).toContain(message);
         expect(wrapper.find('.v-alert').text()).toBe(message);
+        expect(store.fetchPlantCategories).toHaveBeenCalledTimes(1);
     });
 });

@@ -5,6 +5,7 @@
         <span class="headline">{{ isEditMode ? 'Edit Plot' : 'Add Plot' }}</span>
       </v-card-title>
       <v-card-text>
+        <v-alert v-if="saveError" type="error" density="compact" class="mb-4">{{ saveError }}</v-alert>
         <v-form ref="applicationForm">
           <v-text-field
               v-model="plotCopy.friendlyName"
@@ -42,6 +43,8 @@
 </template>
 
 <script>
+import { saveFailureMessage } from '@/utils/save-failures';
+
 export default {
   name: 'UpsertPlotDialog',
 
@@ -54,6 +57,7 @@ export default {
 
   data() {
     return {
+      saveError: '',
       plotCopy: {
         plotId: '',
         friendlyName: '',
@@ -107,11 +111,18 @@ export default {
     },
 
     async handleSavePlot() {
-      await this.onSubmit(this.plotCopy);
+      this.saveError = '';
+      try {
+        await this.onSubmit(this.plotCopy);
+      } catch (err) {
+        this.saveError = saveFailureMessage(err);
+        return;
+      }
       this.resetForm()
     },
 
     handleOnCancel() {
+      this.saveError = '';
       this.resetForm();
       this.onCancel();
     },

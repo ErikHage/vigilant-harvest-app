@@ -1,7 +1,7 @@
 import { createPinia, setActivePinia } from 'pinia';
 import { usePlotsStore } from '@/store';
 import plotsApi from '@/api/plots-api';
-import { httpError } from '../../helpers/http-errors';
+import { apiError, httpError, serviceErrorBody } from '../../helpers/http-errors';
 
 vi.mock('@/api/plots-api');
 
@@ -68,18 +68,24 @@ describe('usePlotsStore', () => {
             expect(store.alertVisible).toBe(false);
         });
 
-        // DocumentsCurrentBehavior: the failure is swallowed, so the dialog that
-        // called it can't tell a failed save from a good one. Should rethrow, as
-        // addPlantingYear does, so the dialog can stay open and say why
-        it('shows an alert and logs when it fails, and still resolves', async () => {
-            const err = httpError(400);
+        // The dialog that called it stays open, and says why
+        it('shows an alert, logs, and rejects, when it fails', async () => {
+            const err = httpError(500);
             plotsApi.upsertPlot.mockRejectedValue(err);
 
-            await expect(store.upsertPlot(north)).resolves.toBeUndefined();
+            await expect(store.upsertPlot(north)).rejects.toBe(err);
 
             expect(store.alertMessage).toBe('error upserting plot');
             expect(store.alertType).toBe('error');
             expect(consoleError).toHaveBeenCalledWith(err);
+        });
+
+        it("shows the service's reason for a refused plot", async () => {
+            plotsApi.upsertPlot.mockRejectedValue(apiError(400, serviceErrorBody(400, 'friendlyName is required')));
+
+            await store.upsertPlot(north).catch(() => {});
+
+            expect(store.alertMessage).toBe('friendlyName is required');
         });
     });
 });

@@ -1,4 +1,5 @@
 import { flushPromises } from '@vue/test-utils';
+import { httpError } from '../../../helpers/http-errors';
 import { createTestingPinia } from '@pinia/testing';
 import { VSelect } from 'vuetify/components';
 import { mountWithPlugins } from '../../../helpers/mount';
@@ -137,10 +138,9 @@ describe('ManagePlantSchedulesDialog', () => {
         expect(document.querySelector('.v-overlay--active')).toBeNull();
     });
 
-    // What a fix to A6 would let it do: if the save rejected, it would stay
-    // open. Today PlantEditPage's onSubmit resolves even when the save fails
-    it('stays open if the save rejects', async () => {
-        const { wrapper } = await mountDialog({ onSubmit: vi.fn().mockRejectedValue(new Error('save failed')) });
+    // A failed save keeps it open, with the changes, and it says the save failed
+    it('stays open, and says so, when the save fails', async () => {
+        const { wrapper } = await mountDialog({ onSubmit: vi.fn().mockRejectedValue(httpError(500)) });
         const dialog = await open(wrapper);
         await add(wrapper, dialog, compost);
         const caught = vi.fn();
@@ -149,7 +149,8 @@ describe('ManagePlantSchedulesDialog', () => {
         await buttonLabelled(dialog, 'Save').trigger('click');
         await flushPromises();
 
-        expect(caught).toHaveBeenCalledWith(expect.objectContaining({ message: 'save failed' }), expect.anything(), expect.anything());
+        expect(caught).not.toHaveBeenCalled();
+        expect(document.body.textContent).toContain("Couldn't save. Try again.");
         expect(document.querySelector('.v-overlay--active')).not.toBeNull();
     });
 

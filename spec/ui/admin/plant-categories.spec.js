@@ -46,7 +46,7 @@ test.describe('The plant categories page', () => {
         await plantCategoriesPage.checkConfirmNeedsAName();
         await plantCategoriesPage.confirm();
 
-        await plantCategoriesPage.checkAlertSays('message: error creating category');
+        await plantCategoriesPage.checkConfirmIsRejected('message: categoryName is required');
     });
 
     // DocumentsCurrentBehavior: as for a category, Add checks the name
@@ -62,6 +62,6 @@ test.describe('The plant categories page', () => {
         await plantCategoriesPage.checkConfirmNeedsAName();
         await plantCategoriesPage.confirm();
 
-        await plantCategoriesPage.checkAlertSays('message: error creating subcategory');
+        await plantCategoriesPage.checkConfirmIsRejected('message: subcategoryName is required');
     });
 });

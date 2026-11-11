@@ -1,4 +1,4 @@
-import { expectText } from './assertions';
+import { expectText, expectVisible } from './assertions';
 
 /**
  * The alert a dashboard page shows when the store reports a failure
@@ -8,4 +8,17 @@ import { expectText } from './assertions';
  */
 export async function pageAlertSays(page, message, what) {
     await expectText(page.getByRole('main').locator('.v-alert'), message, what);
+}
+
+/**
+ * A save the service refused: the dialog stays open, with what was entered,
+ * and says why, as does the page's alert behind it. Check it straight after
+ * the step that caused it: the page's alert fades after three seconds.
+ */
+export async function saveIsRejectedSaying(page, message, what) {
+    const dialog = page.getByRole('dialog');
+
+    await expectVisible(dialog, what);
+    await expectText(dialog.locator('.v-alert'), message, what);
+    await pageAlertSays(page, message, what);
 }

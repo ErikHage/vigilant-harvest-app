@@ -13,6 +13,7 @@ import { usePlantingsStore } from '@/store';
 import { mountWithPlugins } from '../../../../../helpers/mount';
 import { buttonLabelled } from '../../../../../helpers/fields';
 import { aPlanting } from '../../../../../helpers/plantings';
+import { httpError } from '../../../../../helpers/http-errors';
 
 const plants = [{ plantId: 'plant-1', friendlyName: 'Provider bush bean' }];
 const plots = [{ plotId: 'plot-1', friendlyName: 'North bed' }];
@@ -249,6 +250,21 @@ describe('PlantingDetailsPage', () => {
             await buttonLabelled(wrapper, 'Update').trigger('click');
 
             expect(store.updatePlanting.mock.calls[0][1].name).toBe('Earliest beans');
+        });
+
+        // The store's alert says why; the edits stay, unlocked, to fix and send again
+        it('stays unlocked, with the edits, and without reloading, when the Update fails', async () => {
+            const { wrapper, store } = await mountPage();
+            store.updatePlanting.mockRejectedValue(httpError(400));
+            await wrapper.find('.v-switch input').setValue(true);
+            wrapper.findComponent(PlantingDetailsTab).props('planting').name = 'Earliest beans';
+
+            await buttonLabelled(wrapper, 'Update').trigger('click');
+            await flushPromises();
+
+            expect(wrapper.findComponent(PlantingDetailsTab).props('enableEdit')).toBe(true);
+            expect(wrapper.findComponent(PlantingDetailsTab).props('planting').name).toBe('Earliest beans');
+            expect(store.fetchPlantingById).toHaveBeenCalledTimes(1);
         });
 
         // Update is enabled whenever editing is unlocked, whether or not

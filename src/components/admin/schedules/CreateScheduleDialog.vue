@@ -13,6 +13,7 @@
           <span class="headline">Create Activity Schedule</span>
         </v-card-title>
         <v-card-text>
+          <v-alert v-if="saveError" type="error" density="compact" class="mb-4">{{ saveError }}</v-alert>
           <v-form ref="scheduleForm">
             <v-text-field
                 v-model="form.activityScheduleName"
@@ -41,6 +42,8 @@
 </template>
 
 <script>
+import { saveFailureMessage } from '@/utils/save-failures';
+
 export default {
   name: 'CreateScheduleDialog',
 
@@ -52,6 +55,7 @@ export default {
 
   data() {
     return {
+      saveError: '',
       form: {
         activityScheduleName: '',
         description: '',
@@ -74,15 +78,22 @@ export default {
     },
 
     async handleSaveSchedule(isActive) {
-      await this.onSubmit({
-        name: this.form.activityScheduleName.trim(),
-        description: this.form.description,
-      });
+      this.saveError = '';
+      try {
+        await this.onSubmit({
+          name: this.form.activityScheduleName.trim(),
+          description: this.form.description,
+        });
+      } catch (err) {
+        this.saveError = saveFailureMessage(err);
+        return;
+      }
       this.resetForm();
       isActive.value = false;
     },
 
     handleOnCancel(isActive) {
+      this.saveError = '';
       this.resetForm();
       isActive.value = false;
     },

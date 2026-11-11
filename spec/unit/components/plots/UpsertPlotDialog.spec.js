@@ -71,9 +71,9 @@ describe('UpsertPlotDialog', () => {
 
         // DocumentsCurrentBehavior: Create is never disabled and the fields
         // marked required have no rules, so an empty plot is sent. The service
-        // rejects it (friendlyName and plotType are required), the store shows
-        // "error upserting plot", and the page closes the dialog anyway (A6).
-        // Should keep Create disabled until a name and type are given
+        // rejects it (friendlyName and plotType are required), and the dialog
+        // stays open, saying so. Should keep Create disabled until a name and
+        // type are given
         it('submits an empty plot', async () => {
             const wrapper = await mountDialog();
 

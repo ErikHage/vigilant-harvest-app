@@ -61,6 +61,8 @@ describe('useActivitySchedulesStore', () => {
             result: { ...schedule, name: 'Peppers' },
             field: 'selectedActivitySchedule',
             failure: 'error updating activity schedule',
+            // a save, so its dialog can stay open
+            rejects: true,
         },
         {
             action: 'fetchActivityTypes',
@@ -71,7 +73,7 @@ describe('useActivitySchedulesStore', () => {
             field: 'activityTypes',
             failure: 'error fetching activity types',
         },
-    ])('$action', ({ action, args, api, apiArgs, result, field, failure }) => {
+    ])('$action', ({ action, args, api, apiArgs, result, field, failure, rejects = false }) => {
         it(`stores what the service returns in ${field}`, async () => {
             activitySchedulesApi[api].mockResolvedValue(result);
 
@@ -87,8 +89,9 @@ describe('useActivitySchedulesStore', () => {
             activitySchedulesApi[api].mockRejectedValue(err);
             const before = store[field];
 
-            await store[action](...args);
+            const outcome = await store[action](...args).then(() => 'resolved', rejected => rejected);
 
+            expect(outcome).toBe(rejects ? err : 'resolved');
             expect(store.alertMessage).toBe(failure);
             expect(store.alertType).toBe('error');
             expect(consoleError).toHaveBeenCalledWith(err);
@@ -137,14 +140,12 @@ describe('useActivitySchedulesStore', () => {
             expect(store.alertVisible).toBe(false);
         });
 
-        // DocumentsCurrentBehavior: the failure is swallowed, so the dialog that
-        // called it can't tell a failed save from a good one. Should rethrow, as
-        // addPlantingYear does, so the dialog can stay open and say why
-        it('shows an alert and logs when it fails, and still resolves', async () => {
+        // The dialog that called it stays open, and says why
+        it('shows an alert, logs, and rejects, when it fails', async () => {
             const err = httpError(400);
             activitySchedulesApi[api].mockRejectedValue(err);
 
-            await expect(store[action](...args)).resolves.toBeUndefined();
+            await expect(store[action](...args)).rejects.toBe(err);
 
             expect(store.alertMessage).toBe(failure);
             expect(store.alertType).toBe('error');

@@ -56,6 +56,6 @@ test.describe('The plots page', () => {
         await plotsPage.checkCreateNeedsTheRequiredFields();
         await plotsPage.create();
 
-        await plotsPage.checkAlertSays('message: error upserting plot');
+        await plotsPage.checkCreateIsRejected('message: friendlyName is required');
     });
 });

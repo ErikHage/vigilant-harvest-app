@@ -1,13 +1,9 @@
 import { createPinia, setActivePinia } from 'pinia';
 import { useHarvestsStore } from '@/store';
 import harvestsApi from '@/api/harvests-api';
-import { httpError, serviceErrorBody } from '../../helpers/http-errors';
+import { apiError, httpError, serviceErrorBody } from '../../helpers/http-errors';
 
 vi.mock('@/api/harvests-api');
-
-function apiError(status, data) {
-    return Object.assign(httpError(status), { data });
-}
 
 const harvest = { plantingYear: 2026, plantingId: 'planting-1', quantity: 3, harvestDate: '2026-07-04', harvestTypeId: 2 };
 

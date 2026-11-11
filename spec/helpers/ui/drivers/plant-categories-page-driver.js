@@ -1,5 +1,5 @@
 import { expectEnabled,expectHidden, expectText, expectVisible } from './assertions';
-import { pageAlertSays } from './page-alert';
+import { pageAlertSays, saveIsRejectedSaying } from './page-alert';
 import { createRoutedPageDriver } from './routed-page-driver';
 
 /** The plant categories page, and its two add dialogs, as Playwright sees them. */
@@ -48,8 +48,13 @@ export function createPlantCategoriesPageDriver(page) {
         },
 
         /** Clicks Create or Add, and waits for the dialog to close, as it does whatever the service says. */
-        async confirm() {
+        /** Clicks Create or Add, and nothing more: a refused save keeps the dialog open. */
+        async pressConfirm() {
             await confirm.click();
+        },
+
+        async confirm() {
+            await this.pressConfirm();
             await expectHidden(dialog, 'confirming the add dialog');
         },
 
@@ -69,6 +74,11 @@ export function createPlantCategoriesPageDriver(page) {
 
         async alertSays(message) {
             await pageAlertSays(page, message, 'the plant categories page, after a failed save');
+        },
+
+        /** The dialog stays open, saying why the service refused the save, as does the page's alert. */
+        async confirmIsRejectedSaying(message) {
+            await saveIsRejectedSaying(page, message, 'the plant categories page, after the service refused a save');
         },
     };
 }

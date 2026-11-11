@@ -5,6 +5,7 @@
         <span class="headline">Add Plant</span>
       </v-card-title>
       <v-card-text>
+        <v-alert v-if="saveError" type="error" density="compact" class="mb-4">{{ saveError }}</v-alert>
         <v-form ref="applicationForm">
           <v-text-field v-model="form.friendlyName" label="Name" density="compact" required></v-text-field>
           <v-select
@@ -59,6 +60,7 @@
 </template>
 
 <script>
+import { saveFailureMessage } from '@/utils/save-failures';
 import harvestUtils from "@/utils/harvest-utils";
 
 export default {
@@ -87,6 +89,7 @@ export default {
 
   data() {
     return {
+      saveError: '',
       form: {
         category: null,
         subcategoryId: null,
@@ -134,19 +137,26 @@ export default {
     },
 
     async handleSavePlant() {
-      await this.onSubmit({
-        subcategoryId: this.form.subcategoryId,
-        friendlyName: this.form.friendlyName,
-        lifespanType: this.form.lifespanType,
-        description: this.form.description,
-        harvesting: {
-          defaultHarvestTypeId: this.form.defaultHarvestTypeId ?? harvestUtils.unspecifiedHarvestTypeId,
-        },
-      });
+      this.saveError = '';
+      try {
+        await this.onSubmit({
+          subcategoryId: this.form.subcategoryId,
+          friendlyName: this.form.friendlyName,
+          lifespanType: this.form.lifespanType,
+          description: this.form.description,
+          harvesting: {
+            defaultHarvestTypeId: this.form.defaultHarvestTypeId ?? harvestUtils.unspecifiedHarvestTypeId,
+          },
+        });
+      } catch (err) {
+        this.saveError = saveFailureMessage(err);
+        return;
+      }
       this.resetForm();
     },
 
     handleOnCancel() {
+      this.saveError = '';
       this.resetForm();
       this.onCancel();
     },

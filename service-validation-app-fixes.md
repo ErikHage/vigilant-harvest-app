@@ -39,6 +39,9 @@ Every error, from every route, has one shape:
 
 ### 2. The add-planting dialog saves without a name, then closes anyway
 
+**Closing anyway is fixed** (pinned-behaviour fixes, F2a, backlog A6): a failed save keeps the
+dialog open, saying why. Saving without a name is F3's (A16).
+
 - **Where:**
   - `src/components/plantings/AddPlantingDialog.vue:62` and `:84` start `name` as `''`. The field
     has `required`, but nothing stops the save.
