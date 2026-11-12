@@ -56,6 +56,40 @@ test.describe('The planting years pages', () => {
         await plantingYearDetailsPage.checkShowsYear('year: next', 'planted: 1');
     });
 
+    // Carrying a planting forward left its current year behind, and the
+    // service files a new harvest under that year. So a harvest entered in the
+    // new year went to the year before, and the new year's garden and
+    // harvests pages never showed it (vigilant-harvest-service)
+    test('file a harvest of a planting carried into the year after under that year', async ({
+        garden, browserClock, plantingYearsPage, addPlantingYearPage, dashboardPage, gardenPage,
+    }) => {
+        await garden.hasCategory('category: tomatoes');
+        await garden.hasSubcategory('subcategory: cherry', 'category: tomatoes');
+        await garden.hasPlant('plant: sungold', 'subcategory: cherry');
+        await garden.hasPlantingYear('year: last');
+        await garden.hasPlot('plot: bed');
+        await garden.hasPlanting('planting: early', 'plant: sungold', 'year: last', 'status: planted', 'plot: bed');
+        await browserClock.setToNoonIn('year: last', 'on: 04-10');
+        await plantingYearsPage.open();
+        await plantingYearsPage.checkIsShown();
+        await plantingYearsPage.addYear();
+        await addPlantingYearPage.checkIsShown();
+        await addPlantingYearPage.addYear('year: next', 'after: last', 'frost: 15', 'target: 20');
+        await plantingYearsPage.checkIsShown();
+        await dashboardPage.open();
+        await dashboardPage.checkIsShown();
+        await dashboardPage.chooseYear('year: next');
+        await dashboardPage.checkYearIsChosen('year: next');
+        await gardenPage.open();
+        await gardenPage.checkIsShown();
+
+        await gardenPage.enterHarvest('planting: early', 'quantity: 3');
+        await gardenPage.confirmHarvests();
+
+        // the card's total is the chosen year's harvests
+        await gardenPage.checkShowsPlanting('planting: early');
+    });
+
     test('add a year only once both its dates are picked', async ({
         garden, browserClock, plantingYearsPage, addPlantingYearPage,
     }) => {
