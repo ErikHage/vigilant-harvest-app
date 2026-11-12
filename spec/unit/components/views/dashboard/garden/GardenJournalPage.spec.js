@@ -5,6 +5,7 @@ import AddJournalEntryDialog from '@/components/views/dashboard/garden/AddJourna
 import { useJournalStore } from '@/store';
 import { mountWithPlugins } from '../../../../../helpers/mount';
 import { buttonLabelled } from '../../../../../helpers/fields';
+import { httpError } from '../../../../../helpers/http-errors';
 
 // An entry as the service sends it. entryDate is the user's wall-clock time,
 // with no timezone; the audit fields are UTC instants
@@ -84,15 +85,23 @@ describe('GardenJournalPage', () => {
         expect(shownEntries(wrapper)).toEqual(['Thinned the carrots.']);
     });
 
-    // The service sends them in no set order, and the page doesn't sort them,
-    // so the evening's entry comes before the morning's
-    it("shows a day's entries in the order they came", async () => {
-        const { wrapper } = await mountPage();
+    // The service sends them in no set order, and the page showed them so:
+    // here the evening's before the morning's (backlog B28)
+    it("shows a day's entries by their time", async () => {
+        const { wrapper, store } = await mountPage();
 
         await clickDay(wrapper, '2026-06-01');
 
         expect(selected(wrapper)).toBe('2026-06-01');
-        expect(shownEntries(wrapper)).toEqual(['Late watering.', 'Planted the beans.']);
+        expect(shownEntries(wrapper)).toEqual(['Planted the beans.', 'Late watering.']);
+        expect(store.journalEntries).toEqual(entries);
+    });
+
+    it('shows entries made at the same minute in the order they were recorded', async () => {
+        const later = { ...anEntry('e-5', '2026-06-01T10:00:00', 'Then mulched.'), dateCreated: '2026-06-10T17:00:00Z' };
+        const { wrapper } = await mountPage({ journalEntries: [later, morning] });
+
+        expect(shownEntries(wrapper)).toEqual(['Planted the beans.', 'Then mulched.']);
     });
 
     it('does nothing on a click on a gap', async () => {
@@ -103,19 +112,19 @@ describe('GardenJournalPage', () => {
         expect(selected(wrapper)).toBe('2026-06-10');
     });
 
-    // Previous and Next follow the timeline, newest first: Previous goes to
-    // the later day, and Next to the earlier one
-    it('moves between days with Previous and Next', async () => {
+    // They were Previous and Next, following the timeline, newest first, so
+    // Previous went to the later day (backlog B28)
+    it('moves between days with Older and Newer', async () => {
         const { wrapper } = await mountPage();
-        expect(buttonLabelled(wrapper, 'Previous').attributes('disabled')).toBeDefined();
+        expect(buttonLabelled(wrapper, 'Newer').attributes('disabled')).toBeDefined();
 
-        await press(wrapper, 'Next');
+        await press(wrapper, 'Older');
         expect(heading(wrapper)).toBe('2026-06-02');
-        await press(wrapper, 'Next');
+        await press(wrapper, 'Older');
         expect(heading(wrapper)).toBe('2026-06-01');
-        expect(buttonLabelled(wrapper, 'Next').attributes('disabled')).toBeDefined();
+        expect(buttonLabelled(wrapper, 'Older').attributes('disabled')).toBeDefined();
 
-        await press(wrapper, 'Previous');
+        await press(wrapper, 'Newer');
         expect(heading(wrapper)).toBe('2026-06-02');
     });
 
@@ -142,18 +151,19 @@ describe('GardenJournalPage', () => {
         expect(shownEntries(wrapper)).toEqual(['Evening frost.']);
     });
 
-    // DocumentsCurrentBehavior: upsertJournalEntry swallows a failed save,
-    // so the page reloads and goes to the new entry's day anyway, which has
-    // nothing in it, with no message (backlog A6, and A10 for the alert).
-    // Should stay on the day it was on, and show why
-    it("goes to the entry's day even when the save failed", async () => {
-        const { wrapper } = await mountPage();
+    // upsertJournalEntry rejects, so the dialog, which waits for it, stays
+    // open and says why
+    it("rejects, staying on its day without reloading, when the save fails", async () => {
+        const { wrapper, store } = await mountPage();
+        const err = httpError(500);
+        store.upsertJournalEntry.mockRejectedValue(err);
 
-        await wrapper.findComponent(AddJournalEntryDialog).props('onSubmit')({ entryDate: '2026-06-05T08:00:00', entry: 'Lost.' });
+        await expect(wrapper.findComponent(AddJournalEntryDialog).props('onSubmit')({ entryDate: '2026-06-05T08:00:00', entry: 'Lost.' }))
+            .rejects.toBe(err);
         await flushPromises();
 
-        expect(wrapper.find('.timeline-entry.selected').exists()).toBe(false);
-        expect(wrapper.text()).toContain('No entry selected.');
+        expect(store.fetchJournalEntriesByYear).toHaveBeenCalledTimes(1);
+        expect(selected(wrapper)).toBe('2026-06-10');
     });
 
     it("does nothing on the dialog's Cancel", async () => {
@@ -168,14 +178,11 @@ describe('GardenJournalPage', () => {
         expect(timeline(wrapper)).toEqual(before);
     });
 
-    // DocumentsCurrentBehavior: nothing binds the journal store's alert, so
-    // a failed load or save shows nothing (backlog A10). Should show it
-    it("doesn't show the journal store's alert", async () => {
+    it("shows the journal store's alert", async () => {
         const { wrapper } = await mountPage({
             state: { alertVisible: true, alertType: 'error', alertMessage: 'error upserting journal entry' },
         });
 
-        expect(wrapper.find('.v-alert').exists()).toBe(false);
-        expect(wrapper.text()).not.toContain('error upserting journal entry');
+        expect(wrapper.find('.v-alert').text()).toBe('error upserting journal entry');
     });
 });

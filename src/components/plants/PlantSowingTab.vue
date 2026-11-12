@@ -3,11 +3,11 @@
     <tbody>
     <tr>
       <th class="details-header shrink-column">Indoors</th>
-      <td>{{ plant.sowing.indoor }}</td>
+      <td>{{ yesOrNo(plant.sowing.indoor) }}</td>
     </tr>
     <tr>
       <th class="details-header shrink-column">Direct</th>
-      <td>{{ plant.sowing.direct}}</td>
+      <td>{{ yesOrNo(plant.sowing.direct) }}</td>
     </tr>
     <tr>
       <th class="details-header shrink-column">Germination Time</th>
@@ -26,11 +26,17 @@
 </template>
 
 <script>
+import { yesOrNo } from '@/utils/display';
+
 export default {
   name: "PlantSowingTab",
 
   props: {
     plant: Object,
+  },
+
+  methods: {
+    yesOrNo,
   },
 }
 </script>

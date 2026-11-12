@@ -7,6 +7,7 @@ import EditScheduleItemDialog from '@/components/admin/schedules/EditScheduleIte
 import DeleteScheduleItemDialog from '@/components/admin/schedules/DeleteScheduleItemDialog.vue';
 import { useActivitySchedulesStore } from '@/store';
 import { mountWithPlugins } from '../../../../../helpers/mount';
+import { apiError, serviceErrorBody } from '../../../../../helpers/http-errors';
 import { activityTypes, aSchedule, aScheduleItem } from '../../../../../helpers/schedules';
 
 const items = [
@@ -90,27 +91,22 @@ describe('ActivityScheduleDetailsPage', () => {
         expect(wrapper.find('.v-alert').text()).toBe('error updating activity schedule');
     });
 
-    // DocumentsCurrentBehavior: the alert sits inside the page's
-    // v-if="activitySchedule", so when the first schedule viewed fails to
-    // load, the page is blank and says nothing (backlog A10). Should show the
-    // alert without a schedule
-    it("shows nothing, not even the alert, when the schedule didn't load", async () => {
+    it("shows only the alert when the schedule didn't load", async () => {
         const { wrapper } = await mountPage({
             schedule: null,
             state: { alertVisible: true, alertType: 'error', alertMessage: 'error fetching activity schedule by id: schedule-1' },
         });
 
-        expect(wrapper.text()).toBe('');
+        expect(wrapper.text()).toBe('error fetching activity schedule by id: schedule-1');
     });
 
-    // DocumentsCurrentBehavior: it renders whatever schedule the store holds,
-    // so until the fetch returns, and for good if it fails, another
-    // schedule's page shows the last one viewed (backlog A15). Should render
-    // only the route's schedule
-    it('shows the last schedule viewed while another loads', async () => {
+    // The store still holds the last schedule viewed until the fetch returns,
+    // and for good if it fails (backlog A15)
+    it('shows no other schedule while the one in its address loads', async () => {
         const { wrapper } = await mountPage({ routeId: 'schedule-2' });
 
-        expect(wrapper.find('.page-title').text()).toBe('Tomatoes');
+        expect(wrapper.find('.page-title').exists()).toBe(false);
+        expect(wrapper.text()).not.toContain('Tomatoes');
     });
 
     describe('saving', () => {
@@ -146,43 +142,42 @@ describe('ActivityScheduleDetailsPage', () => {
             expect(store.getScheduleById).toHaveBeenCalledTimes(2);
         });
 
-        // DocumentsCurrentBehavior: the edit dialog submits the item without
-        // its schedule's id, and the page passes it on as it is, so the API
-        // patches /activity-schedules/undefined/schedule-items/item-1. It works
-        // only because the service ignores the schedule in that path (backlog
-        // A30). Should send the route's schedule id
-        it('updates an item without its schedule id, then reloads', async () => {
+        // The edit dialog submits the item without its schedule's id, so the
+        // page adds the route's; it once patched
+        // /activity-schedules/undefined/schedule-items/item-1 (backlog A30)
+        it("updates an item with its schedule's id, then reloads", async () => {
             const { wrapper, store } = await mountPage();
             const submitted = { entryId: 'item-1', activityType: 'Fertilize', subType: 'Bone Meal', notes: 'Side-dress' };
 
             await wrapper.findAllComponents(EditScheduleItemDialog)[0].props('onSubmit')(submitted);
             await flushPromises();
 
-            expect(store.updateScheduleItem).toHaveBeenCalledWith(submitted);
-            expect(store.updateScheduleItem.mock.calls[0][0].activityScheduleId).toBeUndefined();
+            expect(store.updateScheduleItem).toHaveBeenCalledWith({ ...submitted, activityScheduleId: 'schedule-1' });
             expect(store.getScheduleById).toHaveBeenCalledTimes(2);
         });
 
-        // DocumentsCurrentBehavior: the store's actions catch a failed save,
-        // alert and resolve, so each handler resolves, and its dialog, which
-        // waits for it, closes as if it had saved (backlog A6). Should
-        // rethrow, so the dialog stays open
+        // The store's actions alert, and reject, so each handler rejects,
+        // without reloading, and its dialog, which waits for it, stays open
         it.each([
             ['the schedule', 'updateSchedule', w => w.findComponent(EditScheduleDialog)],
             ['a new item', 'addScheduleItem', w => w.findComponent(AddScheduleItemDialog)],
             ['an item', 'updateScheduleItem', w => w.findAllComponents(EditScheduleItemDialog)[0]],
             ['a deletion', 'deleteScheduleItem', w => w.findAllComponents(DeleteScheduleItemDialog)[0]],
-        ])('resolves when saving %s fails, so its dialog closes', async (_, action, dialog) => {
+        ])('rejects when saving %s fails, so its dialog stays open', async (_, action, dialog) => {
             const { wrapper, store } = await mountPage();
+            const err = apiError(400, serviceErrorBody(400, `refused ${action}`));
             store[action].mockImplementation(async () => {
                 store.alertVisible = true;
-                store.alertMessage = `error in ${action}`;
+                store.alertMessage = `refused ${action}`;
+                throw err;
             });
+            const reloads = store.getScheduleById.mock.calls.length;
 
-            await expect(dialog(wrapper).props('onSubmit')({ entryId: 'item-1' })).resolves.toBeUndefined();
+            await expect(dialog(wrapper).props('onSubmit')({ entryId: 'item-1' })).rejects.toBe(err);
             await flushPromises();
 
-            expect(wrapper.find('.v-alert').text()).toBe(`error in ${action}`);
+            expect(wrapper.find('.v-alert').text()).toBe(`refused ${action}`);
+            expect(store.getScheduleById).toHaveBeenCalledTimes(reloads);
         });
     });
 });

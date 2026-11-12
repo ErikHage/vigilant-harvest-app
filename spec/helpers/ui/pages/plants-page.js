@@ -1,6 +1,6 @@
 import { parseDslArgs } from '@feral-auth/ts-simple-dsl';
 
-import { by, plant, subcategory } from '../params';
+import { by, message, plant, subcategory } from '../params';
 import { dashboardComponents, routedPageSteps } from './routed-page';
 
 // What `by: name | category | subcategory` searches for
@@ -36,14 +36,27 @@ export function createPlantsPage(world, driver) {
         async checkCreateNeedsTheRequiredFields(...args) {
             parseDslArgs(args, {});
 
-            await driver.offersCreateWithNothingEntered();
+            await driver.withholdsCreateWithNothingEntered();
         },
 
-        /** Clicks Create in the open Add dialog, which closes. No parameters. */
-        async create(...args) {
-            parseDslArgs(args, {});
+        /**
+         * Adds a plant through the dialog with the name of the `plant` the test
+         * already has, in its subcategory, and presses Create. The service
+         * refuses a name in use, so nothing is made to clean up.
+         */
+        async addPlantWithTheNameOf(...args) {
+            const params = parseDslArgs(args, { plant: plant() });
+            const { friendlyName, categoryName, subcategoryName } = world.plantNamed(params.plant);
 
-            await driver.create();
+            await driver.startAddingPlant({
+                friendlyName,
+                categoryName,
+                subcategoryName,
+                lifespanType: 'Annual',
+                harvesting: { defaultHarvestType: 'count' },
+                description: 'A second plant of the same name.',
+            });
+            await driver.pressCreate();
         },
 
         /**
@@ -73,13 +86,14 @@ export function createPlantsPage(world, driver) {
         },
 
         /**
-         * After the service refused a plant, the page's alert says why. Check
-         * it straight away: it fades after three seconds. No parameters.
+         * The service refused the save: the dialog stays open, saying why
+         * (`message`), as does the page's alert. Check it straight away: the
+         * alert fades after three seconds.
          */
-        async checkAlertSaysWhyItWasRefused(...args) {
-            parseDslArgs(args, {});
+        async checkCreateIsRejected(...args) {
+            const params = parseDslArgs(args, { message: message() });
 
-            await driver.alertSaysOnlyThatItFailed();
+            await driver.createIsRejectedSaying(params.message);
         },
     };
 }

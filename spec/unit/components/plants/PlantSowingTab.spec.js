@@ -4,14 +4,14 @@ import { aPlant } from '../../../helpers/plants';
 import PlantSowingTab from '@/components/plants/PlantSowingTab.vue';
 
 describe('PlantSowingTab', () => {
-    // The service stores a sowing boolean as "1" or "0" (its own pinned
-    // behaviour), and the tab shows the value as it comes
-    it("shows the plant's sowing details, with a yes or no as 1 or 0", () => {
+    // The service stores a sowing yes or no as "1" or "0" (its own pinned
+    // behaviour), which the tab showed as it came (backlog B22)
+    it("shows the plant's sowing details, with a yes or no in words", () => {
         const wrapper = mountWithPlugins(PlantSowingTab, { props: { plant: aPlant() } });
 
         expect(fieldRows(wrapper)).toEqual([
-            ['Indoors', '0'],
-            ['Direct', '1'],
+            ['Indoors', 'No'],
+            ['Direct', 'Yes'],
             ['Germination Time', '7-10'],
             ['Germination Temperature', '70-85F'],
             ['Notes', 'Sow after the last frost.'],

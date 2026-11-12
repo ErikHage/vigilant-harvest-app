@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { fromLocalDate, toLocalDate, toLocalDateTime } from '@/utils/dates';
+import { dayOfYearIn, daysFromToday, fromLocalDate, toLocalDate, toLocalDateTime } from '@/utils/dates';
 
 // The suite runs in America/New_York (vitest.config.js), where an evening is
 // already the next day in UTC: the case these helpers exist for.
@@ -63,5 +63,55 @@ describe('fromLocalDate', () => {
 
     it.each([null, undefined])('passes %s through', value => {
         expect(fromLocalDate(value)).toBe(value);
+    });
+});
+
+describe('dayOfYearIn', () => {
+    it.each([
+        [2026, 1, '2026-01-01'],
+        [2026, 60, '2026-03-01'],
+        [2028, 60, '2028-02-29'],
+        [2026, 365, '2026-12-31'],
+        [2026, -5, '2025-12-26'],
+        [8123, 121, '8123-05-01'],
+    ])('reads day %i of %i as %s', (year, number, day) => {
+        expect(toLocalDate(dayOfYearIn(year, number))).toBe(day);
+    });
+});
+
+describe('daysFromToday', () => {
+    afterEach(() => {
+        vi.useRealTimers();
+    });
+
+    const at = now => vi.useFakeTimers({ now: new Date(now), toFake: ['Date'] });
+
+    it.each([
+        ['2026-07-04', 0],
+        ['2026-07-05', 1],
+        ['2026-07-01', -3],
+        ['2027-07-04', 365],
+    ])('counts the days to %s as %i', (day, days) => {
+        at('2026-07-04T09:00:00');
+
+        expect(daysFromToday(day)).toBe(days);
+    });
+
+    it('counts whole days, late in the evening', () => {
+        at('2026-07-04T23:30:00');
+
+        expect(daysFromToday('2026-07-05')).toBe(1);
+    });
+
+    it('counts the day the clocks go forward as one', () => {
+        at('2026-03-07T12:00:00');
+
+        expect(daysFromToday('2026-03-09')).toBe(2);
+    });
+
+    it('takes a dayjs object', () => {
+        at('2026-07-04T09:00:00');
+
+        expect(daysFromToday(dayjs('2026-07-14'))).toBe(10);
     });
 });

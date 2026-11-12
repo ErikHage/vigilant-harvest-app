@@ -50,12 +50,13 @@ describe('AddPlantingDialog', () => {
     });
 
     // It sorts the plants it was given, in place: the plants store's list
-    it('sorts the array of plants it was given', async () => {
+    // It sorts a copy (backlog B21)
+    it('leaves the array of plants it was given as it was', async () => {
         const given = plants();
 
         await mountDialog({ plants: given });
 
-        expect(given.map(plant => plant.plantId)).toEqual(['plant-3', 'plant-2', 'plant-1']);
+        expect(given).toEqual(plants());
     });
 
     it('submits the planting, then empties the form', async () => {
@@ -88,22 +89,17 @@ describe('AddPlantingDialog', () => {
         expect(inputLabelled(dialog(), 'Name').element.value).toBe('');
     });
 
-    // DocumentsCurrentBehavior: Create is never disabled, so a planting with
-    // no name and no plant is sent. The service rejects it (name is
-    // required), and the page closes the dialog anyway (A6), losing the form
-    // (validation-fixes doc, fix 2). Should keep Create disabled until a name
-    // and a plant are chosen
-    it('submits a planting with no name and no plant', async () => {
+    // What the service requires: a name, of more than spaces, and a plant
+    // (backlog A16)
+    it('offers Create only once a name and a plant are given', async () => {
         const wrapper = await mountDialog();
+        expect(buttonLabelled(dialog(), 'Create').attributes('disabled')).toBeDefined();
 
-        await buttonLabelled(dialog(), 'Create').trigger('click');
+        await inputLabelled(dialog(), 'Name').setValue('   ');
+        await wrapper.findComponent(VAutocomplete).setValue('plant-1');
+        expect(buttonLabelled(dialog(), 'Create').attributes('disabled')).toBeDefined();
 
-        expect(wrapper.props('onSubmit')).toHaveBeenCalledWith({
-            name: '',
-            plantId: '',
-            leadTimeWeeks: null,
-            seedSource: null,
-            lotNumber: null,
-        });
+        await inputLabelled(dialog(), 'Name').setValue('Fall beans');
+        expect(buttonLabelled(dialog(), 'Create').attributes('disabled')).toBeUndefined();
     });
 });

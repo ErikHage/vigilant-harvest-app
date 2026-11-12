@@ -3,6 +3,7 @@ import { createTestingPinia } from '@pinia/testing';
 import ActivitySchedulesPage from '@/components/views/dashboard/admin/ActivitySchedulesPage.vue';
 import { useActivitySchedulesStore } from '@/store';
 import { mountWithPlugins } from '../../../../../helpers/mount';
+import { apiError, serviceErrorBody } from '../../../../../helpers/http-errors';
 import { inputLabelled } from '../../../../../helpers/fields';
 import { isOpen, openAction, press } from '../../../../../helpers/action-dialogs';
 import { aSchedule } from '../../../../../helpers/schedules';
@@ -65,14 +66,14 @@ describe('ActivitySchedulesPage', () => {
         expect(count(wrapper)).toBe('1 of 2 activity schedules');
     });
 
-    // The name and description are run together: "Tomatoes" and "Feed" make
-    // "oesfee"
-    it('matches across the name and the description', async () => {
+    // Each on its own: "Tomatoes" and "Feed" don't make "oesfee" (backlog
+    // B32)
+    it("doesn't match across the name and the description", async () => {
         const { wrapper } = await mountPage();
 
         await filterBy(wrapper, 'oesfee');
 
-        expect(rows(wrapper).map(([name]) => name)).toEqual(['Tomatoes']);
+        expect(rows(wrapper).map(([name]) => name)).not.toContain('Tomatoes');
     });
 
     it('says when nothing matches', async () => {
@@ -84,15 +85,16 @@ describe('ActivitySchedulesPage', () => {
         expect(wrapper.text()).toContain('No schedules found');
     });
 
-    // The service takes a schedule with no description, though the app always
-    // sends one; the filter reads it without a guard
-    it('throws on filtering a schedule with no description', async () => {
+    // A description is optional, to the service and, since F3, to the app
+    // (backlog B32)
+    it('filters a schedule with no description by its name', async () => {
         const errorHandler = vi.fn();
         const { wrapper } = await mountPage({ state: { schedules: [aSchedule({ description: null })] }, errorHandler });
 
         await filterBy(wrapper, 'tom');
 
-        expect(errorHandler.mock.calls[0][0]).toBeInstanceOf(TypeError);
+        expect(errorHandler).not.toHaveBeenCalled();
+        expect(wrapper.text()).toContain('1 of 1 activity schedules');
     });
 
     it("goes to a schedule's details from its name", async () => {
@@ -119,21 +121,22 @@ describe('ActivitySchedulesPage', () => {
         expect(isOpen()).toBe(false);
     });
 
-    // DocumentsCurrentBehavior: createSchedule catches a failed save, alerts
-    // and resolves, so the dialog, which waits for the page's handler, closes
-    // and empties as if it had saved (backlog A6). Should rethrow, so the
-    // dialog stays open
-    it('closes the dialog when the save fails', async () => {
+    // createSchedule alerts, and rejects, so the dialog, which waits for the
+    // page's handler, stays open and says why
+    it('keeps the dialog open, and says why, when the save fails', async () => {
         const { wrapper, store } = await mountPage();
         store.createSchedule.mockImplementation(async () => {
             store.alertVisible = true;
             store.alertType = 'error';
-            store.alertMessage = 'error adding activity schedule';
+            store.alertMessage = 'name is required';
+            throw apiError(400, serviceErrorBody(400, 'name is required'));
         });
 
         await createSchedule(wrapper);
 
-        expect(isOpen()).toBe(false);
-        expect(wrapper.find('.v-alert').text()).toBe('error adding activity schedule');
+        expect(isOpen()).toBe(true);
+        expect(document.querySelector('.v-overlay--active').textContent).toContain('name is required');
+        expect(wrapper.find('.v-alert').text()).toBe('name is required');
+        expect(store.fetchSchedules).toHaveBeenCalledTimes(1);
     });
 });

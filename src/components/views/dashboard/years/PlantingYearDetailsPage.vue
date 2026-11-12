@@ -1,5 +1,13 @@
 <template>
   <v-container>
+    <fade-out-alert
+        v-for="(alert, i) in alerts"
+        :key="'alert' + i"
+        :is-visible="alert.isVisible"
+        :alert-type="alert.type"
+        :message="alert.message"
+    />
+
     <v-row v-if="plantingYear">
       <v-col cols="12">
         <v-sheet class="pa-4">
@@ -69,19 +77,30 @@
 import {mapActions, mapState} from "pinia";
 import {usePlantingsStore, usePlantingYearsStore} from "@/store";
 import dayjs from "dayjs";
-
+import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
+import { alertOf } from "@/store/alerts";
 
 export default {
   name: "PlantingYearDetailsPage",
 
+  components: {
+    FadeOutAlert,
+  },
+
   computed: {
+    alerts() {
+      return [usePlantingYearsStore(), usePlantingsStore()].map(alertOf);
+    },
+
     ...mapState(usePlantingYearsStore, {
-      plantingYear: 'plantingYear',
+      storedPlantingYear: 'plantingYear',
     }),
 
-    ...mapState(usePlantingsStore, {
-      plantings: 'plantings',
-    }),
+    // the store holds the last year fetched, which is another until this
+    // page's fetch returns, and for good if it fails
+    plantingYear() {
+      return String(this.storedPlantingYear?.plantingYear) === this.year ? this.storedPlantingYear : null;
+    },
 
     year() {
       return this.$route.params.year;
@@ -126,7 +145,7 @@ export default {
     ]),
 
     ...mapActions(usePlantingsStore, [
-      'fetchPlantingsByYear',
+      'plantingsOfYear',
     ]),
 
     formatDateString(dateString) {
@@ -134,9 +153,17 @@ export default {
     },
   },
 
-  mounted() {
+  data() {
+    return {
+      // this year's, counted here: the plantings store's list is the chosen
+      // year's, which the other pages show (backlog B20)
+      plantings: [],
+    };
+  },
+
+  async mounted() {
     this.fetchPlantingYear(this.year);
-    this.fetchPlantingsByYear(this.year);
+    this.plantings = await this.plantingsOfYear(this.year);
   }
 }
 </script>

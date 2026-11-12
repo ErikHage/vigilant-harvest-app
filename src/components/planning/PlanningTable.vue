@@ -19,8 +19,8 @@
         {{ formatActionDate(item) }}
       </td>
       <td>
-        <span :class="daysUntilActionColor(item.daysUntilAction)">
-          {{ item.daysUntilAction ?? '—' }}
+        <span :class="daysUntilActionColor(daysUntilAction(item))">
+          {{ daysUntilAction(item) ?? '—' }}
         </span>
       </td>
       <td>
@@ -32,7 +32,7 @@
 </template>
 
 <script>
-import dayjs from 'dayjs';
+import { dayOfYearIn, daysFromToday } from '@/utils/dates';
 
 export default {
   props: {
@@ -41,7 +41,7 @@ export default {
       required: true
     },
     year: {
-      type: String,
+      type: Number,
       required: true,
     },
     actionDayTitle: {
@@ -53,9 +53,15 @@ export default {
     formatActionDate(item) {
       if (!item.plannedActionDay) return '—';
 
-      return dayjs(`${this.year}-01-01`)
-          .add(item.plannedActionDay - 1, 'day')
-          .format('MMM D');
+      return dayOfYearIn(this.year, item.plannedActionDay).format('MMM D');
+    },
+
+    // From the user's today. The service's daysUntilAction counts from
+    // today's number in its own year, so it's wrong when that isn't this one
+    daysUntilAction(item) {
+      if (!item.plannedActionDay) return null;
+
+      return daysFromToday(dayOfYearIn(this.year, item.plannedActionDay));
     },
 
     daysUntilActionColor(days) {

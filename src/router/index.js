@@ -13,8 +13,7 @@ import PlotsPage from "@/components/views/dashboard/plots/PlotsPage.vue";
 import PlantingsPage from "@/components/views/dashboard/plantings/PlantingsPage.vue";
 import GardenPage from "@/components/views/dashboard/garden/GardenPage.vue";
 import HarvestsPage from "@/components/views/dashboard/harvests/HarvestsPage.vue";
-import PlantingStatsPage from "@/components/views/dashboard/stats/PlantingStatsPage.vue";
-import PlantStatsPage from "@/components/views/dashboard/stats/PlantStatsPage.vue";
+import HarvestStatsPage from "@/components/views/dashboard/stats/HarvestStatsPage.vue";
 import PlantDetailsPage from "@/components/views/dashboard/plants/PlantDetailsPage.vue";
 import PlantingDetailsPage from "@/components/views/dashboard/plantings/PlantingDetailsPage.vue";
 import PlanningPage from "@/components/views/dashboard/planning/PlanningPage.vue";
@@ -26,6 +25,8 @@ import AddPlantingYearPage from "@/components/views/dashboard/years/AddPlantingY
 import PlantCategoriesPage from "@/components/views/dashboard/admin/PlantCategoriesPage.vue";
 import ActivitySchedulesPage from "@/components/views/dashboard/admin/ActivitySchedulesPage.vue";
 import ActivityScheduleDetailsPage from "@/components/views/dashboard/admin/ActivityScheduleDetailsPage.vue";
+import NotFoundPage from "@/components/views/NotFoundPage.vue";
+import { rememberDestination } from "@/utils/sign-on-destination";
 
 const routes = [
     {
@@ -199,7 +200,8 @@ const routes = [
             {
                 path: views.dashboard.children.stats.planting.path,
                 name: views.dashboard.children.stats.planting.name,
-                component: PlantingStatsPage,
+                component: HarvestStatsPage,
+                props: { statsType: 'Planting' },
                 meta: {
                     requiresAuthenticated: true,
                 },
@@ -207,12 +209,29 @@ const routes = [
             {
                 path: views.dashboard.children.stats.plant.path,
                 name: views.dashboard.children.stats.plant.name,
-                component: PlantStatsPage,
+                component: HarvestStatsPage,
+                props: { statsType: 'Plant' },
+                meta: {
+                    requiresAuthenticated: true,
+                },
+            },
+            {
+                path: views.dashboard.children.notFound.path,
+                name: views.dashboard.children.notFound.name,
+                component: NotFoundPage,
                 meta: {
                     requiresAuthenticated: true,
                 },
             },
         ],
+    },
+    {
+        path: views.notFound.path,
+        name: views.notFound.name,
+        component: NotFoundPage,
+        meta: {
+            requiresAuthenticated: false,
+        },
     },
 ];
 
@@ -238,6 +257,8 @@ router.beforeEach(async (to /*, from */) => {
         }
 
         console.log('sending you back to Landing');
+        // to return to once signed on
+        rememberDestination(to.fullPath);
         return {name: 'LandingPage'};
     }
 });

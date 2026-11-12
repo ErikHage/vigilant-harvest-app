@@ -20,7 +20,7 @@
         <v-spacer></v-spacer>
         <v-btn color="error" @click="onCancel">Cancel</v-btn>
         <v-btn color="warning" @click="onBack">Back</v-btn>
-        <v-btn color="primary" @click="onConfirm">Confirm</v-btn>
+        <v-btn color="primary" :disabled="saving" :loading="saving" @click="onConfirm">Confirm</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -60,6 +60,11 @@ export default {
     onCancel: {
       type: Function,
       required: true,
+    },
+    // the harvests are saving: Confirm waits
+    saving: {
+      type: Boolean,
+      default: false,
     },
   },
 

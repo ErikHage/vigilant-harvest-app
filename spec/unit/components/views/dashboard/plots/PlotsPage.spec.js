@@ -7,6 +7,7 @@ import { usePlotsStore } from '@/store';
 import { mountWithPlugins } from '../../../../../helpers/mount';
 import { buttonLabelled, inputLabelled } from '../../../../../helpers/fields';
 import { dialogTitled, findDialog } from '../../../../../helpers/dialogs';
+import { apiError, serviceErrorBody } from '../../../../../helpers/http-errors';
 
 const plots = [
     { plotId: 'plot-1', friendlyName: 'North bed', lengthInInches: 120, widthInInches: 36, plotType: 'Bed', isActive: true },
@@ -78,6 +79,21 @@ describe('PlotsPage', () => {
         expect(document.querySelector('.v-overlay--active')).toBeNull();
         expect(wrapper.findComponent(UpsertPlotDialog).props('plot')).toBeNull();
         expect(store.fetchPlots).toHaveBeenCalledTimes(2);
+    });
+
+    it('keeps the dialog open, with the edit, and says why, when the save fails', async () => {
+        const { wrapper, store } = await mountPage();
+        store.upsertPlot.mockRejectedValue(apiError(400, serviceErrorBody(400, 'friendlyName must be at most 255 characters')));
+        await wrapper.findAll('tbody tr')[0].find('.mdi-pencil').trigger('click');
+        await flushPromises();
+        await inputLabelled(dialogTitled('Edit Plot'), 'Name').setValue('North bed, by the fence');
+
+        await buttonLabelled(dialogTitled('Edit Plot'), 'Update').trigger('click');
+        await flushPromises();
+
+        expect(findDialog('Edit Plot').text()).toContain('friendlyName must be at most 255 characters');
+        expect(inputLabelled(dialogTitled('Edit Plot'), 'Name').element.value).toBe('North bed, by the fence');
+        expect(store.fetchPlots).toHaveBeenCalledTimes(1);
     });
 
     it('closes the dialog, and forgets the plot, on Cancel', async () => {

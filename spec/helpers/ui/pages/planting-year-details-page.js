@@ -40,7 +40,7 @@ export function createPlantingYearDetailsPage(world, driver) {
         async checkShowsOnlyItsOwnYear(...args) {
             const params = parseDslArgs(args, { year: year(), previous: year() });
 
-            await driver.showsTheLastYearViewedWhileLoading(world.plantingYearNamed(params.year),
+            await driver.showsNoYearWhileLoading(world.plantingYearNamed(params.year),
                 world.plantingYearNamed(params.previous));
         },
     };

@@ -14,7 +14,7 @@
           {{ historyItem.plantingStatus }}
         </v-chip>
         <p v-if="historyItem.comment" class="multiline">
-          {{ historyItem.comment }}
+          {{ describeComment(historyItem.comment) }}
         </p>
       </div>
     </v-card-text>
@@ -34,25 +34,17 @@ export default {
   },
 
   methods: {
-    navigateToPlotDetails() {
-      console.log('plot clicked, do something in the future');
-    },
-
-    navigateToPlantDetails(plantId) {
-      this.$router.push({
-        name: 'PlantDetailsPage',
-        params: {
-          plantId,
-        },
-      });
-    },
-
     getColorForStatus(status) {
       return plantingUtils.mapPlantingStatusToColor(status);
     },
 
     showStatusChip(historyItem) {
       return historyItem.plantingStatus !== plantingActions.comment;
+    },
+
+    // the service files a creation and an update as JSON
+    describeComment(comment) {
+      return plantingUtils.describeHistoryComment(comment);
     },
   },
 }

@@ -1,6 +1,4 @@
-import {
-    expectDisabled, expectEnabled, expectEventually, expectHidden, expectText, expectUrl, expectValue, expectVisible,
-} from './assertions';
+import { expectDisabled, expectHidden, expectText, expectThat, expectUrl, expectValue, expectVisible } from './assertions';
 import { pageAlertSays } from './page-alert';
 import { chooseOption } from './select';
 import { escaped, openPath, urlOf } from './urls';
@@ -109,9 +107,9 @@ export function createPlantingDetailsPageDriver(page, pageErrors) {
             return asDay(await dialog.locator('h3').textContent());
         },
 
-        /** Pinned (A23): with no plot chosen, the Plant dialog offers Confirm. */
-        async offersConfirmWithNoPlot() {
-            await expectEnabled(confirm, 'the Plant dialog, with no plot chosen');
+        /** With no plot chosen, the Plant dialog withholds Confirm. */
+        async withholdsConfirmWithNoPlot() {
+            await expectDisabled(confirm, 'the Plant dialog, with no plot chosen');
         },
 
         /**
@@ -127,9 +125,9 @@ export function createPlantingDetailsPageDriver(page, pageErrors) {
             }
         },
 
-        /** Pinned (A24): with no splits added, the Split dialog offers Confirm. */
-        async offersConfirmWithNoSplits() {
-            await expectEnabled(confirm, 'the Split dialog, with no splits');
+        /** With no splits added, the Split dialog withholds Confirm. */
+        async withholdsConfirmWithNoSplits() {
+            await expectDisabled(confirm, 'the Split dialog, with no splits');
         },
 
         /** Clicks Confirm in the open dialog, and waits for it to close. */
@@ -163,17 +161,32 @@ export function createPlantingDetailsPageDriver(page, pageErrors) {
         },
 
         /**
-         * The History tab shows an entry with the planting's status, and each of
-         * `comments`. The first entry, its creation, shows as its comment the
-         * planting's fields as JSON, as the service files them (B34).
+         * The History tab has an update that sent the planting's `name`, first
+         * of the fields sent. It showed `Updated: ` and them in JSON (B34).
          */
-        async historyShows({ status }, comments) {
+        async historyShowsRename({ name }) {
+            const what = "the planting's History tab, after a rename";
+            const entries = main.locator('.v-window-item--active .v-card');
+
+            await main.getByRole('tab', { name: 'History', exact: true }).click();
+            await expectVisible(entries.locator('p.multiline', {
+                hasText: new RegExp(`^\\s*Updated: name "${escaped(name)}"`),
+            }), what);
+        },
+
+        /**
+         * The History tab shows an entry with the planting's status, and each of
+         * `comments`. The first entry, its creation, says so with the name it
+         * was created with. It showed the planting's fields as JSON, as the
+         * service files them (B34).
+         */
+        async historyShows({ name, status }, comments) {
             const what = 'the planting\'s History tab';
             const entries = main.locator('.v-window-item--active .v-card');
 
             await main.getByRole('tab', { name: 'History', exact: true }).click();
             await expectText(entries.filter({ hasText: 'CREATED' }).first().locator('p.multiline'),
-                /^\s*\{"plantingId":.*\}\s*$/, what);
+                `Created as "${name}"`, what);
             await expectVisible(entries.locator('.v-chip', { hasText: new RegExp(`^\\s*${status}\\s*$`) }).first(), what);
             for (const comment of comments) {
                 await expectVisible(entries.locator('p.multiline', { hasText: comment }), what);
@@ -181,30 +194,30 @@ export function createPlantingDetailsPageDriver(page, pageErrors) {
         },
 
         /**
-         * Pinned (A21): with the form unlocked, the target date's picker opens
-         * with no date chosen, so confirming it without picking clears the date
-         * on screen.
+         * With the form unlocked, the target date's picker opens on the
+         * planting's date, so confirming it without picking keeps it.
          */
-        async targetDatePickerForgetsTheDate() {
-            const what = 'confirming the target date\'s picker without picking';
+        async targetDatePickerKeepsTheDate({ name, targetPlantingDate }) {
+            const what = `confirming ${name}'s target date picker without picking`;
 
             await actionsCard.getByRole('checkbox').click();
             await calendarAfter('Target Planting Date').click();
             await expectVisible(dialog.getByText('Set Target Planting Date', { exact: true }), what);
             await confirmAndClose(what);
-            await expectText(dateAfter('Target Planting Date'), '--', what);
+            await expectText(dateAfter('Target Planting Date'), targetPlantingDate, what);
         },
 
         /**
-         * Pinned (A25): for a planting the service doesn't have, the page says
-         * so, and throws, since it copies the planting it didn't get.
+         * For a planting the service doesn't have, the page says so, and
+         * throws nothing. A throw would come as the alert is set, before it
+         * renders, so the errors are read once the alert shows.
          */
-        async throwsForAMissingPlanting(plantingId) {
+        async saysAPlantingIsMissing(plantingId) {
             const what = `opening the unknown planting ${plantingId}`;
 
             await pageAlertSays(page, `error fetching planting by id: ${plantingId}`, what);
-            await expectEventually(() => pageErrors.messages().some(message => /plantingId/.test(message)),
-                'the page to throw reading the missing planting\'s plantingId', what);
+            const thrown = pageErrors.messages();
+            expectThat(thrown.length === 0, 'no error thrown in the page', JSON.stringify(thrown), what);
         },
     };
 }

@@ -30,7 +30,7 @@ import dayjs from "dayjs";
 
 
 export default {
-  name: 'PlantingsYearsTable',
+  name: 'PlantingYearsTable',
 
   props: {
     plantingYears: {

@@ -5,6 +5,7 @@
         <span class="headline">Add Plant</span>
       </v-card-title>
       <v-card-text>
+        <v-alert v-if="saveError" type="error" density="compact" class="mb-4">{{ saveError }}</v-alert>
         <v-form ref="applicationForm">
           <v-text-field v-model="form.friendlyName" label="Name" density="compact" required></v-text-field>
           <v-select
@@ -52,14 +53,16 @@
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn color="error" text @click="handleOnCancel">Cancel</v-btn>
-        <v-btn color="primary" text @click="handleSavePlant">Create</v-btn>
+        <v-btn color="primary" text :disabled="!canCreate" @click="handleSavePlant">Create</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
 <script>
+import { saveFailureMessage } from '@/utils/save-failures';
 import harvestUtils from "@/utils/harvest-utils";
+import { hasText, isChosen } from '@/utils/form-rules';
 
 export default {
   name: 'AddPlantDialog',
@@ -87,6 +90,7 @@ export default {
 
   data() {
     return {
+      saveError: '',
       form: {
         category: null,
         subcategoryId: null,
@@ -105,6 +109,11 @@ export default {
   },
 
   computed: {
+    // what the service requires: a name and a subcategory
+    canCreate() {
+      return hasText(this.form.friendlyName) && isChosen(this.form.subcategoryId);
+    },
+
     showDialog() {
       return this.show;
     },
@@ -134,19 +143,26 @@ export default {
     },
 
     async handleSavePlant() {
-      await this.onSubmit({
-        subcategoryId: this.form.subcategoryId,
-        friendlyName: this.form.friendlyName,
-        lifespanType: this.form.lifespanType,
-        description: this.form.description,
-        harvesting: {
-          defaultHarvestTypeId: this.form.defaultHarvestTypeId ?? harvestUtils.unspecifiedHarvestTypeId,
-        },
-      });
+      this.saveError = '';
+      try {
+        await this.onSubmit({
+          subcategoryId: this.form.subcategoryId,
+          friendlyName: this.form.friendlyName,
+          lifespanType: this.form.lifespanType,
+          description: this.form.description,
+          harvesting: {
+            defaultHarvestTypeId: this.form.defaultHarvestTypeId ?? harvestUtils.unspecifiedHarvestTypeId,
+          },
+        });
+      } catch (err) {
+        this.saveError = saveFailureMessage(err);
+        return;
+      }
       this.resetForm();
     },
 
     handleOnCancel() {
+      this.saveError = '';
       this.resetForm();
       this.onCancel();
     },

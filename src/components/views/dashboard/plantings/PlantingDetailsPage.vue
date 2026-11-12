@@ -28,6 +28,7 @@
               <v-card-text class="d-flex justify-space-between pa-2">
                 <div class="d-flex align-center">
                   <comment-planting-action-dialog
+                      v-if="planting"
                       :planting="planting"
                       :on-submit="performAction"/>
 
@@ -74,7 +75,7 @@
                       class="mx-1"
                       text="Update"
                       color="warning"
-                      :disabled="!enableEdit"
+                      :disabled="!enableEdit || !isEdited"
                       @click="handleUpdatePlanting"
                   ></v-btn>
                 </div>
@@ -136,6 +137,16 @@ import PlantingDetailsTab from "@/components/plantings/PlantingDetailsTab.vue";
 import PlantingHistoryTab from "@/components/plantings/PlantingHistoryTab.vue";
 
 const { plantingActions, plantingStatuses } = plantingUtils;
+
+// The fields Update can send, as the service stores them, so a field put back
+// as it was is no edit: a picked date is a Date, the service's a string
+const EDITABLE_FIELDS = ['name', 'seedSource', 'lotNumber', 'plantId', 'plotId', 'leadTimeWeeks', 'numberSown',
+  'numberTransplanted'];
+const EDITABLE_DATES = ['targetPlantingDate', 'sowDate', 'transplantDate'];
+const editableValues = planting => JSON.stringify([
+  ...EDITABLE_FIELDS.map(field => planting[field] ?? null),
+  ...EDITABLE_DATES.map(field => toLocalDate(planting[field]) ?? null),
+]);
 
 export default {
   name: "PlantingDetailsPage",
@@ -219,20 +230,19 @@ export default {
       return this.plantingCopy?.name ?? 'Planting Details';
     },
 
-    plot() {
-      return this.plotsById[this.plantingCopy?.plotId];
+    // Update is offered only for an edit
+    isEdited() {
+      return this.planting != null && editableValues(this.plantingCopy) !== editableValues(this.planting);
     },
 
-    plant() {
-      return this.plantsById[this.plantingCopy?.plantId];
-    },
 
     statusColor() {
       return plantingUtils.mapPlantingStatusToColor(this.plantingCopy?.currentStatus);
     },
 
     sortedHistory() {
-      return this.plantingCopy?.statusHistory.sort(sorting.sortPlantingHistoryByDateCreated);
+      // a copy: the history is the store's own array
+      return [...(this.plantingCopy?.statusHistory ?? [])].sort(sorting.sortPlantingHistoryByDateCreated);
     },
 
     alerts() {
@@ -276,6 +286,10 @@ export default {
       await this.fetchPlantingById(this.plantingId);
 
       const planting = this.plantingsById[this.plantingId];
+      if (!planting) {
+        // not found, or not loaded: the plantings store's alert says which
+        return;
+      }
       this.plantingCopy = {
         plantingId: planting.plantingId ?? undefined,
         plotId: planting.plotId ?? undefined,
@@ -358,7 +372,12 @@ export default {
           break;
       }
 
-      await this.updatePlanting(this.plantingId, requestBody);
+      try {
+        await this.updatePlanting(this.plantingId, requestBody);
+      } catch {
+        // still unlocked, with the edits, to fix and save again; the store's alert says why
+        return;
+      }
 
       this.toggleEditMode(false);
       await this.refreshData();

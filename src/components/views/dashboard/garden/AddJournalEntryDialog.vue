@@ -16,6 +16,7 @@
         <span class="headline">Record Journal Entry</span>
       </v-card-title>
       <v-card-text>
+        <v-alert v-if="saveError" type="error" density="compact" class="mb-4">{{ saveError }}</v-alert>
         <p>Entry Date</p>
         <div class="d-flex align-center">
           <date-picker-dialog-activator
@@ -34,17 +35,19 @@
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn color="error" @click="handleCancel">Cancel</v-btn>
-        <v-btn color="primary" @click="handleSubmit">Confirm</v-btn>
+        <v-btn color="primary" :disabled="!canConfirm" @click="handleSubmit">Confirm</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
 <script>
+import { saveFailureMessage } from '@/utils/save-failures';
 import dayjs from 'dayjs';
 
 import DatePickerDialogActivator from "@/components/utils/DatePickerDialogActivator.vue";
 import { toLocalDateTime } from '@/utils/dates';
+import { hasText } from '@/utils/form-rules';
 
 export default {
   name: "AddJournalEntryDialog",
@@ -66,10 +69,18 @@ export default {
 
   data() {
     return {
+      saveError: '',
       show: false,
       entryDate: dayjs(),
       entryText: '',
     };
+  },
+
+  computed: {
+    // the service takes an empty entry, which shows as a blank one
+    canConfirm() {
+      return hasText(this.entryText);
+    },
   },
 
   methods: {
@@ -83,19 +94,35 @@ export default {
     },
 
     handleCancel() {
+      this.saveError = '';
       this.show = false;
       this.resetData();
       this.onCancel();
     },
 
     async handleSubmit() {
-      this.onSubmit({
-        entryDate: toLocalDateTime(this.entryDate),
-        entry: this.entryText,
-      });
-      // TODO don't close until submitted successfully
+      this.saveError = '';
+      try {
+        await this.onSubmit({
+          entryDate: toLocalDateTime(this.entryDate),
+          entry: this.entryText,
+        });
+      } catch (err) {
+        this.saveError = saveFailureMessage(err);
+        return;
+      }
       this.show = false;
       this.resetData();
+    },
+  },
+
+  watch: {
+    // written now: the time it's opened, not when the page was, or when the
+    // dialog last closed
+    show(open) {
+      if (open) {
+        this.entryDate = dayjs();
+      }
     },
   },
 }

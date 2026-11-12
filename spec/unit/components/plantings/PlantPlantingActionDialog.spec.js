@@ -1,7 +1,8 @@
 import { flushPromises } from '@vue/test-utils';
+import { httpError } from '../../../helpers/http-errors';
 import { VSelect } from 'vuetify/components';
 import { mountWithPlugins } from '../../../helpers/mount';
-import { inputLabelled } from '../../../helpers/fields';
+import { buttonLabelled, inputLabelled } from '../../../helpers/fields';
 import { aSaveInFlight, isOpen, openAction, press } from '../../../helpers/action-dialogs';
 import DatePickerDialogActivator from '@/components/utils/DatePickerDialogActivator.vue';
 import PlantPlantingActionDialog from '@/components/plantings/PlantPlantingActionDialog.vue';
@@ -12,6 +13,7 @@ const plots = () => [
     { plotId: 'plot-1', friendlyName: 'North bed' },
 ];
 
+// The dialog reads the clock when it opens, for its default planting date
 function mountDialog({ now = '2026-05-10T10:00:00', ...props } = {}) {
     vi.useFakeTimers({ now: new Date(now), toFake: ['Date'] });
     return mountWithPlugins(PlantPlantingActionDialog, {
@@ -22,6 +24,13 @@ function mountDialog({ now = '2026-05-10T10:00:00', ...props } = {}) {
 
 const open = wrapper => openAction(wrapper, 'Plant', 'Plant Planting');
 const plotSelect = wrapper => wrapper.findComponent(VSelect);
+
+// Opened, with a plot chosen, which Confirm needs
+async function openWithAPlot(wrapper) {
+    const dialog = await open(wrapper);
+    await plotSelect(wrapper).setValue('plot-1');
+    return dialog;
+}
 
 describe('PlantPlantingActionDialog', () => {
     afterEach(() => {
@@ -40,14 +49,14 @@ describe('PlantPlantingActionDialog', () => {
 
     // It sorts the plots it was given, in place: the plots store's list (B21).
     // The dialog's contents render only once it opens, and the sort with them
-    it('sorts the array of plots it was given, once opened', async () => {
+    // It sorts a copy (backlog B21)
+    it('leaves the array of plots it was given as it was, once opened', async () => {
         const given = plots();
         const wrapper = mountDialog({ plots: given });
-        expect(given.map(plot => plot.plotId)).toEqual(['plot-2', 'plot-1']);
 
         await open(wrapper);
 
-        expect(given.map(plot => plot.plotId)).toEqual(['plot-1', 'plot-2']);
+        expect(given).toEqual(plots());
     });
 
     it('submits a PLANT action with the plot, number, date and comment, and closes', async () => {
@@ -72,23 +81,34 @@ describe('PlantPlantingActionDialog', () => {
 
     // As in the start dialog, the date is the user's own day, as YYYY-MM-DD,
     // so a New York evening is planted that day (backlog A22)
+    // Not the day the page was opened (backlog A22)
+    it('starts on the day it is opened', async () => {
+        const wrapper = mountDialog();
+        vi.setSystemTime(new Date('2026-05-11T08:00:00'));
+
+        const dialog = await open(wrapper);
+
+        expect(dialog.find('h3').text()).toBe('Mon May 11 2026');
+    });
+
     it('sends a New York evening as that day', async () => {
         const wrapper = mountDialog({ now: '2026-05-10T22:15:00' });
 
-        await press(await open(wrapper), 'Confirm');
+        await press(await openWithAPlot(wrapper), 'Confirm');
 
         expect(wrapper.props('onSubmit').mock.calls[0][1].transplantDate).toBe('2026-05-10');
     });
 
-    // DocumentsCurrentBehavior: the plot has no rule and Confirm is never
-    // disabled, so a planting is planted in no plot (validation-fixes doc,
-    // fix 5). Should require a plot, unless planting without one is wanted
-    it('plants with no plot chosen', async () => {
+    // Planting out puts a planting in a plot: the garden lists only plantings
+    // that have one (backlog A23)
+    it('offers Confirm only once a plot is chosen', async () => {
         const wrapper = mountDialog();
+        const dialog = await open(wrapper);
+        expect(buttonLabelled(dialog, 'Confirm').attributes('disabled')).toBeDefined();
 
-        await press(await open(wrapper), 'Confirm');
+        await plotSelect(wrapper).setValue('plot-1');
 
-        expect(wrapper.props('onSubmit').mock.calls[0][1].plotId).toBeNull();
+        expect(buttonLabelled(dialog, 'Confirm').attributes('disabled')).toBeUndefined();
     });
 
     it('closes on Cancel without submitting', async () => {
@@ -100,9 +120,8 @@ describe('PlantPlantingActionDialog', () => {
         expect(isOpen()).toBe(false);
     });
 
-    // DocumentsCurrentBehavior: Cancel keeps what was entered, so the next
-    // open shows it. Should go back to the defaults (backlog A13)
-    it('keeps a cancelled entry for the next time it opens', async () => {
+    // (backlog A13)
+    it('forgets a cancelled entry the next time it opens', async () => {
         const wrapper = mountDialog();
         let dialog = await open(wrapper);
         await inputLabelled(dialog, 'Number Transplanted').setValue('20');
@@ -110,17 +129,24 @@ describe('PlantPlantingActionDialog', () => {
 
         dialog = await open(wrapper);
 
-        expect(inputLabelled(dialog, 'Number Transplanted').element.value).toBe('20');
+        expect(inputLabelled(dialog, 'Number Transplanted').element.value).toBe('0');
     });
 
-    // DocumentsCurrentBehavior: it doesn't wait for onSubmit, so it closes
-    // before the plant is done, and can't stay open if it fails (backlog A6).
-    // Should wait
-    it('closes before the plant is done', async () => {
+    it('waits for the plant, open', async () => {
         const wrapper = mountDialog({ onSubmit: aSaveInFlight() });
 
-        await press(await open(wrapper), 'Confirm');
+        await press(await openWithAPlot(wrapper), 'Confirm');
 
-        expect(isOpen()).toBe(false);
+        expect(wrapper.props('onSubmit')).toHaveBeenCalled();
+        expect(isOpen()).toBe(true);
+    });
+
+    it('stays open, and says so, when the plant fails', async () => {
+        const wrapper = mountDialog({ onSubmit: vi.fn().mockRejectedValue(httpError(500)) });
+
+        await press(await openWithAPlot(wrapper), 'Confirm');
+
+        expect(isOpen()).toBe(true);
+        expect(document.body.textContent).toContain("Couldn't save. Try again.");
     });
 });

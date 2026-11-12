@@ -1,17 +1,18 @@
 <template>
-  <v-container v-if="plant">
-    <v-row>
+  <v-container>
+    <!-- outside the v-if="plant", so a plant that fails to load says so -->
+    <v-row v-if="alertVisible">
+      <fade-out-alert :is-visible="alertVisible" :alert-type="alertType" :message="alertMessage"/>
+    </v-row>
+
+    <v-row v-if="loading" class="mt-10 d-flex justify-center">
+      <v-progress-circular size="100" width="10" color="green" indeterminate/>
+    </v-row>
+
+    <v-row v-if="plant">
       <v-col cols="12">
 
-        <v-row v-if="alertVisible">
-          <fade-out-alert :is-visible="alertVisible" :alert-type="alertType" :message="alertMessage"/>
-        </v-row>
-
         <v-snackbar v-model="snackbar.show" timeout="2000">{{ snackbar.message }}</v-snackbar>
-
-        <v-row v-if="loading" class="mt-10 d-flex justify-center">
-          <v-progress-circular size="100" width="10" color="green" indeterminate/>
-        </v-row>
 
         <v-row>
           <v-col cols="12" class="text-center">
@@ -306,7 +307,6 @@ export default {
       return this.textFieldEdited(this.plant.friendlyName, this.plantCopy.friendlyName)
           || this.textFieldEdited(this.plant.lifespanType, this.plantCopy.lifespanType)
           || this.plant.subcategoryId !== this.selectedSubcategoryId
-          || this.textFieldEdited(this.plant.seedSource, this.plantCopy.seedSource)
           || this.textFieldEdited(this.plant.description, this.plantCopy.description)
           || this.plant.tags?.join(",") !== this.plantCopy.tags?.join(",")
           || this.textFieldEdited(this.plant.taxonomy.family, this.plantCopy.taxonomy.family)
@@ -352,7 +352,12 @@ export default {
       await this.fetchPlantCategories();
       await this.fetchHarvestTypes();
 
-      this.plantCopy = JSON.parse(JSON.stringify(this.plantsById[this.plantId]));
+      const plant = this.plantsById[this.plantId];
+      if (!plant) {
+        // not found, or not loaded: the plants store's alert says which
+        return;
+      }
+      this.plantCopy = JSON.parse(JSON.stringify(plant));
       this.selectedSubcategoryId = this.plantCopy.subcategoryId;
       this.selectedHarvestTypeId = this.plantCopy.harvesting?.defaultHarvestTypeId ?? harvestUtils.unspecifiedHarvestTypeId;
       this.selectedCategory = this.categories.find(category =>
@@ -389,12 +394,12 @@ export default {
     },
 
     async updatePlant() {
+      // A failed save keeps the edits, to fix and save again; the store's alert says why
       const success = await this.upsertPlant({
         plantId: this.plantCopy.plantId,
         subcategoryId: this.selectedSubcategoryId,
         friendlyName: this.sanitize(this.plantCopy.friendlyName),
         lifespanType: this.sanitize(this.plantCopy.lifespanType),
-        seedSource: this.sanitize(this.plantCopy.seedSource),
         tags: this.plantCopy.tags,
         description: this.sanitize(this.plantCopy.description),
         taxonomy: {
@@ -431,7 +436,7 @@ export default {
           shelfStability: this.sanitize(this.plantCopy.harvesting.shelfStability),
           harvestInstructions: this.sanitize(this.plantCopy.harvesting.harvestInstructions),
         },
-      });
+      }).then(() => true, () => false);
 
       if (success) {
         await this.refreshData();
@@ -468,7 +473,8 @@ export default {
         assign: addedScheduleIds,
         unassign: removedScheduleIds,
       });
-      await this.refreshData();
+      // the plant alone, for its schedules: the form keeps its unsaved edits
+      await this.fetchPlantById(this.plantId);
     },
   },
 

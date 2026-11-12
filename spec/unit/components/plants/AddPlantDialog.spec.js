@@ -3,6 +3,7 @@ import { VSelect } from 'vuetify/components';
 import { mountWithPlugins } from '../../../helpers/mount';
 import { buttonLabelled, inputLabelled } from '../../../helpers/fields';
 import { dialogTitled, findDialog } from '../../../helpers/dialogs';
+import { httpError } from '../../../helpers/http-errors';
 import AddPlantDialog from '@/components/plants/AddPlantDialog.vue';
 
 const categories = [
@@ -102,6 +103,24 @@ describe('AddPlantDialog', () => {
         expect(select(wrapper, 'Subcategory').props('modelValue')).toBeNull();
     });
 
+    // With no reason from the service, it says the save failed. Cancel forgets
+    // the message, so the next open starts clean
+    it('says the save failed, keeping the form, and forgets it on Cancel', async () => {
+        const wrapper = await mountDialog({ onSubmit: vi.fn().mockRejectedValue(httpError(500)) });
+        await fillIn(wrapper);
+
+        await buttonLabelled(dialogTitled('Add Plant'), 'Create').trigger('click');
+        await flushPromises();
+
+        expect(findDialog('Add Plant').text()).toContain("Couldn't save. Try again.");
+        expect(inputLabelled(dialogTitled('Add Plant'), 'Name').element.value).toBe('Provider bush bean');
+
+        await buttonLabelled(dialogTitled('Add Plant'), 'Cancel').trigger('click');
+        await flushPromises();
+
+        expect(findDialog('Add Plant').text()).not.toContain("Couldn't save");
+    });
+
     it('submits the plant, with its default harvest type under harvesting', async () => {
         const wrapper = await mountDialog();
         await fillIn(wrapper);
@@ -151,22 +170,19 @@ describe('AddPlantDialog', () => {
         expect(inputLabelled(dialogTitled('Add Plant'), 'Name').element.value).toBe('');
     });
 
-    // DocumentsCurrentBehavior: Create is never disabled, and the fields marked
-    // required have no rules, so an empty plant is sent. The service rejects
-    // it (subcategoryId is required), and the alert says only "error upserting
-    // plant" (A7). Should keep Create disabled until a name and subcategory are
-    // given
-    it('submits an empty plant', async () => {
+    // What the service requires: a name, of more than spaces, and a
+    // subcategory (backlog A16)
+    it('offers Create only once a name and subcategory are given', async () => {
         const wrapper = await mountDialog();
+        const create = () => buttonLabelled(dialogTitled('Add Plant'), 'Create');
+        expect(create().attributes('disabled')).toBeDefined();
 
-        await buttonLabelled(dialogTitled('Add Plant'), 'Create').trigger('click');
+        await inputLabelled(dialogTitled('Add Plant'), 'Name').setValue('   ');
+        await select(wrapper, 'Category').setValue(categories[0]);
+        await select(wrapper, 'Subcategory').setValue('subcategory-1');
+        expect(create().attributes('disabled')).toBeDefined();
 
-        expect(wrapper.props('onSubmit')).toHaveBeenCalledWith({
-            subcategoryId: null,
-            friendlyName: '',
-            lifespanType: null,
-            description: '',
-            harvesting: { defaultHarvestTypeId: 1 },
-        });
+        await inputLabelled(dialogTitled('Add Plant'), 'Name').setValue('Provider bush bean');
+        expect(create().attributes('disabled')).toBeUndefined();
     });
 });

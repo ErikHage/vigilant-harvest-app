@@ -1,13 +1,9 @@
 import { createPinia, setActivePinia } from 'pinia';
 import { useHarvestsStore } from '@/store';
 import harvestsApi from '@/api/harvests-api';
-import { httpError, serviceErrorBody } from '../../helpers/http-errors';
+import { apiError, httpError, serviceErrorBody } from '../../helpers/http-errors';
 
 vi.mock('@/api/harvests-api');
-
-function apiError(status, data) {
-    return Object.assign(httpError(status), { data });
-}
 
 const harvest = { plantingYear: 2026, plantingId: 'planting-1', quantity: 3, harvestDate: '2026-07-04', harvestTypeId: 2 };
 
@@ -37,6 +33,28 @@ describe('useHarvestsStore', () => {
         expect(store.harvestStats).toEqual({});
     });
 
+    describe('deleteHarvest', () => {
+        it('deletes the harvest', async () => {
+            harvestsApi.deleteHarvest.mockResolvedValue('OK');
+
+            await store.deleteHarvest('harvest-1');
+
+            expect(harvestsApi.deleteHarvest).toHaveBeenCalledWith('a-token', 'harvest-1');
+            expect(store.alertVisible).toBe(false);
+        });
+
+        it('shows an alert, and rejects, when the delete fails', async () => {
+            const err = apiError(500, '<html>Internal Server Error</html>');
+            harvestsApi.deleteHarvest.mockRejectedValue(err);
+
+            await expect(store.deleteHarvest('harvest-1')).rejects.toBe(err);
+
+            expect(store.alertType).toBe('error');
+            expect(store.alertMessage).toBe('error deleting harvest');
+            expect(consoleError).toHaveBeenCalledWith(err);
+        });
+    });
+
     describe('upsertHarvests', () => {
         it('saves the harvests and returns what the service returns', async () => {
             harvestsApi.upsertHarvests.mockResolvedValue([{ ...harvest, harvestId: 'harvest-1' }]);
@@ -48,18 +66,17 @@ describe('useHarvestsStore', () => {
             expect(store.alertVisible).toBe(false);
         });
 
-        // Both callers send their own plantingYear. The store's default reads
-        // this.plantingYear, which isn't in its state, so it is always undefined
-        it("adds an undefined plantingYear to a harvest that doesn't have one", async () => {
+        // Both callers send their own plantingYear; the store adds no
+        // default, since it has no year of its own (backlog B10)
+        it('sends each harvest as given', async () => {
             const { plantingYear: _, ...withoutYear } = harvest;
             harvestsApi.upsertHarvests.mockResolvedValue([]);
 
             await store.upsertHarvests([withoutYear]);
 
-            // toStrictEqual, because toEqual would also pass with no plantingYear key at all
+            // toStrictEqual, because toEqual would also pass with an undefined plantingYear key
             const [, sent] = harvestsApi.upsertHarvests.mock.calls[0];
-            expect(sent).toStrictEqual([{ plantingYear: undefined, ...withoutYear }]);
-            expect(sent[0]).toHaveProperty('plantingYear');
+            expect(sent).toStrictEqual([withoutYear]);
         });
 
         it("shows the service's message for a 400, and rejects", async () => {
@@ -153,6 +170,27 @@ describe('useHarvestsStore', () => {
             failure: 'error fetching harvest stats',
         },
     ])('$action', ({ action, args, api, apiArgs, result, field, failure }) => {
+        if (action === 'fetchHarvestStats') {
+            // the service's own statsType always says Planting (B29)
+            it('records which type the stats are', async () => {
+                harvestsApi.fetchHarvestStats.mockResolvedValue({ statsType: 'Planting', stats: [] });
+
+                await store.fetchHarvestStats(2026, 'Plant');
+
+                expect(store.harvestStatsType).toBe('Plant');
+            });
+
+            it('keeps the type it had when the fetch fails', async () => {
+                harvestsApi.fetchHarvestStats.mockResolvedValueOnce({ stats: [] });
+                await store.fetchHarvestStats(2026, 'Plant');
+                harvestsApi.fetchHarvestStats.mockRejectedValueOnce(httpError(500));
+
+                await store.fetchHarvestStats(2026, 'Planting');
+
+                expect(store.harvestStatsType).toBe('Plant');
+            });
+        }
+
         it(`stores what the service returns in ${field}`, async () => {
             harvestsApi[api].mockResolvedValue(result);
 

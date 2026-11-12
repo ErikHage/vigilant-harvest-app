@@ -28,8 +28,8 @@ const kinds = {
 /**
  * A stats page, `kind` being `planting` or `plant`: the chosen year's totals,
  * and a card per harvest type for the planting or plant chosen. The two
- * pages are one component apart from three strings (backlog B29), so they
- * share a driver.
+ * are one page, told which by its route; they were two components the same
+ * apart from three strings (backlog B29).
  */
 export function createStatsPageDriver(page, kind) {
     const { name, path, title, select, option, heading, lines } = kinds[kind];

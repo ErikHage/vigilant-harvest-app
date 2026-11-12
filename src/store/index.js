@@ -1,7 +1,6 @@
 import {defineStore} from 'pinia';
 
 import storageUtils from "@/utils/storage-utils";
-import jwtUtils from "@/utils/jwt-utils";
 
 import authenticationApi from "@/api/authentication-api";
 import plantsApi from "@/api/plants-api";
@@ -13,6 +12,7 @@ import activityLogApi from "@/api/activity-log-api";
 import harvestTypesApi from "@/api/harvest-types-api";
 
 import harvestUtils from "@/utils/harvest-utils";
+import { setAlertMessage } from "./alerts";
 
 import {applicationId, feralAuthenticationAppUrl} from "@/utils/constants";
 import plantingYearsApi from "@/api/planting-years-api";
@@ -23,6 +23,13 @@ const localStorageKeys = {
     plantingYear: 'planting-year',
 };
 
+// A year is a number, as the service sends it. localStorage gives back a
+// string, and anything else stored there is no year
+function storedPlantingYear() {
+    const year = Number(storageUtils.getLocalStorageEntry(localStorageKeys.plantingYear));
+    return Number.isInteger(year) && year > 0 ? year : null;
+}
+
 export const useCommonStore = defineStore('common', {
     actions: {
         async fetchPlantingYears() {
@@ -32,10 +39,10 @@ export const useCommonStore = defineStore('common', {
                     acc[py.plantingYear] = py;
                     return acc;
                 }, {});
-                this.availableYears = Object.keys(this.plantingYearsByYear);
+                this.availableYears = Object.keys(this.plantingYearsByYear).map(Number);
                 this.selectedPlantingYear = this.plantingYearsByYear[this.plantingYear];
-            } catch {
-                this.setAlertMessage(null, 'error', 'error fetching planting years');
+            } catch (err) {
+                this.setAlertMessage(err, 'error', 'error fetching planting years');
             }
         },
         selectPlantingYear(year) {
@@ -43,28 +50,13 @@ export const useCommonStore = defineStore('common', {
             this.selectedPlantingYear = this.plantingYearsByYear[year];
             storageUtils.setLocalStorageEntry(localStorageKeys.plantingYear, year);
         },
-        clearPlantingYear() {
-            this.plantingYear = null;
-            this.selectedPlantingYear = null;
-            storageUtils.clearLocalStorageEntry(localStorageKeys.plantingYear);
-        },
-        setAlertMessage(err, type, message) {
-            if (err) {
-                console.error(err);
-            }
-            this.alertVisible = true;
-            this.alertType = type;
-            this.alertMessage = message;
-            setTimeout(() => {
-                this.alertVisible = false;
-            }, 3000);
-        },
+        setAlertMessage,
     },
     state: () => {
         return {
             plantingYearsByYear: {},
             availableYears: [],
-            plantingYear: storageUtils.getLocalStorageEntry(localStorageKeys.plantingYear) ?? new Date().getFullYear(),
+            plantingYear: storedPlantingYear() ?? new Date().getFullYear(),
             selectedPlantingYear: null,
             alertVisible: false,
             alertType: 'success',
@@ -85,13 +77,19 @@ export const useAuthenticationStore = defineStore('authentication', {
                 storageUtils.setTokenInLocalStorage(actorToken);
                 this.isAuthenticated = true;
                 this.showAppBar = true;
-            } catch {
+            } catch (err) {
                 this.isAuthenticated = false;
-                this.setAlertMessage(null, 'error', 'error authenticating sso token');
+                this.setAlertMessage(err, 'error', 'error authenticating sso token');
             }
         },
         async verifyToken() {
             this.isAuthenticated = await authenticationApi.verifyActorToken(storageUtils.tryToLoadTokenFromStorage());
+            if (!this.isAuthenticated) {
+                // a rejected token is no use: forget it, so it isn't asked
+                // about again on every protected page
+                this.clearToken();
+                this.showAppBar = false;
+            }
         },
         async logout() {
             try {
@@ -114,17 +112,7 @@ export const useAuthenticationStore = defineStore('authentication', {
         clearToken() {
             storageUtils.clearTokenFromStorage();
         },
-        setAlertMessage(err, type, message) {
-            if (err) {
-                console.error(err);
-            }
-            this.alertVisible = true;
-            this.alertType = type;
-            this.alertMessage = message;
-            setTimeout(() => {
-                this.alertVisible = false;
-            }, 3000);
-        },
+        setAlertMessage,
     },
     state: () => {
         return {
@@ -135,32 +123,25 @@ export const useAuthenticationStore = defineStore('authentication', {
             showAppBar: storageUtils.tryToLoadTokenFromStorage() !== null,
         };
     },
-    getters: {
-        actor() {
-            const token = storageUtils.tryToLoadTokenFromStorage();
-
-            if (token !== null) {
-                return jwtUtils.parseActorToken(token);
-            }
-            return null;
-        },
-    },
 });
 
 export const usePlantingYearsStore = defineStore('plantingYears', {
     actions: {
+        // Whether the years loaded
         async fetchPlantingYears() {
             try {
                 this.plantingYears = await plantingYearsApi.fetchPlantingYears(storageUtils.tryToLoadTokenFromStorage());
-            } catch {
-                this.setAlertMessage(null, 'error', 'error fetching planting years');
+                return true;
+            } catch (err) {
+                this.setAlertMessage(err, 'error', 'error fetching planting years');
+                return false;
             }
         },
         async fetchPlantingYear(year) {
             try {
                 this.plantingYear = await plantingYearsApi.fetchPlantingYear(storageUtils.tryToLoadTokenFromStorage(), year);
-            } catch {
-                this.setAlertMessage(null, 'error', 'error fetching planting year');
+            } catch (err) {
+                this.setAlertMessage(err, 'error', 'error fetching planting year');
             }
         },
         async addPlantingYear(plantingYearRequest) {
@@ -171,17 +152,7 @@ export const usePlantingYearsStore = defineStore('plantingYears', {
                 throw err;
             }
         },
-        setAlertMessage(err, type, message) {
-            if (err) {
-                console.error(err);
-            }
-            this.alertVisible = true;
-            this.alertType = type;
-            this.alertMessage = message;
-            setTimeout(() => {
-                this.alertVisible = false;
-            }, 3000);
-        },
+        setAlertMessage,
     },
 
     state: () => {
@@ -201,7 +172,8 @@ export const useActivitySchedulesStore = defineStore('activity-schedules', {
             try {
                 await activitySchedulesApi.createActivitySchedule(storageUtils.tryToLoadTokenFromStorage(), activitySchedule);
             } catch (err) {
-                this.setAlertMessage(err, 'error', 'error adding activity schedule');
+                this.setAlertMessage(err, 'error', harvestUtils.upsertErrorMessage(err, 'error adding activity schedule'));
+                throw err;
             }
         },
         async fetchSchedules() {
@@ -222,7 +194,8 @@ export const useActivitySchedulesStore = defineStore('activity-schedules', {
             try {
                 this.selectedActivitySchedule = await activitySchedulesApi.updateActivitySchedule(storageUtils.tryToLoadTokenFromStorage(), activitySchedule);
             } catch (err) {
-                this.setAlertMessage(err, 'error', 'error updating activity schedule');
+                this.setAlertMessage(err, 'error', harvestUtils.upsertErrorMessage(err, 'error updating activity schedule'));
+                throw err;
             }
         },
         async fetchActivityTypes() {
@@ -236,34 +209,27 @@ export const useActivitySchedulesStore = defineStore('activity-schedules', {
             try {
                 await activitySchedulesApi.addActivityScheduleItem(storageUtils.tryToLoadTokenFromStorage(), activityScheduleId, activityScheduleItem);
             } catch (err) {
-                this.setAlertMessage(err, 'error', 'error adding activity schedule item');
+                this.setAlertMessage(err, 'error', harvestUtils.upsertErrorMessage(err, 'error adding activity schedule item'));
+                throw err;
             }
         },
         async updateScheduleItem(activityScheduleItem) {
             try {
                 await activitySchedulesApi.updateActivityScheduleItem(storageUtils.tryToLoadTokenFromStorage(), activityScheduleItem);
             } catch (err) {
-                this.setAlertMessage(err, 'error', 'error updating activity schedule item');
+                this.setAlertMessage(err, 'error', harvestUtils.upsertErrorMessage(err, 'error updating activity schedule item'));
+                throw err;
             }
         },
         async deleteScheduleItem(activityScheduleId, entryId) {
             try {
                 await activitySchedulesApi.deleteActivityScheduleItem(storageUtils.tryToLoadTokenFromStorage(), activityScheduleId, entryId);
             } catch (err) {
-                this.setAlertMessage(err, 'error', 'error deleting activity schedule item');
+                this.setAlertMessage(err, 'error', harvestUtils.upsertErrorMessage(err, 'error deleting activity schedule item'));
+                throw err;
             }
         },
-        setAlertMessage(err, type, message) {
-            if (err) {
-                console.error(err);
-            }
-            this.alertVisible = true;
-            this.alertType = type;
-            this.alertMessage = message;
-            setTimeout(() => {
-                this.alertVisible = false;
-            }, 3000);
-        },
+        setAlertMessage,
     },
     state: () => {
         return {
@@ -283,10 +249,9 @@ export const usePlantsStore = defineStore('plants', {
             try {
                 this.loading = true;
                 await plantsApi.upsertPlant(storageUtils.tryToLoadTokenFromStorage(), plant);
-                return true;
             } catch (err) {
-                this.setAlertMessage(err, 'error', err.data?.message || 'error upserting plant');
-                return false;
+                this.setAlertMessage(err, 'error', harvestUtils.upsertErrorMessage(err, 'error upserting plant'));
+                throw err;
             } finally {
                 this.loading = false;
             }
@@ -295,7 +260,8 @@ export const usePlantsStore = defineStore('plants', {
             try {
                 await plantsApi.updatePlantScheduleAssignment(storageUtils.tryToLoadTokenFromStorage(), plantId, plantScheduleAssignment);
             } catch (err) {
-                this.setAlertMessage(err, 'error', 'error updating plant schedule assignments');
+                this.setAlertMessage(err, 'error', harvestUtils.upsertErrorMessage(err, 'error updating plant schedule assignments'));
+                throw err;
             }
         },
         async fetchPlants() {
@@ -323,21 +289,24 @@ export const usePlantsStore = defineStore('plants', {
             try {
                 await plantsApi.deletePlantById(storageUtils.tryToLoadTokenFromStorage(), plantId);
             } catch (err) {
-                this.setAlertMessage(err, 'error', 'error deleting plant');
+                this.setAlertMessage(err, 'error', harvestUtils.upsertErrorMessage(err, 'error deleting plant'));
+                throw err;
             }
         },
         async createCategory(category) {
             try {
                 await plantsApi.createCategory(storageUtils.tryToLoadTokenFromStorage(), category);
             } catch (err) {
-                this.setAlertMessage(err, 'error', 'error creating category');
+                this.setAlertMessage(err, 'error', harvestUtils.upsertErrorMessage(err, 'error creating category'));
+                throw err;
             }
         },
         async createSubcategory(subcategory) {
             try {
                 await plantsApi.createSubcategory(storageUtils.tryToLoadTokenFromStorage(), subcategory);
             } catch (err) {
-                this.setAlertMessage(err, 'error', 'error creating subcategory');
+                this.setAlertMessage(err, 'error', harvestUtils.upsertErrorMessage(err, 'error creating subcategory'));
+                throw err;
             }
         },
         async fetchPlantCategories() {
@@ -358,17 +327,7 @@ export const usePlantsStore = defineStore('plants', {
                 this.setAlertMessage(err, 'error', 'error fetching harvest types');
             }
         },
-        setAlertMessage(err, type, message) {
-            if (err) {
-                console.error(err);
-            }
-            this.alertVisible = true;
-            this.alertType = type;
-            this.alertMessage = message;
-            setTimeout(() => {
-                this.alertVisible = false;
-            }, 3000);
-        },
+        setAlertMessage,
     },
     state: () => {
         return {
@@ -390,7 +349,8 @@ export const usePlotsStore = defineStore('plots', {
             try {
                 await plotsApi.upsertPlot(storageUtils.tryToLoadTokenFromStorage(), plot);
             } catch (err) {
-                this.setAlertMessage(err, 'error', 'error upserting plot');
+                this.setAlertMessage(err, 'error', harvestUtils.upsertErrorMessage(err, 'error upserting plot'));
+                throw err;
             }
         },
         async fetchPlots() {
@@ -404,17 +364,7 @@ export const usePlotsStore = defineStore('plots', {
                 this.setAlertMessage(err, 'error', 'error fetching plots');
             }
         },
-        setAlertMessage(err, type, message) {
-            if (err) {
-                console.error(err);
-            }
-            this.alertVisible = true;
-            this.alertType = type;
-            this.alertMessage = message;
-            setTimeout(() => {
-                this.alertVisible = false;
-            }, 3000);
-        }
+        setAlertMessage,
     },
     state: () => {
         return {
@@ -434,7 +384,8 @@ export const usePlantingsStore = defineStore('plantings', {
                 this.plantingsById[plantingId] = await plantingsApi.updatePlanting(storageUtils.tryToLoadTokenFromStorage(), plantingId, plantingUpdate);
                 this.setAlertMessage(null, 'success', 'planting updated successfully');
             } catch (err) {
-                this.setAlertMessage(err, 'error', 'error updating planting');
+                this.setAlertMessage(err, 'error', harvestUtils.upsertErrorMessage(err, 'error updating planting'));
+                throw err;
             }
         },
         async createPlanting(plantingRequest) {
@@ -442,7 +393,8 @@ export const usePlantingsStore = defineStore('plantings', {
                 const planting = await plantingsApi.createPlanting(storageUtils.tryToLoadTokenFromStorage(), plantingRequest);
                 this.plantingsById[planting.plantingId] = planting;
             } catch (err) {
-                this.setAlertMessage(err, 'error', 'error creating planting');
+                this.setAlertMessage(err, 'error', harvestUtils.upsertErrorMessage(err, 'error creating planting'));
+                throw err;
             }
         },
         async performPlantingAction(plantingId, action, actionData) {
@@ -453,7 +405,8 @@ export const usePlantingsStore = defineStore('plantings', {
                     action,
                     actionData);
             } catch (err) {
-                this.setAlertMessage(err, 'error', 'error performing planting action ' + action);
+                this.setAlertMessage(err, 'error', harvestUtils.upsertErrorMessage(err, 'error performing planting action ' + action));
+                throw err;
             }
         },
         async fetchPlantingsByYear(plantingYear) {
@@ -467,6 +420,17 @@ export const usePlantingsStore = defineStore('plantings', {
                 this.setAlertMessage(err, 'error', 'error fetching plantings by year');
             }
         },
+        // A year's plantings, returned rather than stored, for a page that
+        // shows another year than the chosen one's: the store's list stays
+        // the chosen year's. None, with the alert, when the fetch fails
+        async plantingsOfYear(plantingYear) {
+            try {
+                return await plantingsApi.fetchPlantingsByYear(storageUtils.tryToLoadTokenFromStorage(), plantingYear);
+            } catch (err) {
+                this.setAlertMessage(err, 'error', 'error fetching plantings by year');
+                return [];
+            }
+        },
         async fetchPlantingById(plantingId) {
             try {
                 this.plantingsById[plantingId] = await plantingsApi.fetchPlantingById(storageUtils.tryToLoadTokenFromStorage(), plantingId);
@@ -474,17 +438,7 @@ export const usePlantingsStore = defineStore('plantings', {
                 this.setAlertMessage(err, 'error', 'error fetching planting by id: ' + plantingId);
             }
         },
-        setAlertMessage(err, type, message) {
-            if (err) {
-                console.error(err);
-            }
-            this.alertVisible = true;
-            this.alertType = type;
-            this.alertMessage = message;
-            setTimeout(() => {
-                this.alertVisible = false;
-            }, 3000);
-        }
+        setAlertMessage,
     },
     state: () => {
         return {
@@ -501,14 +455,19 @@ export const useHarvestsStore = defineStore('harvests', {
     actions: {
         async upsertHarvests(harvests) {
             try {
-                const harvestsWithYear = harvests.map(harvest => ({
-                    plantingYear: this.plantingYear,
-                    ...harvest,
-                }));
-                return await harvestsApi.upsertHarvests(storageUtils.tryToLoadTokenFromStorage(), harvestsWithYear);
+                // each caller sends its year: the store has none of its own
+                return await harvestsApi.upsertHarvests(storageUtils.tryToLoadTokenFromStorage(), harvests);
             } catch (err) {
                 this.setAlertMessage(err, 'error', harvestUtils.upsertErrorMessage(err, 'error inserting harvests'));
-                // the only action here that rethrows: both call sites keep a dialog open on failure
+                throw err;
+            }
+        },
+        // Rethrows, so the dialog can stay open with why
+        async deleteHarvest(harvestId) {
+            try {
+                await harvestsApi.deleteHarvest(storageUtils.tryToLoadTokenFromStorage(), harvestId);
+            } catch (err) {
+                this.setAlertMessage(err, 'error', 'error deleting harvest');
                 throw err;
             }
         },
@@ -546,21 +505,13 @@ export const useHarvestsStore = defineStore('harvests', {
             try {
                 this.harvestStats = await harvestsApi
                     .fetchHarvestStats(storageUtils.tryToLoadTokenFromStorage(), year, statType);
+                // which they are: the service's own statsType always says Planting
+                this.harvestStatsType = statType;
             } catch (err) {
                 this.setAlertMessage(err, 'error', 'error fetching harvest stats');
             }
         },
-        setAlertMessage(err, type, message) {
-            if (err) {
-                console.error(err);
-            }
-            this.alertVisible = true;
-            this.alertType = type;
-            this.alertMessage = message;
-            setTimeout(() => {
-                this.alertVisible = false;
-            }, 3000);
-        }
+        setAlertMessage,
     },
     state: () => {
         return {
@@ -568,6 +519,7 @@ export const useHarvestsStore = defineStore('harvests', {
             harvestSummaries: [],
             harvestQuantitiesByPlanting: {},
             harvestStats: {},
+            harvestStatsType: null,
             alertVisible: false,
             alertType: 'success',
             alertMessage: null,
@@ -581,7 +533,8 @@ export const useJournalStore = defineStore('journal', {
             try {
                 await journalApi.upsertJournalEntry(storageUtils.tryToLoadTokenFromStorage(), journalEntry);
             } catch (err) {
-                this.setAlertMessage(err, 'error', 'error upserting journal entry');
+                this.setAlertMessage(err, 'error', harvestUtils.upsertErrorMessage(err, 'error upserting journal entry'));
+                throw err;
             }
         },
         async fetchJournalEntriesByYear(plantingYear) {
@@ -591,17 +544,7 @@ export const useJournalStore = defineStore('journal', {
                 this.setAlertMessage(err, 'error', 'error fetching journal entries by year');
             }
         },
-        setAlertMessage(err, type, message) {
-            if (err) {
-                console.error(err);
-            }
-            this.alertVisible = true;
-            this.alertType = type;
-            this.alertMessage = message;
-            setTimeout(() => {
-                this.alertVisible = false;
-            }, 3000);
-        }
+        setAlertMessage,
     },
     state: () => {
         return {
@@ -622,17 +565,7 @@ export const usePlanningStore = defineStore('planning', {
                 this.setAlertMessage(err, 'error', 'error fetching planning details by year');
             }
         },
-        setAlertMessage(err, type, message) {
-            if (err) {
-                console.error(err);
-            }
-            this.alertVisible = true;
-            this.alertType = type;
-            this.alertMessage = message;
-            setTimeout(() => {
-                this.alertVisible = false;
-            }, 3000);
-        }
+        setAlertMessage,
     },
     state: () => {
         return {
@@ -650,7 +583,8 @@ export const useActivityLogStore = defineStore('activity-log', {
             try {
                 await activityLogApi.upsertActivityLogEntry(storageUtils.tryToLoadTokenFromStorage(), activityLogEntry);
             } catch (err) {
-                this.setAlertMessage(err, 'error', 'error upserting activity log entry');
+                this.setAlertMessage(err, 'error', harvestUtils.upsertErrorMessage(err, 'error upserting activity log entry'));
+                throw err;
             }
         },
         async fetchActivityLogEntriesByYear(plantingYear) {
@@ -660,17 +594,7 @@ export const useActivityLogStore = defineStore('activity-log', {
                 this.setAlertMessage(err, 'error', 'error fetching activity log entries by year');
             }
         },
-        setAlertMessage(err, type, message) {
-            if (err) {
-                console.error(err);
-            }
-            this.alertVisible = true;
-            this.alertType = type;
-            this.alertMessage = message;
-            setTimeout(() => {
-                this.alertVisible = false;
-            }, 3000);
-        }
+        setAlertMessage,
     },
     state: () => {
         return {

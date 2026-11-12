@@ -1,10 +1,9 @@
 import { expectText } from './assertions';
-import { dayOfYear, daysAfter, monthAndDay, numberedDay, todayInNewYork } from './days';
+import { daysAfter, daysBetween, monthAndDay, todayInNewYork } from './days';
 import { createRoutedPageDriver } from './routed-page-driver';
 
-// The service counts days as days of the year, today's by its own clock, in
-// New York; each count is a day of the planting year less today's
-const daysUntil = day => dayOfYear(day) - dayOfYear(todayInNewYork());
+// The page counts from the browser's today, in New York
+const daysUntil = day => daysBetween(todayInNewYork(), day);
 
 /**
  * The planning page, for the chosen year: today, its planting day and the
@@ -35,7 +34,8 @@ export function createPlanningPageDriver(page) {
 
         /**
          * The title names the year, and the chips show its target planting
-         * day, and the days from today until then, below zero once past.
+         * day, and the days from today until then. The test's years are ahead,
+         * so this never sees a day past, which once counted below zero (B31).
          */
         async showsPlantingDay({ plantingYear, targetPlantingDate }) {
             const what = `the plan for ${plantingYear}`;
@@ -45,15 +45,9 @@ export function createPlanningPageDriver(page) {
             await expectText(chips.nth(2), `${daysUntil(targetPlantingDate)} days until planting!`, what);
         },
 
-        /**
-         * Pinned (A31): Today shows today's day of the year, counted from
-         * January 1 of the planting year, so in a leap year it's the day
-         * before from March on, and in another the day after when today is in
-         * a leap year.
-         */
-        async showsTodayCountedInThePlantingYear({ plantingYear }) {
-            const shown = numberedDay(plantingYear, dayOfYear(todayInNewYork()));
-            await expectText(chips.nth(0), `Today: ${monthAndDay(shown)}`, `the plan for ${plantingYear}`);
+        /** Today shows today's date, whatever the planting year. */
+        async showsToday({ plantingYear }) {
+            await expectText(chips.nth(0), `Today: ${monthAndDay(todayInNewYork())}`, `the plan for ${plantingYear}`);
         },
 
         /**

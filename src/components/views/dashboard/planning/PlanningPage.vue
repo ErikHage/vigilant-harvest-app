@@ -23,7 +23,7 @@
                   variant="outlined"
                   color="primary"
               >
-                Today: {{ formatDayOfMonthToDate(planningDetails.currentDay) }}
+                Today: {{ today.format('MMM D') }}
               </v-chip>
 
               <v-chip
@@ -31,15 +31,16 @@
                   variant="outlined"
                   color="primary"
               >
-                Planting Day: {{ formatDayOfMonthToDate(planningDetails.targetPlantingDay) }}
+                Planting Day: {{ formatDayOfYear(planningDetails.targetPlantingDay) }}
               </v-chip>
 
               <v-chip
+                  v-if="planningDetails.targetPlantingDay"
                   size="x-large"
                   variant="outlined"
                   :color="currentVsTargetColor"
               >
-                {{ dayDifference }} days until planting!
+                {{ countdown }}
               </v-chip>
 
             </div>
@@ -81,6 +82,7 @@ import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
 import PageTitle from "@/components/layout/PageTitle.vue";
 import PlanningTable from "@/components/planning/PlanningTable.vue";
 import dayjs from "dayjs";
+import { dayOfYearIn, daysFromToday } from "@/utils/dates";
 
 export default {
   name: "PlanningPage",
@@ -94,6 +96,9 @@ export default {
   data() {
     return {
       activeTab: 'planning',
+      // the user's own day, as the plan was asked for it; the service's
+      // currentDay is today's number in this year, so not today in another
+      today: dayjs(),
     };
   },
 
@@ -120,11 +125,24 @@ export default {
     },
 
     dayDifference() {
-      if (!this.planningDetails) {
+      if (!this.planningDetails?.targetPlantingDay) {
         return 0;
       }
-      return this.planningDetails.targetPlantingDay
-          - this.planningDetails.currentDay;
+      return daysFromToday(dayOfYearIn(this.plantingYear, this.planningDetails.targetPlantingDay));
+    },
+
+    // It counted down below zero: "-3 days until planting!"
+    countdown() {
+      const days = this.dayDifference;
+      const daysWord = count => (count === 1 ? '1 day' : `${count} days`);
+
+      if (days > 0) {
+        return `${daysWord(days)} until planting!`;
+      }
+      if (days === 0) {
+        return 'Planting day is today!';
+      }
+      return `Planting day was ${daysWord(-days)} ago`;
     },
 
     currentVsTargetColor() {
@@ -148,12 +166,10 @@ export default {
       'fetchPlanningDetailsByYear',
     ]),
 
-    formatDayOfMonthToDate(dayOfMonth) {
-      if (!dayOfMonth) return '—';
+    formatDayOfYear(dayOfYear) {
+      if (!dayOfYear) return '—';
 
-      return dayjs(`${this.plantingYear}-01-01`)
-          .add(dayOfMonth - 1, 'day')
-          .format('MMM D');
+      return dayOfYearIn(this.plantingYear, dayOfYear).format('MMM D');
     },
   },
 

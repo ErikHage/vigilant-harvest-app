@@ -1,5 +1,5 @@
-import { expectCount, expectText, expectThat, expectVisible } from './assertions';
-import { urlOf } from './urls';
+import { expectCount, expectEventually, expectText, expectThat, expectVisible } from './assertions';
+import { status } from '../support/status-codes';
 
 const logout = /\/logout$/;
 
@@ -20,17 +20,21 @@ export function createAppBarDriver(page, serviceCalls) {
         },
 
         /**
-         * After logging out, once the login page shows: no call reached feral to
-         * end the session, so it stays open there until it expires (backlog A2:
-         * the authentication API has no `logout`). The browser's token is gone
-         * from storage, which is what makes the login page show.
+         * After logging out, once the login page shows: one call reached feral
+         * to end the session, feral ended it (204), and the page says nothing
+         * of a failure. The app goes to the login page only once its logout
+         * is done, so that page showing is the point to read it once.
          */
-        async logoutLeavesTheSessionOpen() {
+        async logoutEndsTheSession() {
             const what = 'logging out';
 
             await expectVisible(bar, what);
-            const reached = serviceCalls.countMade('POST', logout);
-            expectThat(reached === 0, 'no logout call to feral (pinned: there is none)', `${reached} made`, what);
+            await expectEventually(() => serviceCalls.wereAnswered('POST', logout, status.noContent),
+                'feral to end the session (204)', what);
+            const made = serviceCalls.countMade('POST', logout);
+            expectThat(made === 1, 'one logout call to feral', `${made} made`, what);
+            const failures = await page.getByText('error logging out').count();
+            expectThat(failures === 0, 'no "error logging out"', `${failures} shown`, what);
         },
 
         /** The bar names `plantingYear` as the year being worked on. */
@@ -51,18 +55,14 @@ export function createAppBarDriver(page, serviceCalls) {
         },
 
         /**
-         * Signed out, on a phone: the home link and Logout, as if signed on
-         * (backlog A12: the phone layout doesn't check `showAppBar`). Read once
-         * the page under it shows.
+         * Signed out, on a phone: no home link and no Logout, as on a desktop.
+         * Read once the page under it shows.
          */
-        async offersHomeAndLogoutWhenSignedOut() {
+        async offersNothingOnAPhone() {
             const what = 'the app bar, signed out, on a phone';
-            const homeLink = bar.getByRole('link');
 
-            await expectVisible(homeLink, what);
-            expectThat(await homeLink.getAttribute('href') === new URL(urlOf('dashboard')).pathname,
-                'a home link to the dashboard', await homeLink.getAttribute('href'), what);
-            await expectVisible(logoutButton, what);
+            await expectCount(bar.getByRole('link'), 0, what);
+            await expectCount(logoutButton, 0, what);
         },
     };
 }

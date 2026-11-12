@@ -3,6 +3,7 @@
     <v-row>
       <v-col cols="12" class="text-center">
         <page-title title="Activity Log"/>
+        <fade-out-alert :is-visible="alert.isVisible" :alert-type="alert.type" :message="alert.message"/>
         <v-spacer></v-spacer>
         <add-activity-log-entry-dialog
             :activity-types="activityTypes"
@@ -53,12 +54,15 @@ import {mapActions, mapState} from "pinia";
 import {useActivityLogStore, useCommonStore} from "@/store";
 import PageTitle from "@/components/layout/PageTitle.vue";
 import AddActivityLogEntryDialog from "@/components/views/dashboard/garden/AddActivityLogEntryDialog.vue";
+import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
+import { alertOf } from "@/store/alerts";
 
 export default {
   name: "GardenActivityLogPage",
 
   components: {
     AddActivityLogEntryDialog,
+    FadeOutAlert,
     PageTitle,
   },
 
@@ -86,6 +90,10 @@ export default {
       activityTypes: 'activityTypes',
       activityLogEntries: 'activityLogEntries',
     }),
+
+    alert() {
+      return alertOf(useActivityLogStore());
+    },
 
     filteredActivityLogEntries() {
       if (this.activityTypeFilter) {

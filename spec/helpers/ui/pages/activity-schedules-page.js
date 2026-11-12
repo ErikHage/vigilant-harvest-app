@@ -35,6 +35,13 @@ export function createActivitySchedulesPage(world, driver) {
             await driver.listsOnly(params.schedule.map(alias => world.scheduleNamed(alias)));
         },
 
+        /** The table lists no schedule. No parameters. */
+        async checkListsNone(...args) {
+            parseDslArgs(args, {});
+
+            await driver.listsNone();
+        },
+
         /** Opens the `schedule`'s details from the table. */
         async openSchedule(...args) {
             const params = parseDslArgs(args, { schedule: schedule() });

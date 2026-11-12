@@ -40,17 +40,16 @@ describe('withApiErrorHandling', () => {
         expect(failure).toMatchObject({ message: 'Network Error', status: null, data: null });
     });
 
-    // DocumentsCurrentBehavior: any other error loses its message, and its status
-    // and body are undefined rather than null, unlike the no-answer case above.
-    // Should keep the original message, or the error as its cause
-    it('replaces any other error with "Unexpected error occurred"', async () => {
-        const fn = vi.fn().mockRejectedValue(new TypeError("Cannot read properties of undefined (reading 'name')"));
+    it('keeps any other error as its cause, with its message, and no status or body', async () => {
+        const original = new TypeError("Cannot read properties of undefined (reading 'name')");
+        const fn = vi.fn().mockRejectedValue(original);
 
         const failure = await withApiErrorHandling(fn)().catch(err => err);
 
         expect(failure).toBeInstanceOf(ApiError);
-        expect(failure.message).toBe('Unexpected error occurred');
-        expect(failure.status).toBeUndefined();
-        expect(failure.data).toBeUndefined();
+        expect(failure.message).toBe("Cannot read properties of undefined (reading 'name')");
+        expect(failure.cause).toBe(original);
+        expect(failure.status).toBeNull();
+        expect(failure.data).toBeNull();
     });
 });

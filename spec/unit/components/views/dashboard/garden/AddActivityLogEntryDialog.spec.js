@@ -1,6 +1,8 @@
 import { flushPromises } from '@vue/test-utils';
+import { httpError } from '../../../../../helpers/http-errors';
 import { VDatePicker, VSelect } from 'vuetify/components';
 import { mountWithPlugins } from '../../../../../helpers/mount';
+import { buttonLabelled } from '../../../../../helpers/fields';
 import { dialogTitled } from '../../../../../helpers/dialogs';
 import { aSaveInFlight, isOpen, openAction, press } from '../../../../../helpers/action-dialogs';
 import AddActivityLogEntryDialog from '@/components/views/dashboard/garden/AddActivityLogEntryDialog.vue';
@@ -161,55 +163,65 @@ describe('AddActivityLogEntryDialog', () => {
         expect(dialog.find('textarea').element.value).toBe('');
     });
 
-    // DocumentsCurrentBehavior: Confirm is never disabled, and with no
-    // activity chosen it reads activityType.name of null and throws a
-    // TypeError. Nothing is sent, and the dialog stays open with no message
-    // (validation-fixes doc, fix 4). Should disable Confirm until an activity
-    // is chosen
-    it('throws on Confirm with no activity chosen', async () => {
-        const errorHandler = vi.fn();
-        const wrapper = mountDialog({ errorHandler });
+    // The service requires an activity (backlog A26)
+    it('offers Confirm only once an activity is chosen', async () => {
+        const wrapper = mountDialog();
         const dialog = await open(wrapper);
         await dialog.find('textarea').setValue('Tomatoes only');
+        expect(buttonLabelled(dialog, 'Confirm').attributes('disabled')).toBeDefined();
 
-        await press(dialog, 'Confirm');
+        await choose(wrapper, 'Activity', activityTypes[0]);
 
-        expect(errorHandler).toHaveBeenCalledTimes(1);
-        expect(errorHandler.mock.calls[0][0]).toBeInstanceOf(TypeError);
-        expect(wrapper.props('onSubmit')).not.toHaveBeenCalled();
-        expect(isOpen()).toBe(true);
+        expect(buttonLabelled(dialog, 'Confirm').attributes('disabled')).toBeUndefined();
     });
 
-    // DocumentsCurrentBehavior: the date picker reads its date only when
-    // created, so after a submit it still holds the last date picked, while
-    // the dialog has gone back to today. Confirming the picker without
-    // picking brings the old date back (backlog A21). Should open on the
-    // dialog's own date
-    it('keeps the last picked date in its picker after a submit', async () => {
+    // After a submit the dialog goes back to today, and so does its picker,
+    // so confirming it without a pick keeps today (backlog A21)
+    it('opens its picker on today after a submit', async () => {
         const wrapper = mountDialog();
         let dialog = await open(wrapper);
         await pickDate(wrapper, dialog, new Date(2026, 6, 1));
         await choose(wrapper, 'Activity', activityTypes[0]);
         await press(dialog, 'Confirm');
 
+        expect(wrapper.props('onSubmit')).toHaveBeenCalled();
+
         dialog = await open(wrapper);
         await pickDate(wrapper, dialog);
 
-        expect(dialog.find('h3').text()).toBe('2026-07-01');
+        expect(dialog.find('h3').text()).toBe('2026-07-04');
     });
 
-    // DocumentsCurrentBehavior: it doesn't wait for onSubmit, so it closes,
-    // and forgets the entry, before the save is done. If the save fails, the
-    // entry is lost, whatever the store does (backlog A6; its own TODO).
-    // Should wait, and stay open if the save fails
-    it('closes before the save is done', async () => {
+    // Not the day the page was opened (backlog A22)
+    it('opens on the day it is opened', async () => {
+        const wrapper = mountDialog();
+        vi.setSystemTime(new Date('2026-07-05T08:00:00'));
+
+        const dialog = await open(wrapper);
+
+        expect(dialog.find('h3').text()).toBe('2026-07-05');
+    });
+
+    it('waits for the save, open', async () => {
         const wrapper = mountDialog({ onSubmit: aSaveInFlight() });
         const dialog = await open(wrapper);
         await choose(wrapper, 'Activity', activityTypes[0]);
 
         await press(dialog, 'Confirm');
 
-        expect(isOpen()).toBe(false);
-        expect(select(wrapper, 'Activity').props('modelValue')).toBeNull();
+        expect(wrapper.props('onSubmit')).toHaveBeenCalled();
+        expect(isOpen()).toBe(true);
+    });
+
+    it('stays open, with the entry, and says so, when the save fails', async () => {
+        const wrapper = mountDialog({ onSubmit: vi.fn().mockRejectedValue(httpError(500)) });
+        const dialog = await open(wrapper);
+        await choose(wrapper, 'Activity', activityTypes[0]);
+
+        await press(dialog, 'Confirm');
+
+        expect(isOpen()).toBe(true);
+        expect(document.body.textContent).toContain("Couldn't save. Try again.");
+        expect(select(wrapper, 'Activity').props('modelValue')).toEqual(activityTypes[0]);
     });
 });

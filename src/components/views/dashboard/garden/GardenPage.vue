@@ -4,11 +4,18 @@
       <v-col cols="12" class="text-center">
         <page-title title="Garden Overview"/>
         <v-spacer></v-spacer>
-        <v-btn class="mt-3" color="primary" @click="openAddHarvestDialog">Add Harvests</v-btn>
+        <!-- the dialog offers the plots' plantings, so it waits for the first load -->
+        <v-btn class="mt-3" color="primary" :disabled="!initialized" @click="openAddHarvestDialog">Add Harvests</v-btn>
         <v-btn class="mt-3 ml-3" color="success" @click="goToJournal">Journal</v-btn>
         <v-btn class="mt-3 ml-3" color="success" @click="goToActivityLog">Activity Log</v-btn>
         <v-btn class="mt-3 ml-3" color="default" @click="toggleShowRetired">{{ showRetired ? "Hide Retired" : "Show Retired" }}</v-btn>
-        <fade-out-alert :is-visible="alert.isVisible" :alert-type="alert.type" :message="alert.message"/>
+        <fade-out-alert
+            v-for="(alert, i) in alerts"
+            :key="'alert' + i"
+            :is-visible="alert.isVisible"
+            :alert-type="alert.type"
+            :message="alert.message"
+        />
       </v-col>
     </v-row>
 
@@ -16,7 +23,6 @@
       <v-col cols="12">
         <v-row>
           <v-col cols="12" lg="4" md="6"
-                 v-if="!loading"
                  v-for="hydratedPlot in hydratedPlots">
             <harvest-summary :hydrated-plot="hydratedPlot" :show-retired="showRetired"/>
           </v-col>
@@ -24,7 +30,7 @@
       </v-col>
     </v-row>
 
-    <v-dialog v-model="dialog" max-width="800px" persistent v-if="!loading">
+    <v-dialog v-model="dialog" max-width="800px" persistent>
       <v-card>
         <v-card-title class="d-flex align-center justify-space-between">
           <span class="headline mr-4">Add Harvests</span>
@@ -79,9 +85,11 @@
                 <v-col cols="3">
                   <v-text-field v-model.number="harvestsForm[harvestFormRecord.plantingId].quantity"
                                 type="number"
+                                step="1"
                                 label="Quantity"
                                 required
                                 density="compact"
+                                :error-messages="quantityError(harvestsForm[harvestFormRecord.plantingId].quantity)"
                   ></v-text-field>
                 </v-col>
               </v-row>
@@ -91,7 +99,7 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="error" @click="closeDialog">Cancel</v-btn>
-          <v-btn color="primary" @click="confirmHarvests" :disabled="this.harvestsEntered.length === 0">Save
+          <v-btn color="primary" @click="confirmHarvests" :disabled="!canSave">Save
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -104,6 +112,7 @@
         :harvest-types="harvestTypes"
         :on-cancel="closeConfirmDialog"
         :on-back="goBackToHarvestDialog"
+        :saving="saving"
         :on-confirm="saveHarvests"/>
 
   </v-container>
@@ -121,6 +130,7 @@ import ConfirmHarvestsDialog from "@/components/garden/ConfirmHarvestsDialog.vue
 import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
 import harvestUtils from "@/utils/harvest-utils";
 import { toLocalDate } from '@/utils/dates';
+import { alertOf } from '@/store/alerts';
 
 export default {
   name: 'GardenPage',
@@ -134,11 +144,9 @@ export default {
   },
 
   data: () => ({
-    loading: false,
     initialized: false,
     showRetired: false,
 
-    overrideHarvestDateDialog: false,
     selectedHarvestDate: new Date(),
 
     dialog: false,
@@ -147,6 +155,8 @@ export default {
 
     harvestsConfirmDialog: false,
     saveErrorMessage: '',
+    // a save in flight: Confirm waits for it, so a second press can't file the harvests twice
+    saving: false,
   }),
 
   computed: {
@@ -160,7 +170,6 @@ export default {
     }),
 
     ...mapState(usePlantsStore, {
-      plants: 'plants',
       plantsById: 'plantsById',
       harvestTypes: 'harvestTypes',
     }),
@@ -171,27 +180,22 @@ export default {
 
     ...mapState(useHarvestsStore, {
       harvestQuantitiesByPlanting: 'harvestQuantitiesByPlanting',
-      alertType: 'alertType',
-      alertMessage: 'alertMessage',
-      alertVisible: 'alertVisible',
     }),
 
-    alert() {
-      return {
-        isVisible: this.alertVisible,
-        type: this.alertType,
-        message: this.alertMessage,
-      };
+    alerts() {
+      return [useHarvestsStore(), usePlotsStore(), usePlantsStore(), usePlantingsStore()].map(alertOf);
     },
 
     filteredPlots() {
-      return this.plots.sort(sorting.sortByPlotFriendlyName);
+      return [...this.plots].sort(sorting.sortByFriendlyName);
     },
 
     hydratedPlots() {
       if (this.initialized) {
         const mappedPlots = this.plantings
-            .filter(planting => planting.plotId) // only with assigned
+            // only with a plot, and one that's loaded: the garden is laid out
+            // by plot, and the plots store's alert says when they didn't load
+            .filter(planting => planting.plotId && this.plotsById[planting.plotId])
             .reduce((acc, planting) => {
               if (!acc[planting.plotId]) {
                 const plot = this.plotsById[planting.plotId];
@@ -213,7 +217,7 @@ export default {
               return acc;
             }, {});
 
-        return Object.values(mappedPlots).sort(sorting.sortByPlotFriendlyName);
+        return Object.values(mappedPlots).sort(sorting.sortByFriendlyName);
       } else {
         return {};
       }
@@ -227,6 +231,12 @@ export default {
 
     harvestsEntered() {
       return Object.values(this.harvestsForm).filter(harvest => harvest.quantity > 0);
+    },
+
+    // at least one, and each a whole number: the service stores a quantity
+    // as one, rounding a fraction
+    canSave() {
+      return this.harvestsEntered.length > 0 && this.harvestsEntered.every(harvest => Number.isInteger(harvest.quantity));
     },
   },
 
@@ -262,30 +272,38 @@ export default {
     },
 
     openAddHarvestDialog() {
-      if (!this.loading) {
-        this.saveErrorMessage = '';
-        const tempPlots = this.hydratedPlots;
+      this.saveErrorMessage = '';
+      // harvested today, the day it's opened: an override from before, and
+      // the day the page was opened, are gone
+      this.selectedHarvestDate = new Date();
+      const tempPlots = this.hydratedPlots;
 
-        for (let i = 0; i < tempPlots.length; i++) {
-          const plot = tempPlots[i];
-          for (let j = 0; j < plot.plantings.length; j++) {
-            const tempPlanting = plot.plantings[j];
-            this.harvestsForm[tempPlanting.plantingId] = {
-              plotId: plot.plotId,
-              plotName: plot.friendlyName,
-              plantingId: tempPlanting.plantingId,
-              plantingName: tempPlanting.name,
-              plantName: tempPlanting.plant.friendlyName,
-              harvestTypeId: tempPlanting.plant.harvesting?.defaultHarvestTypeId
-                  ?? harvestUtils.unspecifiedHarvestTypeId,
-              quantity: 0,
-              currentStatus: tempPlanting.currentStatus,
-            }
+      for (let i = 0; i < tempPlots.length; i++) {
+        const plot = tempPlots[i];
+        for (let j = 0; j < plot.plantings.length; j++) {
+          const tempPlanting = plot.plantings[j];
+          this.harvestsForm[tempPlanting.plantingId] = {
+            plotId: plot.plotId,
+            plotName: plot.friendlyName,
+            plantingId: tempPlanting.plantingId,
+            plantingName: tempPlanting.name,
+            // a plant that didn't load: the planting is offered without it
+            plantName: tempPlanting.plant?.friendlyName,
+            harvestTypeId: tempPlanting.plant?.harvesting?.defaultHarvestTypeId
+                ?? harvestUtils.unspecifiedHarvestTypeId,
+            quantity: 0,
+            currentStatus: tempPlanting.currentStatus,
           }
         }
-
-        this.dialog = true;
       }
+
+      this.dialog = true;
+    },
+
+    // a fraction is the one case worth saying why: the box takes it, and
+    // Save waits
+    quantityError(quantity) {
+      return typeof quantity === 'number' && quantity > 0 && !Number.isInteger(quantity) ? 'A whole number' : [];
     },
 
     onDialogSelectPlotChange(plot) {
@@ -327,6 +345,9 @@ export default {
     },
 
     async saveHarvests() {
+      if (this.saving) {
+        return;
+      }
       const mappedHarvests = Object.values(this.harvestsForm)
           .filter(h => h.quantity > 0)
           .map(h => ({
@@ -337,17 +358,17 @@ export default {
             harvestTypeId: h.harvestTypeId,
           }));
 
-      if (mappedHarvests.length > 0) {
-        try {
-          await this.upsertHarvests(mappedHarvests);
-        } catch (err) {
-          // reopen the entry dialog so the quantities survive a rejected harvest type id
-          this.saveErrorMessage = harvestUtils.upsertErrorMessage(err, 'error saving harvests');
-          this.goBackToHarvestDialog();
-          return;
-        }
-      } else {
-        console.log('no harvests entered, skipping save');
+      // Save is offered only once a quantity is entered, so there's always one
+      this.saving = true;
+      try {
+        await this.upsertHarvests(mappedHarvests);
+      } catch (err) {
+        // reopen the entry dialog so the quantities survive a rejected harvest type id
+        this.saveErrorMessage = harvestUtils.upsertErrorMessage(err, 'error saving harvests');
+        this.goBackToHarvestDialog();
+        return;
+      } finally {
+        this.saving = false;
       }
 
       this.closeConfirmDialog();

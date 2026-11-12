@@ -45,23 +45,12 @@ export default [
     // new code elsewhere is still checked. Backlog rows are in
     // ai-changelogs/projects/vigilant-harvest-app/2026-11-03-2-pinned-behaviour.md
     {
-        // Sorting a prop's or the store's array in place, inside a computed
-        // (backlog B21)
-        files: [
-            'src/components/plantings/AddPlantingDialog.vue',
-            'src/components/plantings/PlantPlantingActionDialog.vue',
-            'src/components/plantings/PlantingDetailsTab.vue',
-            'src/components/views/dashboard/garden/GardenPage.vue',
-            'src/components/views/dashboard/plantings/PlantingDetailsPage.vue',
-        ],
-        rules: {
-            'vue/no-side-effects-in-computed-properties': 'off',
-            'vue/no-mutating-props': 'off',
-        },
+        // PlantingDetailsTab binds its fields' v-models straight to the
+        // `planting` prop, so the page's copy is edited in place; the page
+        // relies on it
+        files: ['src/components/plantings/PlantingDetailsTab.vue'],
+        rules: { 'vue/no-mutating-props': 'off' },
     },
-    // PlantingDetailsTab also binds its fields' v-models straight to the
-    // `planting` prop, so the page's copy is edited in place; the page relies
-    // on it, and it's covered by the block above
     {
         // A list rendered without a key: adding one changes how Vue reuses
         // its elements
@@ -80,14 +69,9 @@ export default [
         },
     },
     {
-        // v-if beside v-for on the plot cards and the harvest dialog's rows
+        // v-if beside v-for on the harvest dialog's rows
         files: ['src/components/views/dashboard/garden/GardenPage.vue'],
         rules: { 'vue/no-use-v-if-with-v-for': 'off' },
-    },
-    {
-        // `alerts` returns nothing, so the page shows none (backlog A10)
-        files: ['src/components/views/dashboard/years/PlantingYearsPage.vue'],
-        rules: { 'vue/return-in-computed-property': 'off' },
     },
     {
         // An empty template: the page renders nothing while it signs on

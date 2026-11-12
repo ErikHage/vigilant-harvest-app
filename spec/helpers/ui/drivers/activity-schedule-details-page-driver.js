@@ -1,4 +1,4 @@
-import { expectEnabled, expectEventually, expectHidden, expectText, expectUrl, expectVisible } from './assertions';
+import { expectDisabled, expectEventually, expectHidden, expectText, expectUrl, expectVisible } from './assertions';
 import { chooseOption } from './select';
 import { escaped, urlOf } from './urls';
 import { status } from '../support/status-codes';
@@ -14,8 +14,9 @@ const ruleOf = ({ frequency, interval }) => `RRULE:FREQ=${frequency.toUpperCase(
 const units = { weekly: 'weeks', daily: 'days', monthly: 'months', yearly: 'years' };
 const ruleInWords = ({ frequency, interval }) => `every ${interval} ${units[frequency]}`;
 
-// An item's update, sent with no schedule in its path (backlog A30)
-const itemUpdateUnderUndefined = /\/activity-schedules\/undefined\/schedule-items\/[^/]+$/;
+// An item's update, under the schedule with this id
+const itemUpdateUnder = scheduleId =>
+    new RegExp(`/activity-schedules/${escaped(scheduleId)}/schedule-items/[^/]+$`);
 
 /**
  * An activity schedule's details page: its name and description, which a
@@ -91,15 +92,15 @@ export function createActivityScheduleDetailsPageDriver(page, serviceCalls) {
             await expectHidden(dialog, 'adding a schedule item');
         },
 
-        /** Pinned (A29): as `addItem`, and Create is offered for the interval, whatever it is. */
-        async addItemOfferingCreateForAnyInterval(item) {
-            const what = `adding a schedule item every ${item.interval}`;
-
+        /** Opens Add Item, and fills it in with `item`, without creating it. */
+        async startAddingItem(item) {
             await openDialog('Add Activity Schedule Item', main.getByRole('button', { name: 'Add Item' }));
             await fillItem(item);
-            await expectEnabled(dialog.getByRole('button', { name: 'Create' }), what);
-            await dialog.getByRole('button', { name: 'Create' }).click();
-            await expectHidden(dialog, what);
+        },
+
+        /** The open Add Item dialog withholds Create, as for an interval that isn't a whole number of at least 1. */
+        async withholdsCreate() {
+            await expectDisabled(dialog.getByRole('button', { name: 'Create' }), 'the Add Item dialog, with that interval');
         },
 
         /**
@@ -127,10 +128,16 @@ export function createActivityScheduleDetailsPageDriver(page, serviceCalls) {
             await expectHidden(dialog, 'editing a schedule item');
         },
 
-        /** Pinned (A30): the item's update went to the service with no schedule in its path, and was taken. */
-        async itemUpdateSentUnderUndefined() {
-            await expectEventually(() => serviceCalls.wereAnswered('PATCH', itemUpdateUnderUndefined, status.ok),
-                'the item\'s update to be sent to /activity-schedules/undefined/schedule-items/<id>, and answered 200',
+        /**
+         * The item's update went to the service under the schedule shown, the
+         * id in the page's address, and was taken. It once went under
+         * `undefined` (backlog A30).
+         */
+        async itemUpdateSentUnderItsSchedule() {
+            const scheduleId = new URL(page.url()).pathname.split('/').pop();
+
+            await expectEventually(() => serviceCalls.wereAnswered('PATCH', itemUpdateUnder(scheduleId), status.ok),
+                `the item's update to be sent to /activity-schedules/${scheduleId}/schedule-items/<id>, and answered 200`,
                 'editing a schedule item');
         },
 

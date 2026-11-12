@@ -1,4 +1,5 @@
 import { flushPromises } from '@vue/test-utils';
+import { httpError } from '../../../../helpers/http-errors';
 import { mountWithPlugins } from '../../../../helpers/mount';
 import { buttonLabelled } from '../../../../helpers/fields';
 import { dialogTitled } from '../../../../helpers/dialogs';
@@ -40,7 +41,7 @@ describe('DeleteScheduleItemDialog', () => {
         expect(details(dialog)).toEqual([
             ['Activity type', 'Fertilize'],
             ['Subcategory', 'Blood Meal'],
-            ['Recurrence', 'RRULE:FREQ=WEEKLY;INTERVAL=2'],
+            ['Recurrence', 'every 2 weeks'],
             ['Date(s)', 'May 1 - Sep 30'],
             ['Notes', 'Side-dress the tomatoes'],
         ]);
@@ -97,17 +98,17 @@ describe('DeleteScheduleItemDialog', () => {
         expect(buttonLabelled(dialog, 'Delete').attributes('disabled')).toBeDefined();
     });
 
-    // It waits for onSubmit; the page's never rejects, since the store
-    // swallows (A6)
-    it('stays open when the delete rejects', async () => {
+    // A failed delete keeps it open, and it says the delete failed
+    it('stays open, and says so, when the delete fails', async () => {
         const errorHandler = vi.fn();
-        const wrapper = mountDialog({ errorHandler, onSubmit: vi.fn().mockRejectedValue(new Error('error deleting activity schedule item')) });
+        const wrapper = mountDialog({ errorHandler, onSubmit: vi.fn().mockRejectedValue(httpError(500)) });
         const dialog = await open(wrapper);
         await confirm(dialog);
 
         await press(dialog, 'Delete');
 
-        expect(errorHandler).toHaveBeenCalledTimes(1);
+        expect(errorHandler).not.toHaveBeenCalled();
+        expect(document.body.textContent).toContain("Couldn't delete. Try again.");
         expect(isOpen()).toBe(true);
     });
 });

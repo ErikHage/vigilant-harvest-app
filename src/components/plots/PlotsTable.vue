@@ -64,7 +64,7 @@ export default {
             plot => plot.friendlyName.toUpperCase().includes(this.searchFilter.toUpperCase()));
       }
 
-      return filteredPlots.sort(sorting.sortByPlantFriendlyName);
+      return [...filteredPlots].sort(sorting.sortByFriendlyName);
     }
   }
 }

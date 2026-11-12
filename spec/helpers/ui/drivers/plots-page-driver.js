@@ -1,5 +1,4 @@
-import { expectEnabled, expectHidden, expectText, expectVisible } from './assertions';
-import { pageAlertSays } from './page-alert';
+import { expectDisabled, expectHidden, expectText, expectVisible } from './assertions';
 import { createRoutedPageDriver } from './routed-page-driver';
 import { chooseOption } from './select';
 
@@ -36,9 +35,14 @@ export function createPlotsPageDriver(page) {
             await expectVisible(dialog.getByText('Add Plot', { exact: true }), 'opening the Add Plot dialog');
         },
 
-        /** Clicks Create, and waits for the dialog to close, as it does whatever the service says. */
-        async create() {
+        /** Clicks Create, and nothing more: a refused save keeps the dialog open. */
+        async pressCreate() {
             await create.click();
+        },
+
+        /** Clicks it, and waits for the dialog to close, as a save that works does. */
+        async create() {
+            await this.pressCreate();
             await expectHidden(dialog, 'creating a plot');
         },
 
@@ -64,9 +68,9 @@ export function createPlotsPageDriver(page) {
             await expectHidden(dialog, what);
         },
 
-        /** Pinned (A16): Create is offered before anything is entered. */
-        async offersCreateWithNothingEntered() {
-            await expectEnabled(create, 'the Add Plot dialog, before anything is entered');
+        /** With nothing entered, the Add Plot dialog withholds Create. */
+        async withholdsCreateWithNothingEntered() {
+            await expectDisabled(create, 'the Add Plot dialog, before anything is entered');
         },
 
         /**
@@ -91,10 +95,6 @@ export function createPlotsPageDriver(page) {
             await search.fill(friendlyName);
             await expectText(rows.getByRole('cell').first(), friendlyName, what);
             await expectText(count, /^\s*1 of \d+ plots\s*$/, what);
-        },
-
-        async alertSays(message) {
-            await pageAlertSays(page, message, 'the plots page, after a failed save');
         },
     };
 }

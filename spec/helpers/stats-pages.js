@@ -1,21 +1,17 @@
 import { flushPromises } from '@vue/test-utils';
 import { createTestingPinia } from '@pinia/testing';
 import { VSelect } from 'vuetify/components';
+import HarvestStatsPage from '@/components/views/dashboard/stats/HarvestStatsPage.vue';
 import HarvestStatsCard from '@/components/harvests/HarvestStatsCard.vue';
 import StatsCard from '@/components/harvests/StatsCard.vue';
 import { useHarvestsStore } from '@/store';
 import { mountWithPlugins } from './mount';
 import { filedOn } from './harvests';
 
-// PlantingStatsPage and PlantStatsPage are the same page, apart from the
-// title, the select's label and the stats type they ask for (B29). Each spec
-// describes its own with this, given:
-// - `component`, `title`, `label` and `statsType`;
-// - `rows`: the stats rows the service sends for that type, in its order;
-// - `options`: the select's titles, for those rows;
-// - `chosen`: an option's index and the rows its cards show, by type.
-export function describeStatsPage({ component, title, label, statsType, rows, options, chosen }) {
-    const harvestStats = {
+// The year's stats as the service sends them, with these `rows`. Its
+// statsType always says Planting
+export function harvestStatsOf(rows) {
+    return {
         firstHarvestDate: filedOn('2026-07-02'),
         lastHarvestDate: filedOn('2026-07-11'),
         numberOfHarvests: 6,
@@ -23,16 +19,27 @@ export function describeStatsPage({ component, title, label, statsType, rows, op
         statsType: 'Planting',
         stats: rows,
     };
+}
+
+// HarvestStatsPage, for one stats type. It was two pages, PlantingStatsPage
+// and PlantStatsPage, the same apart from the title, the select's label and
+// the stats type they asked for (B29). Given:
+// - `statsType`, and the `title` and `label` it shows;
+// - `rows`: the stats rows the service sends for that type, in its order;
+// - `options`: the select's titles, for those rows;
+// - `chosen`: an option's index and the rows its cards show, by type.
+export function describeStatsPage({ title, label, statsType, rows, options, chosen }) {
+    const harvestStats = harvestStatsOf(rows);
 
     async function mountPage({ state = {} } = {}) {
         const pinia = createTestingPinia({
             initialState: {
                 common: { plantingYear: 2026 },
-                harvests: { harvestStats, ...state },
+                harvests: { harvestStats, harvestStatsType: statsType, ...state },
             },
         });
         const store = useHarvestsStore(pinia);
-        const wrapper = mountWithPlugins(component, { global: { plugins: [pinia] } });
+        const wrapper = mountWithPlugins(HarvestStatsPage, { props: { statsType }, global: { plugins: [pinia] } });
         await flushPromises();
         return { wrapper, store };
     }
@@ -41,7 +48,7 @@ export function describeStatsPage({ component, title, label, statsType, rows, op
     const optionTitles = wrapper => select(wrapper).props('items').map(item => select(wrapper).props('itemTitle')(item));
     const cards = wrapper => wrapper.findAllComponents(StatsCard).map(card => card.props('stats').harvestType);
 
-    describe(component.name, () => {
+    describe(`HarvestStatsPage, by ${statsType}`, () => {
         it(`asks for the year's ${statsType} stats`, async () => {
             const { wrapper, store } = await mountPage();
 
@@ -55,11 +62,19 @@ export function describeStatsPage({ component, title, label, statsType, rows, op
             expect(wrapper.findComponent(HarvestStatsCard).props('harvestStats')).toEqual(harvestStats);
         });
 
-        // harvestStatsData is a copy of the store's, so always an object
-        it('shows the totals card, empty, before the stats load', async () => {
-            const { wrapper } = await mountPage({ state: { harvestStats: {} } });
+        // It showed the totals card, empty, with --- for its dates (B29)
+        it('shows no totals, and offers nothing, before the stats load', async () => {
+            const { wrapper } = await mountPage({ state: { harvestStats: {}, harvestStatsType: null } });
 
-            expect(wrapper.findComponent(HarvestStatsCard).props('harvestStats')).toEqual({});
+            expect(wrapper.findComponent(HarvestStatsCard).exists()).toBe(false);
+            expect(select(wrapper).props('items')).toEqual([]);
+        });
+
+        it("shows none of the other type's stats, left in the store", async () => {
+            const other = statsType === 'Plant' ? 'Planting' : 'Plant';
+            const { wrapper } = await mountPage({ state: { harvestStatsType: other } });
+
+            expect(wrapper.findComponent(HarvestStatsCard).exists()).toBe(false);
             expect(select(wrapper).props('items')).toEqual([]);
         });
 

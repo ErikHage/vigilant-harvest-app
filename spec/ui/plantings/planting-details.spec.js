@@ -22,8 +22,9 @@ test.describe('A planting\'s details page', () => {
         await plantingDetailsPage.checkIsShownFor(`planting: ${alias}`);
     };
 
-    // The history's first entry shows the planting's fields as JSON, as the
-    // service files its creation (backlog B34, tier B)
+    // The history's first entry says the planting was created, and with what
+    // name. It showed the planting's fields as JSON, as the service files its
+    // creation (backlog B34)
     test('shows a new planting, the actions it allows, and its history', async ({
         garden, plantingsPage, plantingDetailsPage,
     }) => {
@@ -71,19 +72,12 @@ test.describe('A planting\'s details page', () => {
         await plantingsPage.checkPlantingFound('planting: early-remainder');
     });
 
-    // DocumentsCurrentBehavior: the plot has no rule, so Confirm is offered
-    // with none chosen, and the planting is planted nowhere (backlog A23).
-    // Should offer Confirm only once a plot is chosen
     test('plants a planting only once a plot is chosen', async ({ garden, plantingsPage, plantingDetailsPage }) => {
         await garden.hasPlanting('planting: early', 'plant: sungold', 'year: spring', 'status: started');
         await view(plantingsPage, plantingDetailsPage, 'early');
         await plantingDetailsPage.startPlantingWithNoPlot('planting: early', 'count: 6');
 
         await plantingDetailsPage.checkPlantNeedsAPlot();
-        await plantingDetailsPage.confirm();
-
-        await plantingDetailsPage.checkIsShownFor('planting: early');
-        await plantingDetailsPage.checkShowsPlanting('planting: early');
     });
 
     test('splits a started planting into new ones, which keep the rest', async ({
@@ -100,20 +94,12 @@ test.describe('A planting\'s details page', () => {
         await plantingsPage.checkPlantingFound('planting: early');
     });
 
-    // DocumentsCurrentBehavior: Confirm is offered with no splits added, the
-    // service takes an empty split, and the page moves on to the plantings as
-    // if it had split (backlog A24). Should offer Confirm only once there's a
-    // named split of at least one
     test('splits a planting only once there\'s a split', async ({ garden, plantingsPage, plantingDetailsPage }) => {
         await garden.hasPlanting('planting: early', 'plant: sungold', 'year: spring', 'status: started');
         await view(plantingsPage, plantingDetailsPage, 'early');
         await plantingDetailsPage.openSplitDialog();
 
         await plantingDetailsPage.checkSplitNeedsASplit();
-        await plantingDetailsPage.confirm();
-
-        await plantingsPage.checkIsShown();
-        await plantingsPage.checkPlantingFound('planting: early');
     });
 
     test('retires a planting, after which only a comment is offered', async ({
@@ -159,12 +145,12 @@ test.describe('A planting\'s details page', () => {
 
         await plantingDetailsPage.checkIsShownFor('planting: early');
         await plantingDetailsPage.checkShowsPlanting('planting: early');
+        // the history's entry once showed the update as JSON (backlog B34)
+        await plantingDetailsPage.checkHistoryShowsRename('planting: early');
     });
 
-    // DocumentsCurrentBehavior: the tab renders before the page has copied the
-    // planting, and the picker reads its date only once, so it opens with no
-    // date chosen, and confirming it clears the date on screen (backlog A21).
-    // Should open on the planting's date
+    // The tab renders before the page has copied the planting, so the picker
+    // is created with no date: it opens on the planting's date (backlog A21)
     test('keeps the target date when its picker is confirmed without a pick', async ({
         garden, plantingsPage, plantingDetailsPage,
     }) => {
@@ -175,9 +161,8 @@ test.describe('A planting\'s details page', () => {
         await plantingDetailsPage.checkTargetDateKeptByItsPicker('planting: early');
     });
 
-    // DocumentsCurrentBehavior: the page says it couldn't fetch the planting,
-    // then throws copying it, an unhandled rejection (backlog A25). Should
-    // say so without throwing
+    // It used to throw after saying so, copying the planting it didn't get
+    // (backlog A25)
     test('says when a planting doesn\'t exist', async ({ plantingDetailsPage }) => {
         await plantingDetailsPage.openUnknown();
 

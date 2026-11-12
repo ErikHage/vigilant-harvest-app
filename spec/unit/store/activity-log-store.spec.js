@@ -110,14 +110,12 @@ describe('useActivityLogStore', () => {
             expect(store.alertVisible).toBe(false);
         });
 
-        // DocumentsCurrentBehavior: the failure is swallowed, so the dialog that
-        // called it can't tell a failed save from a good one. Should rethrow, as
-        // upsertHarvests does, so the dialog can stay open and say why
-        it('shows an alert and logs when it fails, and still resolves', async () => {
+        // The dialog that called it stays open, and says why
+        it('shows an alert, logs, and rejects, when it fails', async () => {
             const err = httpError(400);
             activityLogApi.upsertActivityLogEntry.mockRejectedValue(err);
 
-            await expect(store.upsertActivityLogEntry(entry)).resolves.toBeUndefined();
+            await expect(store.upsertActivityLogEntry(entry)).rejects.toBe(err);
 
             expect(store.alertMessage).toBe('error upserting activity log entry');
             expect(store.alertType).toBe('error');

@@ -105,9 +105,9 @@ await dashboardPage.chooseYear('year: spring');
 
 **The harvests and stats pages show the chosen year's harvests too.** `garden.hasHarvest('planting: early', 'quantity: 3', 'on: 2026-07-07')` files one at noon in New York on its day, in 2026: harvests are timestamps too. The stats count only plantings in a plot (the service's query joins the plot), so arrange them planted. `drivers/days.js` writes days as these pages do.
 
-**The planning page counts days by the service's clock, not the browser's.** Its drivers work out what it should read from the real date in New York. `garden.hasPlantingYear('year: spring', 'leap: no')` picks a year that isn't a leap year, and `'leap: yes'` one that is, since the page's days of the year shift by one between them.
+**The planning page counts days from the browser's today,** in New York (the config's `timezoneId`). Its drivers work out what it should read from the real date there. `garden.hasPlantingYear('year: spring', 'leap: no')` picks a year that isn't a leap year, and `'leap: yes'` one that is. Today used to be shown a day early in a leap year (A31), and the leap-year test would show it again.
 
-**Uncaught errors are recorded.** `drivers/page-errors.js` keeps every error the page throws and nothing catches, unhandled rejections included, for pins on code that throws. Nothing fails a test for them on its own.
+**Uncaught errors are recorded.** `drivers/page-errors.js` keeps every error the page throws and nothing catches, unhandled rejections included, so a driver can check a page threw nothing (a missing planting, once A25's throw). Nothing fails a test for them on its own.
 
 **Absence is checked once, after a sync point.** A page that shows nothing looks the same before it reacts as after. A driver checking for absence first waits for the service call it depends on to be answered (`drivers/service-calls.js` records the page's calls from the start of each test), or for the page that follows, then reads the page once.
 
@@ -145,7 +145,7 @@ What a test names is made up, and deleted afterwards.
 - What the service refuses with 409 is tried once more after the rest. Newest first is wrong only for what the service ties together on the side: a planting carried forward into a year the test added is older than that year, and holds it.
 - A plant, plot or planting renamed on the page is remembered by its new name, and cleanup finds it by its old one too, in case the new one was never saved.
 - Plantings a step makes on the service's side are named too, before the step: each split, and the remainder the service splits off when fewer are planted out than were sown, `<name>(2 Remaining)`, as `planting: <alias>-remainder`.
-- It also ends the browser's own session in feral, since the app's Logout doesn't (backlog A2).
+- It also ends the browser's own session in feral, since most tests never press Logout.
 
 **After the last test, a residue check fails the run** if anything with a `ui-` name, or a planting year from 8000 to 8999, is still there: plots, plants, plantings, categories and subcategories, schedules, years. Harvests, journal and activity-log entries and schedule items hang off those. It throws from global teardown, which Playwright reports outside any test, and exits 1. (Setting `process.exitCode` there exits 0: Playwright sets its own.)
 

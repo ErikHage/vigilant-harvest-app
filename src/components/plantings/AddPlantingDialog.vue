@@ -5,6 +5,7 @@
         <span class="headline">Add Planting</span>
       </v-card-title>
       <v-card-text>
+        <v-alert v-if="saveError" type="error" density="compact" class="mb-4">{{ saveError }}</v-alert>
         <v-form ref="applicationForm">
           <v-text-field
               v-model="planting.name"
@@ -37,14 +38,16 @@
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn color="error" @click="handleOnCancel">Cancel</v-btn>
-        <v-btn color="primary" @click="handleSavePlanting">Create</v-btn>
+        <v-btn color="primary" :disabled="!canCreate" @click="handleSavePlanting">Create</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
 <script>
+import { saveFailureMessage } from '@/utils/save-failures';
 import sorting from "@/utils/sorting";
+import { hasText, isChosen } from '@/utils/form-rules';
 
 export default {
   name: "AddPlantingDialog",
@@ -58,6 +61,7 @@ export default {
 
   data() {
     return {
+      saveError: '',
       planting: {
         name: '',
         plantId: '',
@@ -69,12 +73,17 @@ export default {
   },
 
   computed: {
+    // what the service requires: a name and a plant
+    canCreate() {
+      return hasText(this.planting.name) && isChosen(this.planting.plantId);
+    },
+
     showDialog() {
       return this.show;
     },
 
     sortedPlants() {
-      return this.plants.sort(sorting.sortByPlantFriendlyName);
+      return [...this.plants].sort(sorting.sortByFriendlyName);
     }
   },
 
@@ -90,11 +99,18 @@ export default {
     },
 
     async handleSavePlanting() {
-      await this.onSubmit(this.planting);
+      this.saveError = '';
+      try {
+        await this.onSubmit(this.planting);
+      } catch (err) {
+        this.saveError = saveFailureMessage(err);
+        return;
+      }
       this.resetForm();
     },
 
     handleOnCancel() {
+      this.saveError = '';
       this.resetForm();
       this.onCancel();
     },

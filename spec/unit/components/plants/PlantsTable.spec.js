@@ -96,9 +96,8 @@ describe('PlantsTable', () => {
         expect(sortIcons(wrapper)[index]).toEqual(['mdi-sort-descending', 'primary']);
     });
 
-    // Unlike utils/sorting, which ignores case, this compares the strings as
-    // they are, so a lower-case name sorts after every capitalised one
-    it('sorts case-sensitively', () => {
+    // As utils/sorting does (backlog B21)
+    it('sorts ignoring case', () => {
         const wrapper = mountTable({
             plants: [
                 { plantId: 'a', friendlyName: 'zucchini' },
@@ -107,17 +106,17 @@ describe('PlantsTable', () => {
             ],
         });
 
-        expect(names(wrapper)).toEqual(['Zinnia', 'arugula', 'zucchini']);
+        expect(names(wrapper)).toEqual(['arugula', 'Zinnia', 'zucchini']);
     });
 
-    // With no filter, the list it sorts is the one it was given, so the
-    // parent's array (the plants store's list) is reordered too
-    it('sorts the array it was given in place', () => {
+    // It sorts a copy, though with no filter that's the plants store's list
+    // (backlog B21)
+    it('leaves the array it was given as it was', () => {
         const given = plants();
 
         mountTable({ plants: given });
 
-        expect(given.map(plant => plant.plantId)).toEqual(['plant-3', 'plant-2', 'plant-1']);
+        expect(given).toEqual(plants());
     });
 
     it.each([
@@ -130,12 +129,12 @@ describe('PlantsTable', () => {
         expect(names(wrapper)).toEqual(expected);
     });
 
-    // The filter matches the name, category and subcategory run together, so
-    // it also matches across where one ends and the next begins
-    it('matches a filter that spans the name and the category', () => {
+    // Each field on its own: the end of the name and the start of the
+    // category don't match together (backlog B21)
+    it("doesn't match a filter that spans the name and the category", () => {
         const wrapper = mountTable({ filter: 'beanleg' });
 
-        expect(names(wrapper)).toEqual(['Provider bush bean']);
+        expect(names(wrapper)).toEqual([]);
     });
 
     it('matches a plant with no category or subcategory by its name', () => {

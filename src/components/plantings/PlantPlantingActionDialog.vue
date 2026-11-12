@@ -9,6 +9,7 @@
         <span class="headline">Plant Planting</span>
       </v-card-title>
       <v-card-text>
+        <v-alert v-if="saveError" type="error" density="compact" class="mb-4">{{ saveError }}</v-alert>
         <v-select
             v-model="form.plotId"
             :items="sortedPlots"
@@ -46,21 +47,31 @@
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn color="error" @click="handleCancel">Cancel</v-btn>
-        <v-btn color="primary" @click="handleSubmit">Confirm</v-btn>
+        <v-btn color="primary" :disabled="!canConfirm" @click="handleSubmit">Confirm</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
 <script>
+import { saveFailureMessage } from '@/utils/save-failures';
 
 import plantingUtils from '../../utils/plantings';
 import sorting from "@/utils/sorting";
 
 import DatePickerDialogActivator from "@/components/utils/DatePickerDialogActivator.vue";
 import { toLocalDate } from '@/utils/dates';
+import { isChosen } from '@/utils/form-rules';
 
 const { plantingActions } = plantingUtils;
+
+// planted today: the day it's opened, not the day the page was
+const emptyForm = () => ({
+  transplantDate: new Date(),
+  numberTransplanted: 0,
+  plotId: null,
+  comment: null,
+});
 
 export default {
   name: "PlantPlantingActionDialog",
@@ -85,23 +96,24 @@ export default {
 
   data() {
     return {
+      saveError: '',
       show: false,
-      form: {
-        transplantDate: new Date(),
-        numberTransplanted: 0,
-        plotId: null,
-        comment: null,
-      },
+      form: emptyForm(),
     };
   },
 
   computed: {
+    // a plot: the garden lists only plantings that have one
+    canConfirm() {
+      return isChosen(this.form.plotId);
+    },
+
     formattedTransplantDate() {
       return this.form.transplantDate.toDateString();
     },
 
     sortedPlots() {
-      return this.plots.sort(sorting.sortByPlotFriendlyName);
+      return [...this.plots].sort(sorting.sortByFriendlyName);
     }
   },
 
@@ -115,17 +127,33 @@ export default {
       };
     },
 
-    handleSubmit() {
-      this.onSubmit(plantingActions.plant, this.getDataToSubmit());
+    async handleSubmit() {
+      this.saveError = '';
+      try {
+        await this.onSubmit(plantingActions.plant, this.getDataToSubmit());
+      } catch (err) {
+        this.saveError = saveFailureMessage(err);
+        return;
+      }
       this.show = false;
     },
 
     handleCancel() {
+      this.saveError = '';
       this.show = false;
     },
 
     setDateValue(newDateValue) {
       this.form.transplantDate = newDateValue;
+    },
+  },
+
+  watch: {
+    // each open starts afresh, so a cancelled entry is gone
+    show(open) {
+      if (open) {
+        this.form = emptyForm();
+      }
     },
   },
 }

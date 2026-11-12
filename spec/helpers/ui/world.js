@@ -226,9 +226,9 @@ async function deleteAll(named) {
 }
 
 /**
- * Ends the browser's own session in feral. The app's Logout doesn't (backlog
- * A2), so without this every test would leave one open there. Best effort:
- * the page may be closed, or elsewhere.
+ * Ends the browser's own session in feral. Most tests never press Logout, so
+ * without this every test would leave one open there. Best effort: the page
+ * may be closed, or elsewhere, and a session already ended is refused (401).
  */
 async function endBrowserSession(page) {
     try {
@@ -260,10 +260,12 @@ export function createWorld(page) {
     const plantingsByAlias = new Map();
     // Journal and activity-log entries: not deleted on their own, but with their year
     const entriesByAlias = new Map();
+    // Names typed for a plant but never saved, so nothing to delete
+    const unsavedNamesByAlias = new Map();
     let unknownPlantingId;
     const aliasMaps = [
         plotsByAlias, plantingYearsByAlias, categoriesByAlias, subcategoriesByAlias, plantsByAlias, schedulesByAlias,
-        plantingsByAlias, entriesByAlias, scheduleItemsByAlias,
+        plantingsByAlias, entriesByAlias, scheduleItemsByAlias, unsavedNamesByAlias,
     ];
     // Newest first, the order cleanup deletes in
     const named = [];
@@ -386,6 +388,19 @@ export function createWorld(page) {
             const planting = plantingsByAlias.get(alias);
             planting.formerNames.push(planting.name);
             planting.name = madeUpName(alias);
+            return copyOf(planting);
+        },
+
+        /** Forgets the harvest from the planting called `alias` `on` a day: it was removed. */
+        forgetHarvest(alias, on) {
+            known(plantingsByAlias, alias, 'planting', 'garden.hasPlanting');
+            const planting = plantingsByAlias.get(alias);
+            const harvest = planting.harvests.find(each => each.on === on);
+            if (harvest === undefined) {
+                throw new Error(`no harvest of the planting "${alias}" on ${on} in this test -- file one first with garden.hasHarvest`);
+            }
+            planting.harvests = planting.harvests.filter(each => each !== harvest);
+            planting.harvested -= harvest.quantity;
             return copyOf(planting);
         },
 
@@ -600,10 +615,16 @@ export function createWorld(page) {
             return copyOf(plant);
         },
 
-        /** A name for the plant called `alias` that is typed but never saved. */
+        /**
+         * A name for the plant called `alias` that is typed but never saved:
+         * the same one each time it's asked for, in a test.
+         */
         unsavedPlantName(alias) {
             known(plantsByAlias, alias, 'plant', 'garden.hasPlant');
-            return madeUpName(`${alias}-unsaved`);
+            if (!unsavedNamesByAlias.has(alias)) {
+                unsavedNamesByAlias.set(alias, madeUpName(`${alias}-unsaved`));
+            }
+            return unsavedNamesByAlias.get(alias);
         },
 
         /** As `newPlot`, for an activity schedule, with no items. */

@@ -8,6 +8,7 @@ import { useCommonStore, usePlantingsStore, usePlantsStore, usePlotsStore } from
 import { mountWithPlugins } from '../../../../../helpers/mount';
 import { buttonLabelled, inputLabelled } from '../../../../../helpers/fields';
 import { dialogTitled, findDialog } from '../../../../../helpers/dialogs';
+import { apiError, serviceErrorBody } from '../../../../../helpers/http-errors';
 
 const plants = [{ plantId: 'plant-1', friendlyName: 'Provider bush bean' }];
 const plantsById = { 'plant-1': plants[0] };
@@ -104,15 +105,14 @@ describe('PlantingsPage', () => {
         expect(wrapper.findComponent(AddPlantingDialog).props('plants')).toEqual(plants);
     });
 
-    // AddPlantingDialog declares neither, so they fall through to its root as
-    // attributes
-    it('passes the dialog a planting and the plots it has no props for', async () => {
+    // It passed a planting and the plots too, which AddPlantingDialog doesn't
+    // declare, so they fell through to its root as attributes (backlog B12)
+    it('passes the dialog only what it declares', async () => {
         const { wrapper } = await mountPage();
 
         const dialog = wrapper.findComponent(AddPlantingDialog);
-        expect(dialog.props()).not.toHaveProperty('planting');
-        expect(dialog.props()).not.toHaveProperty('plots');
-        expect(dialog.vm.$attrs).toMatchObject({ planting: null, plots });
+        expect(dialog.vm.$attrs).not.toHaveProperty('planting');
+        expect(dialog.vm.$attrs).not.toHaveProperty('plots');
     });
 
     it("creates the planting in the selected year, closes the dialog, and reloads", async () => {
@@ -131,6 +131,22 @@ describe('PlantingsPage', () => {
         }));
         expect(document.querySelector('.v-overlay--active')).toBeNull();
         expect(calls.slice(3)).toEqual(['plants', 'plots', 'plantings 2026']);
+    });
+
+    it('keeps the dialog open, with the name, and says why, when the save fails', async () => {
+        const { wrapper, plantingsStore, calls } = await mountPage();
+        plantingsStore.createPlanting.mockRejectedValue(apiError(400, serviceErrorBody(400, 'name must be at most 255 characters')));
+        await buttonLabelled(wrapper, 'Add').trigger('click');
+        await flushPromises();
+        await inputLabelled(dialogTitled('Add Planting'), 'Name').setValue('Fall beans');
+        await wrapper.findComponent(AddPlantingDialog).findComponent(VAutocomplete).setValue('plant-1');
+
+        await buttonLabelled(dialogTitled('Add Planting'), 'Create').trigger('click');
+        await flushPromises();
+
+        expect(findDialog('Add Planting').text()).toContain('name must be at most 255 characters');
+        expect(inputLabelled(dialogTitled('Add Planting'), 'Name').element.value).toBe('Fall beans');
+        expect(calls).toHaveLength(3);
     });
 
     it('closes the dialog on Cancel', async () => {

@@ -45,9 +45,9 @@ describe('UpsertPlotDialog', () => {
             expect(buttonLabelled(dialog, 'Create').exists()).toBe(true);
         });
 
-        // The service ignores isActive and stores true (its own pinned
-        // behaviour), so a new plot is active whatever this sends
-        it('submits the new plot, with an empty id and isActive false, then empties the form', async () => {
+        // Plots don't retire, and the service makes each new one active. The
+        // dialog sent isActive false, which the service ignored (backlog B24)
+        it('submits the new plot, with an empty id and no isActive, then empties the form', async () => {
             const wrapper = await mountDialog();
             const dialog = dialogTitled('Add Plot');
             await inputLabelled(dialog, 'Name').setValue('East bed');
@@ -64,22 +64,33 @@ describe('UpsertPlotDialog', () => {
                 lengthInInches: 96,
                 widthInInches: 48,
                 plotType: 'Raised Bed',
-                isActive: false,
             });
+            expect(wrapper.props('onSubmit').mock.calls[0][0]).not.toHaveProperty('isActive');
             expect(inputLabelled(dialogTitled('Add Plot'), 'Name').element.value).toBe('');
         });
 
-        // DocumentsCurrentBehavior: Create is never disabled and the fields
-        // marked required have no rules, so an empty plot is sent. The service
-        // rejects it (friendlyName and plotType are required), the store shows
-        // "error upserting plot", and the page closes the dialog anyway (A6).
-        // Should keep Create disabled until a name and type are given
-        it('submits an empty plot', async () => {
+        // What the service requires: a name, a type, and sizes in whole
+        // inches (backlog A16)
+        it('offers Create only once a name and type are given', async () => {
             const wrapper = await mountDialog();
+            const create = () => buttonLabelled(dialogTitled('Add Plot'), 'Create');
+            expect(create().attributes('disabled')).toBeDefined();
 
-            await buttonLabelled(dialogTitled('Add Plot'), 'Create').trigger('click');
+            await inputLabelled(dialogTitled('Add Plot'), 'Name').setValue('North bed');
+            expect(create().attributes('disabled')).toBeDefined();
 
-            expect(wrapper.props('onSubmit')).toHaveBeenCalledWith(expect.objectContaining({ friendlyName: '', plotType: '' }));
+            await typeSelect(wrapper).setValue('Bed');
+            expect(create().attributes('disabled')).toBeUndefined();
+        });
+
+        it.each([['', 'a cleared length'], ['12.5', 'a length with a fraction']])("doesn't offer Create for %j, %s", async length => {
+            const wrapper = await mountDialog();
+            await inputLabelled(dialogTitled('Add Plot'), 'Name').setValue('North bed');
+            await typeSelect(wrapper).setValue('Bed');
+
+            await inputLabelled(dialogTitled('Add Plot'), 'Length (inches)').setValue(length);
+
+            expect(buttonLabelled(dialogTitled('Add Plot'), 'Create').attributes('disabled')).toBeDefined();
         });
     });
 

@@ -14,6 +14,7 @@
         </v-card-title>
 
         <v-card-text>
+          <v-alert v-if="saveError" type="error" density="compact" class="mb-4">{{ saveError }}</v-alert>
           <!-- Current schedules -->
           <div class="text-caption text-disabled text-uppercase mb-2" style="letter-spacing:.05em">
             Assigned schedules
@@ -144,6 +145,7 @@
 </template>
 
 <script>
+import { saveFailureMessage } from '@/utils/save-failures';
 import {mapActions, mapState} from "pinia";
 import {useActivitySchedulesStore} from "@/store";
 
@@ -167,6 +169,7 @@ export default {
 
   data() {
     return {
+      saveError: '',
       workingSchedules: [],
       schedulesToAdd: [],
       selectedToAdd: null,
@@ -223,14 +226,21 @@ export default {
     },
 
     async handleSubmit(isActive) {
-      await this.onSubmit(
-          this.schedulesToAdd.map(s => s.activityScheduleId),
-          this.schedulesToRemove.map(s => s.activityScheduleId),
-      );
+      this.saveError = '';
+      try {
+        await this.onSubmit(
+            this.schedulesToAdd.map(s => s.activityScheduleId),
+            this.schedulesToRemove.map(s => s.activityScheduleId),
+        );
+      } catch (err) {
+        this.saveError = saveFailureMessage(err);
+        return;
+      }
       isActive.value = false;
     },
 
     handleCancel(isActive) {
+      this.saveError = '';
       this.initState();
       isActive.value = false;
     },

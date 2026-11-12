@@ -3,6 +3,7 @@
     <v-row>
       <v-col cols="12" class="text-center">
         <page-title title="Garden Journal"/>
+        <fade-out-alert :is-visible="alert.isVisible" :alert-type="alert.type" :message="alert.message"/>
       </v-col>
     </v-row>
 
@@ -34,20 +35,20 @@
           <div class="navigation-buttons d-flex justify-space-between mb-4">
             <v-btn
                 variant="tonal"
-                :disabled="!previousDate"
-                @click="selectDate(previousDate)"
+                :disabled="!olderDate"
+                @click="selectDate(olderDate)"
                 prepend-icon="mdi-chevron-left"
             >
-              Previous
+              Older
             </v-btn>
             <h2>{{ formatDate(selectedDate) }}</h2>
             <v-btn
                 variant="tonal"
-                :disabled="!nextDate"
-                @click="selectDate(nextDate)"
+                :disabled="!newerDate"
+                @click="selectDate(newerDate)"
                 append-icon="mdi-chevron-right"
             >
-              Next
+              Newer
             </v-btn>
           </div>
           <v-divider class="my-4" />
@@ -77,12 +78,15 @@ import {mapActions, mapState} from "pinia";
 import {useCommonStore, useJournalStore} from "@/store";
 import PageTitle from "@/components/layout/PageTitle.vue";
 import AddJournalEntryDialog from "@/components/views/dashboard/garden/AddJournalEntryDialog.vue";
+import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
+import { alertOf } from "@/store/alerts";
 
 export default {
   name: "GardenJournalPage",
 
   components: {
     AddJournalEntryDialog,
+    FadeOutAlert,
     PageTitle,
   },
 
@@ -100,6 +104,10 @@ export default {
     ...mapState(useJournalStore, {
       journalEntries: 'journalEntries',
     }),
+
+    alert() {
+      return alertOf(useJournalStore());
+    },
 
     groupedEntries() {
       return this.journalEntries.reduce((groups, entry) => {
@@ -136,18 +144,23 @@ export default {
       return items;
     },
 
+    // The day's entries by their time, then as recorded: the service sends
+    // them in no set order. entryDate is local, YYYY-MM-DDTHH:mm:ss, so sorts
+    // as text
     selectedEntries() {
-      return this.groupedEntries[this.selectedDate] || [];
+      return [...(this.groupedEntries[this.selectedDate] || [])].sort((a, b) =>
+          a.entryDate.localeCompare(b.entryDate) || a.dateCreated.localeCompare(b.dateCreated));
     },
 
-    previousDate() {
-      const index = this.sortedDates.indexOf(this.selectedDate);
-      return index > 0 ? this.sortedDates[index - 1] : null;
-    },
-
-    nextDate() {
+    // sortedDates runs newest first, as the timeline does
+    olderDate() {
       const index = this.sortedDates.indexOf(this.selectedDate);
       return index < this.sortedDates.length - 1 ? this.sortedDates[index + 1] : null;
+    },
+
+    newerDate() {
+      const index = this.sortedDates.indexOf(this.selectedDate);
+      return index > 0 ? this.sortedDates[index - 1] : null;
     }
   },
 

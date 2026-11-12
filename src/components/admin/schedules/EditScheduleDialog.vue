@@ -12,6 +12,7 @@
           <span class="headline">Edit Activity Schedule</span>
         </v-card-title>
         <v-card-text>
+          <v-alert v-if="saveError" type="error" density="compact" class="mb-4">{{ saveError }}</v-alert>
           <v-form ref="updateScheduleForm">
             <v-text-field
                 v-model="form.activityScheduleName"
@@ -40,6 +41,9 @@
 </template>
 
 <script>
+import { saveFailureMessage } from '@/utils/save-failures';
+import { hasText } from '@/utils/form-rules';
+
 export default {
   name: 'EditScheduleDialog',
 
@@ -55,6 +59,7 @@ export default {
 
   data() {
     return {
+      saveError: '',
       form: {
         activityScheduleId: '',
         activityScheduleName: '',
@@ -65,7 +70,7 @@ export default {
 
   computed: {
     isSaveDisabled() {
-      return !this.form.activityScheduleName || !this.form.description;
+      return !hasText(this.form.activityScheduleName);
     },
   },
 
@@ -77,15 +82,24 @@ export default {
     },
 
     async handleSaveSchedule(isActive) {
-      await this.onSubmit({
-        activityScheduleId: this.form.activityScheduleId,
-        name: this.form.activityScheduleName.trim(),
-        description: this.form.description,
-      });
+      this.saveError = '';
+      try {
+        await this.onSubmit({
+          activityScheduleId: this.form.activityScheduleId,
+          name: this.form.activityScheduleName.trim(),
+          description: this.form.description,
+        });
+      } catch (err) {
+        this.saveError = saveFailureMessage(err);
+        return;
+      }
       isActive.value = false;
     },
 
+    // back to the schedule, so the next open doesn't show a cancelled edit
     handleOnCancel(isActive) {
+      this.saveError = '';
+      this.resetForm(this.activitySchedule);
       isActive.value = false;
     },
   },

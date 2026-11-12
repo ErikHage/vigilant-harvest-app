@@ -2,9 +2,6 @@ import { expectDisabled, expectEnabled, expectHidden, expectText, expectUrl, exp
 import { chooseOption } from './select';
 import { escaped, urlOf } from './urls';
 
-// The tags dialog's chips, in its order (PlantTagsDialog)
-const offeredTags = ['Container Friendly', 'Cold Tolerant', 'Determinate', 'Indeterminate'];
-
 const editPageUrl = new RegExp(`^${escaped(urlOf('dashboard/plants/'))}[0-9a-f-]{36}/edit$`);
 
 /** A plant's edit page, and its dialogs, as Playwright sees them. */
@@ -112,18 +109,16 @@ export function createPlantEditPageDriver(page) {
         },
 
         /**
-         * Pinned (A18): after `tag` was toggled on, the form shows only the
-         * plant's tags that the dialog offers, with `tag`, in the dialog's
-         * order. Its other tags are gone.
+         * After `tag` was toggled on, the form shows all the plant's tags, then
+         * `tag`. Those the dialog didn't offer were once dropped (backlog A18).
          */
-        async dropsUnofferedTags(plant, tag) {
-            const kept = offeredTags.filter(each => each === tag || plant.tags.includes(each));
-            await expectText(tagChips, kept, `the tags of ${plant.friendlyName}, after toggling ${tag}`);
+        async keepsOwnTagsWith(plant, tag) {
+            await expectText(tagChips, [...plant.tags, tag], `the tags of ${plant.friendlyName}, after toggling ${tag}`);
         },
 
-        /** Pinned (A17): the Name field is back to the plant's saved name, what was typed lost. */
-        async unsavedNameLost({ friendlyName }) {
-            await expectValue(field('Name'), friendlyName, 'the Name field, after the schedules were saved');
+        /** The Name field still holds `name`, typed and not saved. */
+        async unsavedNameKept(name) {
+            await expectValue(field('Name'), name, 'the Name field, after the schedules were saved');
         },
 
         /** Adds the schedule in the Manage Schedules dialog, saves, and waits for it to close. */

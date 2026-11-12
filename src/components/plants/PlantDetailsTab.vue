@@ -41,17 +41,21 @@
 export default {
   name: "PlantDetailsTab",
 
+  // the page shows its tabs only once the plant has loaded
   props: {
-    plant: Object,
+    plant: {
+      type: Object,
+      required: true,
+    },
   },
 
   computed: {
     createdAt() {
-      return this.plant ? new Date(this.plant.dateCreated).toLocaleString() : '--';
+      return new Date(this.plant.dateCreated).toLocaleString();
     },
 
     lastModifiedAt() {
-      return this.plant ? new Date(this.plant.dateModified).toLocaleString() : '--';
+      return new Date(this.plant.dateModified).toLocaleString();
     },
   },
 }

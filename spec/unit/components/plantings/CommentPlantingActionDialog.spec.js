@@ -1,4 +1,5 @@
 import { mountWithPlugins } from '../../../helpers/mount';
+import { apiError, serviceErrorBody } from '../../../helpers/http-errors';
 import { aSaveInFlight, isOpen, openAction, press } from '../../../helpers/action-dialogs';
 import CommentPlantingActionDialog from '@/components/plantings/CommentPlantingActionDialog.vue';
 
@@ -54,17 +55,26 @@ describe('CommentPlantingActionDialog', () => {
         expect(isOpen()).toBe(true);
     });
 
-    // DocumentsCurrentBehavior: it doesn't wait for onSubmit, so it closes,
-    // and forgets the comment, before the save is done. If the save fails, the
-    // comment is lost, whatever the store does (backlog A6). Should wait, and
-    // stay open if the save fails
-    it('closes before the save is done', async () => {
+    it('waits for the save, open', async () => {
         const wrapper = mountDialog({ onSubmit: aSaveInFlight() });
         const dialog = await open(wrapper);
         await dialog.find('textarea').setValue('First true leaves');
 
         await press(dialog, 'Confirm');
 
-        expect(isOpen()).toBe(false);
+        expect(wrapper.props('onSubmit')).toHaveBeenCalled();
+        expect(isOpen()).toBe(true);
+    });
+
+    it('stays open, with the comment, and says why, when the save fails', async () => {
+        const wrapper = mountDialog({ onSubmit: vi.fn().mockRejectedValue(apiError(400, serviceErrorBody(400, 'comment must be at most 1000 characters'))) });
+        const dialog = await open(wrapper);
+        await dialog.find('textarea').setValue('First true leaves');
+
+        await press(dialog, 'Confirm');
+
+        expect(isOpen()).toBe(true);
+        expect(document.body.textContent).toContain('comment must be at most 1000 characters');
+        expect(document.querySelector('.v-overlay--active textarea').value).toBe('First true leaves');
     });
 });

@@ -106,6 +106,16 @@ export const views = {
                     path: 'stats/plants',
                 },
             },
+            // any other path under the dashboard, behind the guard
+            notFound: {
+                name: 'DashboardNotFound',
+                path: ':pathMatch(.*)*',
+            },
         },
+    },
+    // any other path
+    notFound: {
+        name: 'NotFound',
+        path: '/:pathMatch(.*)*',
     },
 };

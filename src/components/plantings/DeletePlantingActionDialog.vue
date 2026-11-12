@@ -9,6 +9,7 @@
         <span class="headline">Delete Planting</span>
       </v-card-title>
       <v-card-text>
+        <v-alert v-if="saveError" type="error" density="compact" class="mb-4">{{ saveError }}</v-alert>
         <h3>Do you really want to delete {{ planting.name }}?</h3>
       </v-card-text>
 
@@ -22,6 +23,7 @@
 </template>
 
 <script>
+import { saveFailureMessage } from '@/utils/save-failures';
 
 import plantingUtils from '../../utils/plantings';
 
@@ -42,17 +44,25 @@ export default {
 
   data() {
     return {
+      saveError: '',
       show: false,
     };
   },
 
   methods: {
-    handleSubmit() {
-      this.onSubmit(plantingActions.delete, {});
+    async handleSubmit() {
+      this.saveError = '';
+      try {
+        await this.onSubmit(plantingActions.delete, {});
+      } catch (err) {
+        this.saveError = saveFailureMessage(err, "Couldn't delete. Try again.");
+        return;
+      }
       this.show = false;
     },
 
     handleCancel() {
+      this.saveError = '';
       this.show = false;
     },
   },

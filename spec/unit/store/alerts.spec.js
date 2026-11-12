@@ -1,8 +1,9 @@
 import { createPinia, setActivePinia } from 'pinia';
 import * as stores from '@/store';
 
-// Each of the 11 stores has its own copy of setAlertMessage. They are the
-// same, so one table tests them all, here rather than in each store's spec
+// All 11 stores share one setAlertMessage action (src/store/alerts.js). One
+// table tests it in each, here rather than in each store's spec, since each
+// store must keep its own timer
 const allStores = Object.entries(stores).filter(([name]) => /^use\w+Store$/.test(name));
 
 describe('setAlertMessage', () => {
@@ -69,18 +70,18 @@ describe('setAlertMessage', () => {
             expect(consoleError).toHaveBeenCalledWith(err);
         });
 
-        // DocumentsCurrentBehavior: an older alert's timer is never cleared, so it
-        // hides a newer alert early. Shown 2 seconds after the first, the second
-        // alert lasts 1 second. Should get its own 3 seconds
-        it("hides a newer alert when the older one's 3 seconds run out", () => {
+        it('gives a newer alert its own 3 seconds', () => {
             store.setAlertMessage(null, 'success', 'saved');
             vi.advanceTimersByTime(2000);
 
             store.setAlertMessage(null, 'error', 'error saving');
-            vi.advanceTimersByTime(1000);
+            vi.advanceTimersByTime(2999);
 
-            expect(store.alertVisible).toBe(false);
+            expect(store.alertVisible).toBe(true);
             expect(store.alertMessage).toBe('error saving');
+
+            vi.advanceTimersByTime(1);
+            expect(store.alertVisible).toBe(false);
         });
     });
 });

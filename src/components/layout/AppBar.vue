@@ -1,7 +1,7 @@
 <template>
   <v-app-bar app>
     <template v-if="$vuetify.display.smAndDown">
-      <v-btn :to="dashboardPath" icon>
+      <v-btn v-if="showAppBar === true" :to="dashboardPath" icon>
         <v-icon>mdi-home</v-icon>
       </v-btn>
 
@@ -16,7 +16,7 @@
 
       <v-spacer></v-spacer>
 
-      <v-btn @click="logoutUser">Logout</v-btn>
+      <v-btn v-if="showAppBar === true" @click="logoutUser">Logout</v-btn>
     </template>
 
     <template v-else>

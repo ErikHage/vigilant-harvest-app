@@ -64,11 +64,18 @@ describe('StatsCard', () => {
         expect(fieldRows(wrapper).slice(2)).toEqual([['Total Harvested', '40 count'], ['Average Harvest per Day', '4 count']]);
     });
 
-    // The service divides without rounding
-    it('shows the average as it comes, unrounded', () => {
+    // The service divides without rounding, and the card showed the average
+    // so: 2.3333333333333335 pounds (backlog B31)
+    it('shows the average to a tenth', () => {
         const wrapper = mountCard(plantingRow);
 
-        expect(fieldRows(wrapper)[3]).toEqual(['Average Harvest per Day', '2.3333333333333335 pounds']);
+        expect(fieldRows(wrapper)[3]).toEqual(['Average Harvest per Day', '2.3 pounds']);
+    });
+
+    it.each([[2.25, '2.3'], [0.04, '0'], [12, '12']])('rounds an average of %d to %s', (average, shown) => {
+        const wrapper = mountCard({ ...plantRow, averageHarvestPerDay: average, harvestType: 'unspecified' });
+
+        expect(fieldRows(wrapper)[3]).toEqual(['Average Harvest per Day', shown]);
     });
 
     it('shows --- for a missing date', () => {

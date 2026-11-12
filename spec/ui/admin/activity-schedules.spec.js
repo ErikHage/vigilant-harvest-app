@@ -25,9 +25,9 @@ test.describe('The activity schedules page', () => {
         await activityScheduleDetailsPage.checkShowsNoItems();
     });
 
-    // The filter matches the name and description run together (backlog B32,
-    // tier B): the end of one and the start of the other find the schedule
-    test('filters on a schedule\'s name and description run together', async ({ garden, activitySchedulesPage }) => {
+    // Each on its own (backlog B32, tier B): the end of one and the start of
+    // the other find nothing
+    test('filters on a schedule\'s name and description each on its own', async ({ garden, activitySchedulesPage }) => {
         await garden.hasSchedule('schedule: roses');
         await garden.hasSchedule('schedule: lawn');
         await activitySchedulesPage.open();
@@ -35,7 +35,7 @@ test.describe('The activity schedules page', () => {
 
         await activitySchedulesPage.filter('schedule: roses', 'by: both');
 
-        await activitySchedulesPage.checkListsOnly('schedule: roses');
+        await activitySchedulesPage.checkListsNone();
     });
 });
 
@@ -67,16 +67,12 @@ test.describe('An activity schedule\'s details page', () => {
         await activityScheduleDetailsPage.checkShowsSchedule('schedule: roses', 'items: 1');
     });
 
-    // DocumentsCurrentBehavior: Create is disabled only for a blank or 0
-    // interval, so a negative one goes into the rule, which the service
-    // stores as it is, and the page shows (backlog A29). Should offer Create
-    // only for a whole number of at least 1
     test('adds an item only for an interval of at least 1', async ({ activityScheduleDetailsPage }) => {
         await activityScheduleDetailsPage.checkIsShownFor('schedule: roses');
 
-        await activityScheduleDetailsPage.addItemEvery('item: feed', 'schedule: roses', 'interval: -1');
+        await activityScheduleDetailsPage.startAddingItemEvery('item: feed', 'schedule: roses', 'interval: -1');
 
-        await activityScheduleDetailsPage.checkListsItem('item: feed');
+        await activityScheduleDetailsPage.checkCreateNeedsAWholeInterval();
     });
 });
 
@@ -100,11 +96,9 @@ test.describe('An activity schedule\'s items', () => {
         await activityScheduleDetailsPage.checkListsItem('item: feed');
     });
 
-    // DocumentsCurrentBehavior: the edit dialog sends the item without its
-    // schedule's id, and the page passes it on, so the update goes to
-    // /activity-schedules/undefined/schedule-items/<id>; it works only
-    // because the service ignores the schedule in that path (backlog A30).
-    // Should send the update under the schedule shown
+    // The edit dialog sends the item without its schedule's id, so the page
+    // adds the one it shows; the update once went under `undefined` (backlog
+    // A30)
     test('sends an item\'s update under its schedule', async ({ activityScheduleDetailsPage }) => {
         await activityScheduleDetailsPage.checkListsItem('item: feed');
 

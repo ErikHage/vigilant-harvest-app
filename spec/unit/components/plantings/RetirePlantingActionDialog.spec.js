@@ -1,4 +1,5 @@
 import { mountWithPlugins } from '../../../helpers/mount';
+import { httpError } from '../../../helpers/http-errors';
 import { aSaveInFlight, isOpen, openAction, press } from '../../../helpers/action-dialogs';
 import RetirePlantingActionDialog from '@/components/plantings/RetirePlantingActionDialog.vue';
 
@@ -48,9 +49,8 @@ describe('RetirePlantingActionDialog', () => {
         expect(isOpen()).toBe(false);
     });
 
-    // DocumentsCurrentBehavior: Cancel keeps the comment, so the next open
-    // shows it, and Confirm sends it. Should clear it (backlog A13)
-    it('keeps a cancelled comment for the next time it opens', async () => {
+    // (backlog A13)
+    it('forgets a cancelled comment the next time it opens', async () => {
         const wrapper = mountDialog();
         let dialog = await open(wrapper);
         await dialog.find('textarea').setValue('never mind');
@@ -58,17 +58,24 @@ describe('RetirePlantingActionDialog', () => {
 
         dialog = await open(wrapper);
 
-        expect(dialog.find('textarea').element.value).toBe('never mind');
+        expect(dialog.find('textarea').element.value).toBe('');
     });
 
-    // DocumentsCurrentBehavior: it doesn't wait for onSubmit, so it closes
-    // before the retire is done, and can't stay open if it fails (backlog
-    // A6). Should wait
-    it('closes before the retire is done', async () => {
+    it('waits for the retire, open', async () => {
         const wrapper = mountDialog({ onSubmit: aSaveInFlight() });
 
         await press(await open(wrapper), 'Confirm');
 
-        expect(isOpen()).toBe(false);
+        expect(wrapper.props('onSubmit')).toHaveBeenCalled();
+        expect(isOpen()).toBe(true);
+    });
+
+    it('stays open, and says so, when the retire fails', async () => {
+        const wrapper = mountDialog({ onSubmit: vi.fn().mockRejectedValue(httpError(500)) });
+
+        await press(await open(wrapper), 'Confirm');
+
+        expect(isOpen()).toBe(true);
+        expect(document.body.textContent).toContain("Couldn't save. Try again.");
     });
 });

@@ -94,15 +94,13 @@ describe('HarvestSummary', () => {
         ]);
     });
 
-    // DocumentsCurrentBehavior: it reads each planting's plant without a
-    // guard, so a planting whose plant isn't loaded throws on render. On
-    // GardenPage, with the plants not loaded, no summary shows (backlog A19).
-    // Should show the planting without its plant.
-    //
-    // An error in a first render is rethrown by mount()
-    it('throws for a planting with no plant', () => {
+    // On GardenPage, with the plants not loaded (backlog A19)
+    it('shows a planting with no plant, without the plant', () => {
         const plantings = [{ ...hydratedPlot.plantings[0], plant: undefined }];
 
-        expect(() => mountSummary({ hydratedPlot: { ...hydratedPlot, plantings } })).toThrow(TypeError);
+        const { wrapper } = mountSummary({ hydratedPlot: { ...hydratedPlot, plantings } });
+
+        expect(wrapper.findAll('.planting-names .name-line').map(name => name.text()))
+            .toEqual([hydratedPlot.plantings[0].name]);
     });
 });

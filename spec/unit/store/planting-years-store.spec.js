@@ -39,23 +39,26 @@ describe('usePlantingYearsStore', () => {
         it('loads the years', async () => {
             plantingYearsApi.fetchPlantingYears.mockResolvedValue(plantingYears);
 
-            await store.fetchPlantingYears();
+            const loaded = await store.fetchPlantingYears();
 
             expect(plantingYearsApi.fetchPlantingYears).toHaveBeenCalledWith('a-token');
             expect(store.plantingYears).toEqual(plantingYears);
+            expect(loaded).toBe(true);
         });
 
-        it('shows an alert, and keeps the years it had, when the fetch fails', async () => {
+        it('shows an alert, logs, and keeps the years it had, when the fetch fails', async () => {
+            const err = httpError(500);
             plantingYearsApi.fetchPlantingYears.mockResolvedValueOnce(plantingYears);
             await store.fetchPlantingYears();
-            plantingYearsApi.fetchPlantingYears.mockRejectedValueOnce(httpError(500));
+            plantingYearsApi.fetchPlantingYears.mockRejectedValueOnce(err);
 
-            await store.fetchPlantingYears();
+            const loaded = await store.fetchPlantingYears();
 
+            expect(loaded).toBe(false);
             expect(store.alertMessage).toBe('error fetching planting years');
             expect(store.alertType).toBe('error');
             expect(store.plantingYears).toEqual(plantingYears);
-            expect(consoleError).not.toHaveBeenCalled();
+            expect(consoleError).toHaveBeenCalledWith(err);
         });
     });
 
@@ -69,15 +72,17 @@ describe('usePlantingYearsStore', () => {
             expect(store.plantingYear).toEqual(plantingYears[1]);
         });
 
-        it('shows an alert, and keeps the year it had, when the fetch fails', async () => {
+        it('shows an alert, logs, and keeps the year it had, when the fetch fails', async () => {
+            const err = httpError(404);
             plantingYearsApi.fetchPlantingYear.mockResolvedValueOnce(plantingYears[1]);
             await store.fetchPlantingYear(2026);
-            plantingYearsApi.fetchPlantingYear.mockRejectedValueOnce(httpError(404));
+            plantingYearsApi.fetchPlantingYear.mockRejectedValueOnce(err);
 
             await store.fetchPlantingYear(2030);
 
             expect(store.alertMessage).toBe('error fetching planting year');
             expect(store.plantingYear).toEqual(plantingYears[1]);
+            expect(consoleError).toHaveBeenCalledWith(err);
         });
     });
 

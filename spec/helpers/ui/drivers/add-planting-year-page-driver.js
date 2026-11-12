@@ -1,5 +1,4 @@
-import { expectEnabled, expectHidden, expectText, expectValue, expectVisible } from './assertions';
-import { pageAlertSays } from './page-alert';
+import { expectDisabled, expectHidden, expectText, expectValue, expectVisible } from './assertions';
 import { createRoutedPageDriver } from './routed-page-driver';
 
 /** The page that adds a planting year, and its two date pickers, as Playwright sees them. */
@@ -29,12 +28,12 @@ export function createAddPlantingYearPageDriver(page) {
 
         /**
          * Lists these plantings, by name, to carry forward, under its heading,
-         * which says "not retired" though only planted ones are listed (B17).
+         * which says they're the planted ones. It said "not retired" (B17).
          */
         async carriesForward(names) {
             const what = 'the plantings the add page carries forward';
 
-            await expectVisible(main.getByText('Plantings to carry forward (not retired)', { exact: true }), what);
+            await expectVisible(main.getByText('Plantings to carry forward (planted)', { exact: true }), what);
             await expectText(carried.locator('td:first-child'), names, what);
         },
 
@@ -61,17 +60,13 @@ export function createAddPlantingYearPageDriver(page) {
             return (await shown.textContent()).trim();
         },
 
-        /** Pinned (A14): Create is offered with no dates picked. */
-        async offersCreateWithNoDates() {
-            await expectEnabled(create, 'the add page, with no dates picked');
+        /** With no dates picked, the add page withholds Create. */
+        async withholdsCreateWithNoDates() {
+            await expectDisabled(create, 'the add page, with no dates picked');
         },
 
         async create() {
             await create.click();
-        },
-
-        async alertSays(message) {
-            await pageAlertSays(page, message, 'the add page, after the service refused the year');
         },
     };
 }

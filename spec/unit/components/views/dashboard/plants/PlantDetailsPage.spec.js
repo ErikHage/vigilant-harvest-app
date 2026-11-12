@@ -82,17 +82,13 @@ describe('PlantDetailsPage', () => {
         expect(wrapper.find('.v-alert').text()).toBe('error fetching plant');
     });
 
-    // DocumentsCurrentBehavior: the alert and the spinner are inside the
-    // v-if="plant", so with no plant loaded they don't show: opening a plant
-    // that fails to load shows a blank page. Should show the alert, and the
-    // spinner, without a plant
-    it('shows neither the alert nor the spinner without a plant', async () => {
+    it('shows the alert and the spinner without a plant', async () => {
         const { wrapper } = await mountPage({
             plantsById: {},
             state: { loading: true, alertVisible: true, alertType: 'error', alertMessage: 'error fetching plant' },
         });
 
-        expect(wrapper.find('.v-alert').exists()).toBe(false);
-        expect(wrapper.find('.v-progress-circular').exists()).toBe(false);
+        expect(wrapper.find('.v-alert').text()).toBe('error fetching plant');
+        expect(wrapper.find('.v-progress-circular').exists()).toBe(true);
     });
 });

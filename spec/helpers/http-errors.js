@@ -8,6 +8,12 @@ export function httpError(status, data = '') {
     });
 }
 
+// An error as the app's API modules reject with it (an ApiError): the status,
+// and the service's body as `data`
+export function apiError(status, data = '') {
+    return Object.assign(httpError(status, data), { data });
+}
+
 // An error as the HTTP client rejects with it when the service doesn't answer
 export function noAnswer() {
     return Object.assign(new Error('Network Error'), { isAxiosError: true });

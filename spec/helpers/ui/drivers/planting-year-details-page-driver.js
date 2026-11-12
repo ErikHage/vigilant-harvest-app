@@ -1,11 +1,18 @@
-import { expectText, expectUrl } from './assertions';
+import { expectEventually, expectText, expectThat, expectUrl } from './assertions';
 import { shortDate } from './planting-years-page-driver';
-import { urlOf } from './urls';
+import { escaped, urlOf } from './urls';
+import { serviceUrl } from '../setup/config';
+import { status } from '../support/status-codes';
+
+// Calls by their full paths, as service-calls.js records them
+const servicePath = escaped(new URL(serviceUrl).pathname);
+const yearsCallPath = new RegExp(`^${servicePath}/planting-years$`);
+const plantingsCallPath = new RegExp(`^${servicePath}/plantings$`);
 
 const statuses = ['CREATED', 'STARTED', 'PLANTED', 'RETIRED'];
 
 /** A planting year's details page, as Playwright sees it. It has no page title, only a card's. */
-export function createPlantingYearDetailsPageDriver(page, callControl) {
+export function createPlantingYearDetailsPageDriver(page, serviceCalls, callControl) {
     const main = page.getByRole('main');
     const title = main.locator('.v-card-title').first();
     const dateUnder = label => main.locator('.v-card', { has: page.locator('.v-card-subtitle', { hasText: label }) })
@@ -34,15 +41,22 @@ export function createPlantingYearDetailsPageDriver(page, callControl) {
         },
 
         /**
-         * Pinned (A15): while the year's own details are held, the page shows
-         * the year viewed before, `last`. Then lets them go, and the page shows
-         * `year`.
+         * While the year's own details are held, the page shows no year, not
+         * `last`, the one viewed before. That's read once, when the page's
+         * other call, for the plantings, has been answered since the years
+         * list was. Then lets the details go, and the page shows `year`.
          */
-        async showsTheLastYearViewedWhileLoading(year, last) {
+        async showsNoYearWhileLoading(year, last) {
             const what = `opening the planting year ${year.plantingYear}, after ${last.plantingYear}`;
 
             await expectUrl(page, urlOf(`dashboard/planting-years/${year.plantingYear}`), what);
-            await expectText(title, `Planting Year ${last.plantingYear}`, what);
+            await expectEventually(() => serviceCalls.wereAnsweredAfter(
+                { method: 'GET', path: yearsCallPath, status: status.ok },
+                { method: 'GET', path: plantingsCallPath, status: status.ok },
+            ), 'the page to have loaded the plantings', what);
+            const titles = await main.locator('.v-card-title').allTextContents();
+            expectThat(!titles.some(text => /Planting Year/.test(text)), 'no year shown while its details load',
+                JSON.stringify(titles), what);
             callControl.release();
             await expectText(title, `Planting Year ${year.plantingYear}`, what);
         },

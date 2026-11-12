@@ -1,11 +1,9 @@
-import { expectEnabled, expectEventually, expectHidden, expectText, expectThat, expectVisible } from './assertions';
+import { expectDisabled, expectHidden, expectText, expectVisible } from './assertions';
 import { createRoutedPageDriver } from './routed-page-driver';
 import { chooseOption } from './select';
 
-const logPath = /\/activity-log$/;
-
 /** The activity log, for the chosen year, and its Log Activity dialog. */
-export function createActivityLogPageDriver(page, serviceCalls, pageErrors) {
+export function createActivityLogPageDriver(page) {
     const main = page.getByRole('main');
     const dialog = page.getByRole('dialog');
     const confirm = dialog.getByRole('button', { name: 'Confirm' });
@@ -51,13 +49,9 @@ export function createActivityLogPageDriver(page, serviceCalls, pageErrors) {
             await openDialog('opening Log Activity');
         },
 
-        /** Pinned (A26): with no activity chosen, Confirm is offered. */
-        async offersConfirmWithNoActivity() {
-            await expectEnabled(confirm, 'Log Activity, with no activity chosen');
-        },
-
-        async confirm() {
-            await confirm.click();
+        /** With no activity chosen, Log Activity withholds Confirm. */
+        async withholdsConfirmWithNoActivity() {
+            await expectDisabled(confirm, 'Log Activity, with no activity chosen');
         },
 
         /**
@@ -65,14 +59,5 @@ export function createActivityLogPageDriver(page, serviceCalls, pageErrors) {
          * activity's name, sends nothing, and leaves the dialog open, saying
          * nothing.
          */
-        async confirmThrowsWithNoActivity() {
-            const what = 'confirming Log Activity with no activity chosen';
-
-            await expectEventually(() => pageErrors.messages().some(message => /TypeError|name/.test(message)),
-                'the page to throw reading the activity\'s name', what);
-            await expectVisible(dialog, what);
-            expectThat(serviceCalls.countMade('PUT', logPath) === 0, 'no entry sent',
-                `${serviceCalls.countMade('PUT', logPath)} sent`, what);
-        },
     };
 }

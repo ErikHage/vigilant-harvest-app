@@ -3,6 +3,7 @@ import { createTestingPinia } from '@pinia/testing';
 import PlantCategoriesPage from '@/components/views/dashboard/admin/PlantCategoriesPage.vue';
 import { usePlantsStore } from '@/store';
 import { mountWithPlugins } from '../../../../../helpers/mount';
+import { apiError, serviceErrorBody } from '../../../../../helpers/http-errors';
 import { inputLabelled } from '../../../../../helpers/fields';
 import { dialogTitled } from '../../../../../helpers/dialogs';
 import { isOpen, openAction, press } from '../../../../../helpers/action-dialogs';
@@ -63,14 +64,14 @@ describe('PlantCategoriesPage', () => {
         expect(store.fetchPlantCategories).toHaveBeenCalledTimes(1);
     });
 
-    // It compares with <, so case-sensitively: lower-case sorts last
+    // Ignoring case, as utils/sorting does (backlog B32)
     it('lists the categories by name, with their subcategories', async () => {
         const { wrapper } = await mountPage();
 
         expect(rows(wrapper)).toEqual([
+            ['alliums', []],
             ['Legumes', ['Beans', 'Peas']],
             ['Nightshades', ['Tomatoes', 'Peppers']],
-            ['alliums', []],
         ]);
         expect(count(wrapper)).toBe('3 of 3 categories');
     });
@@ -80,11 +81,11 @@ describe('PlantCategoriesPage', () => {
         expect(wrapper.find('thead .v-icon').classes()).toContain('mdi-sort-ascending');
 
         await toggleSort(wrapper);
-        expect(rows(wrapper).map(([name]) => name)).toEqual(['alliums', 'Nightshades', 'Legumes']);
+        expect(rows(wrapper).map(([name]) => name)).toEqual(['Nightshades', 'Legumes', 'alliums']);
         expect(wrapper.find('thead .v-icon').classes()).toContain('mdi-sort-descending');
 
         await toggleSort(wrapper);
-        expect(rows(wrapper).map(([name]) => name)).toEqual(['Legumes', 'Nightshades', 'alliums']);
+        expect(rows(wrapper).map(([name]) => name)).toEqual(['alliums', 'Legumes', 'Nightshades']);
     });
 
     it('filters by category or subcategory, in any case, and counts what it shows', async () => {
@@ -96,14 +97,14 @@ describe('PlantCategoriesPage', () => {
         expect(count(wrapper)).toBe('1 of 3 categories');
     });
 
-    // It matches the category and subcategory names run together, as
-    // PlantsTable does (B21): "Legumes" and "Beans" make "mesbea"
-    it('matches across the category and its first subcategory', async () => {
+    // Each name on its own: "Legumes" and "Beans" don't make "mesbea"
+    // (backlog B32)
+    it("doesn't match across the category and a subcategory", async () => {
         const { wrapper } = await mountPage();
 
         await filterBy(wrapper, 'mesbea');
 
-        expect(rows(wrapper).map(([name]) => name)).toEqual(['Legumes']);
+        expect(rows(wrapper)).toEqual([]);
     });
 
     it('says when nothing matches', async () => {
@@ -143,19 +144,19 @@ describe('PlantCategoriesPage', () => {
         expect(store.fetchPlantCategories).toHaveBeenCalledTimes(2);
     });
 
-    // DocumentsCurrentBehavior: createCategory and createSubcategory catch a
-    // failed save, alert and resolve, so the page's handler resolves, and the
-    // dialog, which waits for it, closes and empties as if it had saved
-    // (backlog A6). Should rethrow, so the dialog stays open
+    // createCategory and createSubcategory alert, and reject, so the
+    // page's handler rejects, and the dialog, which waits for it, stays open
+    // and says why
     it.each([
-        ['category', 'createCategory', 'error creating category'],
-        ['subcategory', 'createSubcategory', 'error creating subcategory'],
-    ])('closes the %s dialog when the save fails', async (kind, action, message) => {
+        ['category', 'createCategory', 'categoryName is required'],
+        ['subcategory', 'createSubcategory', 'subcategoryName is required'],
+    ])('keeps the %s dialog open, and says why, when the save fails', async (kind, action, message) => {
         const { wrapper, store } = await mountPage();
         store[action].mockImplementation(async () => {
             store.alertVisible = true;
             store.alertType = 'error';
             store.alertMessage = message;
+            throw apiError(400, serviceErrorBody(400, message));
         });
 
         if (kind === 'category') {
@@ -166,7 +167,9 @@ describe('PlantCategoriesPage', () => {
             await addSubcategoryTo(wrapper, 'Legumes', 'Lentils');
         }
 
-        expect(isOpen()).toBe(false);
+        expect(isOpen()).toBe(true);
+        expect(document.querySelector('.v-overlay--active').textContent).toContain(message);
         expect(wrapper.find('.v-alert').text()).toBe(message);
+        expect(store.fetchPlantCategories).toHaveBeenCalledTimes(1);
     });
 });

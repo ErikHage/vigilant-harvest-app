@@ -19,3 +19,14 @@ export function toLocalDateTime(date) {
 export function fromLocalDate(date) {
     return date == null ? date : dayjs(date).toDate();
 }
+
+// The planning service counts each day as its number in its own year,
+// January 1 being 1. That number, as the day it is in `year`
+export function dayOfYearIn(year, number) {
+    return dayjs(`${year}-01-01`).add(number - 1, 'day');
+}
+
+// Whole days from the user's today to `day`, below zero once it's past
+export function daysFromToday(day) {
+    return dayjs(day).startOf('day').diff(dayjs().startOf('day'), 'day');
+}

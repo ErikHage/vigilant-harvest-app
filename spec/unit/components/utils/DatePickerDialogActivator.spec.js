@@ -75,10 +75,8 @@ describe('DatePickerDialogActivator', () => {
         expect(findDialog('Sown on')).toBeUndefined();
     });
 
-    // DocumentsCurrentBehavior: Cancel closes the dialog but keeps the date that
-    // was picked, so opening it again and confirming submits the cancelled
-    // choice. Should go back to the date it was given
-    it('keeps a cancelled date for the next time it opens', async () => {
+    // Back to the date it was given (backlog A13)
+    it('forgets a cancelled date the next time it opens', async () => {
         const given = new Date(2026, 2, 1);
         const cancelled = new Date(2026, 2, 20);
         const wrapper = mountActivator({ date: given });
@@ -89,16 +87,17 @@ describe('DatePickerDialogActivator', () => {
 
         await buttonLabelled(await open(wrapper), 'Confirm').trigger('click');
 
-        expect(wrapper.props('onSubmit')).toHaveBeenCalledWith(cancelled);
+        expect(wrapper.props('onSubmit')).toHaveBeenCalledWith(given);
     });
 
     // The date is read once, when the component is created
-    it('ignores a new date given after it was created', async () => {
+    // (backlog A21)
+    it('opens on a new date given after it was created', async () => {
         const wrapper = mountActivator({ date: new Date(2026, 2, 1) });
         await wrapper.setProps({ date: new Date(2026, 3, 1) });
 
         await buttonLabelled(await open(wrapper), 'Confirm').trigger('click');
 
-        expect(wrapper.props('onSubmit')).toHaveBeenCalledWith(new Date(2026, 2, 1));
+        expect(wrapper.props('onSubmit')).toHaveBeenCalledWith(new Date(2026, 3, 1));
     });
 });

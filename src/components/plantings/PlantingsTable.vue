@@ -37,6 +37,7 @@
 <script>
 import plantingUtils from '@/utils/plantings'
 import sorting from "@/utils/sorting";
+import { matchesAny } from '@/utils/filtering';
 
 const { plantingStatuses, } = plantingUtils;
 
@@ -73,25 +74,23 @@ export default {
 
   computed: {
     hydratedPlantings() {
-      if (this.plantings.length > 0 && Object.keys(this.plotsMap).length > 0) {
+      // a planting needn't have a plot, and its plant may not have loaded:
+      // it's listed without the name it can't find
+      if (this.plantings.length > 0) {
         let filteredPlantings = this.plantings
             .map(planting => {
               const plant = this.plantsMap[planting.plantId];
               const plot = this.plotsMap[planting.plotId];
               return {
                 ...planting,
-                plantName: plant.friendlyName,
+                plantName: plant?.friendlyName,
                 plotName: plot?.friendlyName,
               };
             });
 
         if (this.filter) {
-          filteredPlantings = filteredPlantings.filter(planting => {
-            const matchString = planting.name.toUpperCase()
-                + planting.plantName.toUpperCase()
-                + (planting.plotName?.toUpperCase() ?? "");
-            return matchString.includes(this.filter.toUpperCase());
-          });
+          filteredPlantings = filteredPlantings.filter(planting =>
+              matchesAny(this.filter, planting.name, planting.plantName, planting.plotName));
         }
 
         if (this.statusFilter) {

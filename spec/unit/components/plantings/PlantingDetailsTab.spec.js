@@ -2,7 +2,8 @@ import { reactive } from 'vue';
 import { flushPromises } from '@vue/test-utils';
 import { VAutocomplete, VSelect } from 'vuetify/components';
 import { mountWithPlugins } from '../../../helpers/mount';
-import { inputLabelled } from '../../../helpers/fields';
+import { buttonLabelled, inputLabelled } from '../../../helpers/fields';
+import { dialogTitled } from '../../../helpers/dialogs';
 import { aPlanting } from '../../../helpers/plantings';
 import DatePickerDialogActivator from '@/components/utils/DatePickerDialogActivator.vue';
 import PlantingDetailsTab from '@/components/plantings/PlantingDetailsTab.vue';
@@ -88,15 +89,17 @@ describe('PlantingDetailsTab', () => {
     });
 
     // It sorts the arrays it was given, in place: the stores' lists (B21)
-    it('offers the plants and plots by name, ignoring case, sorting the arrays it was given', () => {
+    // It sorts copies (backlog B21)
+    it('offers the plants and plots by name, ignoring case, leaving the arrays it was given as they were', () => {
         const givenPlants = plants();
         const givenPlots = plots();
 
         const { wrapper } = mountTab({ plants: givenPlants, plots: givenPlots });
 
         expect(wrapper.findComponent(VAutocomplete).props('items').map(p => p.plantId)).toEqual(['plant-2', 'plant-1']);
-        expect(givenPlants.map(p => p.plantId)).toEqual(['plant-2', 'plant-1']);
-        expect(givenPlots.map(p => p.plotId)).toEqual(['plot-1', 'plot-2']);
+        expect(wrapper.findComponent(VSelect).props('items').map(p => p.plotId)).toEqual(['plot-1', 'plot-2']);
+        expect(givenPlants).toEqual(plants());
+        expect(givenPlots).toEqual(plots());
     });
 
     it('locks every field until editing is enabled', () => {
@@ -192,15 +195,11 @@ describe('PlantingDetailsTab', () => {
         expect($router.push).toHaveBeenCalledWith({ name: 'PlantDetailsPage', params: { plantId: 'plant-1' } });
     });
 
-    // The plot button's handler is a placeholder that only logs
-    it('does nothing from the plot button but log', async () => {
-        const log = vi.spyOn(console, 'log').mockImplementation(() => {});
-        const { wrapper, $router } = mountTab();
+    // Its handler only logged: there's no plot page to go to (backlog B12)
+    it('has no plot button', () => {
+        const { wrapper } = mountTab();
 
-        await wrapper.find('.mdi-vector-square').trigger('click');
-
-        expect($router.push).not.toHaveBeenCalled();
-        expect(log).toHaveBeenCalledWith('plot clicked, do something in the future');
+        expect(wrapper.find('.mdi-vector-square').exists()).toBe(false);
     });
 
     // The service sends dates as YYYY-MM-DD strings, and the pickers take
@@ -218,12 +217,10 @@ describe('PlantingDetailsTab', () => {
         expect(warn).not.toHaveBeenCalled();
     });
 
-    // DocumentsCurrentBehavior: each date picker reads its date only when
-    // it's created (backlog B15). The page renders this tab before its copy
-    // of the planting is filled, so every picker keeps the empty date it
-    // started with, and opens with nothing chosen. Confirming without picking
-    // then clears the date on screen. Should follow the planting's date
-    it('keeps the dates its pickers started with', async () => {
+    // The page renders this tab before its copy of the planting is filled, so
+    // the pickers are created with no dates. Each opens on the planting's date
+    // as it is then, so confirming without a pick keeps it (backlog A21)
+    it("opens each picker on the planting's date, though it arrived later", async () => {
         // reactive, as the page's copy is, so the tab sees the date arrive
         const planting = reactive(aPlanting({ currentStatus: 'STARTED', sowDate: null }));
         const { wrapper } = mountTab({ planting, enableEdit: true });
@@ -231,9 +228,11 @@ describe('PlantingDetailsTab', () => {
         await flushPromises();
         expect(shownDates(wrapper)[1]).toBe('2026-04-20');
 
-        pickers(wrapper)['Set Sow Date'].vm.handleOnSubmit();
+        await pickers(wrapper)['Set Sow Date'].find('.v-btn').trigger('click');
+        await flushPromises();
+        await buttonLabelled(dialogTitled('Set Sow Date'), 'Confirm').trigger('click');
         await flushPromises();
 
-        expect(shownDates(wrapper)[1]).toBe('--');
+        expect(shownDates(wrapper)[1]).toBe('2026-04-20');
     });
 });

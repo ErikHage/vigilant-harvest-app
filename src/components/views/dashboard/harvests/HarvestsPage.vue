@@ -4,7 +4,13 @@
       <v-col cols="12">
         <page-title title="Review Harvests"/>
         <v-spacer></v-spacer>
-        <fade-out-alert :is-visible="alert.isVisible" :alert-type="alert.type" :message="alert.message"/>
+        <fade-out-alert
+            v-for="(alert, i) in alerts"
+            :key="'alert' + i"
+            :is-visible="alert.isVisible"
+            :alert-type="alert.type"
+            :message="alert.message"
+        />
       </v-col>
     </v-row>
 
@@ -82,7 +88,8 @@
             </template>
           </v-card>
         </div>
-        <div v-else class="pa-4">Select a date from the timeline to see harvests.</div>
+        <!-- once loaded, the newest day is selected, so with none there are no harvests -->
+        <div v-else-if="loaded" class="pa-4">No harvests in {{ plantingYear }}.</div>
       </v-col>
     </v-row>
 
@@ -106,6 +113,7 @@ import PageTitle from "@/components/layout/PageTitle.vue";
 import EditHarvestsDialog from "@/components/harvests/EditHarvestsDialog.vue";
 import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
 import harvestUtils from "@/utils/harvest-utils";
+import { alertOf } from "@/store/alerts";
 
 export default {
   name: 'HarvestsPage',
@@ -125,6 +133,7 @@ export default {
     timelineEntries: [],
     selectedDate: null,
     expandedPlants: [],
+    loaded: false,
   }),
 
   computed: {
@@ -143,17 +152,10 @@ export default {
 
     ...mapState(useHarvestsStore, {
       harvests: 'harvests',
-      alertType: 'alertType',
-      alertMessage: 'alertMessage',
-      alertVisible: 'alertVisible',
     }),
 
-    alert() {
-      return {
-        isVisible: this.alertVisible,
-        type: this.alertType,
-        message: this.alertMessage,
-      };
+    alerts() {
+      return [useHarvestsStore(), usePlantsStore(), usePlantingsStore()].map(alertOf);
     },
 
     groupedHarvests() {
@@ -206,6 +208,7 @@ export default {
     ]),
 
     ...mapActions(useHarvestsStore, [
+      'deleteHarvest',
       'searchHarvests',
       'upsertHarvests',
     ]),
@@ -218,12 +221,14 @@ export default {
 
       this.hydratedHarvestsByDate = this.harvests
           .map(harvest => {
+            // a planting or plant that didn't load: the harvest shows without
+            // its name, and the store's alert says why
             const planting = this.plantingsById[harvest.plantingId];
-            const plant = this.plantsById[planting.plantId];
+            const plant = this.plantsById[planting?.plantId];
             return {
               ...harvest,
-              plantName: plant.friendlyName,
-              plantingName: planting.name,
+              plantName: plant?.friendlyName ?? '',
+              plantingName: planting?.name ?? '',
             };
           })
           .reduce((acc, hydratedHarvest) => {
@@ -258,6 +263,7 @@ export default {
       this.timelineEntries = withEllipsis;
 
       this.selectedDate = this.harvestDates[0] || null;
+      this.loaded = true;
     },
 
     showEditHarvestsDialog(harvests) {
@@ -268,7 +274,18 @@ export default {
       this.editHarvestsDialog = true;
     },
 
-    async updateHarvests(harvests) {
+    // Deletes those removed, then saves the rest. A delete of one already
+    // gone is answered 200, so trying again after a failure is safe
+    async updateHarvests(harvests, removedIds = []) {
+      try {
+        for (const harvestId of removedIds) {
+          await this.deleteHarvest(harvestId);
+        }
+      } catch {
+        this.editHarvestsErrorMessage = 'error deleting harvest';
+        return;
+      }
+
       const payload = harvests.map(harvest => ({
         harvestId: harvest.harvestId,
         plantingYear: this.plantingYear,
@@ -279,7 +296,9 @@ export default {
       }));
 
       try {
-        await this.upsertHarvests(payload);
+        if (payload.length > 0) {
+          await this.upsertHarvests(payload);
+        }
       } catch (err) {
         // keep the dialog open so the entries survive a rejected harvest type id
         this.editHarvestsErrorMessage = harvestUtils.upsertErrorMessage(err, 'error updating harvests');

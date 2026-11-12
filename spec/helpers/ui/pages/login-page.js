@@ -38,7 +38,7 @@ export function createLoginPage(world, driver) {
         async checkSignOnIsRejected(...args) {
             parseDslArgs(args, {});
 
-            await driver.refusedSignOnSaysNothing();
+            await driver.refusedSignOnSaysWhy();
         },
 
         /**
@@ -48,7 +48,7 @@ export function createLoginPage(world, driver) {
         async checkIsShownToReturnTo(...args) {
             const params = parseDslArgs(args, { path: path() });
 
-            await driver.isShownForgettingTheWayTo(params.path);
+            await driver.isShownToReturnTo(params.path);
         },
     };
 }

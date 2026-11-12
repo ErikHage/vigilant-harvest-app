@@ -31,5 +31,12 @@ export function createPlantDetailsPage(world, driver) {
 
             await driver.listsSchedules(params.schedule.map(world.scheduleNamed));
         },
+
+        /** The Schedules tab says the plant has none. */
+        async checkListsNoSchedules(...args) {
+            parseDslArgs(args, {});
+
+            await driver.listsNoSchedules();
+        },
     };
 }

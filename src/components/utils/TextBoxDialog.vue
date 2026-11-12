@@ -102,6 +102,13 @@ export default {
         this.textValue = newTextValue;
       },
     },
+
+    // each open starts from the value given, so a cancelled edit is gone
+    show(open) {
+      if (open) {
+        this.textValue = this.value;
+      }
+    },
   },
 }
 </script>

@@ -40,7 +40,7 @@ async function addPlantingYear(actorToken, plantingYearRequest) {
     });
     return response.data;
     } catch (err) {
-        console.log('error adding planting year ' + plantingYearRequest);
+        console.log('error adding planting year ' + plantingYearRequest.plantingYear);
         throw err;
     }
 }

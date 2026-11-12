@@ -12,6 +12,7 @@
           <span class="headline">Add Category</span>
         </v-card-title>
         <v-card-text>
+          <v-alert v-if="saveError" type="error" density="compact" class="mb-4">{{ saveError }}</v-alert>
           <v-form ref="categoryForm">
             <v-text-field
                 v-model="form.categoryName"
@@ -25,7 +26,7 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="error" text @click="handleOnCancel(isActive)">Cancel</v-btn>
-          <v-btn color="primary" text :disabled="!form.categoryName" @click="handleSaveCategory(isActive)">Create</v-btn>
+          <v-btn color="primary" text :disabled="!canCreate" @click="handleSaveCategory(isActive)">Create</v-btn>
         </v-card-actions>
       </v-card>
     </template>
@@ -33,8 +34,11 @@
 </template>
 
 <script>
+import { saveFailureMessage } from '@/utils/save-failures';
+import { hasText } from '@/utils/form-rules';
+
 export default {
-  name: 'AddCategoryDialog',
+  name: 'PlantCategoryAddDialog',
 
   props: {
     onSubmit: {
@@ -44,10 +48,17 @@ export default {
 
   data() {
     return {
+      saveError: '',
       form: {
         categoryName: '',
       },
     };
+  },
+
+  computed: {
+    canCreate() {
+      return hasText(this.form.categoryName);
+    },
   },
 
   methods: {
@@ -56,12 +67,19 @@ export default {
     },
 
     async handleSaveCategory(isActive) {
-      await this.onSubmit({ categoryName: this.form.categoryName.trim() });
+      this.saveError = '';
+      try {
+        await this.onSubmit({ categoryName: this.form.categoryName.trim() });
+      } catch (err) {
+        this.saveError = saveFailureMessage(err);
+        return;
+      }
       this.resetForm();
       isActive.value = false;
     },
 
     handleOnCancel(isActive) {
+      this.saveError = '';
       this.resetForm();
       isActive.value = false;
     },

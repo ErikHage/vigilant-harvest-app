@@ -6,6 +6,7 @@ import { mapActions, mapState } from "pinia";
 
 import { useAuthenticationStore } from "@/store";
 import { views } from "@/utils/constants";
+import { takeDestination } from "@/utils/sign-on-destination";
 
 export default {
   name: 'LandingPage',
@@ -32,9 +33,10 @@ export default {
       return urlParams.get('sso');
     },
 
+    // where the guard found them going, if anywhere
     redirectToDashboard() {
       console.log('redirecting to dashboard');
-      this.$router.push(views.dashboard.path);
+      this.$router.push(takeDestination() ?? views.dashboard.path);
     },
 
     redirectToLogin() {

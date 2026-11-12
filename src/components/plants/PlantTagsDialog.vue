@@ -17,7 +17,7 @@
       <v-card-text>
         <v-chip-group v-model="selectedTags" multiple column>
           <v-chip
-              v-for="tag in availableTags"
+              v-for="tag in offeredTags"
               color="green"
               :key="tag"
               :value="tag">
@@ -36,6 +36,14 @@
 </template>
 
 <script>
+// The tags every plant is offered
+const commonTags = [
+  'Container Friendly',
+  'Cold Tolerant',
+  'Determinate',
+  'Indeterminate',
+];
+
 export default {
   name: "PlantTagsDialog",
 
@@ -52,15 +60,18 @@ export default {
 
   data() {
     return {
-      availableTags: [
-          'Container Friendly',
-          'Cold Tolerant',
-          'Determinate',
-          'Indeterminate',
-      ],
       selectedTags: [],
       show: false,
     };
+  },
+
+  computed: {
+    // The common tags, then the plant's others. The chip group drops a value
+    // with no chip once any chip is toggled, so each of the plant's tags needs
+    // one
+    offeredTags() {
+      return [...commonTags, ...this.tags.filter(tag => !commonTags.includes(tag))];
+    },
   },
 
   methods: {
@@ -84,6 +95,13 @@ export default {
       handler(selectedTags) {
         this.selectedTags = selectedTags;
       },
+    },
+
+    // each open starts from the plant's tags, so a cancelled toggle is gone
+    show(open) {
+      if (open) {
+        this.selectedTags = [...this.tags];
+      }
     },
   },
 }

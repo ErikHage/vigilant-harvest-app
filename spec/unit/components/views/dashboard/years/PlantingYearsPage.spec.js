@@ -42,13 +42,9 @@ describe('PlantingYearsPage', () => {
         expect($router.push).toHaveBeenCalledWith({ name: 'PlantingYearDetailsPage', params: { year: 2026 } });
     });
 
-    // DocumentsCurrentBehavior: the page's alerts computed returns nothing, so
-    // its v-for renders no alert, and a failed load of the years is silent.
-    // Should show the planting-years store's alert, as AddPlantingYearPage does
-    it("doesn't show the planting-years store's alert", () => {
+    it("shows the planting-years store's alert", () => {
         const { wrapper } = mountPage({ alertVisible: true, alertType: 'error', alertMessage: 'error fetching planting years' });
 
-        expect(wrapper.find('.v-alert').exists()).toBe(false);
-        expect(wrapper.text()).not.toContain('error fetching planting years');
+        expect(wrapper.find('.v-alert').text()).toBe('error fetching planting years');
     });
 });

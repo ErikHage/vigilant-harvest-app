@@ -83,7 +83,7 @@ export function createPlantingDetailsPage(world, driver) {
         async checkPlantNeedsAPlot(...args) {
             parseDslArgs(args, {});
 
-            await driver.offersConfirmWithNoPlot();
+            await driver.withholdsConfirmWithNoPlot();
         },
 
         /**
@@ -112,14 +112,7 @@ export function createPlantingDetailsPage(world, driver) {
         async checkSplitNeedsASplit(...args) {
             parseDslArgs(args, {});
 
-            await driver.offersConfirmWithNoSplits();
-        },
-
-        /** Clicks Confirm in the open dialog, which closes. No parameters. */
-        async confirm(...args) {
-            parseDslArgs(args, {});
-
-            await driver.confirm();
+            await driver.withholdsConfirmWithNoSplits();
         },
 
         /** Retires the `planting`, confirming it. */
@@ -152,6 +145,13 @@ export function createPlantingDetailsPage(world, driver) {
             await driver.rename(world.renamePlanting(params.planting).name);
         },
 
+        /** After `renamePlanting`: the History tab has the update, which names the `planting`'s new name. */
+        async checkHistoryShowsRename(...args) {
+            const params = parseDslArgs(args, { planting: planting() });
+
+            await driver.historyShowsRename(world.plantingNamed(params.planting));
+        },
+
         /** The History tab shows the `planting`'s current status, and each comment the test made. */
         async checkHistoryShows(...args) {
             const params = parseDslArgs(args, { planting: planting() });
@@ -165,9 +165,9 @@ export function createPlantingDetailsPage(world, driver) {
          * picking a date keeps the `planting`'s target date.
          */
         async checkTargetDateKeptByItsPicker(...args) {
-            parseDslArgs(args, { planting: planting() });
+            const params = parseDslArgs(args, { planting: planting() });
 
-            await driver.targetDatePickerForgetsTheDate();
+            await driver.targetDatePickerKeepsTheDate(world.plantingNamed(params.planting));
         },
 
         /** Opens the details page of a planting that doesn't exist, by a made-up id. No parameters. */
@@ -181,7 +181,7 @@ export function createPlantingDetailsPage(world, driver) {
         async checkSaysThePlantingWasNotFound(...args) {
             parseDslArgs(args, {});
 
-            await driver.throwsForAMissingPlanting(world.unknownPlantingId());
+            await driver.saysAPlantingIsMissing(world.unknownPlantingId());
         },
     };
 }

@@ -9,6 +9,7 @@
         <span class="headline">Start Planting</span>
       </v-card-title>
       <v-card-text>
+        <v-alert v-if="saveError" type="error" density="compact" class="mb-4">{{ saveError }}</v-alert>
         <v-text-field
             v-model.number="form.numberSown"
             type="number"
@@ -42,6 +43,7 @@
 </template>
 
 <script>
+import { saveFailureMessage } from '@/utils/save-failures';
 
 import plantingUtils from '../../utils/plantings';
 
@@ -49,6 +51,13 @@ import DatePickerDialogActivator from "@/components/utils/DatePickerDialogActiva
 import { toLocalDate } from '@/utils/dates';
 
 const { plantingActions } = plantingUtils;
+
+// sown today: the day it's opened, not the day the page was
+const emptyForm = () => ({
+  sowDate: new Date(),
+  numberSown: 0,
+  comment: null,
+});
 
 export default {
   name: "StartPlantingActionDialog",
@@ -69,12 +78,9 @@ export default {
 
   data() {
     return {
+      saveError: '',
       show: false,
-      form: {
-        sowDate: new Date(),
-        numberSown: 0,
-        comment: null,
-      },
+      form: emptyForm(),
     };
   },
 
@@ -93,17 +99,33 @@ export default {
       };
     },
 
-    handleSubmit() {
-      this.onSubmit(plantingActions.start, this.getDataToSubmit());
+    async handleSubmit() {
+      this.saveError = '';
+      try {
+        await this.onSubmit(plantingActions.start, this.getDataToSubmit());
+      } catch (err) {
+        this.saveError = saveFailureMessage(err);
+        return;
+      }
       this.show = false;
     },
 
     handleCancel() {
+      this.saveError = '';
       this.show = false;
     },
 
     setDateValue(newDateValue) {
       this.form.sowDate = newDateValue;
+    },
+  },
+
+  watch: {
+    // each open starts afresh, so a cancelled entry is gone
+    show(open) {
+      if (open) {
+        this.form = emptyForm();
+      }
     },
   },
 }

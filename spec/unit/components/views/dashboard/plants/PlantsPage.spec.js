@@ -1,10 +1,12 @@
 import { flushPromises } from '@vue/test-utils';
 import { createTestingPinia } from '@pinia/testing';
+import { VSelect } from 'vuetify/components';
 import PlantsPage from '@/components/views/dashboard/plants/PlantsPage.vue';
 import PlantsTable from '@/components/plants/PlantsTable.vue';
 import AddPlantDialog from '@/components/plants/AddPlantDialog.vue';
 import { usePlantsStore } from '@/store';
 import { mountWithPlugins } from '../../../../../helpers/mount';
+import { apiError, serviceErrorBody } from '../../../../../helpers/http-errors';
 import { buttonLabelled, inputLabelled } from '../../../../../helpers/fields';
 import { dialogTitled, findDialog } from '../../../../../helpers/dialogs';
 
@@ -12,7 +14,11 @@ const plants = [
     { plantId: 'plant-1', friendlyName: 'Provider bush bean', category: 'Legumes', subcategory: 'Beans' },
     { plantId: 'plant-2', friendlyName: 'Cherokee Purple', category: 'Nightshades', subcategory: 'Tomatoes' },
 ];
-const categories = [{ categoryId: 'category-1', categoryName: 'Legumes', subcategories: [] }];
+const categories = [{
+    categoryId: 'category-1',
+    categoryName: 'Legumes',
+    subcategories: [{ subcategoryId: 'subcategory-2', subcategoryName: 'Peas' }],
+}];
 const harvestTypes = [{ harvestTypeId: 1, harvestTypeName: 'unspecified' }];
 
 async function mountPage(state = {}) {
@@ -24,6 +30,15 @@ async function mountPage(state = {}) {
     });
     await flushPromises();
     return { wrapper, store: usePlantsStore(pinia), $router };
+}
+
+// What Create needs: a name and a subcategory
+async function fillInAPlant(wrapper, dialog, name) {
+    const select = label => wrapper.findComponent(AddPlantDialog).findAllComponents(VSelect).find(s => s.props('label') === label);
+    await inputLabelled(dialog, 'Name').setValue(name);
+    await select('Category').setValue(categories[0]);
+    await select('Subcategory').setValue('subcategory-2');
+    await flushPromises();
 }
 
 async function openAddDialog(wrapper) {
@@ -89,9 +104,9 @@ describe('PlantsPage', () => {
 
     it('saves the plant, closes the dialog, and reloads', async () => {
         const { wrapper, store } = await mountPage();
-        store.upsertPlant.mockResolvedValue(true);
+        store.upsertPlant.mockResolvedValue();
         const dialog = await openAddDialog(wrapper);
-        await inputLabelled(dialog, 'Name').setValue('Sugar snap pea');
+        await fillInAPlant(wrapper, dialog, 'Sugar snap pea');
 
         await buttonLabelled(dialog, 'Create').trigger('click');
         await flushPromises();
@@ -101,22 +116,19 @@ describe('PlantsPage', () => {
         expect(store.fetchPlants).toHaveBeenCalledTimes(2);
     });
 
-    // DocumentsCurrentBehavior: upsertPlant resolves false when the save fails,
-    // but savePlant ignores it, so the dialog closes and the form is emptied:
-    // what was typed is lost. Should keep the dialog open, with the form as it
-    // was, so the alert's reason can be fixed
-    it('closes the dialog, and empties the form, when the save fails', async () => {
+    it('keeps the dialog open, with what was typed, and says why, when the save fails', async () => {
         const { wrapper, store } = await mountPage();
-        store.upsertPlant.mockResolvedValue(false);
-        let dialog = await openAddDialog(wrapper);
-        await inputLabelled(dialog, 'Name').setValue('Sugar snap pea');
+        store.upsertPlant.mockRejectedValue(apiError(400, serviceErrorBody(400, 'Friendly name already in use')));
+        const dialog = await openAddDialog(wrapper);
+        await fillInAPlant(wrapper, dialog, 'Sugar snap pea');
 
         await buttonLabelled(dialog, 'Create').trigger('click');
         await flushPromises();
 
-        expect(findDialog('Add Plant')).toBeUndefined();
-        dialog = await openAddDialog(wrapper);
-        expect(inputLabelled(dialog, 'Name').element.value).toBe('');
+        expect(findDialog('Add Plant')).toBeDefined();
+        expect(inputLabelled(findDialog('Add Plant'), 'Name').element.value).toBe('Sugar snap pea');
+        expect(findDialog('Add Plant').text()).toContain('Friendly name already in use');
+        expect(store.fetchPlants).toHaveBeenCalledTimes(1);
     });
 
     it("shows the plants store's alert", async () => {

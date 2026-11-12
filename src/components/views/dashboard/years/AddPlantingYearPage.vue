@@ -5,9 +5,12 @@
         <page-title title="Add Planting Year"/>
         <v-spacer></v-spacer>
         <fade-out-alert
+            v-for="(alert, i) in alerts"
+            :key="'alert' + i"
             :is-visible="alert.isVisible"
             :alert-type="alert.type"
-            :message="alert.message"/>
+            :message="alert.message"
+        />
       </v-col>
 
       <v-col cols="12">
@@ -53,10 +56,10 @@
 
           <v-row>
             <v-col cols="12" lg="6">
-              <h3>Plantings to carry forward (not retired)</h3>
+              <h3>Plantings to carry forward (planted)</h3>
               <v-table>
                 <tbody>
-                <template v-for="planting in notRetiredPlantings" :key="planting.plantingId">
+                <template v-for="planting in plantingsToCarryForward" :key="planting.plantingId">
                   <tr>
                     <td>
                       <span class="clickable text-primary font-weight-medium"
@@ -89,6 +92,7 @@
               <div class="d-flex justify-end">
                 <v-btn
                   color="success"
+                  :disabled="!canCreate"
                   @click="onSubmit"
                 >
                   Create New Planting Year
@@ -111,6 +115,8 @@ import DatePickerDialogActivator from "@/components/utils/DatePickerDialogActiva
 import dayjs from "dayjs";
 import plantingUtils from "@/utils/plantings";
 import { toLocalDate } from '@/utils/dates';
+import { alertOf } from '@/store/alerts';
+import { isChosen } from '@/utils/form-rules';
 
 export default {
   name: "AddPlantingYearPage",
@@ -118,41 +124,38 @@ export default {
 
   data() {
     return {
+      // proposed once the years have loaded
       newPlantingYear: {
-        previousPlantingYear: new Date().getFullYear(),
-        plantingYear: new Date().getFullYear() + 1,
+        previousPlantingYear: null,
+        plantingYear: null,
         lastFrostDate: null,
         targetPlantingDate: null,
       },
+      // the previous year's, kept here so the store's list, the chosen
+      // year's, is left alone
+      plantings: [],
     };
   },
 
   computed: {
+    // what the service requires: both dates, and a year, which isn't proposed
+    // until the years load
+    canCreate() {
+      return isChosen(this.newPlantingYear.plantingYear) &&
+          isChosen(this.newPlantingYear.lastFrostDate) && isChosen(this.newPlantingYear.targetPlantingDate);
+    },
+
     ...mapState(usePlantingYearsStore, {
       plantingYears: 'plantingYears',
-      alertType: 'alertType',
-      alertMessage: 'alertMessage',
-      alertVisible: 'alertVisible',
-    }),
-
-    ...mapState(usePlantingsStore, {
-      plantings: 'plantings',
     }),
 
     ...mapState(usePlantsStore, {
       plantsById: 'plantsById',
     }),
 
-    alert() {
-      return {
-        isVisible: this.alertVisible,
-        type: this.alertType,
-        message: this.alertMessage,
-      };
-    },
-
-    currentPlantingYear() {
-      return new Date().getFullYear();
+    // the plantings and plants carried forward load here too
+    alerts() {
+      return [usePlantingYearsStore(), usePlantingsStore(), usePlantsStore()].map(alertOf);
     },
 
     formattedLastFrostDate() {
@@ -167,7 +170,8 @@ export default {
           '--';
     },
 
-    notRetiredPlantings() {
+    // what the service carries forward: the planted ones
+    plantingsToCarryForward() {
       return this.plantings.filter(planting => planting.currentStatus === "PLANTED")
           .map(planting => ({
             ...planting,
@@ -184,12 +188,32 @@ export default {
     ]),
 
     ...mapActions(usePlantingsStore, [
-      'fetchPlantingsByYear',
+      'plantingsOfYear',
     ]),
 
     ...mapActions(usePlantsStore, [
       'fetchPlants',
     ]),
+
+    // The year after the latest, carrying forward from it. Years more than one
+    // past the calendar's don't count: a year added far ahead, by mistake,
+    // would otherwise set every proposal after it. With none, this calendar
+    // year, carrying nothing forward
+    proposeYears() {
+      const nextCalendarYear = new Date().getFullYear() + 1;
+      const years = this.plantingYears
+          .map(year => year.plantingYear)
+          .filter(year => year <= nextCalendarYear);
+
+      if (years.length === 0) {
+        this.newPlantingYear.plantingYear = nextCalendarYear - 1;
+        return;
+      }
+
+      const latest = Math.max(...years);
+      this.newPlantingYear.previousPlantingYear = latest;
+      this.newPlantingYear.plantingYear = latest + 1;
+    },
 
     getStatusColor(value) {
       return plantingUtils.mapPlantingStatusToColor(value);
@@ -213,9 +237,13 @@ export default {
     },
 
     async onSubmit() {
+      // with no previous year, the field is left out: nothing is carried
+      const { previousPlantingYear, ...newPlantingYear } = this.newPlantingYear;
+
       try {
         await this.addPlantingYear({
-          ...this.newPlantingYear,
+          ...newPlantingYear,
+          ...(previousPlantingYear === null ? {} : { previousPlantingYear }),
           lastFrostDate: toLocalDate(this.newPlantingYear.lastFrostDate),
           targetPlantingDate: toLocalDate(this.newPlantingYear.targetPlantingDate),
         });
@@ -229,8 +257,14 @@ export default {
   },
 
   async mounted() {
-    await this.fetchPlantingYears();
-    await this.fetchPlantingsByYear(this.currentPlantingYear);
+    // nothing is proposed if the years don't load: the store's alert shows,
+    // and Create stays off
+    if (await this.fetchPlantingYears()) {
+      this.proposeYears();
+    }
+    if (this.newPlantingYear.previousPlantingYear !== null) {
+      this.plantings = await this.plantingsOfYear(this.newPlantingYear.previousPlantingYear);
+    }
     await this.fetchPlants();
   },
 }

@@ -86,6 +86,8 @@ import FadeOutAlert from '@/components/utils/FadeOutAlert.vue';
 import PageTitle from "@/components/layout/PageTitle.vue";
 import PlantCategoryAddDialog from "@/components/admin/PlantCategoryAddDialog.vue";
 import PlantSubcategoryAddDialog from "@/components/admin/PlantSubcategoryAddDialog.vue";
+import sorting from '@/utils/sorting';
+import { matchesAny } from '@/utils/filtering';
 
 export default {
   name: 'PlantCategoriesPage',
@@ -112,25 +114,13 @@ export default {
       alertVisible: 'alertVisible',
     }),
 
-    alert() {
-      return {
-        isVisible: this.alertVisible,
-        type: this.alertType,
-        message: this.alertMessage,
-      };
-    },
-
     filteredCategories() {
       let result = this.categories;
       if (this.filter) {
-        const upper = this.filter.toUpperCase();
-        result = result.filter(c => {
-          const matchString = c.categoryName.toUpperCase()
-              + c.subcategories.map(s => s.subcategoryName).join(' ').toUpperCase();
-          return matchString.includes(upper);
-        });
+        result = result.filter(c =>
+            matchesAny(this.filter, c.categoryName, ...c.subcategories.map(s => s.subcategoryName)));
       }
-      return [...result].sort(this.generateSortingFunction(this.sortingField));
+      return [...result].sort(sorting.byProperty(this.sortingField));
     },
   },
 
@@ -174,17 +164,6 @@ export default {
       return activeField === property ? 'primary' : 'default';
     },
 
-    generateSortingFunction(property) {
-      let sortOrder = 1;
-      if (property[0] === '-') {
-        sortOrder = -1;
-        property = property.substring(1);
-      }
-      return (a, b) => {
-        const result = a[property] < b[property] ? -1 : a[property] > b[property] ? 1 : 0;
-        return result * sortOrder;
-      };
-    },
   },
 
   mounted() {

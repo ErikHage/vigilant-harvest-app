@@ -9,6 +9,7 @@
         <span class="headline">Split Planting</span>
       </v-card-title>
       <v-card-text>
+        <v-alert v-if="saveError" type="error" density="compact" class="mb-4">{{ saveError }}</v-alert>
         <div class="d-flex justify-space-between mb-2">
           <h3>Splits: </h3>
           <v-btn
@@ -41,6 +42,10 @@
           </v-row>
         </template>
 
+        <p v-if="splitsTotalTooMany" class="text-error mt-2">
+          The splits total {{ splitsTotal }}, more than the {{ planting.numberSown }} sown.
+        </p>
+
         <v-textarea
             v-model="form.comment"
             class="mt-4"
@@ -51,14 +56,16 @@
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn color="error" @click="handleCancel">Cancel</v-btn>
-        <v-btn color="primary" @click="handleSubmit">Confirm</v-btn>
+        <v-btn color="primary" :disabled="!canConfirm" @click="handleSubmit">Confirm</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
 <script>
+import { saveFailureMessage } from '@/utils/save-failures';
 import plantingUtils from '../../utils/plantings';
+import { hasText, isWholeNumber } from '@/utils/form-rules';
 
 const { plantingActions } = plantingUtils;
 
@@ -77,6 +84,7 @@ export default {
 
   data() {
     return {
+      saveError: '',
       show: false,
       form: {
         comment: null,
@@ -86,6 +94,23 @@ export default {
   },
 
   computed: {
+    splitsTotal() {
+      return this.form.splits.reduce((total, split) => total + (Number(split.count) || 0), 0);
+    },
+
+    // what was sown is the most the splits can take; with nothing recorded, the service checks
+    splitsTotalTooMany() {
+      const sown = this.planting?.numberSown;
+      return Number.isInteger(sown) && this.splitsTotal > sown;
+    },
+
+    // at least one split, each named, of at least one plant, and no more than were sown
+    canConfirm() {
+      return this.form.splits.length > 0
+          && this.form.splits.every(split => hasText(split.name) && isWholeNumber(split.count, 1))
+          && !this.splitsTotalTooMany;
+    },
+
 
   },
 
@@ -105,14 +130,20 @@ export default {
       };
     },
 
-    handleSubmit() {
-      // check total counts vs existing numberSown
-      this.onSubmit(plantingActions.split, this.getDataToSubmit());
+    async handleSubmit() {
+      this.saveError = '';
+      try {
+        await this.onSubmit(plantingActions.split, this.getDataToSubmit());
+      } catch (err) {
+        this.saveError = saveFailureMessage(err);
+        return;
+      }
       this.show = false;
       this.resetForm();
     },
 
     handleCancel() {
+      this.saveError = '';
       this.show = false;
       this.resetForm();
     },

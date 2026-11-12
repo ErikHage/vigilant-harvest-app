@@ -2,7 +2,7 @@ import { createPinia, setActivePinia } from 'pinia';
 import { usePlantsStore } from '@/store';
 import plantsApi from '@/api/plants-api';
 import harvestTypesApi from '@/api/harvest-types-api';
-import { httpError, serviceErrorBody } from '../../helpers/http-errors';
+import { apiError, httpError, serviceErrorBody } from '../../helpers/http-errors';
 
 vi.mock('@/api/plants-api');
 vi.mock('@/api/harvest-types-api');
@@ -14,10 +14,6 @@ const harvestTypes = [
     { harvestTypeId: 1, harvestTypeName: 'unspecified' },
     { harvestTypeId: 2, harvestTypeName: 'pounds' },
 ];
-
-function apiError(status, data) {
-    return Object.assign(httpError(status), { data });
-}
 
 describe('usePlantsStore', () => {
     let store;
@@ -111,13 +107,13 @@ describe('usePlantsStore', () => {
     });
 
     describe('upsertPlant', () => {
-        it('saves the plant and resolves true, loading meanwhile', async () => {
+        it('saves the plant, loading meanwhile', async () => {
             let loadingDuringCall;
             plantsApi.upsertPlant.mockImplementation(async () => {
                 loadingDuringCall = store.loading;
             });
 
-            await expect(store.upsertPlant(bean)).resolves.toBe(true);
+            await expect(store.upsertPlant(bean)).resolves.toBeUndefined();
 
             expect(plantsApi.upsertPlant).toHaveBeenCalledWith('a-token', bean);
             expect(loadingDuringCall).toBe(true);
@@ -125,11 +121,12 @@ describe('usePlantsStore', () => {
             expect(store.alertVisible).toBe(false);
         });
 
-        it('resolves false, and stops loading, when the save fails', async () => {
+        // The page or dialog that called it stays put, and says why
+        it('rejects, and stops loading, when the save fails', async () => {
             const err = apiError(500, '<html>Internal Server Error</html>');
             plantsApi.upsertPlant.mockRejectedValue(err);
 
-            await expect(store.upsertPlant(bean)).resolves.toBe(false);
+            await expect(store.upsertPlant(bean)).rejects.toBe(err);
 
             expect(store.loading).toBe(false);
             expect(store.alertType).toBe('error');
@@ -137,25 +134,15 @@ describe('usePlantsStore', () => {
             expect(consoleError).toHaveBeenCalledWith(err);
         });
 
-        // The service's old shape for its two 400s, before it standardised them
-        it("shows a top-level message from the service's body", async () => {
-            plantsApi.upsertPlant.mockRejectedValue(apiError(400, { message: 'Friendly name already in use' }));
+        it.each([
+            'subcategoryId is required',
+            'Friendly name already in use',
+        ])("shows the service's reason for a refused plant: %s", async message => {
+            plantsApi.upsertPlant.mockRejectedValue(apiError(400, serviceErrorBody(400, message)));
 
-            await store.upsertPlant(bean);
+            await store.upsertPlant(bean).catch(() => {});
 
-            expect(store.alertMessage).toBe('Friendly name already in use');
-        });
-
-        // DocumentsCurrentBehavior: reads err.data.message, but the service now
-        // sends every error as { errors: [{ message }] }, so a rejected plant
-        // always shows the generic alert. Should show the service's message, as
-        // harvestUtils.upsertErrorMessage does (validation-fixes doc, fix 1)
-        it("shows the generic alert for the service's standard error body", async () => {
-            plantsApi.upsertPlant.mockRejectedValue(apiError(400, serviceErrorBody(400, 'subcategoryId is required')));
-
-            await store.upsertPlant(bean);
-
-            expect(store.alertMessage).toBe('error upserting plant');
+            expect(store.alertMessage).toBe(message);
         });
     });
 
@@ -251,14 +238,12 @@ describe('usePlantsStore', () => {
             expect(store.alertVisible).toBe(false);
         });
 
-        // DocumentsCurrentBehavior: the failure is swallowed, so the page or
-        // dialog that called it can't tell a failed save from a good one. Should
-        // rethrow, as addPlantingYear does, so the caller can stay put and say why
-        it('shows an alert and logs when it fails, and still resolves', async () => {
+        // The page or dialog that called it stays put, and says why
+        it('shows an alert, logs, and rejects, when it fails', async () => {
             const err = httpError(400);
             plantsApi[api].mockRejectedValue(err);
 
-            await expect(store[action](...args)).resolves.toBeUndefined();
+            await expect(store[action](...args)).rejects.toBe(err);
 
             expect(store.alertMessage).toBe(failure);
             expect(store.alertType).toBe('error');

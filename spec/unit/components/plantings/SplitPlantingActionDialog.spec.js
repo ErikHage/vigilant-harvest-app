@@ -1,5 +1,7 @@
 import { flushPromises } from '@vue/test-utils';
+import { apiError, serviceErrorBody } from '../../../helpers/http-errors';
 import { mountWithPlugins } from '../../../helpers/mount';
+import { buttonLabelled } from '../../../helpers/fields';
 import { aSaveInFlight, isOpen, openAction, press } from '../../../helpers/action-dialogs';
 import SplitPlantingActionDialog from '@/components/plantings/SplitPlantingActionDialog.vue';
 
@@ -74,39 +76,64 @@ describe('SplitPlantingActionDialog', () => {
         expect(dialog.findAll('.v-row')).toHaveLength(0);
     });
 
-    // DocumentsCurrentBehavior: Confirm is never disabled and nothing is
-    // checked, so it sends no splits, splits with blank names, and counts of
-    // 0. The service rejects a blank name (splits[0].name is required, the
-    // validation-fixes doc's fix 3) and checks the total, which the dialog's
-    // own comment says it should. Should require a name and a count of at
-    // least 1 for each split, and check the total against numberSown
+    // Each split needs a name and at least one plant, and together they can
+    // take no more than were sown (backlog A24)
     it.each([
-        ['no splits', async () => {}, []],
-        ['a split with no name and a count of 0', async dialog => addSplit(dialog), [{ name: '', count: 0 }]],
+        ['no splits', async () => {}],
+        ['a split with no name and a count of 0', async dialog => addSplit(dialog)],
+        ['a split with a name of spaces', async dialog => addSplit(dialog, '   ', 3)],
+        ['a split of 0', async dialog => addSplit(dialog, 'North beans', 0)],
+        ['a split of 1.5', async dialog => addSplit(dialog, 'North beans', 1.5)],
         ['splits that add up to more than were sown', async dialog => {
             await addSplit(dialog, 'North beans', 20);
             await addSplit(dialog, 'South beans', 20);
-        }, [{ name: 'North beans', count: 20 }, { name: 'South beans', count: 20 }]],
-    ])('sends %s', async (_, fill, splits) => {
+        }],
+    ])("doesn't offer Confirm for %s", async (_, fill) => {
         const wrapper = mountDialog();
         const dialog = await open(wrapper);
         await fill(dialog);
 
-        await press(dialog, 'Confirm');
-
-        expect(wrapper.props('onSubmit').mock.calls[0][1].splits).toEqual(splits);
+        expect(buttonLabelled(dialog, 'Confirm').attributes('disabled')).toBeDefined();
     });
 
-    // DocumentsCurrentBehavior: it doesn't wait for onSubmit, so it closes,
-    // and empties the splits, before the split is done. If it fails, the
-    // splits are lost (backlog A6). Should wait
-    it('closes before the split is done', async () => {
+    it('says when the splits total more than were sown', async () => {
+        const dialog = await open(mountDialog());
+        await addSplit(dialog, 'North beans', 20);
+        expect(dialog.text()).not.toContain('more than the');
+
+        await addSplit(dialog, 'South beans', 20);
+
+        expect(dialog.text()).toContain('The splits total 40, more than the 24 sown.');
+    });
+
+    // With nothing sown on record, the service checks the total
+    it('offers Confirm for any total when nothing sown is recorded', async () => {
+        const dialog = await open(mountDialog({ planting: { ...planting, numberSown: null } }));
+        await addSplit(dialog, 'North beans', 40);
+
+        expect(buttonLabelled(dialog, 'Confirm').attributes('disabled')).toBeUndefined();
+    });
+
+    it('waits for the split, open', async () => {
         const wrapper = mountDialog({ onSubmit: aSaveInFlight() });
         const dialog = await open(wrapper);
         await addSplit(dialog, 'North beans', 12);
 
         await press(dialog, 'Confirm');
 
-        expect(isOpen()).toBe(false);
+        expect(wrapper.props('onSubmit')).toHaveBeenCalled();
+        expect(isOpen()).toBe(true);
+    });
+
+    it('stays open, with the splits, and says why, when the split fails', async () => {
+        const wrapper = mountDialog({ onSubmit: vi.fn().mockRejectedValue(apiError(400, serviceErrorBody(400, 'splits[0].count must be at least 1'))) });
+        const dialog = await open(wrapper);
+        await addSplit(dialog, 'North beans', 12);
+
+        await press(dialog, 'Confirm');
+
+        expect(isOpen()).toBe(true);
+        expect(document.body.textContent).toContain('splits[0].count must be at least 1');
+        expect(wrapper.vm.form.splits).toEqual([{ name: 'North beans', count: 12 }]);
     });
 });

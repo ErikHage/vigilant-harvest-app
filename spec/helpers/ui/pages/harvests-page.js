@@ -1,6 +1,6 @@
 import { parseDslArgs } from '@feral-auth/ts-simple-dsl';
 
-import { days, message, on, planting, quantity } from '../params';
+import { days, on, planting, quantity, year } from '../params';
 import { dashboardComponents, routedPageSteps } from './routed-page';
 
 /** The harvests page, a timeline of the chosen year's harvest days, in words. */
@@ -63,27 +63,39 @@ export function createHarvestsPage(world, driver) {
         },
 
         /**
-         * Tries to edit the `planting`'s harvest on the day shown to
-         * `quantity`, and presses Update. The step after says what happened.
+         * Removes the `planting`'s harvest on the day shown, which is the one
+         * `on`, in the edit dialog, and updates.
          */
-        async tryToEditHarvest(...args) {
+        async removeHarvest(...args) {
+            const params = parseDslArgs(args, { planting: planting(), on: on() });
+
+            harvestOn(params.planting, params.on);
+            await driver.removeHarvest(world.plantingNamed(params.planting));
+            world.forgetHarvest(params.planting, params.on);
+        },
+
+        /**
+         * Starts editing the `planting`'s harvest on the day shown, typing
+         * `quantity`, without pressing Update.
+         */
+        async startEditingHarvest(...args) {
             const params = parseDslArgs(args, { planting: planting(), quantity: quantity() });
 
-            await driver.editOfferingUpdateAnyway(world.plantingNamed(params.planting), params.quantity);
+            await driver.startEditing(world.plantingNamed(params.planting), params.quantity);
         },
 
-        /** The edit was refused: the dialog stays open, saying `message`, word for word. */
-        async checkEditRefused(...args) {
-            const params = parseDslArgs(args, { message: message() });
-
-            await driver.editRefusedByTheService(params.message);
-        },
-
-        /** With no harvests in the year, the page says to choose a day. No parameters. */
-        async checkSaysThereAreNoHarvests(...args) {
+        /** The open edit dialog offers Update only for a quantity of more than nothing. No parameters. */
+        async checkUpdateNeedsAQuantity(...args) {
             parseDslArgs(args, {});
 
-            await driver.asksForADayWithNoneToChoose();
+            await driver.withholdsUpdate();
+        },
+
+        /** With no harvests in the `year`, the one chosen, the page says so. */
+        async checkSaysThereAreNoHarvests(...args) {
+            const params = parseDslArgs(args, { year: year() });
+
+            await driver.saysThereAreNone(world.plantingYearNamed(params.year));
         },
     };
 }

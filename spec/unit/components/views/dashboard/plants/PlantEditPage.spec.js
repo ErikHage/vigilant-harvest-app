@@ -9,6 +9,7 @@ import { usePlantsStore } from '@/store';
 import { mountWithPlugins } from '../../../../../helpers/mount';
 import { buttonLabelled, inputLabelled } from '../../../../../helpers/fields';
 import { aPlant } from '../../../../../helpers/plants';
+import { httpError } from '../../../../../helpers/http-errors';
 
 const categories = [
     {
@@ -142,24 +143,16 @@ describe('PlantEditPage', () => {
             expect(wrapper.find('.v-progress-circular').exists()).toBe(true);
         });
 
-        // DocumentsCurrentBehavior: with no plant loaded, refreshData copies
-        // plantsById[plantId], which is undefined, through JSON.parse, which
-        // throws. mounted() doesn't await refreshData, so in the app that's an
-        // unhandled rejection in the console. The page stays blank, and its
-        // alert sits inside the v-if="plant" with everything else (backlog
-        // A10). Should show the alert, and not throw.
-        //
-        // The mount's own refresh is held, so its rejection can't escape the
-        // test, and the second refresh is the one checked
-        it('throws, and shows nothing, when the plant is not loaded', async () => {
+        // (backlog A10) The mount's own refresh isn't awaited, so a throw there
+        // would fail the run as an unhandled rejection
+        it("shows only the alert, without throwing, when the plant isn't loaded", async () => {
             const { wrapper } = await mountPage({
                 plantsById: {},
                 state: { alertVisible: true, alertType: 'error', alertMessage: 'error fetching plant' },
-                beforeMount: store => store.fetchPlantById.mockReturnValueOnce(new Promise(() => {})),
             });
 
-            await expect(wrapper.vm.refreshData()).rejects.toThrow(SyntaxError);
-            expect(wrapper.text()).toBe('');
+            await expect(wrapper.vm.refreshData()).resolves.toBeUndefined();
+            expect(wrapper.text()).toBe('error fetching plant');
         });
     });
 
@@ -210,7 +203,7 @@ describe('PlantEditPage', () => {
 
         it('sends the whole plant, trimmed, then reloads and says so', async () => {
             const { wrapper, store } = await mountPage();
-            store.upsertPlant.mockResolvedValue(true);
+            store.upsertPlant.mockResolvedValue();
             await type(wrapper, 'Name', '  Provider  ');
             await type(wrapper, 'Plant Spacing (in.)', '4');
             await select(wrapper, 'Subcategory').setValue('subcategory-2');
@@ -218,12 +211,14 @@ describe('PlantEditPage', () => {
 
             await update(wrapper);
 
+            // the service's plant has no seedSource; toHaveBeenCalledWith would
+            // take an undefined one as absent (backlog B23)
+            expect(store.upsertPlant.mock.calls[0][0]).not.toHaveProperty('seedSource');
             expect(store.upsertPlant).toHaveBeenCalledWith({
                 plantId: 'plant-1',
                 subcategoryId: 'subcategory-2',
                 friendlyName: 'Provider',
                 lifespanType: 'Annual',
-                seedSource: undefined,
                 tags: ['Cold Tolerant', 'Container Friendly'],
                 description: 'Bush bean.',
                 taxonomy: { family: 'Fabaceae', genus: 'Phaseolus', species: 'vulgaris' },
@@ -268,7 +263,7 @@ describe('PlantEditPage', () => {
             ['Species', 'taxonomy.species', 'unguiculata'],
         ])('sends an edited %s', async (label, path, value) => {
             const { wrapper, store } = await mountPage();
-            store.upsertPlant.mockResolvedValue(true);
+            store.upsertPlant.mockResolvedValue();
 
             await type(wrapper, label, String(value));
             await update(wrapper);
@@ -282,7 +277,7 @@ describe('PlantEditPage', () => {
             ['Required Sun', 'Part Sun (4-6 hours)', sent => sent.growing.requiredSun],
         ])('sends a chosen %s', async (label, value, read) => {
             const { wrapper, store } = await mountPage();
-            store.upsertPlant.mockResolvedValue(true);
+            store.upsertPlant.mockResolvedValue();
 
             await select(wrapper, label).setValue(value);
             await update(wrapper);
@@ -296,7 +291,7 @@ describe('PlantEditPage', () => {
             ['Harvesting Instructions', sent => sent.harvesting.harvestInstructions],
         ])('sends what was written in its %s box', async (title, read) => {
             const { wrapper, store } = await mountPage();
-            store.upsertPlant.mockResolvedValue(true);
+            store.upsertPlant.mockResolvedValue();
 
             textBox(wrapper, title).props('onSubmit')('Written in the box.');
             await flushPromises();
@@ -307,7 +302,7 @@ describe('PlantEditPage', () => {
 
         it('sends the climbing height for a plant that climbs', async () => {
             const { wrapper, store } = await mountPage();
-            store.upsertPlant.mockResolvedValue(true);
+            store.upsertPlant.mockResolvedValue();
 
             await wrapper.find('.v-checkbox input').setValue(true);
             await type(wrapper, 'Climbing Height (ft.)', '7');
@@ -319,7 +314,7 @@ describe('PlantEditPage', () => {
         it('sends a field the service left null as null', async () => {
             const plant = aPlant({ taxonomy: { family: null, genus: 'Phaseolus', species: 'vulgaris' } });
             const { wrapper, store } = await mountPage({ plantsById: { 'plant-1': plant } });
-            store.upsertPlant.mockResolvedValue(true);
+            store.upsertPlant.mockResolvedValue();
 
             await type(wrapper, 'Name', 'Provider');
             await update(wrapper);
@@ -331,7 +326,7 @@ describe('PlantEditPage', () => {
         // missing harvest type to "unspecified" anyway (the page's comment)
         it('sends the unspecified harvest type when the choice is cleared', async () => {
             const { wrapper, store } = await mountPage();
-            store.upsertPlant.mockResolvedValue(true);
+            store.upsertPlant.mockResolvedValue();
 
             await select(wrapper, 'Default Harvest Type').setValue(null);
             await update(wrapper);
@@ -339,11 +334,11 @@ describe('PlantEditPage', () => {
             expect(store.upsertPlant.mock.calls[0][0].harvesting.defaultHarvestTypeId).toBe(1);
         });
 
-        // The service treats '' as "not given" for an optional number
-        // (validation-fixes doc, "Already fixed")
+        // The service treats '' as "not given" for an optional number. It
+        // once answered 500
         it('sends a cleared number box as an empty string', async () => {
             const { wrapper, store } = await mountPage();
-            store.upsertPlant.mockResolvedValue(true);
+            store.upsertPlant.mockResolvedValue();
 
             await type(wrapper, 'Days to Maturity', '');
             await update(wrapper);
@@ -353,7 +348,7 @@ describe('PlantEditPage', () => {
 
         it('stays as it is, without reloading, when the save fails', async () => {
             const { wrapper, store } = await mountPage();
-            store.upsertPlant.mockResolvedValue(false);
+            store.upsertPlant.mockRejectedValue(httpError(400));
             await type(wrapper, 'Name', 'Provider');
 
             await update(wrapper);
@@ -396,17 +391,30 @@ describe('PlantEditPage', () => {
             expect(store.fetchPlantById).toHaveBeenCalledTimes(2);
         });
 
-        // DocumentsCurrentBehavior: saving the schedules reloads the plant into
-        // the form, so any unsaved edit elsewhere on the page is lost. Should
-        // reload only the schedules, or keep the edits
-        it('throws away unsaved edits when the schedules are saved', async () => {
-            const { wrapper } = await mountPage();
+        // So the dialog, which waits for it, stays open
+        it('rejects, without reloading, when the save fails', async () => {
+            const { wrapper, store } = await mountPage();
+            const err = httpError(500);
+            store.updatePlantScheduleAssignment.mockRejectedValue(err);
+
+            await expect(wrapper.findComponent(ManagePlantSchedulesDialog).props('onSubmit')(['schedule-3'], []))
+                .rejects.toBe(err);
+
+            expect(store.fetchPlantById).toHaveBeenCalledTimes(1);
+        });
+
+        // It reloads the plant, for its schedules, but not into the form
+        // (backlog A17)
+        it('keeps unsaved edits when the schedules are saved', async () => {
+            const { wrapper, store } = await mountPage();
             await type(wrapper, 'Name', 'Provider');
 
             await wrapper.findComponent(ManagePlantSchedulesDialog).props('onSubmit')(['schedule-3'], []);
             await flushPromises();
 
-            expect(inputLabelled(wrapper, 'Name').element.value).toBe('Provider bush bean');
+            expect(store.fetchPlantById).toHaveBeenCalledTimes(2);
+            expect(inputLabelled(wrapper, 'Name').element.value).toBe('Provider');
+            expect(buttonLabelled(wrapper, 'Update').attributes('disabled')).toBeUndefined();
         });
     });
 });

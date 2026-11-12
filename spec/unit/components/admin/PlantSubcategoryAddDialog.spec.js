@@ -1,4 +1,5 @@
 import { flushPromises } from '@vue/test-utils';
+import { apiError, serviceErrorBody } from '../../../helpers/http-errors';
 import { mountWithPlugins } from '../../../helpers/mount';
 import { buttonLabelled, inputLabelled } from '../../../helpers/fields';
 import { dialogTitled } from '../../../helpers/dialogs';
@@ -58,33 +59,28 @@ describe('PlantSubcategoryAddDialog', () => {
         expect(inputLabelled(dialog, 'Subcategory Name').element.value).toBe('');
     });
 
-    // It waits for onSubmit; the page's never rejects, since the store
-    // swallows (A6)
-    it('stays open, with the name, when the save rejects', async () => {
+    // A failed save keeps it open, with what was entered, and it says why: the
+    // service's reason for a 400
+    it('stays open, with the name, and says why, when the save fails', async () => {
         const errorHandler = vi.fn();
-        const wrapper = mountDialog({ errorHandler, onSubmit: vi.fn().mockRejectedValue(new Error('error creating subcategory')) });
+        const wrapper = mountDialog({ errorHandler, onSubmit: vi.fn().mockRejectedValue(apiError(400, serviceErrorBody(400, 'subcategoryName is required'))) });
         const dialog = await open(wrapper);
         await inputLabelled(dialog, 'Subcategory Name').setValue('Lentils');
 
         await press(dialog, 'Add');
 
-        expect(errorHandler).toHaveBeenCalledTimes(1);
+        expect(errorHandler).not.toHaveBeenCalled();
+        expect(document.body.textContent).toContain("subcategoryName is required");
         expect(isOpen()).toBe(true);
         expect(inputLabelled(dialog, 'Subcategory Name').element.value).toBe('Lentils');
     });
 
-    // DocumentsCurrentBehavior: Add is enabled by any text, but the name is
-    // trimmed when sent, so a name of spaces goes out as ''. The service
-    // rejects it (subcategoryName is required), and the dialog closes, since
-    // the store swallows (backlog A16, A6). Should keep Add disabled until the
-    // trimmed name has something in it
-    it('submits a name of spaces as an empty name', async () => {
-        const wrapper = mountDialog();
-        const dialog = await open(wrapper);
+    // The service reads a name of spaces as missing (backlog A16)
+    it("doesn't offer Add for a name of spaces", async () => {
+        const dialog = await open(mountDialog());
+
         await inputLabelled(dialog, 'Subcategory Name').setValue('   ');
 
-        await press(dialog, 'Add');
-
-        expect(wrapper.props('onSubmit')).toHaveBeenCalledWith({ categoryId: 'category-1', subcategoryName: '' });
+        expect(buttonLabelled(dialog, 'Add').attributes('disabled')).toBeDefined();
     });
 });

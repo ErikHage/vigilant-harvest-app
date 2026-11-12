@@ -1,4 +1,5 @@
 import { flushPromises } from '@vue/test-utils';
+import { apiError, serviceErrorBody } from '../../../../helpers/http-errors';
 import { VSelect } from 'vuetify/components';
 import { mountWithPlugins } from '../../../../helpers/mount';
 import { buttonLabelled, inputLabelled } from '../../../../helpers/fields';
@@ -129,15 +130,16 @@ describe('EditScheduleItemDialog', () => {
         expect(form(wrapper)).toMatchObject({ frequency: 'daily', interval: '3', notes: 'Every other week' });
     });
 
-    // The service takes an item without notes, as it may have been saved
-    it('keeps Save disabled for an item with no notes, until some are written', async () => {
-        const wrapper = mountDialog({ scheduleItem: aScheduleItem({ notes: null }) });
+    // The service takes an item without a subcategory or notes (backlog B33)
+    it('offers Save for an item with no subcategory or notes', async () => {
+        const wrapper = mountDialog({ scheduleItem: aScheduleItem({ subType: null, notes: null }) });
         await open(wrapper);
-        expect(saveDisabled()).toBe(true);
-
-        await inputLabelled(dialog(), 'Notes').setValue('Side-dress');
 
         expect(saveDisabled()).toBe(false);
+
+        await press(dialog(), 'Save');
+
+        expect(wrapper.props('onSubmit')).toHaveBeenCalledWith(expect.objectContaining({ subType: null, notes: null }));
     });
 
     it('closes on Save with no onSubmit given', async () => {
@@ -159,12 +161,8 @@ describe('EditScheduleItemDialog', () => {
         expect(wrapper.props('onSubmit')).not.toHaveBeenCalled();
     });
 
-    // DocumentsCurrentBehavior: Cancel keeps the edits, so the next open
-    // shows them, not the item, and Save sends them (backlog A13). The same
-    // after a failed save: the store swallows (A6), the page reloads the
-    // unchanged item, and only then is the form reset. Should go back to the
-    // item on Cancel
-    it('keeps a cancelled edit for the next time it opens', async () => {
+    // Back to the item (backlog A13)
+    it('forgets a cancelled edit the next time it opens', async () => {
         const wrapper = mountDialog();
         await open(wrapper);
         await inputLabelled(dialog(), 'Notes').setValue('never mind');
@@ -172,32 +170,30 @@ describe('EditScheduleItemDialog', () => {
 
         await open(wrapper);
 
-        expect(form(wrapper).notes).toBe('never mind');
+        expect(form(wrapper).notes).toBe('Side-dress the tomatoes');
     });
 
-    // It waits for onSubmit; the page's never rejects, since the store
-    // swallows (A6)
-    it('stays open when the save rejects', async () => {
+    // A failed save keeps it open, with what was entered, and it says why: the
+    // service's reason for a 400
+    it('stays open, and says why, when the save fails', async () => {
         const errorHandler = vi.fn();
-        const wrapper = mountDialog({ errorHandler, onSubmit: vi.fn().mockRejectedValue(new Error('error updating activity schedule item')) });
+        const wrapper = mountDialog({ errorHandler, onSubmit: vi.fn().mockRejectedValue(apiError(400, serviceErrorBody(400, 'recurrenceRule is required'))) });
         await open(wrapper);
 
         await press(dialog(), 'Save');
 
-        expect(errorHandler).toHaveBeenCalledTimes(1);
+        expect(errorHandler).not.toHaveBeenCalled();
+        expect(document.body.textContent).toContain("recurrenceRule is required");
         expect(isOpen()).toBe(true);
     });
 
-    // DocumentsCurrentBehavior: only a blank or 0 interval disables Save, so
-    // a negative one goes into the rule (backlog A29). Should take a whole
-    // number of at least 1
-    it('saves an interval of -1', async () => {
+    // The interval is a whole number of at least 1 (backlog A29)
+    it.each([['-1'], ['0'], ['1.5'], ['']])("doesn't offer Save for an interval of %j", async interval => {
         const wrapper = mountDialog();
         await open(wrapper);
-        await inputLabelled(dialog(), 'Interval').setValue('-1');
 
-        await press(dialog(), 'Save');
+        await inputLabelled(dialog(), 'Interval').setValue(interval);
 
-        expect(wrapper.props('onSubmit').mock.calls[0][0].recurrenceRule).toBe('RRULE:FREQ=WEEKLY;INTERVAL=-1');
+        expect(saveDisabled()).toBe(true);
     });
 });

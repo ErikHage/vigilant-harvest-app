@@ -39,8 +39,8 @@ test.describe('A plant\'s edit page', () => {
         await plantEditPage.checkUpdateOffered('offered: no');
     });
 
-    // DocumentsCurrentBehavior: saving the schedules reloads the plant into the
-    // form, so an edit not yet saved is lost (backlog A17). Should keep it
+    // Saving the schedules reloads the plant, but not into the form (backlog
+    // A17)
     test('keeps an unsaved edit when the schedules are saved', async ({ plantEditPage }) => {
         await plantEditPage.typeUnsavedName('plant: sungold');
 
@@ -50,9 +50,8 @@ test.describe('A plant\'s edit page', () => {
         await plantEditPage.checkUnsavedNameKept('plant: sungold');
     });
 
-    // DocumentsCurrentBehavior: the tags dialog offers four fixed tags, and
-    // toggling one drops the plant's others, here Heirloom (backlog A18).
-    // Should keep the plant's own tags, and offer them as chips too
+    // The tags dialog offers the plant's own tags as chips, so toggling another
+    // no longer drops them, here Heirloom (backlog A18)
     test('keeps the plant\'s own tags when one is toggled', async ({ plantEditPage }) => {
         await plantEditPage.checkShowsTags('tags: Cold Tolerant, Heirloom');
 

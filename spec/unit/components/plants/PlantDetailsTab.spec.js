@@ -31,8 +31,8 @@ describe('PlantDetailsTab', () => {
         expect(wrapper.findAll('.v-chip')).toHaveLength(0);
     });
 
-    // The '--' for a missing plant can't show: the template reads
-    // plant.plantId first, so the tab throws without a plant
+    // The page shows its tabs only once the plant has loaded, so the tab
+    // requires one. Its '--' for a missing plant could never show (backlog B22)
     it('needs a plant', () => {
         vi.spyOn(console, 'warn').mockImplementation(() => {});
 

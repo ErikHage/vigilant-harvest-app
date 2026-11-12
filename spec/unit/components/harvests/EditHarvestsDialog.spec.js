@@ -46,12 +46,24 @@ async function setType(wrapper, row, harvestTypeId) {
     await flushPromises();
 }
 
+const updateButton = () => buttonLabelled(dialog(), 'Update');
 const warnings = () => dialog().findAll('.merge-warning').map(warning => warning.text());
 
 async function press(label) {
     await buttonLabelled(dialog(), label).trigger('click');
     await flushPromises();
 }
+
+// Remove, or Keep once removed: an icon, named by its aria-label
+async function toggleRemoved(row) {
+    await dialog().findAll('.harvest-row')[row].find('.v-btn').trigger('click');
+    await flushPromises();
+}
+
+// Under a row's quantity: the last of its messages, after the type's
+const quantityMessage = row => dialog().findAll('.harvest-row')[row].findAll('.v-messages').at(-1).text();
+
+const removeLabels = () => dialog().findAll('.harvest-row').map(row => row.find('.v-btn').attributes('aria-label'));
 
 describe('EditHarvestsDialog', () => {
     it('opens and closes with show', async () => {
@@ -103,12 +115,13 @@ describe('EditHarvestsDialog', () => {
 
         await press('Update');
 
-        const submitted = wrapper.props('onSubmit').mock.calls[0][0];
+        const [submitted, removed] = wrapper.props('onSubmit').mock.calls[0];
         expect(submitted.map(h => [h.harvestId, h.harvestTypeId, h.quantity])).toEqual([
             ['harvest-1', 2, 3],
             ['harvest-2', 3, 12],
             ['harvest-3', 3, 25],
         ]);
+        expect(removed).toEqual([]);
         expect(submitted[0]).toMatchObject({ plantingId: 'planting-1', harvestDate: filedOn('2026-07-10') });
         expect(harvests[0].quantity).toBe(2);
         expect(harvests[2].harvestTypeId).toBe(1);
@@ -156,26 +169,119 @@ describe('EditHarvestsDialog', () => {
         expect(warnings()[0]).toBe('Same planting and type as another row. Saving combines these into one 2 pounds harvest.');
     });
 
-    // The warning names the type as stored, where the rest of the app shows
-    // no name for unspecified
-    it("names unspecified harvests 'unspecified' in the warning", async () => {
+    // As the rest of the app shows it, with no name for unspecified. The
+    // warning named it as stored, "14 unspecified harvest" (backlog B30)
+    it('names no type for unspecified harvests in the warning', async () => {
         const wrapper = await mountDialog();
         await setType(wrapper, 0, 1);
         await setType(wrapper, 1, 1);
 
-        expect(warnings()[0]).toBe('Same planting and type as another row. Saving combines these into one 14 unspecified harvest.');
+        expect(warnings()[0]).toBe('Same planting and type as another row. Saving combines these into one 14 harvest.');
     });
 
-    // Update is never disabled, and only the service checks a quantity: it
-    // answers 400 (harvests[0].quantity must be greater than 0), which the
-    // page shows here (validation-fixes doc, "worth doing"). Nor can a
-    // harvest be removed: the app has no call to delete one
-    it.each([['', ''], ['0', 0], ['-1', -1]])('submits a quantity of "%s"', async (entered, sent) => {
-        const wrapper = await mountDialog();
+    // The service requires each quantity to be more than nothing, so Update
+    // waits for that (backlog B30)
+    it.each([[''], ['0'], ['-1']])("doesn't offer Update for a quantity of \"%s\"", async entered => {
+        await mountDialog();
+
         await setQuantity(0, entered);
 
-        await press('Update');
+        expect(updateButton().attributes('disabled')).toBeDefined();
+    });
 
-        expect(wrapper.props('onSubmit').mock.calls[0][0][0].quantity).toBe(sent);
+    // The service stores a quantity as a whole number, so 1.5 was saved as 2
+    // (backlog B27)
+    it("doesn't offer Update for a quantity with a fraction, and says why", async () => {
+        await mountDialog();
+
+        await setQuantity(0, '1.5');
+
+        expect(updateButton().attributes('disabled')).toBeDefined();
+        expect(quantityMessage(0)).toBe('A whole number');
+    });
+
+    it("says nothing under a quantity that's whole", async () => {
+        await mountDialog();
+
+        await setQuantity(0, '4');
+
+        expect(quantityMessage(0)).toBe('');
+    });
+
+    describe('removing', () => {
+        // The service has a delete, which the app never called, so a harvest
+        // couldn't be removed (backlog B30)
+        it('offers Remove on each row', async () => {
+            await mountDialog();
+
+            expect(removeLabels()).toEqual(['Remove', 'Remove', 'Remove']);
+        });
+
+        it('marks a removed row, and submits it apart from the rest', async () => {
+            const wrapper = await mountDialog();
+
+            await toggleRemoved(1);
+
+            expect(removeLabels()).toEqual(['Remove', 'Keep', 'Remove']);
+            expect(dialog().findAll('.harvest-row')[1].text()).toContain('Removed on Update');
+            expect(dialog().findAll('.harvest-row')[1].find('input[type=number]').attributes('disabled')).toBeDefined();
+
+            await press('Update');
+
+            const [kept, removed] = wrapper.props('onSubmit').mock.calls[0];
+            expect(kept.map(h => h.harvestId)).toEqual(['harvest-1', 'harvest-3']);
+            expect(removed).toEqual(['harvest-2']);
+        });
+
+        it('keeps a row again on Keep', async () => {
+            const wrapper = await mountDialog();
+            await toggleRemoved(1);
+
+            await toggleRemoved(1);
+            await press('Update');
+
+            const [kept, removed] = wrapper.props('onSubmit').mock.calls[0];
+            expect(kept).toHaveLength(3);
+            expect(removed).toEqual([]);
+        });
+
+        it("doesn't hold up Update for a removed row's quantity", async () => {
+            await mountDialog();
+            await setQuantity(0, '');
+
+            await toggleRemoved(0);
+
+            expect(updateButton().attributes('disabled')).toBeUndefined();
+        });
+
+        it('leaves a removed row out of the merge warning', async () => {
+            const wrapper = await mountDialog();
+            await setType(wrapper, 1, 2);
+
+            await toggleRemoved(1);
+
+            expect(warnings()).toEqual([]);
+        });
+
+        it('offers Update with every row removed', async () => {
+            const wrapper = await mountDialog();
+            await toggleRemoved(0);
+            await toggleRemoved(1);
+            await toggleRemoved(2);
+
+            await press('Update');
+
+            expect(wrapper.props('onSubmit')).toHaveBeenCalledWith([], ['harvest-1', 'harvest-2', 'harvest-3']);
+        });
+
+        it('forgets the removals when given new harvests', async () => {
+            const wrapper = await mountDialog();
+            await toggleRemoved(0);
+
+            await wrapper.setProps({ harvests: [...harvests] });
+            await flushPromises();
+
+            expect(removeLabels()).toEqual(['Remove', 'Remove', 'Remove']);
+        });
     });
 });

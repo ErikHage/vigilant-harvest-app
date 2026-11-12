@@ -72,15 +72,13 @@ describe('AppBar', () => {
             expect(buttonLabelled(wrapper, 'Logout').exists()).toBe(true);
         });
 
-        // DocumentsCurrentBehavior: the phone layout doesn't check showAppBar, so
-        // someone logged out still sees the home button and Logout. Should show
-        // them only when logged in, as the desktop layout does
-        it('shows the home button and Logout when logged out', () => {
+        // As on a desktop (backlog A12)
+        it('shows neither the home button nor Logout when logged out', () => {
             const { wrapper } = mountAppBar({ showAppBar: false });
 
             expect(wrapper.find('.planting-year').exists()).toBe(false);
-            expect(wrapper.find('.mdi-home').exists()).toBe(true);
-            expect(buttonLabelled(wrapper, 'Logout').exists()).toBe(true);
+            expect(wrapper.find('.mdi-home').exists()).toBe(false);
+            expect(wrapper.findAll('.v-btn').map(button => button.text())).not.toContain('Logout');
         });
     });
 

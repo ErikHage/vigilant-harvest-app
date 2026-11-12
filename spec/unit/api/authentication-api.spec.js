@@ -67,11 +67,24 @@ describe('authenticationApi', () => {
         });
     });
 
-    // DocumentsCurrentBehavior: has no logout, though the authentication store's
-    // logout calls it, so logging out never reaches the service. Should have a
-    // logout that ends the session on the service
-    it('has no logout', () => {
-        expect(Object.keys(authenticationApi)).toEqual(['verifySsoToken', 'verifyActorToken']);
-        expect(authenticationApi.logout).toBeUndefined();
+    describe('logout', () => {
+        it("ends the token's session on the service", async () => {
+            axios.post.mockResolvedValue({ status: 204, data: '' });
+
+            await authenticationApi.logout('actor-token');
+
+            expect(axios.post).toHaveBeenCalledWith(`${authServiceUrl}/logout`, {}, {
+                headers: { 'x-feral-auth-token': 'actor-token' },
+            });
+        });
+
+        it('rejects with an ApiError, keeping the status, when the service refuses', async () => {
+            axios.post.mockRejectedValue(httpError(401));
+
+            const failure = await authenticationApi.logout('actor-token').catch(err => err);
+
+            expect(failure).toBeInstanceOf(ApiError);
+            expect(failure.status).toBe(401);
+        });
     });
 });

@@ -130,12 +130,13 @@ describe('HarvestsPage', () => {
             expect(selected(wrapper)).toBe('2026-07-01');
         });
 
-        // It says so even when there are none to select
-        it('asks for a day when none is selected', async () => {
+        // It asked for a day to be selected from an empty timeline (backlog
+        // B31)
+        it('says when the year has no harvests', async () => {
             const { wrapper } = await mountPage({ state: { harvests: { harvests: [] } } });
 
             expect(timeline(wrapper)).toEqual([]);
-            expect(wrapper.text()).toContain('Select a date from the timeline to see harvests.');
+            expect(wrapper.find('.content-column').text()).toBe('No harvests in 2026.');
         });
 
         it("shows the harvests store's alert", async () => {
@@ -146,31 +147,27 @@ describe('HarvestsPage', () => {
             expect(wrapper.find('.v-alert').text()).toBe('error searching harvests page');
         });
 
-        // DocumentsCurrentBehavior: it binds only the harvests store's alert,
-        // so a failed load of the plants or plantings shows nothing (backlog
-        // A10). Should show each store's alert
         it.each([
             ['plants', 'error fetching plants'],
             ['plantings', 'error fetching plantings by year'],
-        ])("doesn't show the %s store's alert", async (store, message) => {
+        ])("shows the %s store's alert", async (store, message) => {
             const { wrapper } = await mountPage({ state: { [store]: { alertVisible: true, alertType: 'error', alertMessage: message } } });
 
-            expect(wrapper.find('.v-alert').exists()).toBe(false);
+            expect(wrapper.find('.v-alert').text()).toBe(message);
         });
 
-        // DocumentsCurrentBehavior: it reads each harvest's planting, and its
-        // plant, without a guard, so with the plantings (or plants) not
-        // loaded the load throws, and the page shows no harvests (backlog
-        // A19). Should show the harvest without the names it can't find
+        // Each harvest shows without the names it can't find (backlog A19)
         it.each([
             ['plantings', { plantings: { plantingsById: {} } }],
             ['plants', { plants: { plantsById: {} } }],
-        ])("throws, and shows nothing, when the %s aren't loaded", async (_, state) => {
+        ])("shows the harvests when the %s aren't loaded", async (_, state) => {
             const errorHandler = vi.fn();
             const { wrapper } = await mountPage({ state, errorHandler });
 
-            expect(errorHandler.mock.calls[0][0]).toBeInstanceOf(TypeError);
-            expect(timeline(wrapper)).toEqual([]);
+            expect(errorHandler).not.toHaveBeenCalled();
+            expect(timeline(wrapper)).toEqual(['2026-07-10', '2026-07-09', '...', '2026-07-01']);
+            // the day's harvests, under one heading with no name
+            expect(plantGroups(wrapper).map(([name]) => name)).toEqual(['']);
         });
     });
 
@@ -260,13 +257,63 @@ describe('HarvestsPage', () => {
                 beforeMount: ({ harvests }) => harvests.upsertHarvests.mockRejectedValueOnce(failure),
             });
             const dialog = await openEdit(wrapper);
-            await dialog.find('input[type=number]').setValue('0');
+            await dialog.find('input[type=number]').setValue('5');
 
             await press(dialog, 'Update');
 
             expect(dialog.find('.v-alert').text()).toBe(message);
-            expect(dialog.find('input[type=number]').element.value).toBe('0');
+            expect(dialog.find('input[type=number]').element.value).toBe('5');
             expect(store.searchHarvests).toHaveBeenCalledTimes(1);
+        });
+
+        // The app had no call to delete one (backlog B30)
+        it('deletes the harvests removed, saves the rest, then reloads', async () => {
+            const { wrapper, harvests: store } = await mountPage();
+            const dialog = await openEdit(wrapper);
+            const removeButtons = () => dialog.findAll('.harvest-row .v-btn');
+            expect(removeButtons().length).toBeGreaterThan(0);
+
+            await removeButtons()[0].trigger('click');
+            await flushPromises();
+            await press(dialog, 'Update');
+
+            const removedId = store.deleteHarvest.mock.calls[0][0];
+            expect(store.deleteHarvest).toHaveBeenCalledTimes(1);
+            expect(store.upsertHarvests.mock.calls[0][0].map(h => h.harvestId)).not.toContain(removedId);
+            expect(store.deleteHarvest.mock.invocationCallOrder[0]).toBeLessThan(store.upsertHarvests.mock.invocationCallOrder[0]);
+            expect(findDialog('Edit Harvests')).toBeUndefined();
+            expect(store.searchHarvests).toHaveBeenCalledTimes(2);
+        });
+
+        it('only deletes when every harvest of the day is removed', async () => {
+            const { wrapper, harvests: store } = await mountPage();
+            await clickDay(wrapper, '2026-07-09');
+            const dialog = await openEdit(wrapper);
+
+            await dialog.find('.harvest-row .v-btn').trigger('click');
+            await flushPromises();
+            await press(dialog, 'Update');
+
+            expect(store.deleteHarvest).toHaveBeenCalledWith('h-5');
+            expect(store.upsertHarvests).not.toHaveBeenCalled();
+            expect(store.searchHarvests).toHaveBeenCalledTimes(2);
+        });
+
+        it('stays open, saving nothing, when a delete fails', async () => {
+            const { wrapper, harvests: store } = await mountPage({
+                beforeMount: ({ harvests }) => harvests.deleteHarvest.mockRejectedValueOnce(new ApiError('Request failed', 500, '')),
+            });
+            await clickDay(wrapper, '2026-07-09');
+            const dialog = await openEdit(wrapper);
+
+            await dialog.find('.harvest-row .v-btn').trigger('click');
+            await flushPromises();
+            await press(dialog, 'Update');
+
+            expect(dialog.find('.v-alert').text()).toBe('error deleting harvest');
+            expect(store.upsertHarvests).not.toHaveBeenCalled();
+            expect(store.searchHarvests).toHaveBeenCalledTimes(1);
+            expect(findDialog('Edit Harvests')).toBeDefined();
         });
 
         it('closes on Cancel, without saving, and clears a failure for the next time', async () => {

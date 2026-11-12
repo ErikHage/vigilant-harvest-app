@@ -23,7 +23,8 @@ test.describe('The stats pages', () => {
         await dashboardPage.checkYearIsChosen('year: spring');
     });
 
-    // The average a day is unrounded (backlog B31, tier B): 7 over 3 days
+    // The average a day, 7 over 3 days, to a tenth. It was unrounded (backlog
+    // B31)
     test('totals the year, and a planting\'s harvests', async ({ plantingStatsPage }) => {
         await plantingStatsPage.open();
         await plantingStatsPage.checkIsShown();
@@ -31,7 +32,7 @@ test.describe('The stats pages', () => {
         await plantingStatsPage.checkShowsTotals('first: 2026-07-07', 'last: 2026-07-09', 'days: 3', 'harvestDays: 2');
         await plantingStatsPage.choose('planting: early');
         await plantingStatsPage.checkShowsStats('planting: early',
-            'first: 2026-07-07', 'last: 2026-07-09', 'total: 7', 'average: 2.3333333333333335');
+            'first: 2026-07-07', 'last: 2026-07-09', 'total: 7', 'average: 2.3');
     });
 
     test('totals the year, and a plant\'s harvests, from all its plantings', async ({ plantStatsPage }) => {
@@ -42,5 +43,24 @@ test.describe('The stats pages', () => {
         await plantStatsPage.choose('plant: sungold');
         await plantStatsPage.checkShowsStats('plant: sungold',
             'first: 2026-07-07', 'last: 2026-07-09', 'total: 12', 'average: 4');
+    });
+
+    // The two are one page, kept as the route changes from one to the other,
+    // so it loads the second's stats in place of the first's (backlog B29)
+    test('show a planting\'s stats after a plant\'s, going from one page to the other', async ({
+        plantStatsPage, plantingStatsPage,
+    }) => {
+        await plantStatsPage.open();
+        await plantStatsPage.checkIsShown();
+        await plantStatsPage.choose('plant: sungold');
+        await plantStatsPage.checkShowsStats('plant: sungold',
+            'first: 2026-07-07', 'last: 2026-07-09', 'total: 12', 'average: 4');
+
+        await plantStatsPage.dashboardNav.goTo('page: plantingStats');
+
+        await plantingStatsPage.checkIsShown();
+        await plantingStatsPage.choose('planting: late');
+        await plantingStatsPage.checkShowsStats('planting: late',
+            'first: 2026-07-09', 'last: 2026-07-09', 'total: 5', 'average: 5');
     });
 });

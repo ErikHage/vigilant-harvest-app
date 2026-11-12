@@ -1,11 +1,12 @@
 <template>
-  <v-container v-if="activitySchedule != null">
-    <v-row>
-      <v-col cols="12">
+  <v-container>
+    <!-- outside the v-if, so a schedule that fails to load says so -->
+    <v-row v-if="alertVisible">
+      <fade-out-alert :is-visible="alertVisible" :alert-type="alertType" :message="alertMessage"/>
+    </v-row>
 
-        <v-row v-if="alertVisible">
-          <fade-out-alert :is-visible="alertVisible" :alert-type="alertType" :message="alertMessage"/>
-        </v-row>
+    <v-row v-if="activitySchedule != null">
+      <v-col cols="12">
 
         <v-row class="mb-4 align-center">
           <v-col>
@@ -128,7 +129,7 @@ export default {
 
   computed: {
     ...mapState(useActivitySchedulesStore, {
-      activitySchedule: 'selectedActivitySchedule',
+      selectedActivitySchedule: 'selectedActivitySchedule',
       activityTypes: 'activityTypes',
       alertType: 'alertType',
       alertMessage: 'alertMessage',
@@ -139,13 +140,13 @@ export default {
       return this.$route.params.activityScheduleId;
     },
 
-    alert() {
-      return {
-        isVisible: this.alertVisible,
-        type: this.alertType,
-        message: this.alertMessage,
-      };
+    // the store holds the last schedule fetched, which is another until this
+    // page's fetch returns, and for good if it fails
+    activitySchedule() {
+      const schedule = this.selectedActivitySchedule;
+      return schedule?.activityScheduleId === this.activityScheduleId ? schedule : null;
     },
+
   },
 
   methods: {
@@ -176,8 +177,9 @@ export default {
       await this.refreshData();
     },
 
+    // the dialog's item has no schedule id: it's this page's (backlog A30)
     async onUpdateActivityScheduleItem(scheduleItem) {
-      await this.updateScheduleItem(scheduleItem);
+      await this.updateScheduleItem({ ...scheduleItem, activityScheduleId: this.activityScheduleId });
       await this.refreshData();
     },
 

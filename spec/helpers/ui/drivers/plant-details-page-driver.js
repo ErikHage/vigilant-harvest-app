@@ -6,12 +6,15 @@ const plantPageUrl = suffix => new RegExp(`^${escaped(urlOf('dashboard/plants/')
 
 // What a tab shows for a value: as stored, with nothing for none
 const shown = value => (value === null || value === undefined ? '' : String(value));
+// A yes or no, stored as a boolean or as "1" or "0", in words; else as stored
+const yesOrNo = value => ({ true: 'Yes', 1: 'Yes', false: 'No', 0: 'No' }[String(value)] ?? shown(value));
 const dateTime = /^\d{1,2}\/\d{1,2}\/\d{4}, \d{1,2}:\d{2}:\d{2} [AP]M$/;
 
 /**
- * Each tab's rows, header and value, as the page shows them for `plant`.
- * Values are shown raw: climbing as `true`/`false`, and the depth with no
- * unit (B22). The climbing height has a row only for a climber.
+ * Each tab's rows, header and value, as the page shows them for `plant`. A
+ * yes or no is in words, and each measure's header has its unit; they were
+ * raw, and the depth had none (B22). The climbing height has a row only for a
+ * climber.
  */
 const tabRows = plant => ({
     Details: [
@@ -30,14 +33,14 @@ const tabRows = plant => ({
         ['Species', shown(plant.taxonomy.species)],
     ],
     Sowing: [
-        ['Indoors', shown(plant.sowing.indoor)],
-        ['Direct', shown(plant.sowing.direct)],
+        ['Indoors', yesOrNo(plant.sowing.indoor)],
+        ['Direct', yesOrNo(plant.sowing.direct)],
         ['Germination Time', shown(plant.sowing.germinationDaysRange)],
         ['Germination Temperature', shown(plant.sowing.germinationTempRange)],
         ['Notes', shown(plant.sowing.sowingNotes)],
     ],
     Planting: [
-        ['Planting Depth', shown(plant.planting.depthInInches)],
+        ['Planting Depth (in)', shown(plant.planting.depthInInches)],
         ['Plant Spacing (in)', shown(plant.planting.plantSpacingInches)],
         ['Row Spacing (in)', shown(plant.planting.rowSpacingInches)],
         ['Instructions', shown(plant.planting.instructions)],
@@ -45,8 +48,8 @@ const tabRows = plant => ({
     Growing: [
         ['Sun', shown(plant.growing.requiredSun)],
         ['Days to Maturity', shown(plant.growing.daysToMaturity)],
-        ['Climbing', String(plant.growing.isClimbing)],
-        ...(plant.growing.isClimbing ? [['Climbing Height', shown(plant.growing.climbingHeightFeet)]] : []),
+        ['Climbing', yesOrNo(plant.growing.isClimbing)],
+        ...(plant.growing.isClimbing ? [['Climbing Height (ft)', shown(plant.growing.climbingHeightFeet)]] : []),
         ['Mature Size', shown(plant.growing.plantSize)],
         ['Notes', shown(plant.growing.growingNotes)],
     ],
@@ -101,6 +104,12 @@ export function createPlantDetailsPageDriver(page) {
             await openTab('Schedules');
             await expectText(shownTab.getByRole('cell'), schedules.flatMap(({ name, description }) => [name, description]),
                 what);
+        },
+
+        /** The Schedules tab says the plant has none. It once showed only its headers (B22). */
+        async listsNoSchedules() {
+            await openTab('Schedules');
+            await expectText(shownTab.getByRole('cell'), ['No schedules'], 'the Schedules tab of a plant with none');
         },
     };
 }

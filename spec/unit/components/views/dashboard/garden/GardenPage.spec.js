@@ -4,6 +4,7 @@ import { VSelect } from 'vuetify/components';
 import GardenPage from '@/components/views/dashboard/garden/GardenPage.vue';
 import HarvestSummary from '@/components/harvests/HarvestSummary.vue';
 import DatePickerDialogActivator from '@/components/utils/DatePickerDialogActivator.vue';
+import ConfirmHarvestsDialog from '@/components/garden/ConfirmHarvestsDialog.vue';
 import { ApiError } from '@/api/error-handler';
 import { useHarvestsStore, usePlantingsStore, usePlantsStore, usePlotsStore } from '@/store';
 import { mountWithPlugins } from '../../../../../helpers/mount';
@@ -199,58 +200,50 @@ describe('GardenPage', () => {
             expect(wrapper.find('.v-alert').text()).toBe('error fetching harvest summaries by year');
         });
 
-        // DocumentsCurrentBehavior: it binds only the harvests store's alert,
-        // so a failed load of the plots, plants or plantings shows nothing
-        // (backlog A10). Should show each store's alert
         it.each([
             ['plots', 'error fetching plots'],
             ['plants', 'error fetching plants'],
             ['plantings', 'error fetching plantings by year'],
-        ])("doesn't show the %s store's alert", async (store, message) => {
+        ])("shows the %s store's alert", async (store, message) => {
             const { wrapper } = await mountPage({
                 state: { [store]: { alertVisible: true, alertType: 'error', alertMessage: message } },
             });
 
-            expect(wrapper.find('.v-alert').exists()).toBe(false);
+            expect(wrapper.find('.v-alert').text()).toBe(message);
         });
 
-        // DocumentsCurrentBehavior: it reads each planting's plant without a
-        // guard, so with the plants not loaded, Add Harvests throws and the
-        // dialog doesn't open (backlog A19). Should skip, or name, a planting
-        // whose plant is missing
-        it("throws on Add Harvests when the plants aren't loaded", async () => {
+        // Each planting is offered without its plant's name (backlog A19)
+        it("opens Add Harvests when the plants aren't loaded", async () => {
             const errorHandler = vi.fn();
             const { wrapper } = await mountPage({ state: { plants: { plants: [], plantsById: {} } }, errorHandler });
+            expect(summaries(wrapper)).toHaveLength(2);
 
             await press(wrapper, 'Add Harvests');
 
-            expect(errorHandler.mock.calls[0][0]).toBeInstanceOf(TypeError);
-            expect(entryDialog()).toBeUndefined();
+            expect(errorHandler).not.toHaveBeenCalled();
+            expect(entryDialog()).toBeDefined();
         });
 
-        // DocumentsCurrentBehavior: with the plots not loaded, each plot is
-        // built from its plantings alone, with no name, and sorting two of them
-        // by name throws. The update after the load fails, so the page keeps
-        // what it showed before it, with no plots (backlog A19). Should guard
-        // the plot
-        it("throws, and shows no plots, when the plots aren't loaded", async () => {
+        // The garden is laid out by plot, so a planting whose plot isn't
+        // loaded is left out; the plots store's alert says why (backlog A19)
+        it("shows no plots, without throwing, when the plots aren't loaded", async () => {
             const errorHandler = vi.fn();
             const { wrapper } = await mountPage({ state: { plots: { plots: [], plotsById: {} } }, errorHandler });
 
-            expect(errorHandler).toHaveBeenCalledTimes(1);
-            expect(errorHandler.mock.calls[0][0]).toBeInstanceOf(TypeError);
+            expect(errorHandler).not.toHaveBeenCalled();
             expect(summaries(wrapper)).toHaveLength(0);
         });
 
         // filteredPlots sorts the store's own list, in place, once the dialog
         // that offers them renders (B21)
-        it("sorts the plots store's list in place", async () => {
+        // It sorts a copy (backlog B21)
+        it("leaves the plots store's list as it was", async () => {
             const { wrapper, pinia } = await mountPage();
-            expect(pinia.state.value.plots.plots.map(p => p.friendlyName)).toEqual(['South bed', 'North bed', 'Herb box']);
 
             await openEntry(wrapper);
 
-            expect(pinia.state.value.plots.plots.map(p => p.friendlyName)).toEqual(['Herb box', 'North bed', 'South bed']);
+            expect(plotSelect(wrapper).props('items').map(p => p.friendlyName)).toEqual(['Herb box', 'North bed', 'South bed']);
+            expect(pinia.state.value.plots.plots.map(p => p.friendlyName)).toEqual(['South bed', 'North bed', 'Herb box']);
         });
     });
 
@@ -362,17 +355,20 @@ describe('GardenPage', () => {
         });
 
         // Before the first load is done hydratedPlots is {}, not a list, so
-        // the dialog has no plantings to offer
-        it('opens with nothing to harvest before the first load is done', async () => {
+        // the dialog opened with no plantings to offer (backlog B27)
+        it("doesn't offer Add Harvests before the first load is done", async () => {
             const { wrapper } = await mountPage({
                 beforeMount: ({ plots }) => plots.fetchPlots.mockReturnValueOnce(new Promise(() => {})),
             });
             expect(summaries(wrapper)).toHaveLength(0);
 
-            const dialog = await openEntry(wrapper);
-            await choosePlot(wrapper, northBed);
+            expect(buttonLabelled(wrapper, 'Add Harvests').attributes('disabled')).toBeDefined();
+        });
 
-            expect(dialog.text()).toContain('There are no plantings to harvest in North bed');
+        it('offers Add Harvests once the first load is done', async () => {
+            const { wrapper } = await mountPage();
+
+            expect(buttonLabelled(wrapper, 'Add Harvests').attributes('disabled')).toBeUndefined();
         });
     });
 
@@ -395,18 +391,43 @@ describe('GardenPage', () => {
             expect(dialog.find('.v-card-title').text()).toContain('Wed Jul 01 2026');
         });
 
-        // DocumentsCurrentBehavior: an overridden date outlasts Cancel, and a
-        // save, so the next harvests go on it too unless it's changed back
-        // (backlog A13). Should go back to today
-        it('keeps an overridden date after Cancel', async () => {
+        // (backlog A13)
+        it('goes back to today after Cancel', async () => {
             const { wrapper } = await mountPage();
             let dialog = await openEntry(wrapper);
             wrapper.findComponent(DatePickerDialogActivator).props('onSubmit')(new Date(2026, 6, 1));
+            await flushPromises();
+            expect(dialog.find('.v-card-title').text()).toContain('Wed Jul 01 2026');
             await press(dialog, 'Cancel');
 
             dialog = await openEntry(wrapper);
 
-            expect(dialog.find('.v-card-title').text()).toContain('Wed Jul 01 2026');
+            expect(dialog.find('.v-card-title').text()).toContain('Sat Jul 04 2026');
+        });
+
+        it('goes back to today after a save', async () => {
+            const { wrapper, harvests } = await mountPage();
+            const dialog = await openEntry(wrapper);
+            wrapper.findComponent(DatePickerDialogActivator).props('onSubmit')(new Date(2026, 6, 1));
+            await choosePlot(wrapper, northBed);
+            await enterQuantity(dialog, 'Early beans', '2');
+            await press(dialog, 'Save');
+            await press(dialogTitled(confirmTitle('Wed Jul 01 2026')), 'Confirm');
+            expect(harvests.upsertHarvests.mock.calls[0][0][0].harvestDate).toBe('2026-07-01');
+
+            const reopened = await openEntry(wrapper);
+
+            expect(reopened.find('.v-card-title').text()).toContain('Sat Jul 04 2026');
+        });
+
+        // Not the day the page was opened (backlog A22)
+        it('is the day the dialog is opened', async () => {
+            const { wrapper } = await mountPage();
+            vi.setSystemTime(new Date('2026-07-05T08:00:00'));
+
+            const dialog = await openEntry(wrapper);
+
+            expect(dialog.find('.v-card-title').text()).toContain('Sun Jul 05 2026');
         });
     });
 
@@ -443,18 +464,26 @@ describe('GardenPage', () => {
             ]);
         });
 
-        // The service takes it, but stores it in an INT column, so it keeps 2
-        // (validation-fixes doc, "worth doing")
-        it('saves a fractional quantity as it was entered', async () => {
-            const { wrapper, harvests } = await mountPage();
+        // The service took it, but stores it in an INT column, so it kept 2
+        // (backlog B27)
+        it("doesn't offer Save for a quantity with a fraction, and says why", async () => {
+            const { wrapper } = await mountPage();
             const dialog = await openEntry(wrapper);
             await choosePlot(wrapper, northBed);
+            await choosePlot(wrapper, southBed);
+            await enterQuantity(dialog, 'Sungold', '5');
+            await choosePlot(wrapper, northBed);
+
             await enterQuantity(dialog, 'Early beans', '1.5');
-            await press(dialog, 'Save');
 
-            await press(dialogTitled(confirmTitle('Sat Jul 04 2026')), 'Confirm');
+            expect(buttonLabelled(dialog, 'Save').attributes('disabled')).toBeDefined();
+            const row = dialog.findAll('.harvest-row').find(r => r.find('.text-success').text() === 'Early beans');
+            expect(row.findAll('.v-messages').at(-1).text()).toBe('A whole number');
 
-            expect(harvests.upsertHarvests.mock.calls[0][0][0].quantity).toBe(1.5);
+            await enterQuantity(dialog, 'Early beans', '2');
+
+            expect(buttonLabelled(dialog, 'Save').attributes('disabled')).toBeUndefined();
+            expect(row.findAll('.v-messages').at(-1).text()).toBe('');
         });
 
         it.each([
@@ -488,10 +517,7 @@ describe('GardenPage', () => {
         });
 
         // A harvest date is the user's own day, as YYYY-MM-DD, so harvests
-        // saved on a New York evening go on that day (backlog A22). The
-        // default is still the day the page was created, so a page left open
-        // overnight files them under the day before: A22's stale default,
-        // left for the pinned-behaviour plan's chunk F5
+        // saved on a New York evening go on that day (backlog A22)
         it('saves a New York evening on that day', async () => {
             const { wrapper, harvests } = await mountPage({ now: '2026-07-04T21:30:00' });
 
@@ -500,22 +526,19 @@ describe('GardenPage', () => {
             expect(harvests.upsertHarvests.mock.calls[0][0][0].harvestDate).toBe('2026-07-04');
         });
 
-        // DocumentsCurrentBehavior: Confirm stays enabled while the save is in
-        // flight, and each press saves the harvests again. The service adds a
-        // harvest to one already filed for its planting, day and type, so a
-        // double press doubles them. Should disable Confirm until the save is
-        // done (backlog A27)
-        it('saves again on a second Confirm while the first is in flight', async () => {
+        // The service adds a harvest to one already filed for its planting, day
+        // and type, so a second save would double them (backlog A27)
+        it('saves once, with Confirm disabled, while the save is in flight', async () => {
             const { wrapper, harvests } = await mountPage({
                 beforeMount: ({ harvests }) => harvests.upsertHarvests.mockReturnValue(new Promise(() => {})),
             });
             const confirm = await enterHarvests(wrapper);
 
             await press(confirm, 'Confirm');
-            await press(confirm, 'Confirm');
 
-            expect(harvests.upsertHarvests).toHaveBeenCalledTimes(2);
-            expect(harvests.upsertHarvests.mock.calls[1][0]).toEqual(harvests.upsertHarvests.mock.calls[0][0]);
+            expect(buttonLabelled(confirm, 'Confirm').attributes('disabled')).toBeDefined();
+            await wrapper.findComponent(ConfirmHarvestsDialog).props('onConfirm')();
+            expect(harvests.upsertHarvests).toHaveBeenCalledTimes(1);
         });
     });
 });

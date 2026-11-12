@@ -1,6 +1,6 @@
 import { parseDslArgs } from '@feral-auth/ts-simple-dsl';
 
-import { day, message, plantings, year } from '../params';
+import { day, plantings, year } from '../params';
 import { dashboardComponents, routedPageSteps } from './routed-page';
 
 /**
@@ -49,21 +49,7 @@ export function createAddPlantingYearPage(world, driver) {
         async checkCreateNeedsBothDates(...args) {
             parseDslArgs(args, {});
 
-            await driver.offersCreateWithNoDates();
-        },
-
-        /** Clicks Create, whatever's picked. No parameters. */
-        async create(...args) {
-            parseDslArgs(args, {});
-
-            await driver.create();
-        },
-
-        /** The page's alert says `message`. Check it straight away: it fades after three seconds. */
-        async checkAlertSays(...args) {
-            const params = parseDslArgs(args, { message: message() });
-
-            await driver.alertSays(params.message);
+            await driver.withholdsCreateWithNoDates();
         },
     };
 }

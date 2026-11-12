@@ -52,9 +52,7 @@
 
     <add-planting-dialog
         :show="dialog"
-        :planting="selectedPlanting"
         :plants="plants"
-        :plots="plots"
         :on-submit="savePlanting"
         :on-cancel="closeDialog"
     />
@@ -84,7 +82,6 @@ export default {
 
   data: () => ({
     dialog: false,
-    selectedPlanting: null,
     searchFilter: null,
     statusFilter: null,
     plantingStatuses: plantingUtils.plantingStatusesList,
@@ -153,18 +150,12 @@ export default {
       'fetchPlantingsByYear',
     ]),
 
-    openDialog(planting) {
-      if (planting !== undefined) {
-        this.selectedPlanting = planting;
-      } else {
-        this.selectedPlanting = null;
-      }
+    openDialog() {
       this.dialog = true;
     },
 
     closeDialog() {
       this.dialog = false;
-      this.selectedPlanting = null;
     },
 
     navigateToPlantingDetails(planting) {

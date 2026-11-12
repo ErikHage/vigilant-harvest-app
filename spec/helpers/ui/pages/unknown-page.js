@@ -16,7 +16,7 @@ export function createUnknownPage(world, driver) {
         async checkIsShownAt(...args) {
             const params = parseDslArgs(args, { path: path() });
 
-            await driver.isEmptyAt(params.path);
+            await driver.saysNoPageAt(params.path);
         },
     };
 }

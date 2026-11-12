@@ -1,5 +1,5 @@
-import { expectEnabled, expectHidden, expectText, expectVisible } from './assertions';
-import { pageAlertSays } from './page-alert';
+import { expectDisabled, expectHidden, expectText, expectVisible } from './assertions';
+import { saveIsRejectedSaying } from './page-alert';
 import { createRoutedPageDriver } from './routed-page-driver';
 import { chooseOption } from './select';
 
@@ -36,19 +36,24 @@ export function createPlantsPageDriver(page) {
             await expectVisible(dialog.getByText('Add Plant', { exact: true }), 'opening the Add Plant dialog');
         },
 
-        /** Pinned (A16): Create is offered before anything is entered. */
-        async offersCreateWithNothingEntered() {
-            await expectEnabled(create, 'the Add Plant dialog, before anything is entered');
+        /** With nothing entered, the Add Plant dialog withholds Create. */
+        async withholdsCreateWithNothingEntered() {
+            await expectDisabled(create, 'the Add Plant dialog, before anything is entered');
         },
 
-        /** Clicks Create, and waits for the dialog to close, as it does whatever the service says. */
-        async create() {
+        /** Clicks Create, and nothing more: a refused save keeps the dialog open. */
+        async pressCreate() {
             await create.click();
+        },
+
+        /** Clicks it, and waits for the dialog to close, as a save that works does. */
+        async create() {
+            await this.pressCreate();
             await expectHidden(dialog, 'creating a plant');
         },
 
-        /** Adds a plant through the Add dialog, with what it asks for, then waits for it to close. */
-        async addPlant({ friendlyName, categoryName, subcategoryName, lifespanType, harvesting, description }) {
+        /** Opens the Add dialog, and fills it in with `plant`'s details, without creating it. */
+        async startAddingPlant({ friendlyName, categoryName, subcategoryName, lifespanType, harvesting, description }) {
             const select = name => dialog.getByRole('combobox', { name, exact: true });
 
             await this.openAddDialog();
@@ -58,6 +63,11 @@ export function createPlantsPageDriver(page) {
             await chooseOption(page, select('Lifespan Type'), lifespanType);
             await chooseOption(page, select('Default Harvest Type'), harvesting.defaultHarvestType);
             await dialog.getByRole('textbox', { name: 'Description', exact: true }).fill(description);
+        },
+
+        /** Adds a plant through the Add dialog, with what it asks for, then waits for it to close. */
+        async addPlant(plant) {
+            await this.startAddingPlant(plant);
             await this.create();
         },
 
@@ -83,12 +93,9 @@ export function createPlantsPageDriver(page) {
             await clickIcon(friendlyName, 'mdi-pencil', `editing the plant ${friendlyName}`);
         },
 
-        /**
-         * Pinned (A7): the alert says only that saving failed, not the
-         * service's reason.
-         */
-        async alertSaysOnlyThatItFailed() {
-            await pageAlertSays(page, 'error upserting plant', 'the plants page, after the service refused a plant');
+        /** The dialog stays open, saying why the service refused the save, as does the page's alert. */
+        async createIsRejectedSaying(message) {
+            await saveIsRejectedSaying(page, message, 'the plants page, after the service refused a plant');
         },
     };
 }

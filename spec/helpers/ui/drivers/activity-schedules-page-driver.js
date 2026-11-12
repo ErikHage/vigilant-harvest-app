@@ -45,6 +45,15 @@ export function createActivitySchedulesPageDriver(page) {
                 new RegExp(`^\\s*${schedules.length} of \\d+ activity schedules\\s*$`), what);
         },
 
+        /** The table lists no schedule, says so, and the count is 0. */
+        async listsNone() {
+            const what = 'the activity schedules listed';
+
+            await expectText(rows, [/No schedules found/], what);
+            await expectText(main.locator('.text-body-2', { hasText: 'activity schedules' }),
+                /^\s*0 of \d+ activity schedules\s*$/, what);
+        },
+
         /** Opens the schedule from its name in the table. */
         async openSchedule({ name }) {
             await rows.locator('.clickable', { hasText: exactly(name) }).click();

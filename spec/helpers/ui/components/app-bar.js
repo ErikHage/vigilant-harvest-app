@@ -16,7 +16,7 @@ export function createAppBar(world, driver) {
         async checkLogoutEndedTheSession(...args) {
             parseDslArgs(args, {});
 
-            await driver.logoutLeavesTheSessionOpen();
+            await driver.logoutEndsTheSession();
         },
 
         /** The bar names the `year` (one the test named) as the year being worked on. */
@@ -37,7 +37,7 @@ export function createAppBar(world, driver) {
         async checkOffersNothingSignedOutOnAPhone(...args) {
             parseDslArgs(args, {});
 
-            await driver.offersHomeAndLogoutWhenSignedOut();
+            await driver.offersNothingOnAPhone();
         },
     };
 }

@@ -5,6 +5,7 @@
         <span class="headline">{{ isEditMode ? 'Edit Plot' : 'Add Plot' }}</span>
       </v-card-title>
       <v-card-text>
+        <v-alert v-if="saveError" type="error" density="compact" class="mb-4">{{ saveError }}</v-alert>
         <v-form ref="applicationForm">
           <v-text-field
               v-model="plotCopy.friendlyName"
@@ -34,14 +35,17 @@
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn color="error" text @click="handleOnCancel">Cancel</v-btn>
-        <v-btn v-if="isEditMode" color="primary" text @click="handleSavePlot">Update</v-btn>
-        <v-btn v-else color="primary" text @click="handleSavePlot">Create</v-btn>
+        <v-btn v-if="isEditMode" color="primary" text :disabled="!canSave" @click="handleSavePlot">Update</v-btn>
+        <v-btn v-else color="primary" text :disabled="!canSave" @click="handleSavePlot">Create</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
 <script>
+import { saveFailureMessage } from '@/utils/save-failures';
+import { hasText, isWholeNumber } from '@/utils/form-rules';
+
 export default {
   name: 'UpsertPlotDialog',
 
@@ -54,13 +58,15 @@ export default {
 
   data() {
     return {
+      saveError: '',
+      // no isActive: plots don't retire, and the service makes each new one
+      // active
       plotCopy: {
         plotId: '',
         friendlyName: '',
         lengthInInches: 0,
         widthInInches: 0,
         plotType: '',
-        isActive: false,
       },
       plotTypes: [
         'Bed',
@@ -85,6 +91,14 @@ export default {
   },
 
   computed: {
+    // what the service requires: a name, a type, and its sizes in whole inches
+    canSave() {
+      return hasText(this.plotCopy.friendlyName)
+          && hasText(this.plotCopy.plotType)
+          && isWholeNumber(this.plotCopy.lengthInInches)
+          && isWholeNumber(this.plotCopy.widthInInches);
+    },
+
     showDialog() {
       return this.show;
     },
@@ -102,16 +116,22 @@ export default {
         lengthInInches: 0,
         widthInInches: 0,
         plotType: '',
-        isActive: false,
       };
     },
 
     async handleSavePlot() {
-      await this.onSubmit(this.plotCopy);
+      this.saveError = '';
+      try {
+        await this.onSubmit(this.plotCopy);
+      } catch (err) {
+        this.saveError = saveFailureMessage(err);
+        return;
+      }
       this.resetForm()
     },
 
     handleOnCancel() {
+      this.saveError = '';
       this.resetForm();
       this.onCancel();
     },

@@ -1,6 +1,6 @@
 import { parseDslArgs } from '@feral-auth/ts-simple-dsl';
 
-import { message, plant, planting, year } from '../params';
+import { plant, planting, year } from '../params';
 import { dashboardComponents, routedPageSteps } from './routed-page';
 
 /** The plantings page, which lists the chosen year's plantings, in words. */
@@ -31,16 +31,18 @@ export function createPlantingsPage(world, driver) {
         async checkCreateNeedsTheRequiredFields(...args) {
             parseDslArgs(args, {});
 
-            await driver.offersCreateWithNothingEntered();
+            await driver.withholdsCreateWithNothingEntered();
         },
 
-        /** Clicks Create in the open Add dialog, which closes. No parameters. */
-        async create(...args) {
-            parseDslArgs(args, {});
-
-            await driver.create();
-        },
-
+        /**
+         * Clicks Create in the open Add dialog. No parameters. A save that succeeds
+         * closes it; one the service refuses keeps it open, for a check to follow.
+         */
+        /**
+         * The service refused the save: the dialog stays open, saying why
+         * (`message`), as does the page's alert. Check it straight away: the
+         * alert fades after three seconds.
+         */
         /**
          * Searching for the `planting`'s name finds it, with its plant,
          * quantity, plot and status as the test has them, and no other.
@@ -63,13 +65,6 @@ export function createPlantingsPage(world, driver) {
             const params = parseDslArgs(args, { planting: planting() });
 
             await driver.viewPlanting(world.plantingNamed(params.planting));
-        },
-
-        /** The page's alert says `message`. Check it straight away: it fades after three seconds. */
-        async checkAlertSays(...args) {
-            const params = parseDslArgs(args, { message: message() });
-
-            await driver.alertSays(params.message);
         },
     };
 }

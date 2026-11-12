@@ -24,12 +24,12 @@ describe('DashboardPage', () => {
         expect(store.fetchPlantingYears).toHaveBeenCalledTimes(1);
     });
 
-    it('tells the app bar a year is selected, and which', async () => {
+    // Not which: the app bar had a prop for it that it never read (backlog B12)
+    it('tells the app bar a year is selected', async () => {
         const { wrapper } = await mountDashboard({ plantingYear: 2026, selectedPlantingYear: year2026 });
 
         const appBar = wrapper.findComponent(DashboardAppBar);
-        expect(appBar.props('isPlantingYearSelected')).toBe(true);
-        expect(appBar.props('plantingYear')).toEqual(year2026);
+        expect(appBar.props()).toEqual({ isPlantingYearSelected: true });
     });
 
     it('tells the app bar when no year is selected', async () => {
@@ -38,9 +38,7 @@ describe('DashboardPage', () => {
         expect(wrapper.findComponent(DashboardAppBar).props('isPlantingYearSelected')).toBe(false);
     });
 
-    // DocumentsCurrentBehavior: nothing shows the common store's alert, so a
-    // failed load of the planting years is silent. Should show it
-    it("doesn't show the common store's alert", async () => {
+    it("shows the common store's alert", async () => {
         const { wrapper } = await mountDashboard({
             plantingYear: 2026,
             alertVisible: true,
@@ -48,7 +46,6 @@ describe('DashboardPage', () => {
             alertMessage: 'error fetching planting years',
         });
 
-        expect(wrapper.text()).not.toContain('error fetching planting years');
-        expect(wrapper.find('.v-alert').exists()).toBe(false);
+        expect(wrapper.find('.v-alert').text()).toBe('error fetching planting years');
     });
 });

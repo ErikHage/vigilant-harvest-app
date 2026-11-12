@@ -1,5 +1,4 @@
-import { expectEnabled,expectHidden, expectText, expectVisible } from './assertions';
-import { pageAlertSays } from './page-alert';
+import { expectDisabled, expectHidden, expectText, expectVisible } from './assertions';
 import { createRoutedPageDriver } from './routed-page-driver';
 
 /** The plant categories page, and its two add dialogs, as Playwright sees them. */
@@ -42,14 +41,19 @@ export function createPlantCategoriesPageDriver(page) {
             await dialog.getByRole('textbox', { name: 'Subcategory Name' }).fill(name);
         },
 
-        /** Pinned (A16): Create or Add is offered for a name of spaces only. */
-        async offersConfirmForANameOfSpaces() {
-            await expectEnabled(confirm, 'the add dialog, with a name of spaces typed');
+        /** With a name of spaces typed, the add dialog withholds Create or Add. */
+        async withholdsConfirmForANameOfSpaces() {
+            await expectDisabled(confirm, 'the add dialog, with a name of spaces typed');
         },
 
-        /** Clicks Create or Add, and waits for the dialog to close, as it does whatever the service says. */
-        async confirm() {
+        /** Clicks Create or Add, and nothing more: a refused save keeps the dialog open. */
+        async pressConfirm() {
             await confirm.click();
+        },
+
+        /** Clicks it, and waits for the dialog to close, as a save that works does. */
+        async confirm() {
+            await this.pressConfirm();
             await expectHidden(dialog, 'confirming the add dialog');
         },
 
@@ -65,10 +69,6 @@ export function createPlantCategoriesPageDriver(page) {
             await expectText(rows.locator('.v-chip'), subcategoryNames, what);
             // A RegExp is matched against the text as is, trailing space and all
             await expectText(count, /^\s*1 of \d+ categories\s*$/, what);
-        },
-
-        async alertSays(message) {
-            await pageAlertSays(page, message, 'the plant categories page, after a failed save');
         },
     };
 }
