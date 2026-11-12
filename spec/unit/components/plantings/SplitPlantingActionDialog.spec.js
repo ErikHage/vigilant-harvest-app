@@ -77,7 +77,7 @@ describe('SplitPlantingActionDialog', () => {
     });
 
     // Each split needs a name and at least one plant, and together they can
-    // take no more than were sown (validation-fixes doc, fix 3)
+    // take no more than were sown (backlog A24)
     it.each([
         ['no splits', async () => {}],
         ['a split with no name and a count of 0', async dialog => addSplit(dialog)],

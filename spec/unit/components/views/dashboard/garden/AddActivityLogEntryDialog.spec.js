@@ -163,7 +163,7 @@ describe('AddActivityLogEntryDialog', () => {
         expect(dialog.find('textarea').element.value).toBe('');
     });
 
-    // The service requires an activity (validation-fixes doc, fix 4)
+    // The service requires an activity (backlog A26)
     it('offers Confirm only once an activity is chosen', async () => {
         const wrapper = mountDialog();
         const dialog = await open(wrapper);

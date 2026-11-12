@@ -90,7 +90,7 @@ describe('AddPlantingDialog', () => {
     });
 
     // What the service requires: a name, of more than spaces, and a plant
-    // (validation-fixes doc, fix 2)
+    // (backlog A16)
     it('offers Create only once a name and a plant are given', async () => {
         const wrapper = await mountDialog();
         expect(buttonLabelled(dialog(), 'Create').attributes('disabled')).toBeDefined();

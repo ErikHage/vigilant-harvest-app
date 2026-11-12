@@ -465,7 +465,7 @@ describe('GardenPage', () => {
         });
 
         // The service took it, but stores it in an INT column, so it kept 2
-        // (validation-fixes doc, "worth doing"; backlog B27)
+        // (backlog B27)
         it("doesn't offer Save for a quantity with a fraction, and says why", async () => {
             const { wrapper } = await mountPage();
             const dialog = await openEntry(wrapper);

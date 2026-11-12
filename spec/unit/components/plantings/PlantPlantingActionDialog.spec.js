@@ -100,7 +100,7 @@ describe('PlantPlantingActionDialog', () => {
     });
 
     // Planting out puts a planting in a plot: the garden lists only plantings
-    // that have one (validation-fixes doc, fix 5)
+    // that have one (backlog A23)
     it('offers Confirm only once a plot is chosen', async () => {
         const wrapper = mountDialog();
         const dialog = await open(wrapper);

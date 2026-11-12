@@ -334,8 +334,8 @@ describe('PlantEditPage', () => {
             expect(store.upsertPlant.mock.calls[0][0].harvesting.defaultHarvestTypeId).toBe(1);
         });
 
-        // The service treats '' as "not given" for an optional number
-        // (validation-fixes doc, "Already fixed")
+        // The service treats '' as "not given" for an optional number. It
+        // once answered 500
         it('sends a cleared number box as an empty string', async () => {
             const { wrapper, store } = await mountPage();
             store.upsertPlant.mockResolvedValue();

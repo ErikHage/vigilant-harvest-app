@@ -179,8 +179,8 @@ describe('EditHarvestsDialog', () => {
         expect(warnings()[0]).toBe('Same planting and type as another row. Saving combines these into one 14 harvest.');
     });
 
-    // The service requires each quantity to be more than nothing (validation-
-    // fixes doc, "worth doing"), so Update waits for that
+    // The service requires each quantity to be more than nothing, so Update
+    // waits for that (backlog B30)
     it.each([[''], ['0'], ['-1']])("doesn't offer Update for a quantity of \"%s\"", async entered => {
         await mountDialog();
 

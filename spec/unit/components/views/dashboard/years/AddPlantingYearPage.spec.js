@@ -224,7 +224,7 @@ describe('AddPlantingYearPage', () => {
         expect(wrapper.find('.v-alert').text()).toBe('error adding planting year');
     });
 
-    // The service requires both dates (validation-fixes doc, "worth doing")
+    // The service requires both dates (backlog A14)
     it('offers Create only once both dates are picked', async () => {
         const { wrapper } = await mountPage();
         const create = () => buttonLabelled(wrapper, 'Create New Planting Year');
