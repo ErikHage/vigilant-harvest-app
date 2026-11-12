@@ -121,9 +121,6 @@
     </div>
 
     <div class="d-flex">
-      <v-btn class="px-1 mt-2" color="black" size="small" @click="navigateToPlotDetails(planting.plotId)">
-        <v-icon>mdi-vector-square</v-icon>
-      </v-btn>
       <v-select
           v-model="planting.plotId"
           :items="sortedPlots"
@@ -243,9 +240,6 @@ export default {
   methods: {
     fromLocalDate,
 
-    navigateToPlotDetails() {
-      console.log('plot clicked, do something in the future');
-    },
 
     navigateToPlantDetails(plantId) {
       this.$router.push({

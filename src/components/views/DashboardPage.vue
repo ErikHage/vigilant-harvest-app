@@ -2,7 +2,6 @@
   <v-container>
     <dashboard-app-bar
         :is-planting-year-selected="plantingYear != null"
-        :planting-year="selectedPlantingYear"
     />
     <!-- the common store's: the planting years, loaded here for every dashboard page -->
     <fade-out-alert :is-visible="alert.isVisible" :alert-type="alert.type" :message="alert.message"/>
@@ -28,7 +27,6 @@ export default {
   computed: {
     ...mapState(useCommonStore, {
       plantingYear: 'plantingYear',
-      selectedPlantingYear: 'selectedPlantingYear',
     }),
 
     alert() {

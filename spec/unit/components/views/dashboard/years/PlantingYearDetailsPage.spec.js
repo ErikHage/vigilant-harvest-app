@@ -1,5 +1,6 @@
 import { createTestingPinia } from '@pinia/testing';
 import { nextTick } from 'vue';
+import { flushPromises } from '@vue/test-utils';
 import PlantingYearDetailsPage from '@/components/views/dashboard/years/PlantingYearDetailsPage.vue';
 import { usePlantingsStore, usePlantingYearsStore } from '@/store';
 import { mountWithPlugins } from '../../../../../helpers/mount';
@@ -17,18 +18,23 @@ const plantings = [
     { plantingId: 'planting-4', currentStatus: 'RETIRED' },
 ];
 
-// `plantingYear` is what the store holds when the page opens on /planting-years/<year>
-function mountPage({ year = '2026', plantingYear = year2026, extraState = {} } = {}) {
+// `plantingYear` is what the store holds when the page opens on
+// /planting-years/<year>, and `yearPlantings` what the plantings store's
+// plantingsOfYear answers. The store's own list is another year's
+async function mountPage({ year = '2026', plantingYear = year2026, yearPlantings = plantings, extraState = {} } = {}) {
     const pinia = createTestingPinia({
         initialState: {
             plantingYears: { plantingYear, ...extraState },
-            plantings: { plantings },
+            plantings: { plantings: [{ plantingId: 'other-year', currentStatus: 'CREATED' }] },
         },
     });
+    const plantingsStore = usePlantingsStore(pinia);
+    plantingsStore.plantingsOfYear.mockResolvedValue(yearPlantings);
     const wrapper = mountWithPlugins(PlantingYearDetailsPage, {
         global: { plugins: [pinia], mocks: { $route: { params: { year } } } },
     });
-    return { wrapper, plantingYearsStore: usePlantingYearsStore(pinia), plantingsStore: usePlantingsStore(pinia) };
+    await flushPromises();
+    return { wrapper, plantingYearsStore: usePlantingYearsStore(pinia), plantingsStore };
 }
 
 // Each status row's label and count
@@ -40,21 +46,24 @@ function statusRows(wrapper) {
 }
 
 describe('PlantingYearDetailsPage', () => {
-    it("loads the year from the route, and that year's plantings", () => {
-        const { plantingYearsStore, plantingsStore } = mountPage();
+    // Its plantings for itself, not into the store, whose list is the chosen
+    // year's, which the other pages show (backlog B20)
+    it("loads the year from the route, and that year's plantings, for itself", async () => {
+        const { plantingYearsStore, plantingsStore } = await mountPage();
 
         expect(plantingYearsStore.fetchPlantingYear).toHaveBeenCalledWith('2026');
-        expect(plantingsStore.fetchPlantingsByYear).toHaveBeenCalledWith('2026');
+        expect(plantingsStore.plantingsOfYear).toHaveBeenCalledWith('2026');
+        expect(plantingsStore.fetchPlantingsByYear).not.toHaveBeenCalled();
     });
 
-    it('shows nothing until a year is loaded', () => {
-        const { wrapper } = mountPage({ plantingYear: null });
+    it('shows nothing until a year is loaded', async () => {
+        const { wrapper } = await mountPage({ plantingYear: null });
 
         expect(wrapper.text()).toBe('');
     });
 
-    it('shows the year and its dates, as UTC days', () => {
-        const { wrapper } = mountPage();
+    it('shows the year and its dates, as UTC days', async () => {
+        const { wrapper } = await mountPage();
 
         expect(wrapper.find('.text-h4').text()).toBe('Planting Year 2026');
         expect(wrapper.findAll('.v-card-subtitle').map(subtitle => subtitle.text()))
@@ -62,10 +71,10 @@ describe('PlantingYearDetailsPage', () => {
         expect(wrapper.findAll('.v-card-text > .text-h5').map(date => date.text())).toEqual(['May 1', 'May 17']);
     });
 
-    // The service sends each year with its own counts (details), but the page
-    // counts the plantings store's list instead
-    it('counts the plantings by status, from the plantings it loaded', () => {
-        const { wrapper } = mountPage();
+    // Not the store's list, nor the year's details, which the service fills
+    // only in its list of years (backlog B20)
+    it('counts the plantings by status, from the plantings it loaded', async () => {
+        const { wrapper } = await mountPage();
 
         expect(statusRows(wrapper)).toEqual([
             ['Created Plantings', '0'],
@@ -75,26 +84,23 @@ describe('PlantingYearDetailsPage', () => {
         ]);
     });
 
-    it('counts 0 for each status with no plantings', () => {
-        const pinia = createTestingPinia({ initialState: { plantingYears: { plantingYear: year2026 }, plantings: { plantings: [] } } });
-        const wrapper = mountWithPlugins(PlantingYearDetailsPage, {
-            global: { plugins: [pinia], mocks: { $route: { params: { year: '2026' } } } },
-        });
+    it('counts 0 for each status with no plantings', async () => {
+        const { wrapper } = await mountPage({ yearPlantings: [] });
 
         expect(statusRows(wrapper).map(([, count]) => count)).toEqual(['0', '0', '0', '0']);
     });
 
     // The store still holds the last year viewed until the fetch returns, and
     // for good if it fails (backlog A15)
-    it("shows no other year under a year's address", () => {
-        const { wrapper } = mountPage({ year: '2030', plantingYear: year2026 });
+    it("shows no other year under a year's address", async () => {
+        const { wrapper } = await mountPage({ year: '2030', plantingYear: year2026 });
 
         expect(wrapper.find('.text-h4').exists()).toBe(false);
         expect(wrapper.text()).not.toContain('2026');
     });
 
-    it("shows the planting-years store's alert", () => {
-        const { wrapper } = mountPage({
+    it("shows the planting-years store's alert", async () => {
+        const { wrapper } = await mountPage({
             extraState: { alertVisible: true, alertType: 'error', alertMessage: 'error fetching planting year' },
         });
 
@@ -102,7 +108,7 @@ describe('PlantingYearDetailsPage', () => {
     });
 
     it("shows the plantings store's alert, for the year's plantings", async () => {
-        const { wrapper, plantingsStore } = mountPage();
+        const { wrapper, plantingsStore } = await mountPage();
 
         plantingsStore.$patch({ alertVisible: true, alertType: 'error', alertMessage: 'error fetching plantings by year' });
         await nextTick();

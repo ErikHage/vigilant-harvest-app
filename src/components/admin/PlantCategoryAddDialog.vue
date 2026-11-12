@@ -38,7 +38,7 @@ import { saveFailureMessage } from '@/utils/save-failures';
 import { hasText } from '@/utils/form-rules';
 
 export default {
-  name: 'AddCategoryDialog',
+  name: 'PlantCategoryAddDialog',
 
   props: {
     onSubmit: {

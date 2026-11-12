@@ -50,11 +50,6 @@ export const useCommonStore = defineStore('common', {
             this.selectedPlantingYear = this.plantingYearsByYear[year];
             storageUtils.setLocalStorageEntry(localStorageKeys.plantingYear, year);
         },
-        clearPlantingYear() {
-            this.plantingYear = null;
-            this.selectedPlantingYear = null;
-            storageUtils.clearLocalStorageEntry(localStorageKeys.plantingYear);
-        },
         setAlertMessage,
     },
     state: () => {
@@ -422,6 +417,17 @@ export const usePlantingsStore = defineStore('plantings', {
                 this.setAlertMessage(err, 'error', 'error fetching plantings by year');
             }
         },
+        // A year's plantings, returned rather than stored, for a page that
+        // shows another year than the chosen one's: the store's list stays
+        // the chosen year's. None, with the alert, when the fetch fails
+        async plantingsOfYear(plantingYear) {
+            try {
+                return await plantingsApi.fetchPlantingsByYear(storageUtils.tryToLoadTokenFromStorage(), plantingYear);
+            } catch (err) {
+                this.setAlertMessage(err, 'error', 'error fetching plantings by year');
+                return [];
+            }
+        },
         async fetchPlantingById(plantingId) {
             try {
                 this.plantingsById[plantingId] = await plantingsApi.fetchPlantingById(storageUtils.tryToLoadTokenFromStorage(), plantingId);
@@ -446,11 +452,8 @@ export const useHarvestsStore = defineStore('harvests', {
     actions: {
         async upsertHarvests(harvests) {
             try {
-                const harvestsWithYear = harvests.map(harvest => ({
-                    plantingYear: this.plantingYear,
-                    ...harvest,
-                }));
-                return await harvestsApi.upsertHarvests(storageUtils.tryToLoadTokenFromStorage(), harvestsWithYear);
+                // each caller sends its year: the store has none of its own
+                return await harvestsApi.upsertHarvests(storageUtils.tryToLoadTokenFromStorage(), harvests);
             } catch (err) {
                 this.setAlertMessage(err, 'error', harvestUtils.upsertErrorMessage(err, 'error inserting harvests'));
                 throw err;

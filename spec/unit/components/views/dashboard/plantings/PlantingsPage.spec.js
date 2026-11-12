@@ -105,15 +105,14 @@ describe('PlantingsPage', () => {
         expect(wrapper.findComponent(AddPlantingDialog).props('plants')).toEqual(plants);
     });
 
-    // AddPlantingDialog declares neither, so they fall through to its root as
-    // attributes
-    it('passes the dialog a planting and the plots it has no props for', async () => {
+    // It passed a planting and the plots too, which AddPlantingDialog doesn't
+    // declare, so they fell through to its root as attributes (backlog B12)
+    it('passes the dialog only what it declares', async () => {
         const { wrapper } = await mountPage();
 
         const dialog = wrapper.findComponent(AddPlantingDialog);
-        expect(dialog.props()).not.toHaveProperty('planting');
-        expect(dialog.props()).not.toHaveProperty('plots');
-        expect(dialog.vm.$attrs).toMatchObject({ planting: null, plots });
+        expect(dialog.vm.$attrs).not.toHaveProperty('planting');
+        expect(dialog.vm.$attrs).not.toHaveProperty('plots');
     });
 
     it("creates the planting in the selected year, closes the dialog, and reloads", async () => {

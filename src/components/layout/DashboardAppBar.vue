@@ -105,9 +105,6 @@ export default {
       type: Boolean,
       required: true,
     },
-    plantingYear: {
-      type: Object,
-    }
   },
 
   data: () => ({

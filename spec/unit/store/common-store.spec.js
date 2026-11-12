@@ -126,27 +126,4 @@ describe('useCommonStore', () => {
             expect(store.selectedPlantingYear).toBeUndefined();
         });
     });
-
-    describe('clearPlantingYear', () => {
-        it('clears the year and forgets it', async () => {
-            plantingYearsApi.fetchPlantingYears.mockResolvedValue(plantingYears);
-            await store.fetchPlantingYears();
-            store.selectPlantingYear(2025);
-
-            store.clearPlantingYear();
-
-            expect(store.plantingYear).toBeNull();
-            expect(store.selectedPlantingYear).toBeNull();
-            expect(localStorage.getItem('planting-year')).toBeNull();
-        });
-
-        it('leaves a new store on the current year', () => {
-            store.selectPlantingYear(2025);
-            store.clearPlantingYear();
-
-            setActivePinia(createPinia());
-
-            expect(useCommonStore().plantingYear).toBe(2026);
-        });
-    });
 });

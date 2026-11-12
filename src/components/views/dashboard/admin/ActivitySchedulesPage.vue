@@ -94,14 +94,6 @@ export default {
       alertVisible: 'alertVisible',
     }),
 
-    alert() {
-      return {
-        isVisible: this.alertVisible,
-        type: this.alertType,
-        message: this.alertMessage,
-      };
-    },
-
     filteredSchedules() {
       let result = this.schedules;
       if (this.filter) {

@@ -17,9 +17,9 @@ function mountDialog({ errorHandler, ...props } = {}) {
 const open = wrapper => openAction(wrapper, 'Add Category', 'Add Category');
 
 describe('PlantCategoryAddDialog', () => {
-    // Its name is AddCategoryDialog (B13)
-    it('is named AddCategoryDialog', () => {
-        expect(PlantCategoryAddDialog.name).toBe('AddCategoryDialog');
+    // It was named AddCategoryDialog (backlog B13)
+    it('is named for its file', () => {
+        expect(PlantCategoryAddDialog.name).toBe('PlantCategoryAddDialog');
     });
 
     it('opens from Add Category, empty, with Create disabled', async () => {

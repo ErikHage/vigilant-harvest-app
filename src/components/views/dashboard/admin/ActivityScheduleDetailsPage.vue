@@ -147,13 +147,6 @@ export default {
       return schedule?.activityScheduleId === this.activityScheduleId ? schedule : null;
     },
 
-    alert() {
-      return {
-        isVisible: this.alertVisible,
-        type: this.alertType,
-        message: this.alertMessage,
-      };
-    },
   },
 
   methods: {
@@ -184,8 +177,9 @@ export default {
       await this.refreshData();
     },
 
+    // the dialog's item has no schedule id: it's this page's (backlog A30)
     async onUpdateActivityScheduleItem(scheduleItem) {
-      await this.updateScheduleItem(scheduleItem);
+      await this.updateScheduleItem({ ...scheduleItem, activityScheduleId: this.activityScheduleId });
       await this.refreshData();
     },
 

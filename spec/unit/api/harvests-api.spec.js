@@ -33,26 +33,29 @@ describe('harvestsApi', () => {
             name: 'searchHarvests',
             call: () => harvestsApi.searchHarvests('a-token', 2026),
             verb: 'get',
-            url: `${serviceUrl}/harvests/search?year=2026`,
+            url: `${serviceUrl}/harvests/search`,
+            config: withToken({ params: { year: 2026 } }),
         },
         {
             name: 'fetchHarvestStats',
             call: () => harvestsApi.fetchHarvestStats('a-token', 2026, 'Planting'),
             verb: 'get',
-            url: `${serviceUrl}/harvests/stats?year=2026&type=Planting`,
+            url: `${serviceUrl}/harvests/stats`,
+            config: withToken({ params: { year: 2026, type: 'Planting' } }),
         },
     ]);
 
-    // Unlike fetchHarvestSummary, these two build their query strings by hand,
-    // so a missing year is sent as the text "null"
+    // As params, as fetchHarvestSummary does, so axios leaves a missing year out
+    // of the query, where these two once sent the text "null" (backlog B3)
     it.each([
-        ['searchHarvests', () => harvestsApi.searchHarvests('a-token', null), `${serviceUrl}/harvests/search?year=null`],
-        ['fetchHarvestStats', () => harvestsApi.fetchHarvestStats('a-token', null, 'Plant'), `${serviceUrl}/harvests/stats?year=null&type=Plant`],
-    ])('%s sends a missing year as "null"', async (_, call, url) => {
+        ['searchHarvests', () => harvestsApi.searchHarvests('a-token', null), `${serviceUrl}/harvests/search`, { year: null }],
+        ['fetchHarvestStats', () => harvestsApi.fetchHarvestStats('a-token', null, 'Plant'), `${serviceUrl}/harvests/stats`, { year: null, type: 'Plant' }],
+    ])('%s puts a missing year in params, not the URL', async (_, call, url, params) => {
         axios.get.mockResolvedValue({ data: [] });
 
         await call();
 
-        expect(axios.get).toHaveBeenCalledWith(url, withToken());
+        expect(axios.get).toHaveBeenCalledWith(url, withToken({ params }));
+        expect(axios.getUri({ url, params })).not.toContain('null');
     });
 });

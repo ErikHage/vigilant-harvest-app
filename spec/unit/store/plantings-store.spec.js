@@ -67,6 +67,32 @@ describe('usePlantingsStore', () => {
         });
     });
 
+    // For the year details page, which shows a year that may not be the
+    // chosen one (backlog B20)
+    describe('plantingsOfYear', () => {
+        it("returns the year's plantings, leaving the store's list alone", async () => {
+            plantingsApi.fetchPlantingsByYear.mockResolvedValueOnce([early]);
+            await store.fetchPlantingsByYear(2026);
+            plantingsApi.fetchPlantingsByYear.mockResolvedValueOnce([late]);
+
+            await expect(store.plantingsOfYear(2025)).resolves.toEqual([late]);
+
+            expect(plantingsApi.fetchPlantingsByYear).toHaveBeenLastCalledWith('a-token', 2025);
+            expect(store.plantings).toEqual([early]);
+            expect(store.plantingsById).toEqual({ 'planting-1': early });
+        });
+
+        it('returns none, with an alert, and logs, when the fetch fails', async () => {
+            const err = httpError(500);
+            plantingsApi.fetchPlantingsByYear.mockRejectedValueOnce(err);
+
+            await expect(store.plantingsOfYear(2025)).resolves.toEqual([]);
+
+            expect(store.alertMessage).toBe('error fetching plantings by year');
+            expect(consoleError).toHaveBeenCalledWith(err);
+        });
+    });
+
     describe('fetchPlantingById', () => {
         it('loads one planting into the index', async () => {
             plantingsApi.fetchPlantingById.mockResolvedValue(early);

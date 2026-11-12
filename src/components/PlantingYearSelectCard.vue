@@ -39,7 +39,6 @@ export default {
   props: [
     'availableYears',
     'onSelectYearChange',
-    'onSelectYearClear',
     'selectedYear',
   ],
 

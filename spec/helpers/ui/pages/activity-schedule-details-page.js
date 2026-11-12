@@ -82,7 +82,7 @@ export function createActivityScheduleDetailsPage(world, driver) {
         async checkItemUpdateNamedItsSchedule(...args) {
             parseDslArgs(args, {});
 
-            await driver.itemUpdateSentUnderUndefined();
+            await driver.itemUpdateSentUnderItsSchedule();
         },
 
         /** Deletes the `item`, through its bin, confirming it. */

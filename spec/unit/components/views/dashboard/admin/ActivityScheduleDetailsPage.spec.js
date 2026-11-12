@@ -142,20 +142,17 @@ describe('ActivityScheduleDetailsPage', () => {
             expect(store.getScheduleById).toHaveBeenCalledTimes(2);
         });
 
-        // DocumentsCurrentBehavior: the edit dialog submits the item without
-        // its schedule's id, and the page passes it on as it is, so the API
-        // patches /activity-schedules/undefined/schedule-items/item-1. It works
-        // only because the service ignores the schedule in that path (backlog
-        // A30). Should send the route's schedule id
-        it('updates an item without its schedule id, then reloads', async () => {
+        // The edit dialog submits the item without its schedule's id, so the
+        // page adds the route's; it once patched
+        // /activity-schedules/undefined/schedule-items/item-1 (backlog A30)
+        it("updates an item with its schedule's id, then reloads", async () => {
             const { wrapper, store } = await mountPage();
             const submitted = { entryId: 'item-1', activityType: 'Fertilize', subType: 'Bone Meal', notes: 'Side-dress' };
 
             await wrapper.findAllComponents(EditScheduleItemDialog)[0].props('onSubmit')(submitted);
             await flushPromises();
 
-            expect(store.updateScheduleItem).toHaveBeenCalledWith(submitted);
-            expect(store.updateScheduleItem.mock.calls[0][0].activityScheduleId).toBeUndefined();
+            expect(store.updateScheduleItem).toHaveBeenCalledWith({ ...submitted, activityScheduleId: 'schedule-1' });
             expect(store.getScheduleById).toHaveBeenCalledTimes(2);
         });
 

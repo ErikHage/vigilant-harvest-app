@@ -9,7 +9,6 @@ function mountCard(props) {
         props: {
             availableYears: [2025, 2026],
             onSelectYearChange: vi.fn(),
-            onSelectYearClear: vi.fn(),
             selectedYear: 2026,
             ...props,
         },
@@ -78,8 +77,8 @@ describe('PlantingYearSelectCard', () => {
         expect(wrapper.find('.flash-green').exists()).toBe(false);
     });
 
-    // onSelectYearClear is a prop, but nothing on the card calls it, so there
-    // is no way to clear the year from here
+    // A cleared year would bring back the requests with no year, so the card
+    // offers none; its unused onSelectYearClear prop is gone (backlog B12)
     it('has no way to clear the year', () => {
         const wrapper = mountCard();
 

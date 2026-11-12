@@ -44,18 +44,17 @@ describe('useHarvestsStore', () => {
             expect(store.alertVisible).toBe(false);
         });
 
-        // Both callers send their own plantingYear. The store's default reads
-        // this.plantingYear, which isn't in its state, so it is always undefined
-        it("adds an undefined plantingYear to a harvest that doesn't have one", async () => {
+        // Both callers send their own plantingYear; the store adds no
+        // default, since it has no year of its own (backlog B10)
+        it('sends each harvest as given', async () => {
             const { plantingYear: _, ...withoutYear } = harvest;
             harvestsApi.upsertHarvests.mockResolvedValue([]);
 
             await store.upsertHarvests([withoutYear]);
 
-            // toStrictEqual, because toEqual would also pass with no plantingYear key at all
+            // toStrictEqual, because toEqual would also pass with an undefined plantingYear key
             const [, sent] = harvestsApi.upsertHarvests.mock.calls[0];
-            expect(sent).toStrictEqual([{ plantingYear: undefined, ...withoutYear }]);
-            expect(sent[0]).toHaveProperty('plantingYear');
+            expect(sent).toStrictEqual([withoutYear]);
         });
 
         it("shows the service's message for a 400, and rejects", async () => {

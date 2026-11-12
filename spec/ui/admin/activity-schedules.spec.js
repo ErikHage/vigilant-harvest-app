@@ -96,11 +96,9 @@ test.describe('An activity schedule\'s items', () => {
         await activityScheduleDetailsPage.checkListsItem('item: feed');
     });
 
-    // DocumentsCurrentBehavior: the edit dialog sends the item without its
-    // schedule's id, and the page passes it on, so the update goes to
-    // /activity-schedules/undefined/schedule-items/<id>; it works only
-    // because the service ignores the schedule in that path (backlog A30).
-    // Should send the update under the schedule shown
+    // The edit dialog sends the item without its schedule's id, so the page
+    // adds the one it shows; the update once went under `undefined` (backlog
+    // A30)
     test('sends an item\'s update under its schedule', async ({ activityScheduleDetailsPage }) => {
         await activityScheduleDetailsPage.checkListsItem('item: feed');
 

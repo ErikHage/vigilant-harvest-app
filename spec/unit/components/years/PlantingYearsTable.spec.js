@@ -13,8 +13,9 @@ function mountTable(props) {
 }
 
 describe('PlantingYearsTable', () => {
-    it('is named PlantingsYearsTable', () => {
-        expect(PlantingYearsTable.name).toBe('PlantingsYearsTable');
+    // It was named PlantingsYearsTable (backlog B13)
+    it('is named for its file', () => {
+        expect(PlantingYearsTable.name).toBe('PlantingYearsTable');
     });
 
     it('lists each year with its target planting date and last frost date', () => {

@@ -103,7 +103,9 @@ least 1, and the total no more than was sown.
   - The service now answers `lastFrostDate is required`. The page stays put and the store alerts
     "error adding planting year", so nothing breaks, but disabling Save until both dates are set is
     clearer.
-- **Requests made after the year is cleared.**
+- **Requests made after the year is cleared.** **Fixed** (pinned-behaviour fixes, F9, backlogs B12
+  and B3): nothing clears the year now, and the harvest calls send it as a param, so a missing
+  year is left out rather than sent as `null`.
   - After `clearPlantingYear()` (`src/store/index.js:46`), a page can request `/journal/null` or
     similar. That is now a 400 (`plantingYear must be an integer`), and was a 500. The app alerts
     either way.

@@ -24,12 +24,12 @@ describe('DashboardPage', () => {
         expect(store.fetchPlantingYears).toHaveBeenCalledTimes(1);
     });
 
-    it('tells the app bar a year is selected, and which', async () => {
+    // Not which: the app bar had a prop for it that it never read (backlog B12)
+    it('tells the app bar a year is selected', async () => {
         const { wrapper } = await mountDashboard({ plantingYear: 2026, selectedPlantingYear: year2026 });
 
         const appBar = wrapper.findComponent(DashboardAppBar);
-        expect(appBar.props('isPlantingYearSelected')).toBe(true);
-        expect(appBar.props('plantingYear')).toEqual(year2026);
+        expect(appBar.props()).toEqual({ isPlantingYearSelected: true });
     });
 
     it('tells the app bar when no year is selected', async () => {

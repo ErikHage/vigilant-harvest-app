@@ -22,7 +22,6 @@
       <v-col cols="12">
         <v-row>
           <v-col cols="12" lg="4" md="6"
-                 v-if="!loading"
                  v-for="hydratedPlot in hydratedPlots">
             <harvest-summary :hydrated-plot="hydratedPlot" :show-retired="showRetired"/>
           </v-col>
@@ -30,7 +29,7 @@
       </v-col>
     </v-row>
 
-    <v-dialog v-model="dialog" max-width="800px" persistent v-if="!loading">
+    <v-dialog v-model="dialog" max-width="800px" persistent>
       <v-card>
         <v-card-title class="d-flex align-center justify-space-between">
           <span class="headline mr-4">Add Harvests</span>
@@ -142,11 +141,9 @@ export default {
   },
 
   data: () => ({
-    loading: false,
     initialized: false,
     showRetired: false,
 
-    overrideHarvestDateDialog: false,
     selectedHarvestDate: new Date(),
 
     dialog: false,
@@ -170,7 +167,6 @@ export default {
     }),
 
     ...mapState(usePlantsStore, {
-      plants: 'plants',
       plantsById: 'plantsById',
       harvestTypes: 'harvestTypes',
     }),
@@ -267,34 +263,32 @@ export default {
     },
 
     openAddHarvestDialog() {
-      if (!this.loading) {
-        this.saveErrorMessage = '';
-        // harvested today, the day it's opened: an override from before, and
-        // the day the page was opened, are gone
-        this.selectedHarvestDate = new Date();
-        const tempPlots = this.hydratedPlots;
+      this.saveErrorMessage = '';
+      // harvested today, the day it's opened: an override from before, and
+      // the day the page was opened, are gone
+      this.selectedHarvestDate = new Date();
+      const tempPlots = this.hydratedPlots;
 
-        for (let i = 0; i < tempPlots.length; i++) {
-          const plot = tempPlots[i];
-          for (let j = 0; j < plot.plantings.length; j++) {
-            const tempPlanting = plot.plantings[j];
-            this.harvestsForm[tempPlanting.plantingId] = {
-              plotId: plot.plotId,
-              plotName: plot.friendlyName,
-              plantingId: tempPlanting.plantingId,
-              plantingName: tempPlanting.name,
-              // a plant that didn't load: the planting is offered without it
-              plantName: tempPlanting.plant?.friendlyName,
-              harvestTypeId: tempPlanting.plant?.harvesting?.defaultHarvestTypeId
-                  ?? harvestUtils.unspecifiedHarvestTypeId,
-              quantity: 0,
-              currentStatus: tempPlanting.currentStatus,
-            }
+      for (let i = 0; i < tempPlots.length; i++) {
+        const plot = tempPlots[i];
+        for (let j = 0; j < plot.plantings.length; j++) {
+          const tempPlanting = plot.plantings[j];
+          this.harvestsForm[tempPlanting.plantingId] = {
+            plotId: plot.plotId,
+            plotName: plot.friendlyName,
+            plantingId: tempPlanting.plantingId,
+            plantingName: tempPlanting.name,
+            // a plant that didn't load: the planting is offered without it
+            plantName: tempPlanting.plant?.friendlyName,
+            harvestTypeId: tempPlanting.plant?.harvesting?.defaultHarvestTypeId
+                ?? harvestUtils.unspecifiedHarvestTypeId,
+            quantity: 0,
+            currentStatus: tempPlanting.currentStatus,
           }
         }
-
-        this.dialog = true;
       }
+
+      this.dialog = true;
     },
 
     onDialogSelectPlotChange(plot) {
@@ -349,20 +343,17 @@ export default {
             harvestTypeId: h.harvestTypeId,
           }));
 
-      if (mappedHarvests.length > 0) {
-        this.saving = true;
-        try {
-          await this.upsertHarvests(mappedHarvests);
-        } catch (err) {
-          // reopen the entry dialog so the quantities survive a rejected harvest type id
-          this.saveErrorMessage = harvestUtils.upsertErrorMessage(err, 'error saving harvests');
-          this.goBackToHarvestDialog();
-          return;
-        } finally {
-          this.saving = false;
-        }
-      } else {
-        console.log('no harvests entered, skipping save');
+      // Save is offered only once a quantity is entered, so there's always one
+      this.saving = true;
+      try {
+        await this.upsertHarvests(mappedHarvests);
+      } catch (err) {
+        // reopen the entry dialog so the quantities survive a rejected harvest type id
+        this.saveErrorMessage = harvestUtils.upsertErrorMessage(err, 'error saving harvests');
+        this.goBackToHarvestDialog();
+        return;
+      } finally {
+        this.saving = false;
       }
 
       this.closeConfirmDialog();

@@ -235,13 +235,6 @@ export default {
       return this.planting != null && editableValues(this.plantingCopy) !== editableValues(this.planting);
     },
 
-    plot() {
-      return this.plotsById[this.plantingCopy?.plotId];
-    },
-
-    plant() {
-      return this.plantsById[this.plantingCopy?.plantId];
-    },
 
     statusColor() {
       return plantingUtils.mapPlantingStatusToColor(this.plantingCopy?.currentStatus);

@@ -102,10 +102,6 @@ export default {
       return String(this.storedPlantingYear?.plantingYear) === this.year ? this.storedPlantingYear : null;
     },
 
-    ...mapState(usePlantingsStore, {
-      plantings: 'plantings',
-    }),
-
     year() {
       return this.$route.params.year;
     },
@@ -149,7 +145,7 @@ export default {
     ]),
 
     ...mapActions(usePlantingsStore, [
-      'fetchPlantingsByYear',
+      'plantingsOfYear',
     ]),
 
     formatDateString(dateString) {
@@ -157,9 +153,17 @@ export default {
     },
   },
 
-  mounted() {
+  data() {
+    return {
+      // this year's, counted here: the plantings store's list is the chosen
+      // year's, which the other pages show (backlog B20)
+      plantings: [],
+    };
+  },
+
+  async mounted() {
     this.fetchPlantingYear(this.year);
-    this.fetchPlantingsByYear(this.year);
+    this.plantings = await this.plantingsOfYear(this.year);
   }
 }
 </script>

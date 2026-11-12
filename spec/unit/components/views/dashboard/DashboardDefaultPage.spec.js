@@ -39,11 +39,4 @@ describe('DashboardDefaultPage', () => {
         expect(store.selectPlantingYear).toHaveBeenCalledWith('2025');
     });
 
-    it('would clear the year, if the card offered a way to', async () => {
-        const { wrapper, store } = mountPage();
-
-        await wrapper.findComponent(PlantingYearSelectCard).props('onSelectYearClear')();
-
-        expect(store.clearPlantingYear).toHaveBeenCalledTimes(1);
-    });
 });

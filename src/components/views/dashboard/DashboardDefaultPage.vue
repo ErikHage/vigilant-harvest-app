@@ -20,7 +20,6 @@
         <planting-year-select-card
             :available-years="availableYears"
             :on-select-year-change="onSelectYearChange"
-            :on-select-year-clear="onSelectYearClear"
             :selected-year="plantingYear"/>
       </v-col>
     </v-row>
@@ -55,7 +54,6 @@ export default {
   methods: {
     ...mapActions(useCommonStore, [
       'selectPlantingYear',
-      'clearPlantingYear',
     ]),
 
     async onSelectYearChange(year) {
@@ -64,9 +62,6 @@ export default {
       this.loading = false;
     },
 
-    async onSelectYearClear() {
-      this.clearPlantingYear();
-    },
   },
 }
 </script>

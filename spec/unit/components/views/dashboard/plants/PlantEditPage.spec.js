@@ -211,12 +211,14 @@ describe('PlantEditPage', () => {
 
             await update(wrapper);
 
+            // the service's plant has no seedSource; toHaveBeenCalledWith would
+            // take an undefined one as absent (backlog B23)
+            expect(store.upsertPlant.mock.calls[0][0]).not.toHaveProperty('seedSource');
             expect(store.upsertPlant).toHaveBeenCalledWith({
                 plantId: 'plant-1',
                 subcategoryId: 'subcategory-2',
                 friendlyName: 'Provider',
                 lifespanType: 'Annual',
-                seedSource: undefined,
                 tags: ['Cold Tolerant', 'Container Friendly'],
                 description: 'Bush bean.',
                 taxonomy: { family: 'Fabaceae', genus: 'Phaseolus', species: 'vulgaris' },

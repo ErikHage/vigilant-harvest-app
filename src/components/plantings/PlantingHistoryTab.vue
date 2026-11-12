@@ -34,19 +34,6 @@ export default {
   },
 
   methods: {
-    navigateToPlotDetails() {
-      console.log('plot clicked, do something in the future');
-    },
-
-    navigateToPlantDetails(plantId) {
-      this.$router.push({
-        name: 'PlantDetailsPage',
-        params: {
-          plantId,
-        },
-      });
-    },
-
     getColorForStatus(status) {
       return plantingUtils.mapPlantingStatusToColor(status);
     },

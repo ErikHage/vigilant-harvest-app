@@ -307,7 +307,6 @@ export default {
       return this.textFieldEdited(this.plant.friendlyName, this.plantCopy.friendlyName)
           || this.textFieldEdited(this.plant.lifespanType, this.plantCopy.lifespanType)
           || this.plant.subcategoryId !== this.selectedSubcategoryId
-          || this.textFieldEdited(this.plant.seedSource, this.plantCopy.seedSource)
           || this.textFieldEdited(this.plant.description, this.plantCopy.description)
           || this.plant.tags?.join(",") !== this.plantCopy.tags?.join(",")
           || this.textFieldEdited(this.plant.taxonomy.family, this.plantCopy.taxonomy.family)
@@ -401,7 +400,6 @@ export default {
         subcategoryId: this.selectedSubcategoryId,
         friendlyName: this.sanitize(this.plantCopy.friendlyName),
         lifespanType: this.sanitize(this.plantCopy.lifespanType),
-        seedSource: this.sanitize(this.plantCopy.seedSource),
         tags: this.plantCopy.tags,
         description: this.sanitize(this.plantCopy.description),
         taxonomy: {

@@ -114,14 +114,6 @@ export default {
       alertVisible: 'alertVisible',
     }),
 
-    alert() {
-      return {
-        isVisible: this.alertVisible,
-        type: this.alertType,
-        message: this.alertMessage,
-      };
-    },
-
     filteredCategories() {
       let result = this.categories;
       if (this.filter) {

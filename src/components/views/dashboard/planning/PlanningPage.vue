@@ -31,7 +31,7 @@
                   variant="outlined"
                   color="primary"
               >
-                Planting Day: {{ formatDayOfMonthToDate(planningDetails.targetPlantingDay) }}
+                Planting Day: {{ formatDayOfYear(planningDetails.targetPlantingDay) }}
               </v-chip>
 
               <v-chip
@@ -151,10 +151,10 @@ export default {
       'fetchPlanningDetailsByYear',
     ]),
 
-    formatDayOfMonthToDate(dayOfMonth) {
-      if (!dayOfMonth) return '—';
+    formatDayOfYear(dayOfYear) {
+      if (!dayOfYear) return '—';
 
-      return dayOfYearIn(this.plantingYear, dayOfMonth).format('MMM D');
+      return dayOfYearIn(this.plantingYear, dayOfYear).format('MMM D');
     },
   },
 

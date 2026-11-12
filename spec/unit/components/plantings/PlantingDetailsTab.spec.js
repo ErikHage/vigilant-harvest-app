@@ -195,15 +195,11 @@ describe('PlantingDetailsTab', () => {
         expect($router.push).toHaveBeenCalledWith({ name: 'PlantDetailsPage', params: { plantId: 'plant-1' } });
     });
 
-    // The plot button's handler is a placeholder that only logs
-    it('does nothing from the plot button but log', async () => {
-        const log = vi.spyOn(console, 'log').mockImplementation(() => {});
-        const { wrapper, $router } = mountTab();
+    // Its handler only logged: there's no plot page to go to (backlog B12)
+    it('has no plot button', () => {
+        const { wrapper } = mountTab();
 
-        await wrapper.find('.mdi-vector-square').trigger('click');
-
-        expect($router.push).not.toHaveBeenCalled();
-        expect(log).toHaveBeenCalledWith('plot clicked, do something in the future');
+        expect(wrapper.find('.mdi-vector-square').exists()).toBe(false);
     });
 
     // The service sends dates as YYYY-MM-DD strings, and the pickers take
