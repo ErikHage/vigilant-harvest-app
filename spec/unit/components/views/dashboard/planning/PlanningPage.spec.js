@@ -74,22 +74,26 @@ describe('PlanningPage', () => {
         ]);
     });
 
-    // Past the planting day it counts down below zero
+    // Past the planting day it counted down below zero, "-3 days until
+    // planting!" (backlog B31)
     it.each([
-        ['2026-04-17', 30, 'primary'],
-        ['2026-05-10', 7, 'warning'],
-        ['2026-05-17', 0, 'error'],
-        ['2026-05-20', -3, 'error'],
-    ])('colours the countdown on %s, %i days out, as %s', async (today, days, colour) => {
+        ['2026-04-17', '30 days until planting!', 'primary'],
+        ['2026-05-10', '7 days until planting!', 'warning'],
+        ['2026-05-16', '1 day until planting!', 'warning'],
+        ['2026-05-17', 'Planting day is today!', 'error'],
+        ['2026-05-18', 'Planting day was 1 day ago', 'error'],
+        ['2026-05-20', 'Planting day was 3 days ago', 'error'],
+    ])('on %s, says "%s", in %s', async (today, countdown, colour) => {
         const { wrapper } = await mountPage({ today });
 
-        expect(chips(wrapper)[2]).toEqual([`${days} days until planting!`, colour]);
+        expect(chips(wrapper)[2]).toEqual([countdown, colour]);
     });
 
-    it('shows a dash for a planting day it was not given', async () => {
+    // It counted down to day 0, "0 days until planting!"
+    it('shows a dash, and no countdown, for a planting day it was not given', async () => {
         const { wrapper } = await mountPage({ state: { planningDetails: planningDetails({ targetPlantingDay: undefined }) } });
 
-        expect(chips(wrapper)[1][0]).toBe('Planting Day: —');
+        expect(chips(wrapper).map(([text]) => text)).toEqual(['Today: Apr 10', 'Planting Day: —']);
     });
 
     it('lists what to start, by sowing day, and what to plant, by planting day', async () => {

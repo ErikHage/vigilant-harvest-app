@@ -59,13 +59,14 @@ export default {
   data() {
     return {
       saveError: '',
+      // no isActive: plots don't retire, and the service makes each new one
+      // active
       plotCopy: {
         plotId: '',
         friendlyName: '',
         lengthInInches: 0,
         widthInInches: 0,
         plotType: '',
-        isActive: false,
       },
       plotTypes: [
         'Bed',
@@ -115,7 +116,6 @@ export default {
         lengthInInches: 0,
         widthInInches: 0,
         plotType: '',
-        isActive: false,
       };
     },
 

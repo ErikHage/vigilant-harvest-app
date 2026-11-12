@@ -25,9 +25,11 @@ test.describe('The planting years pages', () => {
         await plantingYearDetailsPage.checkShowsYear('year: spring', 'created: 1', 'started: 1');
     });
 
-    // The page proposes the year after the browser's calendar year, so the
-    // clock is set in a year the test owns. Only planted plantings are carried
-    // forward, under a heading that says "not retired" (backlog B17, tier B)
+    // The page proposes the year after the latest, passing over any more than
+    // a year past the browser's calendar, so the clock is set in a year the
+    // test owns: other workers' years are then too far ahead, or behind. Only
+    // planted plantings are carried forward, under a heading that says so; it
+    // said "not retired" (backlog B17 and B18)
     test('add the year after, carrying forward what was planted', async ({
         garden, browserClock, plantingYearsPage, addPlantingYearPage, plantingYearDetailsPage,
     }) => {

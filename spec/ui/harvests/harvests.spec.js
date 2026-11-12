@@ -67,12 +67,11 @@ test.describe('The harvests page, with no harvests', () => {
         await dashboardPage.checkYearIsChosen('year: spring');
     });
 
-    // It asks for a day to be chosen from an empty timeline (backlog B31,
-    // tier B)
+    // It asked for a day to be chosen from an empty timeline (backlog B31)
     test('says there are no harvests', async ({ harvestsPage }) => {
         await harvestsPage.open();
         await harvestsPage.checkIsShown();
 
-        await harvestsPage.checkSaysThereAreNoHarvests();
+        await harvestsPage.checkSaysThereAreNoHarvests('year: spring');
     });
 });

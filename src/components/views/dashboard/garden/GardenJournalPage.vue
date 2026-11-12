@@ -35,20 +35,20 @@
           <div class="navigation-buttons d-flex justify-space-between mb-4">
             <v-btn
                 variant="tonal"
-                :disabled="!previousDate"
-                @click="selectDate(previousDate)"
+                :disabled="!olderDate"
+                @click="selectDate(olderDate)"
                 prepend-icon="mdi-chevron-left"
             >
-              Previous
+              Older
             </v-btn>
             <h2>{{ formatDate(selectedDate) }}</h2>
             <v-btn
                 variant="tonal"
-                :disabled="!nextDate"
-                @click="selectDate(nextDate)"
+                :disabled="!newerDate"
+                @click="selectDate(newerDate)"
                 append-icon="mdi-chevron-right"
             >
-              Next
+              Newer
             </v-btn>
           </div>
           <v-divider class="my-4" />
@@ -144,18 +144,23 @@ export default {
       return items;
     },
 
+    // The day's entries by their time, then as recorded: the service sends
+    // them in no set order. entryDate is local, YYYY-MM-DDTHH:mm:ss, so sorts
+    // as text
     selectedEntries() {
-      return this.groupedEntries[this.selectedDate] || [];
+      return [...(this.groupedEntries[this.selectedDate] || [])].sort((a, b) =>
+          a.entryDate.localeCompare(b.entryDate) || a.dateCreated.localeCompare(b.dateCreated));
     },
 
-    previousDate() {
-      const index = this.sortedDates.indexOf(this.selectedDate);
-      return index > 0 ? this.sortedDates[index - 1] : null;
-    },
-
-    nextDate() {
+    // sortedDates runs newest first, as the timeline does
+    olderDate() {
       const index = this.sortedDates.indexOf(this.selectedDate);
       return index < this.sortedDates.length - 1 ? this.sortedDates[index + 1] : null;
+    },
+
+    newerDate() {
+      const index = this.sortedDates.indexOf(this.selectedDate);
+      return index > 0 ? this.sortedDates[index - 1] : null;
     }
   },
 

@@ -9,8 +9,8 @@ test.describe('A plant\'s details page', () => {
         await garden.hasSchedule('schedule: feeding');
     });
 
-    // The tabs show values raw: a climber's "true", a depth with no unit
-    // (backlog B22, tier B)
+    // A yes or no in words, and each measure with its unit. They were raw: a
+    // climber's "true", a depth with no unit (backlog B22)
     test('shows each of the plant\'s fields, tab by tab, and its schedules', async ({
         garden, plantsPage, plantDetailsPage,
     }) => {
@@ -24,5 +24,17 @@ test.describe('A plant\'s details page', () => {
         await plantDetailsPage.checkIsShownFor('plant: sungold');
         await plantDetailsPage.checkShowsPlant('plant: sungold');
         await plantDetailsPage.checkListsSchedules('schedule: feeding');
+    });
+
+    // It showed only the headers (backlog B22)
+    test('says when the plant has no schedules', async ({ garden, plantsPage, plantDetailsPage }) => {
+        await garden.hasPlant('plant: sungold', 'subcategory: cherry');
+        await plantsPage.open();
+        await plantsPage.checkIsShown();
+
+        await plantsPage.viewPlant('plant: sungold');
+
+        await plantDetailsPage.checkIsShownFor('plant: sungold');
+        await plantDetailsPage.checkListsNoSchedules();
     });
 });

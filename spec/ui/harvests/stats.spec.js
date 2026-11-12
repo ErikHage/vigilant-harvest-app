@@ -23,7 +23,8 @@ test.describe('The stats pages', () => {
         await dashboardPage.checkYearIsChosen('year: spring');
     });
 
-    // The average a day is unrounded (backlog B31, tier B): 7 over 3 days
+    // The average a day, 7 over 3 days, to a tenth. It was unrounded (backlog
+    // B31)
     test('totals the year, and a planting\'s harvests', async ({ plantingStatsPage }) => {
         await plantingStatsPage.open();
         await plantingStatsPage.checkIsShown();
@@ -31,7 +32,7 @@ test.describe('The stats pages', () => {
         await plantingStatsPage.checkShowsTotals('first: 2026-07-07', 'last: 2026-07-09', 'days: 3', 'harvestDays: 2');
         await plantingStatsPage.choose('planting: early');
         await plantingStatsPage.checkShowsStats('planting: early',
-            'first: 2026-07-07', 'last: 2026-07-09', 'total: 7', 'average: 2.3333333333333335');
+            'first: 2026-07-07', 'last: 2026-07-09', 'total: 7', 'average: 2.3');
     });
 
     test('totals the year, and a plant\'s harvests, from all its plantings', async ({ plantStatsPage }) => {

@@ -45,9 +45,9 @@ describe('UpsertPlotDialog', () => {
             expect(buttonLabelled(dialog, 'Create').exists()).toBe(true);
         });
 
-        // The service ignores isActive and stores true (its own pinned
-        // behaviour), so a new plot is active whatever this sends
-        it('submits the new plot, with an empty id and isActive false, then empties the form', async () => {
+        // Plots don't retire, and the service makes each new one active. The
+        // dialog sent isActive false, which the service ignored (backlog B24)
+        it('submits the new plot, with an empty id and no isActive, then empties the form', async () => {
             const wrapper = await mountDialog();
             const dialog = dialogTitled('Add Plot');
             await inputLabelled(dialog, 'Name').setValue('East bed');
@@ -64,8 +64,8 @@ describe('UpsertPlotDialog', () => {
                 lengthInInches: 96,
                 widthInInches: 48,
                 plotType: 'Raised Bed',
-                isActive: false,
             });
+            expect(wrapper.props('onSubmit').mock.calls[0][0]).not.toHaveProperty('isActive');
             expect(inputLabelled(dialogTitled('Add Plot'), 'Name').element.value).toBe('');
         });
 

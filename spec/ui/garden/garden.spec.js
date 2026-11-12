@@ -60,8 +60,8 @@ test.describe('The journal and activity log', () => {
         await browserClock.setTo('time: 2026-07-01T12:00:00-04:00');
     });
 
-    // The timeline runs newest first, and Next follows it, to the earlier day
-    // (backlog B28, tier B)
+    // The timeline runs newest first. Its buttons were Previous and Next,
+    // following it, so Next went to the earlier day (backlog B28)
     test('records a journal entry under its day, and steps back to an earlier one', async ({
         garden, journalPage,
     }) => {
@@ -73,8 +73,8 @@ test.describe('The journal and activity log', () => {
 
         await journalPage.checkListsDaysOf('entry: watered, planted');
         await journalPage.checkShowsEntry('entry: watered');
-        await journalPage.checkOffersPreviousAndNext('previous: no', 'next: yes');
-        await journalPage.next();
+        await journalPage.checkOffersOlderAndNewer('older: yes', 'newer: no');
+        await journalPage.older();
         await journalPage.checkShowsEntry('entry: planted');
     });
 

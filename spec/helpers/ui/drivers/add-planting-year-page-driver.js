@@ -28,12 +28,12 @@ export function createAddPlantingYearPageDriver(page) {
 
         /**
          * Lists these plantings, by name, to carry forward, under its heading,
-         * which says "not retired" though only planted ones are listed (B17).
+         * which says they're the planted ones. It said "not retired" (B17).
          */
         async carriesForward(names) {
             const what = 'the plantings the add page carries forward';
 
-            await expectVisible(main.getByText('Plantings to carry forward (not retired)', { exact: true }), what);
+            await expectVisible(main.getByText('Plantings to carry forward (planted)', { exact: true }), what);
             await expectText(carried.locator('td:first-child'), names, what);
         },
 

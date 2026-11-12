@@ -127,11 +127,14 @@ export const useAuthenticationStore = defineStore('authentication', {
 
 export const usePlantingYearsStore = defineStore('plantingYears', {
     actions: {
+        // Whether the years loaded
         async fetchPlantingYears() {
             try {
                 this.plantingYears = await plantingYearsApi.fetchPlantingYears(storageUtils.tryToLoadTokenFromStorage());
+                return true;
             } catch (err) {
                 this.setAlertMessage(err, 'error', 'error fetching planting years');
+                return false;
             }
         },
         async fetchPlantingYear(year) {

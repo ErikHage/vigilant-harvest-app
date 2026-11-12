@@ -35,11 +35,12 @@
               </v-chip>
 
               <v-chip
+                  v-if="planningDetails.targetPlantingDay"
                   size="x-large"
                   variant="outlined"
                   :color="currentVsTargetColor"
               >
-                {{ dayDifference }} days until planting!
+                {{ countdown }}
               </v-chip>
 
             </div>
@@ -128,6 +129,20 @@ export default {
         return 0;
       }
       return daysFromToday(dayOfYearIn(this.plantingYear, this.planningDetails.targetPlantingDay));
+    },
+
+    // It counted down below zero: "-3 days until planting!"
+    countdown() {
+      const days = this.dayDifference;
+      const daysWord = count => (count === 1 ? '1 day' : `${count} days`);
+
+      if (days > 0) {
+        return `${daysWord(days)} until planting!`;
+      }
+      if (days === 0) {
+        return 'Planting day is today!';
+      }
+      return `Planting day was ${daysWord(-days)} ago`;
     },
 
     currentVsTargetColor() {

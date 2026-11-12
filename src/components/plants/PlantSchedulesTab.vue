@@ -11,6 +11,9 @@
       <td>{{ schedule.name }}</td>
       <td>{{ schedule.description }}</td>
     </tr>
+    <tr v-if="!plant.activitySchedules?.length">
+      <td colspan="2" class="text-medium-emphasis">No schedules</td>
+    </tr>
     </tbody>
   </v-table>
 </template>

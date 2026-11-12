@@ -11,7 +11,7 @@ const plantsById = {
     'plant-1': { plantId: 'plant-1', friendlyName: 'Provider bush bean', lifespanType: 'ANNUAL' },
     'plant-2': { plantId: 'plant-2', friendlyName: 'Asparagus', lifespanType: 'PERENNIAL' },
 };
-const plantings = [
+const previousPlantings = [
     { plantingId: 'planting-1', name: 'Asparagus bed', plantId: 'plant-2', currentStatus: 'PLANTED' },
     { plantingId: 'planting-2', name: 'Early beans', plantId: 'plant-1', currentStatus: 'STARTED' },
     { plantingId: 'planting-3', name: 'Late beans', plantId: 'plant-1', currentStatus: 'CREATED' },
@@ -19,16 +19,23 @@ const plantings = [
     { plantingId: 'planting-5', name: 'Mystery', plantId: 'plant-9', currentStatus: 'PLANTED' },
 ];
 
-// The page proposes the year after the calendar year, read when it's created
-async function mountPage({ today = '2026-11-07T12:00:00', plantingYearsState = {} } = {}) {
+// The page proposes the year after the latest of `years`, as the calendar
+// allows. The store's list of plantings is another year's, and stays so
+const shownYearsPlantings = [
+    { plantingId: 'planting-9', name: 'This year', plantId: 'plant-1', currentStatus: 'PLANTED' },
+];
+
+async function mountPage({ today = '2026-11-07T12:00:00', years = [2025, 2026], yearsLoad = true, plantingYearsState = {} } = {}) {
     vi.useFakeTimers({ now: new Date(today), toFake: ['Date'] });
     const pinia = createTestingPinia({
         initialState: {
-            plantingYears: plantingYearsState,
-            plantings: { plantings },
+            plantingYears: { plantingYears: years.map(plantingYear => ({ plantingYear })), ...plantingYearsState },
+            plantings: { plantings: shownYearsPlantings },
             plants: { plantsById },
         },
     });
+    usePlantingYearsStore(pinia).fetchPlantingYears.mockResolvedValue(yearsLoad);
+    usePlantingsStore(pinia).plantingsOfYear.mockResolvedValue(previousPlantings);
     const $router = { push: vi.fn() };
     const wrapper = mountWithPlugins(AddPlantingYearPage, {
         global: { plugins: [pinia], mocks: { $router } },
@@ -56,15 +63,19 @@ describe('AddPlantingYearPage', () => {
         vi.useRealTimers();
     });
 
-    it("loads the years, then this calendar year's plantings, then the plants", async () => {
+    // Its own copy of the previous year's plantings, so the store's list, the
+    // year chosen, is left alone
+    it("loads the years, then the latest year's plantings, then the plants", async () => {
         const { plantingYearsStore, plantingsStore, plantsStore } = await mountPage();
 
         expect(plantingYearsStore.fetchPlantingYears).toHaveBeenCalledTimes(1);
-        expect(plantingsStore.fetchPlantingsByYear).toHaveBeenCalledWith(2026);
+        expect(plantingsStore.plantingsOfYear).toHaveBeenCalledWith(2026);
+        expect(plantingsStore.fetchPlantingsByYear).not.toHaveBeenCalled();
+        expect(plantingsStore.plantings).toEqual(shownYearsPlantings);
         expect(plantsStore.fetchPlants).toHaveBeenCalledTimes(1);
     });
 
-    it('proposes the year after this calendar year, carrying forward from this one, and allows no change', async () => {
+    it('proposes the year after the latest, carrying forward from it, and allows no change', async () => {
         const { wrapper } = await mountPage();
 
         expect(inputLabelled(wrapper, 'Previous Planting Year').element.value).toBe('2026');
@@ -73,25 +84,61 @@ describe('AddPlantingYearPage', () => {
         expect(inputLabelled(wrapper, 'New Planting Year').attributes('disabled')).toBeDefined();
     });
 
-    // The years come from the calendar, not from the years that exist. In
-    // January 2027, with 2027 never added, it proposes 2028
-    it('goes by the calendar, whatever years exist', async () => {
-        const { wrapper } = await mountPage({
-            today: '2027-01-15T12:00:00',
-            plantingYearsState: { plantingYears: [{ plantingYear: 2026 }] },
-        });
+    // It went by the calendar: in January 2027, with 2027 never added, it
+    // proposed 2028, from 2027 (backlog B18)
+    it("goes by the years that exist, not the calendar's", async () => {
+        const { wrapper } = await mountPage({ today: '2027-01-15T12:00:00', years: [2025, 2026] });
+
+        expect(inputLabelled(wrapper, 'Previous Planting Year').element.value).toBe('2026');
+        expect(inputLabelled(wrapper, 'New Planting Year').element.value).toBe('2027');
+    });
+
+    it('proposes two years ahead of the calendar once next year exists', async () => {
+        const { wrapper } = await mountPage({ years: [2026, 2027] });
 
         expect(inputLabelled(wrapper, 'Previous Planting Year').element.value).toBe('2027');
         expect(inputLabelled(wrapper, 'New Planting Year').element.value).toBe('2028');
     });
 
-    // The heading says "not retired", but only PLANTED plantings are listed:
-    // started and created ones are left out. The service carries forward only
-    // planted ones, so the list is right and the heading isn't
-    it('lists only the planted plantings under "not retired", with their plant and lifespan', async () => {
+    it('passes over a year more than one past the calendar', async () => {
+        const { wrapper, plantingsStore } = await mountPage({ years: [2026, 2099] });
+
+        expect(inputLabelled(wrapper, 'New Planting Year').element.value).toBe('2027');
+        expect(plantingsStore.plantingsOfYear).toHaveBeenCalledWith(2026);
+    });
+
+    it('proposes this calendar year, carrying nothing forward, with no years', async () => {
+        const { wrapper, plantingYearsStore, plantingsStore } = await mountPage({ years: [] });
+        await pickDate(wrapper, 'Set Last Frost Date', new Date(2026, 4, 10));
+        await pickDate(wrapper, 'Set Target Planting Date', new Date(2026, 4, 17));
+
+        expect(inputLabelled(wrapper, 'Previous Planting Year').element.value).toBe('');
+        expect(inputLabelled(wrapper, 'New Planting Year').element.value).toBe('2026');
+        expect(plantingsStore.plantingsOfYear).not.toHaveBeenCalled();
+        expect(tableRows(wrapper)).toEqual([]);
+
+        await buttonLabelled(wrapper, 'Create New Planting Year').trigger('click');
+
+        const [request] = plantingYearsStore.addPlantingYear.mock.calls[0];
+        expect(request).toEqual({ plantingYear: 2026, lastFrostDate: '2026-05-10', targetPlantingDate: '2026-05-17' });
+    });
+
+    it("proposes nothing, and doesn't offer Create, when the years don't load", async () => {
+        const { wrapper, plantingsStore } = await mountPage({ yearsLoad: false });
+        await pickDate(wrapper, 'Set Last Frost Date', new Date(2027, 4, 10));
+        await pickDate(wrapper, 'Set Target Planting Date', new Date(2027, 4, 17));
+
+        expect(inputLabelled(wrapper, 'New Planting Year').element.value).toBe('');
+        expect(plantingsStore.plantingsOfYear).not.toHaveBeenCalled();
+        expect(buttonLabelled(wrapper, 'Create New Planting Year').attributes('disabled')).toBeDefined();
+    });
+
+    // Only PLANTED plantings are listed, as the service carries forward. The
+    // heading said "not retired" (backlog B17)
+    it('lists only the planted plantings, with their plant and lifespan', async () => {
         const { wrapper } = await mountPage();
 
-        expect(wrapper.text()).toContain('Plantings to carry forward (not retired)');
+        expect(wrapper.text()).toContain('Plantings to carry forward (planted)');
         expect(tableRows(wrapper)).toEqual([
             ['Asparagus bed', 'Asparagus', 'PERENNIAL', 'PLANTED'],
             ['Mystery', '', '', 'PLANTED'],

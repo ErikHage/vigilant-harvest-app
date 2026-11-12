@@ -64,28 +64,48 @@ describe('PlantTagsDialog', () => {
         expect(findDialog('Plant Tags')).toBeUndefined();
     });
 
-    it("keeps a tag it doesn't offer, unseen, when nothing is toggled", async () => {
+    it("offers the plant's own tags after the common ones, selected", async () => {
         const wrapper = mountDialog({ tags: ['Heirloom', 'Cold Tolerant'] });
         const dialog = await open(wrapper);
-        expect(chips(dialog).map(([tag]) => tag)).not.toContain('Heirloom');
+
+        expect(chips(dialog)).toEqual([
+            ['Container Friendly', false],
+            ['Cold Tolerant', true],
+            ['Determinate', false],
+            ['Indeterminate', false],
+            ['Heirloom', true],
+        ]);
+    });
+
+    it("keeps the plant's own tags when nothing is toggled", async () => {
+        const wrapper = mountDialog({ tags: ['Heirloom', 'Cold Tolerant'] });
+        const dialog = await open(wrapper);
 
         await buttonLabelled(dialog, 'Confirm').trigger('click');
 
         expect(wrapper.props('onSubmit')).toHaveBeenCalledWith(['Heirloom', 'Cold Tolerant']);
     });
 
-    // DocumentsCurrentBehavior: a tag the dialog doesn't offer has no chip, and
-    // Vuetify's chip group drops a value with no chip as soon as any chip is
-    // toggled. So editing the tags of a plant with such a tag silently removes
-    // it. Should offer the plant's own tags as chips too
-    it("drops a tag it doesn't offer once any chip is toggled", async () => {
+    // Vuetify's chip group drops a value with no chip once any chip is toggled,
+    // so a tag of the plant's own was lost until it had one (backlog A18)
+    it("keeps the plant's own tags when a chip is toggled", async () => {
         const wrapper = mountDialog({ tags: ['Heirloom', 'Cold Tolerant'] });
         const dialog = await open(wrapper);
 
         await toggle(dialog, 'Determinate');
         await buttonLabelled(dialog, 'Confirm').trigger('click');
 
-        expect(wrapper.props('onSubmit')).toHaveBeenCalledWith(['Cold Tolerant', 'Determinate']);
+        expect(wrapper.props('onSubmit')).toHaveBeenCalledWith(['Heirloom', 'Cold Tolerant', 'Determinate']);
+    });
+
+    it("drops one of the plant's own tags when its chip is toggled off", async () => {
+        const wrapper = mountDialog({ tags: ['Heirloom', 'Cold Tolerant'] });
+        const dialog = await open(wrapper);
+
+        await toggle(dialog, 'Heirloom');
+        await buttonLabelled(dialog, 'Confirm').trigger('click');
+
+        expect(wrapper.props('onSubmit')).toHaveBeenCalledWith(['Cold Tolerant']);
     });
 
     it('closes on Cancel without submitting', async () => {

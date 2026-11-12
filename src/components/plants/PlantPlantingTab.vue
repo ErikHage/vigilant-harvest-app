@@ -2,7 +2,7 @@
   <v-table>
     <tbody>
     <tr>
-      <th class="details-header shrink-column">Planting Depth</th>
+      <th class="details-header shrink-column">Planting Depth (in)</th>
       <td>{{ plant.planting.depthInInches }}</td>
     </tr>
     <tr>

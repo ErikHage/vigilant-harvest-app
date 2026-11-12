@@ -130,12 +130,13 @@ describe('HarvestsPage', () => {
             expect(selected(wrapper)).toBe('2026-07-01');
         });
 
-        // It says so even when there are none to select
-        it('asks for a day when none is selected', async () => {
+        // It asked for a day to be selected from an empty timeline (backlog
+        // B31)
+        it('says when the year has no harvests', async () => {
             const { wrapper } = await mountPage({ state: { harvests: { harvests: [] } } });
 
             expect(timeline(wrapper)).toEqual([]);
-            expect(wrapper.text()).toContain('Select a date from the timeline to see harvests.');
+            expect(wrapper.find('.content-column').text()).toBe('No harvests in 2026.');
         });
 
         it("shows the harvests store's alert", async () => {

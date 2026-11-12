@@ -41,7 +41,7 @@
         </tr>
         <tr>
           <th>Average Harvest per Day</th>
-          <td>{{ formatQuantity(stats.averageHarvestPerDay) }}</td>
+          <td>{{ formatQuantity(toTenths(stats.averageHarvestPerDay)) }}</td>
         </tr>
         </tbody>
       </v-table>
@@ -73,6 +73,11 @@ export default {
   methods: {
     formatQuantity(quantity) {
       return harvestUtils.formatQuantity(quantity, this.stats.harvestType);
+    },
+
+    // The service divides without rounding: 7 over 3 days is 2.3333333333333335
+    toTenths(quantity) {
+      return typeof quantity === 'number' ? Math.round(quantity * 10) / 10 : quantity;
     },
 
     formatDate(date) {

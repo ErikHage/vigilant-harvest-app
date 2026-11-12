@@ -39,16 +39,16 @@ export function createJournalPageDriver(page) {
             await expectText(main.locator('.journal-entry p'), texts, what);
         },
 
-        /** Previous and Next, each offered or not. */
-        async offersPreviousAndNext(previous, next) {
-            const what = 'the journal\'s Previous and Next';
+        /** Older and Newer, each offered or not. */
+        async offersOlderAndNewer(older, newer) {
+            const what = 'the journal\'s Older and Newer';
 
-            await (previous ? expectEnabled : expectDisabled)(main.getByRole('button', { name: 'Previous' }), what);
-            await (next ? expectEnabled : expectDisabled)(main.getByRole('button', { name: 'Next' }), what);
+            await (older ? expectEnabled : expectDisabled)(main.getByRole('button', { name: 'Older' }), what);
+            await (newer ? expectEnabled : expectDisabled)(main.getByRole('button', { name: 'Newer' }), what);
         },
 
-        async next() {
-            await main.getByRole('button', { name: 'Next' }).click();
+        async older() {
+            await main.getByRole('button', { name: 'Older' }).click();
         },
     };
 }

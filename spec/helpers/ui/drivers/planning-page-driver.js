@@ -34,7 +34,8 @@ export function createPlanningPageDriver(page) {
 
         /**
          * The title names the year, and the chips show its target planting
-         * day, and the days from today until then, below zero once past.
+         * day, and the days from today until then. The test's years are ahead,
+         * so this never sees a day past, which once counted below zero (B31).
          */
         async showsPlantingDay({ plantingYear, targetPlantingDate }) {
             const what = `the plan for ${plantingYear}`;

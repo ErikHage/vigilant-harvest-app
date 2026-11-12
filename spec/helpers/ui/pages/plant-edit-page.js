@@ -95,7 +95,7 @@ export function createPlantEditPage(world, driver) {
         async checkTagsKeptAfterToggling(...args) {
             const params = parseDslArgs(args, { plant: plant(), tag: tag() });
 
-            await driver.dropsUnofferedTags(world.plantNamed(params.plant), params.tag);
+            await driver.keepsOwnTagsWith(world.plantNamed(params.plant), params.tag);
         },
 
         /**

@@ -39,10 +39,11 @@ describe('usePlantingYearsStore', () => {
         it('loads the years', async () => {
             plantingYearsApi.fetchPlantingYears.mockResolvedValue(plantingYears);
 
-            await store.fetchPlantingYears();
+            const loaded = await store.fetchPlantingYears();
 
             expect(plantingYearsApi.fetchPlantingYears).toHaveBeenCalledWith('a-token');
             expect(store.plantingYears).toEqual(plantingYears);
+            expect(loaded).toBe(true);
         });
 
         it('shows an alert, logs, and keeps the years it had, when the fetch fails', async () => {
@@ -51,8 +52,9 @@ describe('usePlantingYearsStore', () => {
             await store.fetchPlantingYears();
             plantingYearsApi.fetchPlantingYears.mockRejectedValueOnce(err);
 
-            await store.fetchPlantingYears();
+            const loaded = await store.fetchPlantingYears();
 
+            expect(loaded).toBe(false);
             expect(store.alertMessage).toBe('error fetching planting years');
             expect(store.alertType).toBe('error');
             expect(store.plantingYears).toEqual(plantingYears);

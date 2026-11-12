@@ -14,9 +14,8 @@ test.describe('The plots page', () => {
         await plotsPage.checkPlotListed('plot: bed');
     });
 
-    // The dialog sends a new plot as inactive, with no field to change it, but
-    // the service doesn't read isActive on a create, and makes every new plot
-    // active (backlog B24)
+    // The service makes every new plot active. The dialog sent one as
+    // inactive, which the service ignored (backlog B24)
     test('lists a plot added through its dialog, as active', async ({ plotsPage }) => {
         await plotsPage.open();
         await plotsPage.checkIsShown();

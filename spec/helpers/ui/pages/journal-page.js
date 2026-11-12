@@ -36,18 +36,18 @@ export function createJournalPage(world, driver) {
             await driver.showsDay(shown.entryDate, [shown.entry]);
         },
 
-        /** Previous and Next are offered, or not: `previous: yes | no`, `next: yes | no`. */
-        async checkOffersPreviousAndNext(...args) {
-            const params = parseDslArgs(args, { previous: offered(), next: offered() });
+        /** Older and Newer are offered, or not: `older: yes | no`, `newer: yes | no`. */
+        async checkOffersOlderAndNewer(...args) {
+            const params = parseDslArgs(args, { older: offered(), newer: offered() });
 
-            await driver.offersPreviousAndNext(params.previous === 'yes', params.next === 'yes');
+            await driver.offersOlderAndNewer(params.older === 'yes', params.newer === 'yes');
         },
 
-        /** Clicks Next. No parameters. */
-        async next(...args) {
+        /** Clicks Older, for the day before. No parameters. */
+        async older(...args) {
             parseDslArgs(args, {});
 
-            await driver.next();
+            await driver.older();
         },
     };
 }

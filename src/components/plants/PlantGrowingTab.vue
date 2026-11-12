@@ -11,10 +11,10 @@
     </tr>
     <tr>
       <th class="details-header shrink-column">Climbing</th>
-      <td>{{ plant.growing.isClimbing }}</td>
+      <td>{{ yesOrNo(plant.growing.isClimbing) }}</td>
     </tr>
     <tr v-if="plant.growing.isClimbing">
-      <th class="details-header shrink-column">Climbing Height</th>
+      <th class="details-header shrink-column">Climbing Height (ft)</th>
       <td>{{ plant.growing.climbingHeightFeet }}</td>
     </tr>
     <tr>
@@ -30,11 +30,17 @@
 </template>
 
 <script>
+import { yesOrNo } from '@/utils/display';
+
 export default {
   name: "PlantGrowingTab",
 
   props: {
     plant: Object,
+  },
+
+  methods: {
+    yesOrNo,
   },
 }
 </script>

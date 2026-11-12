@@ -1,6 +1,6 @@
 import { parseDslArgs } from '@feral-auth/ts-simple-dsl';
 
-import { days, on, planting, quantity } from '../params';
+import { days, on, planting, quantity, year } from '../params';
 import { dashboardComponents, routedPageSteps } from './routed-page';
 
 /** The harvests page, a timeline of the chosen year's harvest days, in words. */
@@ -79,11 +79,11 @@ export function createHarvestsPage(world, driver) {
             await driver.withholdsUpdate();
         },
 
-        /** With no harvests in the year, the page says to choose a day. No parameters. */
+        /** With no harvests in the `year`, the one chosen, the page says so. */
         async checkSaysThereAreNoHarvests(...args) {
-            parseDslArgs(args, {});
+            const params = parseDslArgs(args, { year: year() });
 
-            await driver.asksForADayWithNoneToChoose();
+            await driver.saysThereAreNone(world.plantingYearNamed(params.year));
         },
     };
 }

@@ -88,7 +88,8 @@
             </template>
           </v-card>
         </div>
-        <div v-else class="pa-4">Select a date from the timeline to see harvests.</div>
+        <!-- once loaded, the newest day is selected, so with none there are no harvests -->
+        <div v-else-if="loaded" class="pa-4">No harvests in {{ plantingYear }}.</div>
       </v-col>
     </v-row>
 
@@ -132,6 +133,7 @@ export default {
     timelineEntries: [],
     selectedDate: null,
     expandedPlants: [],
+    loaded: false,
   }),
 
   computed: {
@@ -260,6 +262,7 @@ export default {
       this.timelineEntries = withEllipsis;
 
       this.selectedDate = this.harvestDates[0] || null;
+      this.loaded = true;
     },
 
     showEditHarvestsDialog(harvests) {

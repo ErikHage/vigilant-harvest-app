@@ -89,18 +89,19 @@ export function createHarvestsPageDriver(page, serviceCalls) {
         },
 
         /**
-         * With no harvest days, the page asks for a day to be chosen from an
-         * empty timeline. It looks the same while it loads, so this waits for
-         * the load's last call, and two frames for the page to take it in.
+         * With no harvest days, the page says the year has none, by its
+         * number, and its timeline is empty. It asked for a day to be chosen
+         * (B31). The page shows neither while it loads, but this waits for the
+         * load's last call anyway, and two frames for the page to take it in.
          */
-        async asksForADayWithNoneToChoose() {
+        async saysThereAreNone({ plantingYear }) {
             const what = 'the harvests page, with no harvests';
 
             await expectEventually(() => serviceCalls.wereAnsweredAfter(harvestsSearch, plantingsList),
                 'the page to load the harvests, then the plantings', what);
             await page.evaluate(() => new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))));
 
-            await expectText(main.locator('.content-column'), 'Select a date from the timeline to see harvests.', what);
+            await expectText(main.locator('.content-column'), `No harvests in ${plantingYear}.`, what);
             await expectCount(timeline, 0, what);
         },
     };
