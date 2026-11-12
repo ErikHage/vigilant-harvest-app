@@ -46,6 +46,19 @@ test.describe('The harvests page', () => {
         await harvestsPage.checkShowsHarvest('planting: early', 'on: 2026-07-09');
     });
 
+    // The service had a delete, which the app never called (backlog B30)
+    test('removes a day\'s harvest, and with it the day', async ({ harvestsPage }) => {
+        await harvestsPage.open();
+        await harvestsPage.checkIsShown();
+        await harvestsPage.checkShowsDay('on: 2026-07-09');
+
+        await harvestsPage.removeHarvest('planting: early', 'on: 2026-07-09');
+
+        await harvestsPage.checkListsDays('days: 2026-07-07');
+        await harvestsPage.checkShowsDay('on: 2026-07-07');
+        await harvestsPage.checkShowsHarvest('planting: early', 'on: 2026-07-07');
+    });
+
     // The service refuses a harvest of nothing, so Update waits for more (backlog B30)
     test('offers Update only for a harvest of something', async ({ harvestsPage }) => {
         await harvestsPage.open();

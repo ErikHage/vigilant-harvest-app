@@ -14,7 +14,7 @@
           {{ historyItem.plantingStatus }}
         </v-chip>
         <p v-if="historyItem.comment" class="multiline">
-          {{ historyItem.comment }}
+          {{ describeComment(historyItem.comment) }}
         </p>
       </div>
     </v-card-text>
@@ -40,6 +40,11 @@ export default {
 
     showStatusChip(historyItem) {
       return historyItem.plantingStatus !== plantingActions.comment;
+    },
+
+    // the service files a creation and an update as JSON
+    describeComment(comment) {
+      return plantingUtils.describeHistoryComment(comment);
     },
   },
 }

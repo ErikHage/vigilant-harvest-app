@@ -115,7 +115,9 @@ least 1, and the total no more than was sown.
   - Line 22 says a 400 from `PUT /harvests` "means an unknown harvest type id". It can now be any
     field's check, such as a quantity or a date.
   - The function itself still does the right thing.
-- **Fractional harvest quantities are rounded by the service.**
+- **Fractional harvest quantities are rounded by the service.** **Fixed** (pinned-behaviour
+  fixes, F10b, backlog B27): both harvest dialogs take whole numbers only, and say so for a
+  fraction. The column stays an `INT`.
   - The harvest types include pounds, ounces and kilograms, and the quantity boxes allow 1.5.
   - The service accepts it, but its `quantity` column is an `INT`, so 1.5 is stored as 2, and 0.4 as
     0.

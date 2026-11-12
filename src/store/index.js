@@ -462,6 +462,15 @@ export const useHarvestsStore = defineStore('harvests', {
                 throw err;
             }
         },
+        // Rethrows, so the dialog can stay open with why
+        async deleteHarvest(harvestId) {
+            try {
+                await harvestsApi.deleteHarvest(storageUtils.tryToLoadTokenFromStorage(), harvestId);
+            } catch (err) {
+                this.setAlertMessage(err, 'error', 'error deleting harvest');
+                throw err;
+            }
+        },
         async fetchHarvestSummariesByYear(plantingYear) {
             try {
                 this.harvestSummaries = await harvestsApi.fetchHarvestSummary(storageUtils.tryToLoadTokenFromStorage(), plantingYear);
@@ -496,6 +505,8 @@ export const useHarvestsStore = defineStore('harvests', {
             try {
                 this.harvestStats = await harvestsApi
                     .fetchHarvestStats(storageUtils.tryToLoadTokenFromStorage(), year, statType);
+                // which they are: the service's own statsType always says Planting
+                this.harvestStatsType = statType;
             } catch (err) {
                 this.setAlertMessage(err, 'error', 'error fetching harvest stats');
             }
@@ -508,6 +519,7 @@ export const useHarvestsStore = defineStore('harvests', {
             harvestSummaries: [],
             harvestQuantitiesByPlanting: {},
             harvestStats: {},
+            harvestStatsType: null,
             alertVisible: false,
             alertType: 'success',
             alertMessage: null,

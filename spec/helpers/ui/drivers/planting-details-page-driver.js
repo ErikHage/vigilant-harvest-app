@@ -161,17 +161,32 @@ export function createPlantingDetailsPageDriver(page, pageErrors) {
         },
 
         /**
-         * The History tab shows an entry with the planting's status, and each of
-         * `comments`. The first entry, its creation, shows as its comment the
-         * planting's fields as JSON, as the service files them (B34).
+         * The History tab has an update that sent the planting's `name`, first
+         * of the fields sent. It showed `Updated: ` and them in JSON (B34).
          */
-        async historyShows({ status }, comments) {
+        async historyShowsRename({ name }) {
+            const what = "the planting's History tab, after a rename";
+            const entries = main.locator('.v-window-item--active .v-card');
+
+            await main.getByRole('tab', { name: 'History', exact: true }).click();
+            await expectVisible(entries.locator('p.multiline', {
+                hasText: new RegExp(`^\\s*Updated: name "${escaped(name)}"`),
+            }), what);
+        },
+
+        /**
+         * The History tab shows an entry with the planting's status, and each of
+         * `comments`. The first entry, its creation, says so with the name it
+         * was created with. It showed the planting's fields as JSON, as the
+         * service files them (B34).
+         */
+        async historyShows({ name, status }, comments) {
             const what = 'the planting\'s History tab';
             const entries = main.locator('.v-window-item--active .v-card');
 
             await main.getByRole('tab', { name: 'History', exact: true }).click();
             await expectText(entries.filter({ hasText: 'CREATED' }).first().locator('p.multiline'),
-                /^\s*\{"plantingId":.*\}\s*$/, what);
+                `Created as "${name}"`, what);
             await expectVisible(entries.locator('.v-chip', { hasText: new RegExp(`^\\s*${status}\\s*$`) }).first(), what);
             for (const comment of comments) {
                 await expectVisible(entries.locator('p.multiline', { hasText: comment }), what);

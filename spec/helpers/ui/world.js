@@ -391,6 +391,19 @@ export function createWorld(page) {
             return copyOf(planting);
         },
 
+        /** Forgets the harvest from the planting called `alias` `on` a day: it was removed. */
+        forgetHarvest(alias, on) {
+            known(plantingsByAlias, alias, 'planting', 'garden.hasPlanting');
+            const planting = plantingsByAlias.get(alias);
+            const harvest = planting.harvests.find(each => each.on === on);
+            if (harvest === undefined) {
+                throw new Error(`no harvest of the planting "${alias}" on ${on} in this test -- file one first with garden.hasHarvest`);
+            }
+            planting.harvests = planting.harvests.filter(each => each !== harvest);
+            planting.harvested -= harvest.quantity;
+            return copyOf(planting);
+        },
+
         /**
          * Remembers `quantity` more harvested from the planting called `alias`,
          * of its plant's default harvest type, `on` a day, `YYYY-MM-DD`, or

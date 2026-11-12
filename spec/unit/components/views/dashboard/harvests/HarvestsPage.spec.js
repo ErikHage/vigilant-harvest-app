@@ -266,6 +266,56 @@ describe('HarvestsPage', () => {
             expect(store.searchHarvests).toHaveBeenCalledTimes(1);
         });
 
+        // The app had no call to delete one (backlog B30)
+        it('deletes the harvests removed, saves the rest, then reloads', async () => {
+            const { wrapper, harvests: store } = await mountPage();
+            const dialog = await openEdit(wrapper);
+            const removeButtons = () => dialog.findAll('.harvest-row .v-btn');
+            expect(removeButtons().length).toBeGreaterThan(0);
+
+            await removeButtons()[0].trigger('click');
+            await flushPromises();
+            await press(dialog, 'Update');
+
+            const removedId = store.deleteHarvest.mock.calls[0][0];
+            expect(store.deleteHarvest).toHaveBeenCalledTimes(1);
+            expect(store.upsertHarvests.mock.calls[0][0].map(h => h.harvestId)).not.toContain(removedId);
+            expect(store.deleteHarvest.mock.invocationCallOrder[0]).toBeLessThan(store.upsertHarvests.mock.invocationCallOrder[0]);
+            expect(findDialog('Edit Harvests')).toBeUndefined();
+            expect(store.searchHarvests).toHaveBeenCalledTimes(2);
+        });
+
+        it('only deletes when every harvest of the day is removed', async () => {
+            const { wrapper, harvests: store } = await mountPage();
+            await clickDay(wrapper, '2026-07-09');
+            const dialog = await openEdit(wrapper);
+
+            await dialog.find('.harvest-row .v-btn').trigger('click');
+            await flushPromises();
+            await press(dialog, 'Update');
+
+            expect(store.deleteHarvest).toHaveBeenCalledWith('h-5');
+            expect(store.upsertHarvests).not.toHaveBeenCalled();
+            expect(store.searchHarvests).toHaveBeenCalledTimes(2);
+        });
+
+        it('stays open, saving nothing, when a delete fails', async () => {
+            const { wrapper, harvests: store } = await mountPage({
+                beforeMount: ({ harvests }) => harvests.deleteHarvest.mockRejectedValueOnce(new ApiError('Request failed', 500, '')),
+            });
+            await clickDay(wrapper, '2026-07-09');
+            const dialog = await openEdit(wrapper);
+
+            await dialog.find('.harvest-row .v-btn').trigger('click');
+            await flushPromises();
+            await press(dialog, 'Update');
+
+            expect(dialog.find('.v-alert').text()).toBe('error deleting harvest');
+            expect(store.upsertHarvests).not.toHaveBeenCalled();
+            expect(store.searchHarvests).toHaveBeenCalledTimes(1);
+            expect(findDialog('Edit Harvests')).toBeDefined();
+        });
+
         it('closes on Cancel, without saving, and clears a failure for the next time', async () => {
             const { wrapper, harvests: store } = await mountPage({
                 beforeMount: ({ harvests }) => harvests.upsertHarvests.mockRejectedValueOnce(new ApiError('Request failed', 500, '')),

@@ -23,8 +23,7 @@ import PlantingYearDetailsPage from '@/components/views/dashboard/years/Planting
 import PlantingsPage from '@/components/views/dashboard/plantings/PlantingsPage.vue';
 import PlantingDetailsPage from '@/components/views/dashboard/plantings/PlantingDetailsPage.vue';
 import HarvestsPage from '@/components/views/dashboard/harvests/HarvestsPage.vue';
-import PlantingStatsPage from '@/components/views/dashboard/stats/PlantingStatsPage.vue';
-import PlantStatsPage from '@/components/views/dashboard/stats/PlantStatsPage.vue';
+import HarvestStatsPage from '@/components/views/dashboard/stats/HarvestStatsPage.vue';
 
 vi.mock('@/api/authentication-api');
 
@@ -48,8 +47,8 @@ const dashboardPages = [
     ['/dashboard/plantings', 'PlantingsPage', PlantingsPage],
     ['/dashboard/plantings/planting-1/details', 'PlantingDetailsPage', PlantingDetailsPage],
     ['/dashboard/harvests', 'HarvestsPage', HarvestsPage],
-    ['/dashboard/stats/plantings', 'PlantingStatsPage', PlantingStatsPage],
-    ['/dashboard/stats/plants', 'PlantStatsPage', PlantStatsPage],
+    ['/dashboard/stats/plantings', 'PlantingStatsPage', HarvestStatsPage],
+    ['/dashboard/stats/plants', 'PlantStatsPage', HarvestStatsPage],
 ];
 const protectedPaths = dashboardPages.map(([path]) => path);
 
@@ -74,6 +73,14 @@ describe('router', () => {
 
             expect(route.name).toBe(name);
             expect(route.matched.map(record => record.components.default)).toEqual([DashboardPage, component]);
+        });
+
+        // One page, told which stats by its route (B29)
+        it.each([
+            ['/dashboard/stats/plantings', 'Planting'],
+            ['/dashboard/stats/plants', 'Plant'],
+        ])('gives %s its stats type, %s', (path, statsType) => {
+            expect(router.resolve(path).matched[1].props.default).toEqual({ statsType });
         });
 
         it.each([

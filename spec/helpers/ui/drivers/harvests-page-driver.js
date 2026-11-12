@@ -3,6 +3,9 @@ import { createRoutedPageDriver } from './routed-page-driver';
 import { escaped } from './urls';
 import { status } from '../support/status-codes';
 
+// A harvest's delete
+const harvestDelete = /\/harvests\/[0-9a-f-]{36}$/;
+
 // The page loads the year's harvests, then its plantings, last
 const harvestsSearch = { method: 'GET', path: /\/harvests\/search$/, status: status.ok };
 const plantingsList = { method: 'GET', path: /\/plantings$/, status: status.ok };
@@ -76,6 +79,23 @@ export function createHarvestsPageDriver(page, serviceCalls) {
             await changeQuantity(name, quantity, what);
             await dialog.getByRole('button', { name: 'Update' }).click();
             await expectHidden(dialog, what);
+        },
+
+        /**
+         * Removes the planting's harvest on the day shown, and updates: the
+         * service is asked to delete it, and does. The app had no delete (B30).
+         */
+        async removeHarvest({ name }) {
+            const what = `removing ${name}'s harvest`;
+
+            await main.getByRole('button', { name: 'Edit' }).click();
+            await expectVisible(dialog.getByText('Edit Harvests', { exact: true }), what);
+            await dialog.locator('.harvest-row', { hasText: name }).getByRole('button', { name: 'Remove' }).click();
+            await expectVisible(dialog.getByText('Removed on Update', { exact: true }), what);
+            await dialog.getByRole('button', { name: 'Update' }).click();
+            await expectHidden(dialog, what);
+            await expectEventually(() => serviceCalls.wereAnswered('DELETE', harvestDelete, status.ok),
+                'the harvest\'s delete to be sent, and answered 200', what);
         },
 
         /** As `editHarvest`, but leaves the dialog to the step after: Update is offered whatever the quantity. */

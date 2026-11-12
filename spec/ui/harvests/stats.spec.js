@@ -44,4 +44,23 @@ test.describe('The stats pages', () => {
         await plantStatsPage.checkShowsStats('plant: sungold',
             'first: 2026-07-07', 'last: 2026-07-09', 'total: 12', 'average: 4');
     });
+
+    // The two are one page, kept as the route changes from one to the other,
+    // so it loads the second's stats in place of the first's (backlog B29)
+    test('show a planting\'s stats after a plant\'s, going from one page to the other', async ({
+        plantStatsPage, plantingStatsPage,
+    }) => {
+        await plantStatsPage.open();
+        await plantStatsPage.checkIsShown();
+        await plantStatsPage.choose('plant: sungold');
+        await plantStatsPage.checkShowsStats('plant: sungold',
+            'first: 2026-07-07', 'last: 2026-07-09', 'total: 12', 'average: 4');
+
+        await plantStatsPage.dashboardNav.goTo('page: plantingStats');
+
+        await plantingStatsPage.checkIsShown();
+        await plantingStatsPage.choose('planting: late');
+        await plantingStatsPage.checkShowsStats('planting: late',
+            'first: 2026-07-09', 'last: 2026-07-09', 'total: 5', 'average: 5');
+    });
 });

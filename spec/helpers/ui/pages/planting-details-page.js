@@ -145,6 +145,13 @@ export function createPlantingDetailsPage(world, driver) {
             await driver.rename(world.renamePlanting(params.planting).name);
         },
 
+        /** After `renamePlanting`: the History tab has the update, which names the `planting`'s new name. */
+        async checkHistoryShowsRename(...args) {
+            const params = parseDslArgs(args, { planting: planting() });
+
+            await driver.historyShowsRename(world.plantingNamed(params.planting));
+        },
+
         /** The History tab shows the `planting`'s current status, and each comment the test made. */
         async checkHistoryShows(...args) {
             const params = parseDslArgs(args, { planting: planting() });

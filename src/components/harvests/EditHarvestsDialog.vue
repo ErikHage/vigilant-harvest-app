@@ -12,8 +12,18 @@
         </v-alert>
 
         <v-form ref="editHarvestsForm">
-          <v-row no-gutters v-for="harvest in harvestsCopy" :key="harvest.harvestId" class="harvest-row">
-            <v-col cols="5">
+          <v-row no-gutters v-for="harvest in harvestsCopy" :key="harvest.harvestId" class="harvest-row"
+                 :class="{ removed: isRemoved(harvest) }">
+            <v-col cols="1">
+              <v-btn
+                  :icon="isRemoved(harvest) ? 'mdi-undo' : 'mdi-delete-outline'"
+                  :aria-label="isRemoved(harvest) ? 'Keep' : 'Remove'"
+                  variant="text"
+                  size="small"
+                  @click="toggleRemoved(harvest)"
+              ></v-btn>
+            </v-col>
+            <v-col cols="4">
               <div class="d-flex flex-column align-start justify-center mr-6">
                 <span class="text-success">{{ harvest.plantingName }}</span>
                 <span class="smaller-text">{{ harvest.plantName }}</span>
@@ -27,15 +37,23 @@
                         label="Type"
                         density="compact"
                         variant="solo"
+                        :disabled="isRemoved(harvest)"
               ></v-select>
             </v-col>
             <v-col cols="3">
               <v-text-field v-model.number="harvest.quantity"
                             type="number"
+                            step="1"
                             label="Quantity"
                             density="compact"
                             required
+                            :disabled="isRemoved(harvest)"
+                            :error-messages="quantityError(harvest)"
               ></v-text-field>
+            </v-col>
+
+            <v-col cols="12" v-if="isRemoved(harvest)">
+              <div class="removed-note mb-2">Removed on Update</div>
             </v-col>
 
             <v-col cols="12" v-if="mergeWarning(harvest)">
@@ -56,7 +74,7 @@
 
 <script>
 import harvestUtils from "@/utils/harvest-utils";
-import { isPositiveNumber } from '@/utils/form-rules';
+import { isWholeNumber } from '@/utils/form-rules';
 
 export default {
   name: 'EditHarvestsDialog',
@@ -79,6 +97,8 @@ export default {
   data() {
     return {
       harvestsCopy: [],
+      // the ids of the harvests to delete on Update
+      removedIds: [],
     };
   },
 
@@ -88,14 +108,20 @@ export default {
       handler(newHarvests) {
         // copy each harvest, the originals are the same objects the page renders from
         this.harvestsCopy = newHarvests.map(harvest => ({ ...harvest }));
+        this.removedIds = [];
       },
     },
   },
 
   computed: {
-    // the service requires each quantity to be more than nothing
+    keptHarvests() {
+      return this.harvestsCopy.filter(harvest => !this.isRemoved(harvest));
+    },
+
+    // each kept quantity a whole number of at least 1: the service requires
+    // more than nothing, and stores whole numbers, rounding a fraction
     canUpdate() {
-      return this.harvestsCopy.every(harvest => isPositiveNumber(harvest.quantity));
+      return this.keptHarvests.every(harvest => isWholeNumber(harvest.quantity, 1));
     },
 
     showDialog() {
@@ -105,7 +131,7 @@ export default {
     // the service allows at most one harvest per planting per day per type, so rows that
     // collide on that pair get folded into one and their quantities summed
     mergeGroups() {
-      return this.harvestsCopy.reduce((acc, harvest) => {
+      return this.keptHarvests.reduce((acc, harvest) => {
         const key = `${harvest.plantingId}::${harvest.harvestTypeId}`;
 
         if (!acc[key]) {
@@ -124,24 +150,48 @@ export default {
       return harvestUtils.harvestTypeNameById(this.harvestTypes, harvestTypeId);
     },
 
+    isRemoved(harvest) {
+      return this.removedIds.includes(harvest.harvestId);
+    },
+
+    toggleRemoved(harvest) {
+      this.removedIds = this.isRemoved(harvest)
+          ? this.removedIds.filter(id => id !== harvest.harvestId)
+          : [...this.removedIds, harvest.harvestId];
+    },
+
+    // a fraction is the one case worth saying why: the box takes it, and
+    // Update waits
+    quantityError(harvest) {
+      const quantity = harvest.quantity;
+      return !this.isRemoved(harvest) && typeof quantity === 'number' && quantity > 0 && !Number.isInteger(quantity)
+          ? 'A whole number'
+          : [];
+    },
+
+    // in the type's label, as the rest of the app shows it: none for
+    // unspecified
     mergeWarning(harvest) {
+      if (this.isRemoved(harvest)) {
+        return '';
+      }
       const group = this.mergeGroups[`${harvest.plantingId}::${harvest.harvestTypeId}`];
 
       if (!group || group.count < 2) {
         return '';
       }
 
-      const harvestTypeName = this.harvestTypeName(harvest.harvestTypeId);
-      return `Same planting and type as another row. Saving combines these into one `
-          + `${group.quantity} ${harvestTypeName} harvest.`;
+      const total = harvestUtils.formatQuantity(group.quantity, this.harvestTypeName(harvest.harvestTypeId));
+      return `Same planting and type as another row. Saving combines these into one ${total} harvest.`;
     },
 
     handleCancel() {
       this.onCancel();
     },
 
+    // the harvests kept, as edited, and the ids of those removed
     handleSubmit() {
-      this.onSubmit(this.harvestsCopy);
+      this.onSubmit(this.keptHarvests, this.removedIds);
     },
   }
 }
@@ -160,5 +210,15 @@ export default {
 .merge-warning {
   font-size: 0.8rem;
   color: #b26500;
+}
+
+.removed .text-success,
+.removed .smaller-text {
+  text-decoration: line-through;
+}
+
+.removed-note {
+  font-size: 0.8rem;
+  color: gray;
 }
 </style>

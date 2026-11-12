@@ -22,8 +22,9 @@ test.describe('A planting\'s details page', () => {
         await plantingDetailsPage.checkIsShownFor(`planting: ${alias}`);
     };
 
-    // The history's first entry shows the planting's fields as JSON, as the
-    // service files its creation (backlog B34, tier B)
+    // The history's first entry says the planting was created, and with what
+    // name. It showed the planting's fields as JSON, as the service files its
+    // creation (backlog B34)
     test('shows a new planting, the actions it allows, and its history', async ({
         garden, plantingsPage, plantingDetailsPage,
     }) => {
@@ -144,6 +145,8 @@ test.describe('A planting\'s details page', () => {
 
         await plantingDetailsPage.checkIsShownFor('planting: early');
         await plantingDetailsPage.checkShowsPlanting('planting: early');
+        // the history's entry once showed the update as JSON (backlog B34)
+        await plantingDetailsPage.checkHistoryShowsRename('planting: early');
     });
 
     // The tab renders before the page has copied the planting, so the picker

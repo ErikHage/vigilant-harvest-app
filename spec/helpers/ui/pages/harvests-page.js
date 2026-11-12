@@ -63,6 +63,18 @@ export function createHarvestsPage(world, driver) {
         },
 
         /**
+         * Removes the `planting`'s harvest on the day shown, which is the one
+         * `on`, in the edit dialog, and updates.
+         */
+        async removeHarvest(...args) {
+            const params = parseDslArgs(args, { planting: planting(), on: on() });
+
+            harvestOn(params.planting, params.on);
+            await driver.removeHarvest(world.plantingNamed(params.planting));
+            world.forgetHarvest(params.planting, params.on);
+        },
+
+        /**
          * Starts editing the `planting`'s harvest on the day shown, typing
          * `quantity`, without pressing Update.
          */

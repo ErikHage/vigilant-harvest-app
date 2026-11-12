@@ -28,6 +28,19 @@ describe('PlantingHistoryTab', () => {
         ]);
     });
 
+    // As the service files them, in JSON (backlog B34)
+    it('summarises a creation and an update', () => {
+        const wrapper = mountTab([
+            { plantingHistoryId: 'h-1', plantingStatus: 'CREATED', comment: '{"plantingId":"p-1","name":"Early beans"}', dateCreated: '2026-03-01T18:00:00Z' },
+            { plantingHistoryId: 'h-2', plantingStatus: 'CREATED', comment: 'Updated: {"name":"Late beans","numberSown":12}', dateCreated: '2026-03-02T18:00:00Z' },
+        ]);
+
+        expect(cards(wrapper).map(([, , comment]) => comment)).toEqual([
+            'Created as "Early beans"',
+            'Updated: name "Late beans", number sown 12',
+        ]);
+    });
+
     it('colours each status chip', () => {
         const wrapper = mountTab();
 

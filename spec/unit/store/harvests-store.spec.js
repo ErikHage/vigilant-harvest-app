@@ -33,6 +33,28 @@ describe('useHarvestsStore', () => {
         expect(store.harvestStats).toEqual({});
     });
 
+    describe('deleteHarvest', () => {
+        it('deletes the harvest', async () => {
+            harvestsApi.deleteHarvest.mockResolvedValue('OK');
+
+            await store.deleteHarvest('harvest-1');
+
+            expect(harvestsApi.deleteHarvest).toHaveBeenCalledWith('a-token', 'harvest-1');
+            expect(store.alertVisible).toBe(false);
+        });
+
+        it('shows an alert, and rejects, when the delete fails', async () => {
+            const err = apiError(500, '<html>Internal Server Error</html>');
+            harvestsApi.deleteHarvest.mockRejectedValue(err);
+
+            await expect(store.deleteHarvest('harvest-1')).rejects.toBe(err);
+
+            expect(store.alertType).toBe('error');
+            expect(store.alertMessage).toBe('error deleting harvest');
+            expect(consoleError).toHaveBeenCalledWith(err);
+        });
+    });
+
     describe('upsertHarvests', () => {
         it('saves the harvests and returns what the service returns', async () => {
             harvestsApi.upsertHarvests.mockResolvedValue([{ ...harvest, harvestId: 'harvest-1' }]);
@@ -148,6 +170,27 @@ describe('useHarvestsStore', () => {
             failure: 'error fetching harvest stats',
         },
     ])('$action', ({ action, args, api, apiArgs, result, field, failure }) => {
+        if (action === 'fetchHarvestStats') {
+            // the service's own statsType always says Planting (B29)
+            it('records which type the stats are', async () => {
+                harvestsApi.fetchHarvestStats.mockResolvedValue({ statsType: 'Planting', stats: [] });
+
+                await store.fetchHarvestStats(2026, 'Plant');
+
+                expect(store.harvestStatsType).toBe('Plant');
+            });
+
+            it('keeps the type it had when the fetch fails', async () => {
+                harvestsApi.fetchHarvestStats.mockResolvedValueOnce({ stats: [] });
+                await store.fetchHarvestStats(2026, 'Plant');
+                harvestsApi.fetchHarvestStats.mockRejectedValueOnce(httpError(500));
+
+                await store.fetchHarvestStats(2026, 'Planting');
+
+                expect(store.harvestStatsType).toBe('Plant');
+            });
+        }
+
         it(`stores what the service returns in ${field}`, async () => {
             harvestsApi[api].mockResolvedValue(result);
 

@@ -23,6 +23,12 @@ describe('harvestsApi', () => {
             body: { harvests },
         },
         {
+            name: 'deleteHarvest',
+            call: () => harvestsApi.deleteHarvest('a-token', 'harvest-1'),
+            verb: 'delete',
+            url: `${serviceUrl}/harvests/harvest-1`,
+        },
+        {
             name: 'fetchHarvestSummary',
             call: () => harvestsApi.fetchHarvestSummary('a-token', 2026),
             verb: 'get',

@@ -355,17 +355,20 @@ describe('GardenPage', () => {
         });
 
         // Before the first load is done hydratedPlots is {}, not a list, so
-        // the dialog has no plantings to offer
-        it('opens with nothing to harvest before the first load is done', async () => {
+        // the dialog opened with no plantings to offer (backlog B27)
+        it("doesn't offer Add Harvests before the first load is done", async () => {
             const { wrapper } = await mountPage({
                 beforeMount: ({ plots }) => plots.fetchPlots.mockReturnValueOnce(new Promise(() => {})),
             });
             expect(summaries(wrapper)).toHaveLength(0);
 
-            const dialog = await openEntry(wrapper);
-            await choosePlot(wrapper, northBed);
+            expect(buttonLabelled(wrapper, 'Add Harvests').attributes('disabled')).toBeDefined();
+        });
 
-            expect(dialog.text()).toContain('There are no plantings to harvest in North bed');
+        it('offers Add Harvests once the first load is done', async () => {
+            const { wrapper } = await mountPage();
+
+            expect(buttonLabelled(wrapper, 'Add Harvests').attributes('disabled')).toBeUndefined();
         });
     });
 
@@ -461,18 +464,26 @@ describe('GardenPage', () => {
             ]);
         });
 
-        // The service takes it, but stores it in an INT column, so it keeps 2
-        // (validation-fixes doc, "worth doing")
-        it('saves a fractional quantity as it was entered', async () => {
-            const { wrapper, harvests } = await mountPage();
+        // The service took it, but stores it in an INT column, so it kept 2
+        // (validation-fixes doc, "worth doing"; backlog B27)
+        it("doesn't offer Save for a quantity with a fraction, and says why", async () => {
+            const { wrapper } = await mountPage();
             const dialog = await openEntry(wrapper);
             await choosePlot(wrapper, northBed);
+            await choosePlot(wrapper, southBed);
+            await enterQuantity(dialog, 'Sungold', '5');
+            await choosePlot(wrapper, northBed);
+
             await enterQuantity(dialog, 'Early beans', '1.5');
-            await press(dialog, 'Save');
 
-            await press(dialogTitled(confirmTitle('Sat Jul 04 2026')), 'Confirm');
+            expect(buttonLabelled(dialog, 'Save').attributes('disabled')).toBeDefined();
+            const row = dialog.findAll('.harvest-row').find(r => r.find('.text-success').text() === 'Early beans');
+            expect(row.findAll('.v-messages').at(-1).text()).toBe('A whole number');
 
-            expect(harvests.upsertHarvests.mock.calls[0][0][0].quantity).toBe(1.5);
+            await enterQuantity(dialog, 'Early beans', '2');
+
+            expect(buttonLabelled(dialog, 'Save').attributes('disabled')).toBeUndefined();
+            expect(row.findAll('.v-messages').at(-1).text()).toBe('');
         });
 
         it.each([
