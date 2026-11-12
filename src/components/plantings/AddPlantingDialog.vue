@@ -83,7 +83,7 @@ export default {
     },
 
     sortedPlants() {
-      return this.plants.sort(sorting.sortByPlantFriendlyName);
+      return [...this.plants].sort(sorting.sortByFriendlyName);
     }
   },
 

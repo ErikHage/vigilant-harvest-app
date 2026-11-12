@@ -248,7 +248,8 @@ export default {
     },
 
     sortedHistory() {
-      return this.plantingCopy?.statusHistory.sort(sorting.sortPlantingHistoryByDateCreated);
+      // a copy: the history is the store's own array
+      return [...(this.plantingCopy?.statusHistory ?? [])].sort(sorting.sortPlantingHistoryByDateCreated);
     },
 
     alerts() {

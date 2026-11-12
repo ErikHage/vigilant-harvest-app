@@ -25,12 +25,13 @@ describe('PlotsTable', () => {
     });
 
     // It sorts the array it was given, not a copy, as PlantsTable does (B21)
-    it('sorts the array it was given in place', () => {
+    // It sorts a copy (backlog B21)
+    it('leaves the array it was given as it was', () => {
         const given = plots();
 
         mountTable({ plots: given });
 
-        expect(given.map(plot => plot.plotId)).toEqual(['plot-3', 'plot-2', 'plot-1']);
+        expect(given).toEqual(plots());
     });
 
     it('filters by name, ignoring case', () => {

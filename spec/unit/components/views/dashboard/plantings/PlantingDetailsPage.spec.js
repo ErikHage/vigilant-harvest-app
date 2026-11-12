@@ -118,17 +118,17 @@ describe('PlantingDetailsPage', () => {
                 .toEqual(['h-1', 'h-2', 'h-3', 'h-4']);
         });
 
-        // sortedHistory sorts the copy's statusHistory, which is the store's
-        // own array, in place (B21)
-        it("sorts the store's history array in place", async () => {
-            const planting = aPlanting();
-            const { wrapper, pinia } = await mountPage({ planting });
+        // It sorts a copy of the store's own array (backlog B21). The store
+        // holds the very array given, so its order is checked against a fresh
+        // planting's
+        it("leaves the store's history array as it was", async () => {
+            const { wrapper, pinia } = await mountPage({ planting: aPlanting() });
 
             await wrapper.findAll('.v-tab').find(tab => tab.text() === 'History').trigger('click');
             await flushPromises();
 
             expect(pinia.state.value.plantings.plantingsById['planting-1'].statusHistory.map(item => item.plantingHistoryId))
-                .toEqual(['h-1', 'h-2', 'h-3', 'h-4']);
+                .toEqual(aPlanting().statusHistory.map(item => item.plantingHistoryId));
         });
 
         it.each([

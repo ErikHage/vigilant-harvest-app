@@ -89,15 +89,17 @@ describe('PlantingDetailsTab', () => {
     });
 
     // It sorts the arrays it was given, in place: the stores' lists (B21)
-    it('offers the plants and plots by name, ignoring case, sorting the arrays it was given', () => {
+    // It sorts copies (backlog B21)
+    it('offers the plants and plots by name, ignoring case, leaving the arrays it was given as they were', () => {
         const givenPlants = plants();
         const givenPlots = plots();
 
         const { wrapper } = mountTab({ plants: givenPlants, plots: givenPlots });
 
         expect(wrapper.findComponent(VAutocomplete).props('items').map(p => p.plantId)).toEqual(['plant-2', 'plant-1']);
-        expect(givenPlants.map(p => p.plantId)).toEqual(['plant-2', 'plant-1']);
-        expect(givenPlots.map(p => p.plotId)).toEqual(['plot-1', 'plot-2']);
+        expect(wrapper.findComponent(VSelect).props('items').map(p => p.plotId)).toEqual(['plot-1', 'plot-2']);
+        expect(givenPlants).toEqual(plants());
+        expect(givenPlots).toEqual(plots());
     });
 
     it('locks every field until editing is enabled', () => {

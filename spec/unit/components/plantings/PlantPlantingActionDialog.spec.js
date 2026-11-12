@@ -49,14 +49,14 @@ describe('PlantPlantingActionDialog', () => {
 
     // It sorts the plots it was given, in place: the plots store's list (B21).
     // The dialog's contents render only once it opens, and the sort with them
-    it('sorts the array of plots it was given, once opened', async () => {
+    // It sorts a copy (backlog B21)
+    it('leaves the array of plots it was given as it was, once opened', async () => {
         const given = plots();
         const wrapper = mountDialog({ plots: given });
-        expect(given.map(plot => plot.plotId)).toEqual(['plot-2', 'plot-1']);
 
         await open(wrapper);
 
-        expect(given.map(plot => plot.plotId)).toEqual(['plot-1', 'plot-2']);
+        expect(given).toEqual(plots());
     });
 
     it('submits a PLANT action with the plot, number, date and comment, and closes', async () => {

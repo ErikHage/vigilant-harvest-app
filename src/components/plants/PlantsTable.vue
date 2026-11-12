@@ -48,6 +48,9 @@
 </template>
 
 <script>
+import sorting from '@/utils/sorting';
+import { matchesAny } from '@/utils/filtering';
+
 export default {
   name: 'PlantsTable',
 
@@ -76,14 +79,11 @@ export default {
     filteredPlants() {
       let filtered = this.plants;
       if (this.filter) {
-        filtered = this.plants.filter(plant => {
-          const matchString = plant.friendlyName.toUpperCase() +
-              (plant.category?.toUpperCase() ?? "") +
-              (plant.subcategory?.toUpperCase() ?? "");
-          return matchString.includes(this.filter.toUpperCase());
-        });
+        filtered = this.plants.filter(plant =>
+            matchesAny(this.filter, plant.friendlyName, plant.category, plant.subcategory));
       }
-      return filtered.sort(this.generateSortingFunction(this.sortingField));
+      // a copy: the plants are the store's list
+      return [...filtered].sort(sorting.byProperty(this.sortingField));
     },
 
     nameSortIcon() {
@@ -126,17 +126,6 @@ export default {
       }
     },
 
-    generateSortingFunction(property) {
-      let sortOrder = 1;
-      if (property[0] === "-") {
-        sortOrder = -1;
-        property = property.substr(1);
-      }
-      return function (a, b) {
-        const result = (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0;
-        return result * sortOrder;
-      }
-    },
 
     getSortIconColor(property) {
       const activeField = this.sortingField.replace(/^-/, '');

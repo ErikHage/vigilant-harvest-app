@@ -50,12 +50,13 @@ describe('AddPlantingDialog', () => {
     });
 
     // It sorts the plants it was given, in place: the plants store's list
-    it('sorts the array of plants it was given', async () => {
+    // It sorts a copy (backlog B21)
+    it('leaves the array of plants it was given as it was', async () => {
         const given = plants();
 
         await mountDialog({ plants: given });
 
-        expect(given.map(plant => plant.plantId)).toEqual(['plant-3', 'plant-2', 'plant-1']);
+        expect(given).toEqual(plants());
     });
 
     it('submits the planting, then empties the form', async () => {

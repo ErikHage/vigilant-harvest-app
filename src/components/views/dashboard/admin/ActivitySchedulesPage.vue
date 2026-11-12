@@ -69,6 +69,7 @@ import PageTitle from "@/components/layout/PageTitle.vue";
 import {mapActions, mapState} from "pinia";
 import {useActivitySchedulesStore} from "@/store";
 import CreateScheduleDialog from "@/components/admin/schedules/CreateScheduleDialog.vue";
+import { matchesAny } from '@/utils/filtering';
 
 export default {
   name: "ActivitySchedulesPage",
@@ -104,12 +105,8 @@ export default {
     filteredSchedules() {
       let result = this.schedules;
       if (this.filter) {
-        const upper = this.filter.toUpperCase();
-        result = result.filter(s => {
-          // a description is optional
-          const matchString = s.name.toUpperCase() + (s.description?.toUpperCase() ?? '');
-          return matchString.includes(upper);
-        });
+        // a description is optional
+        result = result.filter(s => matchesAny(this.filter, s.name, s.description));
       }
       return [...result];
     }

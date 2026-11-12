@@ -65,6 +65,12 @@ describe('PlantingsTable', () => {
         expect(names(mountTable({ filter }))).toEqual(expected);
     });
 
+    // Each field on its own: "Early beans" and "Provider bush bean" don't
+    // make "beansprov"
+    it("doesn't match a filter that spans the planting's name and its plant's", () => {
+        expect(names(mountTable({ filter: 'beansprov' }))).toEqual([]);
+    });
+
     it('filters by status', () => {
         expect(names(mountTable({ statusFilter: 'PLANTED' }))).toEqual(['Early beans']);
     });

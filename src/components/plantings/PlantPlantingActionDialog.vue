@@ -113,7 +113,7 @@ export default {
     },
 
     sortedPlots() {
-      return this.plots.sort(sorting.sortByPlotFriendlyName);
+      return [...this.plots].sort(sorting.sortByFriendlyName);
     }
   },
 

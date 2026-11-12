@@ -66,14 +66,14 @@ describe('ActivitySchedulesPage', () => {
         expect(count(wrapper)).toBe('1 of 2 activity schedules');
     });
 
-    // The name and description are run together: "Tomatoes" and "Feed" make
-    // "oesfee"
-    it('matches across the name and the description', async () => {
+    // Each on its own: "Tomatoes" and "Feed" don't make "oesfee" (backlog
+    // B32)
+    it("doesn't match across the name and the description", async () => {
         const { wrapper } = await mountPage();
 
         await filterBy(wrapper, 'oesfee');
 
-        expect(rows(wrapper).map(([name]) => name)).toEqual(['Tomatoes']);
+        expect(rows(wrapper).map(([name]) => name)).not.toContain('Tomatoes');
     });
 
     it('says when nothing matches', async () => {

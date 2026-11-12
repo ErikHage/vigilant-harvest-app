@@ -188,7 +188,7 @@ export default {
     },
 
     filteredPlots() {
-      return this.plots.sort(sorting.sortByPlotFriendlyName);
+      return [...this.plots].sort(sorting.sortByFriendlyName);
     },
 
     hydratedPlots() {
@@ -218,7 +218,7 @@ export default {
               return acc;
             }, {});
 
-        return Object.values(mappedPlots).sort(sorting.sortByPlotFriendlyName);
+        return Object.values(mappedPlots).sort(sorting.sortByFriendlyName);
       } else {
         return {};
       }

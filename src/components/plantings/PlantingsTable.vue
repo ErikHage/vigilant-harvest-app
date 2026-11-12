@@ -37,6 +37,7 @@
 <script>
 import plantingUtils from '@/utils/plantings'
 import sorting from "@/utils/sorting";
+import { matchesAny } from '@/utils/filtering';
 
 const { plantingStatuses, } = plantingUtils;
 
@@ -88,12 +89,8 @@ export default {
             });
 
         if (this.filter) {
-          filteredPlantings = filteredPlantings.filter(planting => {
-            const matchString = planting.name.toUpperCase()
-                + (planting.plantName?.toUpperCase() ?? "")
-                + (planting.plotName?.toUpperCase() ?? "");
-            return matchString.includes(this.filter.toUpperCase());
-          });
+          filteredPlantings = filteredPlantings.filter(planting =>
+              matchesAny(this.filter, planting.name, planting.plantName, planting.plotName));
         }
 
         if (this.statusFilter) {

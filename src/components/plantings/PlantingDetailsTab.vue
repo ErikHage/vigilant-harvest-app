@@ -210,11 +210,11 @@ export default {
     },
 
     sortedPlots() {
-      return this.plots.sort(sorting.sortByPlotFriendlyName);
+      return [...this.plots].sort(sorting.sortByFriendlyName);
     },
 
     sortedPlants() {
-      return this.plants.sort(sorting.sortByPlantFriendlyName);
+      return [...this.plants].sort(sorting.sortByFriendlyName);
     },
 
     plantingYearsDisplay() {

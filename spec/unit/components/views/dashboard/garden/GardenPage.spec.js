@@ -236,13 +236,14 @@ describe('GardenPage', () => {
 
         // filteredPlots sorts the store's own list, in place, once the dialog
         // that offers them renders (B21)
-        it("sorts the plots store's list in place", async () => {
+        // It sorts a copy (backlog B21)
+        it("leaves the plots store's list as it was", async () => {
             const { wrapper, pinia } = await mountPage();
-            expect(pinia.state.value.plots.plots.map(p => p.friendlyName)).toEqual(['South bed', 'North bed', 'Herb box']);
 
             await openEntry(wrapper);
 
-            expect(pinia.state.value.plots.plots.map(p => p.friendlyName)).toEqual(['Herb box', 'North bed', 'South bed']);
+            expect(plotSelect(wrapper).props('items').map(p => p.friendlyName)).toEqual(['Herb box', 'North bed', 'South bed']);
+            expect(pinia.state.value.plots.plots.map(p => p.friendlyName)).toEqual(['South bed', 'North bed', 'Herb box']);
         });
     });
 

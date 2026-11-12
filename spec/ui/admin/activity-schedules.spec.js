@@ -25,9 +25,9 @@ test.describe('The activity schedules page', () => {
         await activityScheduleDetailsPage.checkShowsNoItems();
     });
 
-    // The filter matches the name and description run together (backlog B32,
-    // tier B): the end of one and the start of the other find the schedule
-    test('filters on a schedule\'s name and description run together', async ({ garden, activitySchedulesPage }) => {
+    // Each on its own (backlog B32, tier B): the end of one and the start of
+    // the other find nothing
+    test('filters on a schedule\'s name and description each on its own', async ({ garden, activitySchedulesPage }) => {
         await garden.hasSchedule('schedule: roses');
         await garden.hasSchedule('schedule: lawn');
         await activitySchedulesPage.open();
@@ -35,7 +35,7 @@ test.describe('The activity schedules page', () => {
 
         await activitySchedulesPage.filter('schedule: roses', 'by: both');
 
-        await activitySchedulesPage.checkListsOnly('schedule: roses');
+        await activitySchedulesPage.checkListsNone();
     });
 });
 

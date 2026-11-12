@@ -2,8 +2,7 @@ import sorting from '@/utils/sorting';
 
 describe('sorting', () => {
     describe.each([
-        ['sortByPlotFriendlyName', 'friendlyName'],
-        ['sortByPlantFriendlyName', 'friendlyName'],
+        ['sortByFriendlyName', 'friendlyName'],
         ['sortByPlantingName', 'name'],
     ])('%s', (comparator, field) => {
         const item = value => ({ [field]: value });
@@ -23,6 +22,21 @@ describe('sorting', () => {
         it('orders an earlier name before a later one, either way round', () => {
             expect(sorting[comparator](item('apple'), item('Bean'))).toBe(-1);
             expect(sorting[comparator](item('Bean'), item('apple'))).toBe(1);
+        });
+    });
+
+    // For the tables whose headers choose the sort (backlog B21)
+    describe('byProperty', () => {
+        const list = () => [{ name: 'zucchini' }, { name: 'Zinnia' }, { name: 'arugula' }, { name: null }];
+
+        it('sorts by the property, ignoring case, a missing value first', () => {
+            expect(list().sort(sorting.byProperty('name')).map(item => item.name))
+                .toEqual([null, 'arugula', 'Zinnia', 'zucchini']);
+        });
+
+        it('sorts descending for -property', () => {
+            expect(list().sort(sorting.byProperty('-name')).map(item => item.name))
+                .toEqual(['zucchini', 'Zinnia', 'arugula', null]);
         });
     });
 
