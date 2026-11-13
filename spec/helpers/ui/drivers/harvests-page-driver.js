@@ -94,8 +94,8 @@ export function createHarvestsPageDriver(page, serviceCalls) {
             await expectVisible(dialog.getByText('Removed on Update', { exact: true }), what);
             await dialog.getByRole('button', { name: 'Update' }).click();
             await expectHidden(dialog, what);
-            await expectEventually(() => serviceCalls.wereAnswered('DELETE', harvestDelete, status.ok),
-                'the harvest\'s delete to be sent, and answered 200', what);
+            await expectEventually(() => serviceCalls.wereAnswered('DELETE', harvestDelete, status.noContent),
+                'the harvest\'s delete to be sent, and answered 204', what);
         },
 
         /** As `editHarvest`, but leaves the dialog to the step after: Update is offered whatever the quantity. */
