@@ -207,6 +207,7 @@
                 <v-text-field v-model="plantCopy.taxonomy.family" label="Family" variant="solo" density="compact"/>
                 <v-text-field v-model="plantCopy.taxonomy.genus" label="Genus" variant="solo" density="compact"/>
                 <v-text-field v-model="plantCopy.taxonomy.species" label="Species" variant="solo" density="compact"/>
+                <v-text-field v-model="plantCopy.taxonomy.cultivar" label="Cultivar" variant="solo" density="compact"/>
               </v-card-text>
             </v-card>
           </v-col>
@@ -312,6 +313,7 @@ export default {
           || this.textFieldEdited(this.plant.taxonomy.family, this.plantCopy.taxonomy.family)
           || this.textFieldEdited(this.plant.taxonomy.genus, this.plantCopy.taxonomy.genus)
           || this.textFieldEdited(this.plant.taxonomy.species, this.plantCopy.taxonomy.species)
+          || this.textFieldEdited(this.plant.taxonomy.cultivar, this.plantCopy.taxonomy.cultivar)
           || this.textFieldEdited(this.plant.sowing.indoor, this.plantCopy.sowing.indoor)
           || this.textFieldEdited(this.plant.sowing.direct, this.plantCopy.sowing.direct)
           || this.textFieldEdited(this.plant.sowing.germinationDaysRange, this.plantCopy.sowing.germinationDaysRange)
@@ -406,6 +408,7 @@ export default {
           family: this.sanitize(this.plantCopy.taxonomy.family),
           genus: this.sanitize(this.plantCopy.taxonomy.genus),
           species: this.sanitize(this.plantCopy.taxonomy.species),
+          cultivar: this.sanitize(this.plantCopy.taxonomy.cultivar),
         },
         sowing: {
           indoor: this.sanitize(this.plantCopy.sowing.indoor),

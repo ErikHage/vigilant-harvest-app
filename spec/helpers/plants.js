@@ -13,7 +13,7 @@ export function aPlant(overrides = {}) {
         tags: ['Cold Tolerant', 'Container Friendly'],
         dateCreated: '2026-03-01T13:00:00.000Z',
         dateModified: '2026-04-02T14:30:00.000Z',
-        taxonomy: { family: 'Fabaceae', genus: 'Phaseolus', species: 'vulgaris' },
+        taxonomy: { family: 'Fabaceae', genus: 'Phaseolus', species: 'vulgaris', cultivar: 'Black Valentine' },
         // The service stores a sowing boolean as the string "1" or "0"
         sowing: {
             indoor: '0',

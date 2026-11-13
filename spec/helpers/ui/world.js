@@ -139,7 +139,7 @@ const kinds = {
 // for: the service's defaults
 const emptyPlant = {
     tags: [],
-    taxonomy: { family: null, genus: null, species: null },
+    taxonomy: { family: null, genus: null, species: null, cultivar: null },
     sowing: { indoor: null, direct: null, germinationDaysRange: null, germinationTempRange: null, sowingNotes: null },
     planting: { depthInInches: null, plantSpacingInches: null, rowSpacingInches: null, instructions: null },
     growing: {
@@ -559,7 +559,7 @@ export function createWorld(page) {
                 lifespanType: 'Perennial',
                 tags,
                 description: 'Made up by the UI suite.\nOn two lines.',
-                taxonomy: { family: 'Solanaceae', genus: 'Solanum', species: 'lycopersicum' },
+                taxonomy: { family: 'Solanaceae', genus: 'Solanum', species: 'lycopersicum', cultivar: 'Brandywine' },
                 sowing: {
                     indoor: '6 weeks before last frost', direct: 'Not recommended', germinationDaysRange: '5-10',
                     germinationTempRange: '70-85F', sowingNotes: 'Keep the soil moist.',
@@ -601,9 +601,10 @@ export function createWorld(page) {
         plantNamed: alias => known(plantsByAlias, alias, 'plant', 'garden.hasPlant'),
 
         /**
-         * Makes up new values for the plant called `alias`, a name, a family and
-         * a description, and remembers them as the plant's from now on. Cleanup
-         * finds the plant by its old name too, in case they're never saved.
+         * Makes up new values for the plant called `alias`, a name, a family, a
+         * cultivar and a description, and remembers them as the plant's from now
+         * on. Cleanup finds the plant by its old name too, in case they're never
+         * saved.
          */
         editPlant(alias) {
             known(plantsByAlias, alias, 'plant', 'garden.hasPlant');
@@ -611,6 +612,7 @@ export function createWorld(page) {
             plant.formerNames.push(plant.friendlyName);
             plant.friendlyName = madeUpName(alias);
             plant.taxonomy.family = 'Rosaceae';
+            plant.taxonomy.cultivar = 'Cherokee Purple';
             plant.description = 'Edited by the UI suite.';
             return copyOf(plant);
         },

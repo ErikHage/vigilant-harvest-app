@@ -36,9 +36,9 @@ export function createPlantEditPage(world, driver) {
         },
 
         /**
-         * Gives the `plant` a new made-up name, family and description, the
-         * last through its dialog, without saving. From here on the test's
-         * `plant` has them.
+         * Gives the `plant` a new made-up name, family, cultivar and
+         * description, the last through its dialog, without saving. From here
+         * on the test's `plant` has them.
          */
         async edit(...args) {
             const params = parseDslArgs(args, { plant: plant() });

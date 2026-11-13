@@ -31,6 +31,7 @@ const tabRows = plant => ({
         ['Family', shown(plant.taxonomy.family)],
         ['Genus', shown(plant.taxonomy.genus)],
         ['Species', shown(plant.taxonomy.species)],
+        ['Cultivar', shown(plant.taxonomy.cultivar)],
     ],
     Sowing: [
         ['Indoors', yesOrNo(plant.sowing.indoor)],

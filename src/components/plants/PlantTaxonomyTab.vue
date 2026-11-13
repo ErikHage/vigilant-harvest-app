@@ -13,6 +13,10 @@
       <th class="details-header shrink-column">Species</th>
       <td>{{ plant.taxonomy.species }}</td>
     </tr>
+    <tr>
+      <th class="details-header shrink-column">Cultivar</th>
+      <td>{{ plant.taxonomy.cultivar }}</td>
+    </tr>
     </tbody>
   </v-table>
 </template>

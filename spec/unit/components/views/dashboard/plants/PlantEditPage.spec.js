@@ -221,7 +221,7 @@ describe('PlantEditPage', () => {
                 lifespanType: 'Annual',
                 tags: ['Cold Tolerant', 'Container Friendly'],
                 description: 'Bush bean.',
-                taxonomy: { family: 'Fabaceae', genus: 'Phaseolus', species: 'vulgaris' },
+                taxonomy: { family: 'Fabaceae', genus: 'Phaseolus', species: 'vulgaris', cultivar: 'Black Valentine' },
                 sowing: {
                     indoor: '0',
                     direct: '1',
@@ -261,6 +261,7 @@ describe('PlantEditPage', () => {
             ['Family', 'taxonomy.family', 'Fabaceae (legumes)'],
             ['Genus', 'taxonomy.genus', 'Vigna'],
             ['Species', 'taxonomy.species', 'unguiculata'],
+            ['Cultivar', 'taxonomy.cultivar', 'Kentucky Wonder'],
         ])('sends an edited %s', async (label, path, value) => {
             const { wrapper, store } = await mountPage();
             store.upsertPlant.mockResolvedValue();
@@ -312,14 +313,14 @@ describe('PlantEditPage', () => {
         });
 
         it('sends a field the service left null as null', async () => {
-            const plant = aPlant({ taxonomy: { family: null, genus: 'Phaseolus', species: 'vulgaris' } });
+            const plant = aPlant({ taxonomy: { family: null, genus: 'Phaseolus', species: 'vulgaris', cultivar: null } });
             const { wrapper, store } = await mountPage({ plantsById: { 'plant-1': plant } });
             store.upsertPlant.mockResolvedValue();
 
             await type(wrapper, 'Name', 'Provider');
             await update(wrapper);
 
-            expect(store.upsertPlant.mock.calls[0][0].taxonomy.family).toBeNull();
+            expect(store.upsertPlant.mock.calls[0][0].taxonomy).toMatchObject({ family: null, cultivar: null });
         });
 
         // PUT /plants is a full upsert, and the service would default a

@@ -52,6 +52,7 @@ export function createPlantEditPageDriver(page) {
             await expectValue(field('Family'), plant.taxonomy.family ?? '', what);
             await expectValue(field('Genus'), plant.taxonomy.genus ?? '', what);
             await expectValue(field('Species'), plant.taxonomy.species ?? '', what);
+            await expectValue(field('Cultivar'), plant.taxonomy.cultivar ?? '', what);
         },
 
         /** Update and Reset are both offered, or neither. */
@@ -62,10 +63,11 @@ export function createPlantEditPageDriver(page) {
             await (offered ? expectEnabled : expectDisabled)(reset, what);
         },
 
-        /** Types the plant's new name and family, and its new description through its dialog. */
+        /** Types the plant's new name, family and cultivar, and its new description through its dialog. */
         async edit({ friendlyName, taxonomy, description }) {
             await field('Name').fill(friendlyName);
             await field('Family').fill(taxonomy.family);
+            await field('Cultivar').fill(taxonomy.cultivar);
             await pencilAfter('Description').click();
             await expectVisible(dialog.getByText('describe the plant', { exact: true }), 'opening the description');
             await dialog.getByRole('textbox').fill(description);
