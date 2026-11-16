@@ -6,9 +6,11 @@ import { expectEventually, expectThat, expectVisible } from './assertions';
  * It's a Vuetify navigation drawer, so a `navigation`, and the app's only
  * one. On a desktop it's always there, either expanded or a rail of icons;
  * the banner's Menu button switches between them. A rail's links keep their
- * names, so they're found the same way in both. Vuetify marks the rail only
- * by a class, so a rail is recognised by what it shows: a separator in place
- * of the Admin heading, and a drawer narrow enough for icons alone.
+ * names, so they're found the same way in both. Its links are grouped under
+ * headings (Planning, Garden, Recordkeeping, Config). Vuetify marks the rail
+ * only by a class, so a rail is recognised by what it shows: separators in
+ * place of the headings, and a drawer narrow enough for icons alone. The
+ * Config heading stands for them all: it shows with or without a year.
  *
  * On a phone (below Vuetify's md breakpoint, 960px) it's hidden, and Menu
  * slides it in over the page. Hidden, it's only moved off screen: its links
@@ -17,8 +19,8 @@ import { expectEventually, expectThat, expectVisible } from './assertions';
 
 // Each page's link
 const destinations = {
-    planning: 'Planning',
-    garden: 'Garden',
+    planning: 'Plan',
+    garden: 'Overview',
     journal: 'Journal',
     activityLog: 'Activity Log',
     plants: 'Plants',
@@ -41,8 +43,8 @@ const railWidth = 100;
 export function createDashboardNavDriver(page) {
     const drawer = page.getByRole('navigation');
     const menuButton = page.getByRole('banner').getByRole('button', { name: 'Menu' });
-    const adminHeading = drawer.getByText('Admin', { exact: true });
-    const separator = drawer.getByRole('separator');
+    const configHeading = drawer.getByText('Config', { exact: true });
+    const separators = drawer.getByRole('separator');
     const onAPhone = () => (page.viewportSize()?.width ?? phoneWidth) < phoneWidth;
     const drawerWidth = async () => (await drawer.boundingBox())?.width ?? 0;
 
@@ -69,26 +71,26 @@ export function createDashboardNavDriver(page) {
             await this.isExpanded();
         },
 
-        /** Icons only: a separator where the Admin heading was, in a narrow drawer. */
+        /** Icons only: separators where the headings were, in a narrow drawer. */
         async isRail() {
             const what = 'the dashboard\'s drawer, as a rail';
 
-            await expectVisible(separator, what);
+            await expectVisible(separators.first(), what);
             await expectEventually(async () => (await drawerWidth()) < railWidth,
                 `the drawer narrower than ${railWidth}px`, what);
-            const headings = await adminHeading.count();
-            expectThat(headings === 0, 'no Admin heading', `${headings} shown`, what);
+            const headings = await configHeading.count();
+            expectThat(headings === 0, 'no Config heading', `${headings} shown`, what);
         },
 
-        /** Expanded: the Admin heading, and no separator in its place. */
+        /** Expanded: the headings, and no separators in their place. */
         async isExpanded() {
             const what = 'the dashboard\'s drawer, expanded';
 
-            await expectVisible(adminHeading, what);
+            await expectVisible(configHeading, what);
             await expectEventually(async () => (await drawerWidth()) >= railWidth,
                 `the drawer at least ${railWidth}px wide`, what);
-            const separators = await separator.count();
-            expectThat(separators === 0, 'no separator', `${separators} shown`, what);
+            const shown = await separators.count();
+            expectThat(shown === 0, 'no separator', `${shown} shown`, what);
         },
     };
 }

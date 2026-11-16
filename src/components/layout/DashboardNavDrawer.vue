@@ -8,14 +8,13 @@
       @update:model-value="updateOpen"
   >
     <v-list nav density="compact">
-      <template v-for="section in sections" :key="section.heading || 'pages'">
-        <template v-if="section.heading">
-          <v-divider v-if="isRailShown"/>
-          <v-list-subheader v-else>{{ section.heading }}</v-list-subheader>
-        </template>
+      <template v-for="(group, i) in visibleGroups" :key="group.heading">
+        <!-- a rail has no room for headings: a divider stands between its groups -->
+        <v-divider v-if="isRailShown && i > 0"/>
+        <v-list-subheader v-if="!isRailShown">{{ group.heading }}</v-list-subheader>
 
         <v-tooltip
-            v-for="page in section.pages"
+            v-for="page in group.pages"
             :key="page.path"
             :text="page.title"
             :disabled="!isRailShown"
@@ -42,23 +41,41 @@ import { views } from "@/utils/constants";
 
 const pathTo = child => views.dashboard.path + "/" + views.dashboard.children[child].path;
 
-// Each page, in the drawer's order. A year-specific page needs a planting year
-const pages = [
-  { title: 'Planning', icon: 'mdi-calendar-edit', path: pathTo('planning'), isYearSpecific: true },
-  { title: 'Garden', icon: 'mdi-sprout-outline', path: pathTo('garden'), isYearSpecific: true },
-  { title: 'Journal', icon: 'mdi-book-open-page-variant', path: pathTo('journal'), isYearSpecific: true },
-  { title: 'Activity Log', icon: 'mdi-clipboard-list-outline', path: pathTo('activityLog'), isYearSpecific: true },
-  { title: 'Plants', icon: 'mdi-leaf', path: pathTo('plants') },
-  { title: 'Plots', icon: 'mdi-vector-square', path: pathTo('plots') },
-  { title: 'Years', icon: 'mdi-calendar-range', path: pathTo('years') },
-  { title: 'Plantings', icon: 'mdi-shovel', path: pathTo('plantings'), isYearSpecific: true },
-  { title: 'Harvests', icon: 'mdi-basket', path: pathTo('harvests'), isYearSpecific: true },
-  { title: 'Stats', icon: 'mdi-chart-bar', path: pathTo('stats'), isYearSpecific: true },
-];
-
-const adminPages = [
-  { title: 'Categories', icon: 'mdi-shape-outline', path: pathTo('categories') },
-  { title: 'Activity Schedules', icon: 'mdi-calendar-clock', path: pathTo('activitySchedules') },
+// The drawer's groups, and each one's pages, in order. A year-specific page
+// needs a planting year
+const groups = [
+  {
+    heading: 'Planning',
+    pages: [
+      { title: 'Plan', icon: 'mdi-calendar-edit', path: pathTo('planning'), isYearSpecific: true },
+    ],
+  },
+  {
+    heading: 'Garden',
+    pages: [
+      { title: 'Overview', icon: 'mdi-sprout-outline', path: pathTo('garden'), isYearSpecific: true },
+      { title: 'Plots', icon: 'mdi-vector-square', path: pathTo('plots') },
+      { title: 'Plants', icon: 'mdi-leaf', path: pathTo('plants') },
+      { title: 'Plantings', icon: 'mdi-shovel', path: pathTo('plantings'), isYearSpecific: true },
+      { title: 'Harvests', icon: 'mdi-basket', path: pathTo('harvests'), isYearSpecific: true },
+    ],
+  },
+  {
+    heading: 'Recordkeeping',
+    pages: [
+      { title: 'Journal', icon: 'mdi-book-open-page-variant', path: pathTo('journal'), isYearSpecific: true },
+      { title: 'Activity Log', icon: 'mdi-clipboard-list-outline', path: pathTo('activityLog'), isYearSpecific: true },
+      { title: 'Stats', icon: 'mdi-chart-bar', path: pathTo('stats'), isYearSpecific: true },
+    ],
+  },
+  {
+    heading: 'Config',
+    pages: [
+      { title: 'Years', icon: 'mdi-calendar-range', path: pathTo('years') },
+      { title: 'Categories', icon: 'mdi-shape-outline', path: pathTo('categories') },
+      { title: 'Activity Schedules', icon: 'mdi-calendar-clock', path: pathTo('activitySchedules') },
+    ],
+  },
 ];
 
 export default {
@@ -90,11 +107,14 @@ export default {
       return !this.isPhone && this.isRail;
     },
 
-    sections() {
-      return [
-        { heading: null, pages: pages.filter(page => !page.isYearSpecific || this.isPlantingYearSelected) },
-        { heading: 'Admin', pages: adminPages },
-      ];
+    // A group left with no pages (none of its year pages, with no year) goes, heading and all
+    visibleGroups() {
+      return groups
+          .map(group => ({
+            ...group,
+            pages: group.pages.filter(page => !page.isYearSpecific || this.isPlantingYearSelected),
+          }))
+          .filter(group => group.pages.length > 0);
     },
   },
 

@@ -25,20 +25,32 @@ function drawerLinks(wrapper) {
     return wrapper.findAll('.v-navigation-drawer a[href]').map(link => [link.text(), link.attributes('href')]);
 }
 
-const allLinks = [
-    ['Planning', '/dashboard/planning'],
-    ['Garden', '/dashboard/garden'],
-    ['Journal', '/dashboard/journal'],
-    ['Activity Log', '/dashboard/activity-log'],
-    ['Plants', '/dashboard/plants'],
+// The headings, and the text and path of each link, in the drawer's order
+function drawerContents(wrapper) {
+    return wrapper.findAll('.v-navigation-drawer .v-list-subheader, .v-navigation-drawer a[href]')
+        .map(item => (item.element.tagName === 'A' ? [item.text(), item.attributes('href')] : item.text()));
+}
+
+const allContents = [
+    'Planning',
+    ['Plan', '/dashboard/planning'],
+    'Garden',
+    ['Overview', '/dashboard/garden'],
     ['Plots', '/dashboard/plots'],
-    ['Years', '/dashboard/planting-years'],
+    ['Plants', '/dashboard/plants'],
     ['Plantings', '/dashboard/plantings'],
     ['Harvests', '/dashboard/harvests'],
+    'Recordkeeping',
+    ['Journal', '/dashboard/journal'],
+    ['Activity Log', '/dashboard/activity-log'],
     ['Stats', '/dashboard/stats'],
+    'Config',
+    ['Years', '/dashboard/planting-years'],
     ['Categories', '/dashboard/categories'],
     ['Activity Schedules', '/dashboard/activity-schedules'],
 ];
+
+const allLinks = allContents.filter(item => Array.isArray(item));
 
 describe('DashboardNavDrawer', () => {
     afterEach(() => {
@@ -47,11 +59,10 @@ describe('DashboardNavDrawer', () => {
     });
 
     describe('on a desktop', () => {
-        it('links to each page, with the admin pages under a heading', async () => {
+        it('links to each page, grouped under headings', async () => {
             const { wrapper } = await mountDrawer();
 
-            expect(drawerLinks(wrapper)).toEqual(allLinks);
-            expect(wrapper.find('.v-list-subheader').text()).toBe('Admin');
+            expect(drawerContents(wrapper)).toEqual(allContents);
             expect(wrapper.find('.v-navigation-drawer').classes()).not.toContain('v-navigation-drawer--rail');
         });
 
@@ -61,26 +72,35 @@ describe('DashboardNavDrawer', () => {
             expect(wrapper.findAll('.v-navigation-drawer a[href] .v-icon')).toHaveLength(allLinks.length);
         });
 
-        // Planning, Garden, Plantings, Harvests and Stats need one (backlog A11)
+        // Plan, Overview, Plantings, Harvests, Journal, Activity Log and Stats
+        // need one (backlog A11). A group left empty loses its heading
         it('hides the year-specific pages with no planting year selected', async () => {
             const { wrapper } = await mountDrawer({ isPlantingYearSelected: false });
 
-            expect(drawerLinks(wrapper)).toEqual([
-                ['Plants', '/dashboard/plants'],
+            expect(drawerContents(wrapper)).toEqual([
+                'Garden',
                 ['Plots', '/dashboard/plots'],
+                ['Plants', '/dashboard/plants'],
+                'Config',
                 ['Years', '/dashboard/planting-years'],
                 ['Categories', '/dashboard/categories'],
                 ['Activity Schedules', '/dashboard/activity-schedules'],
             ]);
         });
 
-        it('shows a rail of the same links, with a divider for the heading', async () => {
+        it('shows a rail of the same links, with a divider between groups for the headings', async () => {
             const { wrapper } = await mountDrawer({ navigation: { isRail: true } });
 
             expect(wrapper.find('.v-navigation-drawer').classes()).toContain('v-navigation-drawer--rail');
             expect(drawerLinks(wrapper).map(([, path]) => path)).toEqual(allLinks.map(([, path]) => path));
             expect(wrapper.find('.v-list-subheader').exists()).toBe(false);
-            expect(wrapper.find('.v-navigation-drawer .v-divider').exists()).toBe(true);
+            expect(wrapper.findAll('.v-navigation-drawer .v-divider')).toHaveLength(3);
+        });
+
+        it('has no dividers when expanded', async () => {
+            const { wrapper } = await mountDrawer();
+
+            expect(wrapper.find('.v-navigation-drawer .v-divider').exists()).toBe(false);
         });
 
         it('stays open when a link is followed', async () => {
