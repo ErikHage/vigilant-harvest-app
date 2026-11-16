@@ -25,6 +25,7 @@ export default {
 <style scoped>
   .page-title {
     font-weight: bold;
-    font-size: 2vw;
+    /* scales with the window, but never too small to read on a phone or too big on a wide screen */
+    font-size: clamp(1.25rem, 2vw, 2rem);
   }
 </style>

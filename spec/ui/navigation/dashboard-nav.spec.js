@@ -92,6 +92,15 @@ test.describe('On a phone', () => {
         await statsPage.checkIsShown();
     });
 
+    test('the page title is readable', async ({ loginPage, dashboardPage, gardenPage }) => {
+        await loginPage.logIn('user: gardener');
+        await dashboardPage.checkIsShown();
+
+        await gardenPage.open();
+        await gardenPage.checkIsShown();
+        await gardenPage.checkTitleIsReadable();
+    });
+
     // As the desktop layout does (backlog A12)
     test('the app bar offers nothing to someone signed out', async ({ loginPage }) => {
         await loginPage.open();

@@ -39,6 +39,13 @@ export function routedPageSteps(driver) {
 
             await driver.isShownAfterReload();
         },
+
+        /** The page's title is set large enough to read, whatever the window's width. No parameters. */
+        async checkTitleIsReadable(...args) {
+            parseDslArgs(args, {});
+
+            await driver.titleIsReadable();
+        },
     };
 }
 

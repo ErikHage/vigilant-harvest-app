@@ -1,4 +1,7 @@
 import { expectThat, expectUrl, expectVisible } from './assertions';
+
+// The smallest title that reads comfortably: the browser's body text size
+const readableTitlePx = 16;
 import { openPath, urlOf } from './urls';
 
 /**
@@ -10,6 +13,8 @@ import { openPath, urlOf } from './urls';
  */
 export function createRoutedPageDriver(page, { name, path, marker }) {
     const shown = marker(page.getByRole('main'));
+    // PageTitle renders a plain span, with no heading role: found by its class
+    const title = page.getByRole('main').locator('.page-title');
 
     // Every URL the browser has been at since the last reload. The router's own
     // changes count: Playwright reports those as navigations too
@@ -50,6 +55,15 @@ export function createRoutedPageDriver(page, { name, path, marker }) {
             page.off('framenavigated', recordUrl);
             const elsewhere = urlsSinceReload.filter(url => url !== urlOf(path));
             expectThat(elsewhere.length === 0, `to stay at ${urlOf(path)}`, `went to ${elsewhere.join(', ')}`, what);
+        },
+
+        /** Read once the page is shown: the title's computed font size is at least `readableTitlePx`. */
+        async titleIsReadable() {
+            const what = `the title of ${name}, ${page.viewportSize()?.width}px wide`;
+
+            await expectVisible(title, what);
+            const px = await title.evaluate(el => parseFloat(getComputedStyle(el).fontSize));
+            expectThat(px >= readableTitlePx, `a font size of at least ${readableTitlePx}px`, `${px}px`, what);
         },
     };
 }
