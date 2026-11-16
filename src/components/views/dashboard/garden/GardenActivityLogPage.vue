@@ -1,7 +1,7 @@
 <template>
   <v-container fluid>
     <v-row>
-      <v-col cols="12" class="text-center">
+      <v-col cols="12">
         <page-title title="Activity Log"/>
         <fade-out-alert :is-visible="alert.isVisible" :alert-type="alert.type" :message="alert.message"/>
         <v-spacer></v-spacer>

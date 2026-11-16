@@ -15,7 +15,7 @@
         <v-snackbar v-model="snackbar.show" timeout="2000">{{ snackbar.message }}</v-snackbar>
 
         <v-row>
-          <v-col cols="12" class="text-center">
+          <v-col cols="12">
             <page-title :title="plant.friendlyName"/>
             <v-spacer/>
             <span>{{ plant.category }}</span>

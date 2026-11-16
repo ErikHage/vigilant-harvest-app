@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <v-row class="text-center">
+    <v-row>
       <v-col cols="12">
         <page-title title="Review Harvests"/>
         <v-spacer></v-spacer>

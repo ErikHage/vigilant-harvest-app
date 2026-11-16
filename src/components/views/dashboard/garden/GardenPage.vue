@@ -1,7 +1,7 @@
 <template>
   <v-container>
     <v-row>
-      <v-col cols="12" class="text-center">
+      <v-col cols="12">
         <page-title title="Garden Overview"/>
         <v-spacer></v-spacer>
         <!-- the dialog offers the plots' plantings, so it waits for the first load -->

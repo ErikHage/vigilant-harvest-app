@@ -2,7 +2,7 @@
   <v-container>
 
     <v-row>
-      <v-col cols="12" class="text-center">
+      <v-col cols="12">
         <page-title title="Harvest Stats"/>
         <v-spacer></v-spacer>
         <fade-out-alert :is-visible="alert.isVisible" :alert-type="alert.type" :message="alert.message"/>

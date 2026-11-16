@@ -2,7 +2,7 @@
   <v-container>
     <v-row>
 
-      <v-col cols="12" class="text-center">
+      <v-col cols="12">
         <page-title title="Manage Plots"/>
         <v-spacer></v-spacer>
         <fade-out-alert

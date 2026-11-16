@@ -3,7 +3,7 @@
     <v-row>
       <v-col cols="12">
         <v-row>
-          <v-col cols="12" class="text-center">
+          <v-col cols="12">
             <page-title :title="title"/>
             <div class="mb-2">
               <span>{{ planting?.plantingId }}</span>
