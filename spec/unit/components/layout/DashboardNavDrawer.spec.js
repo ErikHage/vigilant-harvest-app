@@ -52,6 +52,13 @@ const allContents = [
 
 const allLinks = allContents.filter(item => Array.isArray(item));
 
+// Whether Vuetify made the drawer inert. jsdom has no `inert` property, so Vue
+// writes the value as an attribute, "true" or "false"; a browser gets the
+// property, and only a true one
+function isInert(wrapper) {
+    return wrapper.find('.v-navigation-drawer').attributes('inert') === 'true';
+}
+
 describe('DashboardNavDrawer', () => {
     afterEach(() => {
         onADesktop();
@@ -111,6 +118,11 @@ describe('DashboardNavDrawer', () => {
 
             expect(wrapper.find('.v-navigation-drawer').classes()).toContain('v-navigation-drawer--active');
         });
+
+        it('is never inert, expanded or as a rail', async () => {
+            expect(isInert((await mountDrawer()).wrapper)).toBe(false);
+            expect(isInert((await mountDrawer({ navigation: { isRail: true } })).wrapper)).toBe(false);
+        });
     });
 
     describe('on a phone', () => {
@@ -124,6 +136,19 @@ describe('DashboardNavDrawer', () => {
             const drawer = wrapper.find('.v-navigation-drawer');
             expect(drawer.classes()).not.toContain('v-navigation-drawer--active');
             expect(drawer.classes()).not.toContain('v-navigation-drawer--rail');
+        });
+
+        // Vuetify's doing: off screen, the closed drawer's links are out of the
+        // tab order and the accessibility tree. Playwright's role locators
+        // don't honour inert, so the UI suite can't see this
+        it('is inert while closed, and not once opened', async () => {
+            const { wrapper, store } = await mountDrawer();
+            expect(isInert(wrapper)).toBe(true);
+
+            store.setOpenOnPhone(true);
+            await flushPromises();
+
+            expect(isInert(wrapper)).toBe(false);
         });
 
         it('slides in over the page when opened, with every page', async () => {

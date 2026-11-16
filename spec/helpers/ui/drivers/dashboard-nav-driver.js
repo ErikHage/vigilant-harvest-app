@@ -13,8 +13,11 @@ import { expectEventually, expectThat, expectVisible } from './assertions';
  * Config heading stands for them all: it shows with or without a year.
  *
  * On a phone (below Vuetify's md breakpoint, 960px) it's hidden, and Menu
- * slides it in over the page. Hidden, it's only moved off screen: its links
- * stay in the accessibility tree.
+ * slides it in over the page. Hidden, it's off screen and `inert`: out of the
+ * tab order and the browser's accessibility tree. Playwright's role locators
+ * and ariaSnapshot don't honour `inert`, though: they still find its links,
+ * and call them visible. So `goTo` opens it first, and the unit suite checks
+ * the `inert`.
  */
 
 // Each page's link
