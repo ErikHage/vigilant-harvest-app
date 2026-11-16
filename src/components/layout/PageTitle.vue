@@ -18,6 +18,6 @@ export default {
 <style scoped>
   .page-title {
     font-weight: bold;
-    font-size: 2.5vw;
+    font-size: 2vw;
   }
 </style>
