@@ -2,20 +2,20 @@
   <v-container fluid>
     <v-row>
       <v-col cols="12">
-        <page-title title="Garden Journal"/>
+        <page-title title="Garden Journal">
+          <template #actions>
+            <add-journal-entry-dialog
+                :on-submit="handleNewEntry"
+                :on-cancel="() => {}"
+            />
+          </template>
+        </page-title>
         <fade-out-alert :is-visible="alert.isVisible" :alert-type="alert.type" :message="alert.message"/>
       </v-col>
     </v-row>
 
     <v-row>
       <v-col cols="2" class="timeline-column d-flex flex-column">
-        <div class="add-entry-wrapper mb-2 text-center">
-          <add-journal-entry-dialog
-              :on-submit="handleNewEntry"
-              :on-cancel="() => {}"
-          />
-        </div>
-
         <div class="timeline flex-grow-1 overflow-y-auto">
           <div
               v-for="(item, index) in timelineItems"
@@ -251,10 +251,5 @@ export default {
 
 .respect-formatting {
   white-space: pre-wrap;
-}
-
-.add-entry-wrapper {
-  border-bottom: 1px solid #ccc;
-  padding-bottom: 10px;
 }
 </style>

@@ -2,13 +2,15 @@
   <v-container>
     <v-row>
       <v-col cols="12">
-        <page-title title="Garden Overview"/>
-        <v-spacer></v-spacer>
-        <!-- the dialog offers the plots' plantings, so it waits for the first load -->
-        <v-btn class="mt-3" color="primary" :disabled="!initialized" @click="openAddHarvestDialog">Add Harvests</v-btn>
-        <v-btn class="mt-3 ml-3" color="success" @click="goToJournal">Journal</v-btn>
-        <v-btn class="mt-3 ml-3" color="success" @click="goToActivityLog">Activity Log</v-btn>
-        <v-btn class="mt-3 ml-3" color="default" @click="toggleShowRetired">{{ showRetired ? "Hide Retired" : "Show Retired" }}</v-btn>
+        <page-title title="Garden Overview">
+          <template #actions>
+            <!-- the dialog offers the plots' plantings, so it waits for the first load -->
+            <v-btn color="primary" :disabled="!initialized" @click="openAddHarvestDialog">Add Harvests</v-btn>
+            <v-btn color="success" @click="goToJournal">Journal</v-btn>
+            <v-btn color="success" @click="goToActivityLog">Activity Log</v-btn>
+            <v-btn color="default" @click="toggleShowRetired">{{ showRetired ? "Hide Retired" : "Show Retired" }}</v-btn>
+          </template>
+        </page-title>
         <fade-out-alert
             v-for="(alert, i) in alerts"
             :key="'alert' + i"
