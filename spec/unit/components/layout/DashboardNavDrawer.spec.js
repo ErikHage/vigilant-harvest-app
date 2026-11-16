@@ -28,6 +28,8 @@ function drawerLinks(wrapper) {
 const allLinks = [
     ['Planning', '/dashboard/planning'],
     ['Garden', '/dashboard/garden'],
+    ['Journal', '/dashboard/journal'],
+    ['Activity Log', '/dashboard/activity-log'],
     ['Plants', '/dashboard/plants'],
     ['Plots', '/dashboard/plots'],
     ['Years', '/dashboard/planting-years'],

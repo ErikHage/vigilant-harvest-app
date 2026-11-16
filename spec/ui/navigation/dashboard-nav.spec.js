@@ -31,7 +31,7 @@ test.describe('The dashboard\'s drawer', () => {
     });
 
     test('leads to each of the year\'s pages', async ({
-        dashboardPage, planningPage, gardenPage, plantingsPage, harvestsPage, statsPage,
+        dashboardPage, planningPage, gardenPage, journalPage, activityLogPage, plantingsPage, harvestsPage, statsPage,
     }) => {
         await dashboardPage.dashboardNav.goTo('page: planning');
         await planningPage.checkIsShown();
@@ -39,7 +39,13 @@ test.describe('The dashboard\'s drawer', () => {
         await planningPage.dashboardNav.goTo('page: garden');
         await gardenPage.checkIsShown();
 
-        await gardenPage.dashboardNav.goTo('page: plantings');
+        await gardenPage.dashboardNav.goTo('page: journal');
+        await journalPage.checkIsShown();
+
+        await journalPage.dashboardNav.goTo('page: activityLog');
+        await activityLogPage.checkIsShown();
+
+        await activityLogPage.dashboardNav.goTo('page: plantings');
         await plantingsPage.checkIsShown();
 
         await plantingsPage.dashboardNav.goTo('page: harvests');

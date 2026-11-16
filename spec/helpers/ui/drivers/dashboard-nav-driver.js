@@ -19,6 +19,8 @@ import { expectEventually, expectThat, expectVisible } from './assertions';
 const destinations = {
     planning: 'Planning',
     garden: 'Garden',
+    journal: 'Journal',
+    activityLog: 'Activity Log',
     plants: 'Plants',
     plots: 'Plots',
     plantingYears: 'Years',

@@ -46,6 +46,8 @@ const pathTo = child => views.dashboard.path + "/" + views.dashboard.children[ch
 const pages = [
   { title: 'Planning', icon: 'mdi-calendar-edit', path: pathTo('planning'), isYearSpecific: true },
   { title: 'Garden', icon: 'mdi-sprout-outline', path: pathTo('garden'), isYearSpecific: true },
+  { title: 'Journal', icon: 'mdi-book-open-page-variant', path: pathTo('journal'), isYearSpecific: true },
+  { title: 'Activity Log', icon: 'mdi-clipboard-list-outline', path: pathTo('activityLog'), isYearSpecific: true },
   { title: 'Plants', icon: 'mdi-leaf', path: pathTo('plants') },
   { title: 'Plots', icon: 'mdi-vector-square', path: pathTo('plots') },
   { title: 'Years', icon: 'mdi-calendar-range', path: pathTo('years') },

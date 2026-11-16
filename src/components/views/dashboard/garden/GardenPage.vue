@@ -6,8 +6,6 @@
           <template #actions>
             <!-- the dialog offers the plots' plantings, so it waits for the first load -->
             <v-btn color="primary" :disabled="!initialized" @click="openAddHarvestDialog">Add Harvests</v-btn>
-            <v-btn color="success" @click="goToJournal">Journal</v-btn>
-            <v-btn color="success" @click="goToActivityLog">Activity Log</v-btn>
             <v-btn color="default" @click="toggleShowRetired">{{ showRetired ? "Hide Retired" : "Show Retired" }}</v-btn>
           </template>
         </page-title>
@@ -260,18 +258,6 @@ export default {
       'upsertHarvests',
       'fetchHarvestSummariesByYear',
     ]),
-
-    goToJournal() {
-      this.$router.push({
-        name: 'Journal',
-      });
-    },
-
-    goToActivityLog() {
-      this.$router.push({
-        name: 'ActivityLog',
-      });
-    },
 
     openAddHarvestDialog() {
       this.saveErrorMessage = '';

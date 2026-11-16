@@ -181,15 +181,13 @@ describe('GardenPage', () => {
             expect(summaries(wrapper).every(s => s.props('showRetired') === false)).toBe(true);
         });
 
-        it.each([
-            ['Journal', 'Journal'],
-            ['Activity Log', 'ActivityLog'],
-        ])('goes to the %s', async (label, name) => {
-            const { wrapper, $router } = await mountPage();
+        // The drawer leads to them now
+        it('offers no Journal or Activity Log button', async () => {
+            const { wrapper } = await mountPage();
 
-            await press(wrapper, label);
-
-            expect($router.push).toHaveBeenCalledWith({ name });
+            const labels = wrapper.findAll('.v-btn').map(button => button.text());
+            expect(labels).not.toContain('Journal');
+            expect(labels).not.toContain('Activity Log');
         });
 
         it("shows the harvests store's alert", async () => {

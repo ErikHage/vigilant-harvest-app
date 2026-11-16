@@ -47,7 +47,7 @@ export const shellComponents = world => ({
     appBar: createAppBar(world, world.drivers.appBar),
 });
 
-/** The app bar and the dashboard's own bar, which every dashboard page has. */
+/** The app bar and the dashboard's side drawer, which every dashboard page has. */
 export const dashboardComponents = world => ({
     ...shellComponents(world),
     dashboardNav: createDashboardNav(world, world.drivers.dashboardNav),
