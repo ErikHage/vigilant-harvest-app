@@ -2,13 +2,15 @@ import { flushPromises } from '@vue/test-utils';
 import { createTestingPinia } from '@pinia/testing';
 import AppBar from '@/components/layout/AppBar.vue';
 import { useAuthenticationStore } from '@/store';
+import { useNavigationStore } from '@/store/navigation';
 import { mountInLayout } from '../../../helpers/layout';
 import { buttonLabelled } from '../../../helpers/fields';
 import { linkRouter, linkPaths } from '../../../helpers/routers';
 import { onADesktop, onAPhone } from '../../../helpers/display';
 
-function mountAppBar({ showAppBar = true, plantingYear = 2026 } = {}) {
+async function mountAppBar({ showAppBar = true, plantingYear = 2026, path = '/landing' } = {}) {
     const router = linkRouter();
+    await router.push(path);
     vi.spyOn(router, 'push');
 
     const wrapper = mountInLayout(AppBar, {
@@ -24,7 +26,12 @@ function mountAppBar({ showAppBar = true, plantingYear = 2026 } = {}) {
             ],
         },
     });
-    return { wrapper, router, store: useAuthenticationStore() };
+    return { wrapper, router, store: useAuthenticationStore(), navigation: useNavigationStore() };
+}
+
+// The hamburger, which Vuetify renders as an icon button
+function menuButton(wrapper) {
+    return wrapper.find('button[aria-label="Menu"]');
 }
 
 describe('AppBar', () => {
@@ -34,24 +41,33 @@ describe('AppBar', () => {
     });
 
     describe('on a desktop', () => {
-        it('shows the title, the planting year, Dashboard and Logout when logged in', () => {
-            const { wrapper } = mountAppBar();
+        it('shows the title, the planting year, Dashboard and Logout when logged in', async () => {
+            const { wrapper } = await mountAppBar();
 
             expect(wrapper.text()).toContain('Vigilant Harvest');
             expect(wrapper.find('.planting-year').text()).toBe('2026');
             expect(buttonLabelled(wrapper, 'Dashboard').exists()).toBe(true);
             expect(buttonLabelled(wrapper, 'Logout').exists()).toBe(true);
             expect(linkPaths(wrapper)).toEqual(['/dashboard']);
+            expect(menuButton(wrapper).exists()).toBe(false);
         });
 
-        it('shows only the title when logged out', () => {
-            const { wrapper } = mountAppBar({ showAppBar: false });
+        it('offers the menu on dashboard pages, switching the drawer to and from the rail', async () => {
+            const { wrapper, navigation } = await mountAppBar({ path: '/dashboard/plants' });
+
+            await menuButton(wrapper).trigger('click');
+
+            expect(navigation.toggle).toHaveBeenCalledWith(false);
+        });
+
+        it('shows only the title when logged out', async () => {
+            const { wrapper } = await mountAppBar({ showAppBar: false });
 
             expect(wrapper.text()).toBe('Vigilant Harvest');
         });
 
-        it('hides the planting year when none is selected', () => {
-            const { wrapper } = mountAppBar({ plantingYear: null });
+        it('hides the planting year when none is selected', async () => {
+            const { wrapper } = await mountAppBar({ plantingYear: null });
 
             expect(wrapper.find('.planting-year').exists()).toBe(false);
         });
@@ -62,28 +78,43 @@ describe('AppBar', () => {
             onAPhone();
         });
 
-        it('shows a home button, the planting year and Logout when logged in', () => {
-            const { wrapper } = mountAppBar();
+        it('shows a home button, the planting year and Logout when logged in', async () => {
+            const { wrapper } = await mountAppBar();
 
             expect(wrapper.text()).not.toContain('Vigilant Harvest');
             expect(wrapper.find('.planting-year').text()).toBe('2026');
             expect(wrapper.find('.mdi-home').exists()).toBe(true);
             expect(linkPaths(wrapper)).toEqual(['/dashboard']);
             expect(buttonLabelled(wrapper, 'Logout').exists()).toBe(true);
+            expect(menuButton(wrapper).exists()).toBe(false);
+        });
+
+        it('offers the menu on dashboard pages, opening the drawer', async () => {
+            const { wrapper, navigation } = await mountAppBar({ path: '/dashboard' });
+
+            await menuButton(wrapper).trigger('click');
+
+            expect(navigation.toggle).toHaveBeenCalledWith(true);
         });
 
         // As on a desktop (backlog A12)
-        it('shows neither the home button nor Logout when logged out', () => {
-            const { wrapper } = mountAppBar({ showAppBar: false });
+        it('shows neither the home button nor Logout when logged out', async () => {
+            const { wrapper } = await mountAppBar({ showAppBar: false });
 
             expect(wrapper.find('.planting-year').exists()).toBe(false);
             expect(wrapper.find('.mdi-home').exists()).toBe(false);
             expect(wrapper.findAll('.v-btn').map(button => button.text())).not.toContain('Logout');
         });
+
+        it('offers no menu when logged out, even on a dashboard page', async () => {
+            const { wrapper } = await mountAppBar({ showAppBar: false, path: '/dashboard' });
+
+            expect(menuButton(wrapper).exists()).toBe(false);
+        });
     });
 
     it('logs out, then goes to the login page', async () => {
-        const { wrapper, router, store } = mountAppBar();
+        const { wrapper, router, store } = await mountAppBar();
         let pushedBeforeLogoutFinished;
         store.logout.mockImplementation(async () => {
             await Promise.resolve();

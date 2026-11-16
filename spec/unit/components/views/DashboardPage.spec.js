@@ -1,7 +1,7 @@
 import { flushPromises } from '@vue/test-utils';
 import { createTestingPinia } from '@pinia/testing';
 import DashboardPage from '@/components/views/DashboardPage.vue';
-import DashboardAppBar from '@/components/layout/DashboardAppBar.vue';
+import DashboardNavDrawer from '@/components/layout/DashboardNavDrawer.vue';
 import { useCommonStore } from '@/store';
 import { mountInLayout } from '../../../helpers/layout';
 import { linkRouter } from '../../../helpers/routers';
@@ -24,18 +24,18 @@ describe('DashboardPage', () => {
         expect(store.fetchPlantingYears).toHaveBeenCalledTimes(1);
     });
 
-    // Not which: the app bar had a prop for it that it never read (backlog B12)
-    it('tells the app bar a year is selected', async () => {
+    // Not which: the app bar before the drawer had a prop for it that it never read (backlog B12)
+    it('tells the drawer a year is selected', async () => {
         const { wrapper } = await mountDashboard({ plantingYear: 2026, selectedPlantingYear: year2026 });
 
-        const appBar = wrapper.findComponent(DashboardAppBar);
-        expect(appBar.props()).toEqual({ isPlantingYearSelected: true });
+        const drawer = wrapper.findComponent(DashboardNavDrawer);
+        expect(drawer.props()).toEqual({ isPlantingYearSelected: true });
     });
 
-    it('tells the app bar when no year is selected', async () => {
+    it('tells the drawer when no year is selected', async () => {
         const { wrapper } = await mountDashboard({ plantingYear: null });
 
-        expect(wrapper.findComponent(DashboardAppBar).props('isPlantingYearSelected')).toBe(false);
+        expect(wrapper.findComponent(DashboardNavDrawer).props('isPlantingYearSelected')).toBe(false);
     });
 
     it("shows the common store's alert", async () => {

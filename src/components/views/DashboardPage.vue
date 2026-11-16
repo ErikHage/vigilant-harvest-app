@@ -1,8 +1,9 @@
 <template>
+  <!-- the drawer joins the app's layout, beside the main area rather than in its container -->
+  <dashboard-nav-drawer
+      :is-planting-year-selected="plantingYear != null"
+  />
   <v-container>
-    <dashboard-app-bar
-        :is-planting-year-selected="plantingYear != null"
-    />
     <!-- the common store's: the planting years, loaded here for every dashboard page -->
     <fade-out-alert :is-visible="alert.isVisible" :alert-type="alert.type" :message="alert.message"/>
     <v-row>
@@ -13,7 +14,7 @@
 
 <script>
 
-import DashboardAppBar from "@/components/layout/DashboardAppBar.vue";
+import DashboardNavDrawer from "@/components/layout/DashboardNavDrawer.vue";
 import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
 import {mapActions, mapState} from "pinia";
 import {useCommonStore} from "@/store";
@@ -22,7 +23,7 @@ import { alertOf } from "@/store/alerts";
 export default {
   name: 'DashboardPage',
 
-  components: {DashboardAppBar, FadeOutAlert},
+  components: {DashboardNavDrawer, FadeOutAlert},
 
   computed: {
     ...mapState(useCommonStore, {

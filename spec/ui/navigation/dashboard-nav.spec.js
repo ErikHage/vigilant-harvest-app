@@ -1,11 +1,11 @@
 import { test } from '../../helpers/ui/ui-test';
 
-// The dashboard's own bar. Its year pages show only with a year chosen, and
+// The dashboard's side drawer. Its year pages show only with a year chosen, and
 // since the store falls back to the current year and nothing can clear it,
 // one always is: so the unit suite's A11 (they'd show with none) can't arise
 // in the app as it is.
 
-test.describe('The dashboard\'s bar', () => {
+test.describe('The dashboard\'s drawer', () => {
     test.beforeEach(async ({ loginPage, dashboardPage }) => {
         await loginPage.logIn('user: gardener');
         await dashboardPage.checkIsShown();
@@ -48,13 +48,32 @@ test.describe('The dashboard\'s bar', () => {
         await harvestsPage.dashboardNav.goTo('page: stats');
         await statsPage.checkIsShown();
     });
+
+    test('collapses to a rail that still leads to each page, and is remembered', async ({
+        dashboardPage, plotsPage,
+    }) => {
+        await dashboardPage.dashboardNav.checkIsExpanded();
+
+        await dashboardPage.dashboardNav.collapseToRail();
+        await dashboardPage.dashboardNav.goTo('page: plots');
+        await plotsPage.checkIsShown();
+
+        await plotsPage.reload();
+        await plotsPage.checkIsShownAfterReload();
+        await plotsPage.dashboardNav.checkIsRail();
+
+        await plotsPage.dashboardNav.expand();
+        await plotsPage.reload();
+        await plotsPage.checkIsShownAfterReload();
+        await plotsPage.dashboardNav.checkIsExpanded();
+    });
 });
 
 test.describe('On a phone', () => {
-    // Below Vuetify's md breakpoint (960px), where both bars change layout
+    // Below Vuetify's md breakpoint (960px), where the app bar and the drawer change layout
     test.use({ viewport: { width: 390, height: 844 } });
 
-    test('the dashboard\'s bar is a menu, and still leads to each page', async ({
+    test('the dashboard\'s drawer opens from Menu, and still leads to each page', async ({
         loginPage, dashboardPage, plotsPage, statsPage,
     }) => {
         await loginPage.logIn('user: gardener');
