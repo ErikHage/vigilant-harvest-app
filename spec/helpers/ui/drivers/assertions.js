@@ -46,6 +46,12 @@ export async function expectEnabled(locator, what) {
     await expect(locator, failureMessage(what, `${locator} to be enabled`)).toBeEnabled();
 }
 
+/** A checkbox, `checked` or not. */
+export async function expectChecked(locator, checked, what) {
+    await expect(locator, failureMessage(what, `${locator} to be ${checked ? 'checked' : 'unchecked'}`))
+        .toBeChecked({ checked });
+}
+
 /** Retries, so it waits for elements to come or go: use it only once they are sure to. */
 export async function expectCount(locator, count, what) {
     await expect(locator, failureMessage(what, `${count} of ${locator}`)).toHaveCount(count);

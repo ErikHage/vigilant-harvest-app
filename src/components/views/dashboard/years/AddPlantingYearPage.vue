@@ -57,10 +57,30 @@
           <v-row>
             <v-col cols="12" lg="6">
               <h3>Plantings to carry forward (planted)</h3>
+              <div class="d-flex align-center my-2">
+                <v-btn
+                    size="small"
+                    variant="outlined"
+                    :disabled="plantingsToCarryForward.length === 0"
+                    @click="toggleSelectAll"
+                >
+                  {{ allSelected ? 'Deselect all' : 'Select all' }}
+                </v-btn>
+                <span class="ml-3 smaller-text">
+                  {{ selectedPlantingIds.length }} of {{ plantingsToCarryForward.length }} selected
+                </span>
+              </div>
               <v-table>
                 <tbody>
                 <template v-for="planting in plantingsToCarryForward" :key="planting.plantingId">
                   <tr>
+                    <td>
+                      <v-checkbox-btn
+                          v-model="selectedPlantingIds"
+                          :value="planting.plantingId"
+                          :aria-label="'Carry forward ' + planting.name"
+                          density="compact"/>
+                    </td>
                     <td>
                       <span class="clickable text-primary font-weight-medium"
                             @click="onClickPlanting(planting.plantingId)">
@@ -93,7 +113,7 @@
                 <v-btn
                   color="success"
                   :disabled="!canCreate"
-                  @click="onSubmit"
+                  @click="onCreate"
                 >
                   Create New Planting Year
                 </v-btn>
@@ -103,6 +123,13 @@
         </v-sheet>
       </v-col>
     </v-row>
+
+    <no-carry-forward-dialog
+        :show="showNoCarryForwardDialog"
+        :planting-year="newPlantingYear.plantingYear"
+        :on-cancel="onCancelNoCarryForward"
+        :on-confirm="onConfirmNoCarryForward"
+    />
   </v-container>
 </template>
 
@@ -112,6 +139,7 @@ import {usePlantingsStore, usePlantingYearsStore, usePlantsStore} from "@/store"
 import PageTitle from "@/components/layout/PageTitle.vue";
 import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
 import DatePickerDialogActivator from "@/components/utils/DatePickerDialogActivator.vue";
+import NoCarryForwardDialog from "@/components/years/NoCarryForwardDialog.vue";
 import dayjs from "dayjs";
 import plantingUtils from "@/utils/plantings";
 import { toLocalDate } from '@/utils/dates';
@@ -120,7 +148,7 @@ import { isChosen } from '@/utils/form-rules';
 
 export default {
   name: "AddPlantingYearPage",
-  components: {DatePickerDialogActivator, FadeOutAlert, PageTitle},
+  components: {DatePickerDialogActivator, FadeOutAlert, NoCarryForwardDialog, PageTitle},
 
   data() {
     return {
@@ -134,6 +162,9 @@ export default {
       // the previous year's, kept here so the store's list, the chosen
       // year's, is left alone
       plantings: [],
+      // none at first: the user chooses what to carry
+      selectedPlantingIds: [],
+      showNoCarryForwardDialog: false,
     };
   },
 
@@ -170,7 +201,7 @@ export default {
           '--';
     },
 
-    // what the service carries forward: the planted ones
+    // what may be carried forward: the planted ones
     plantingsToCarryForward() {
       return this.plantings.filter(planting => planting.currentStatus === "PLANTED")
           .map(planting => ({
@@ -178,6 +209,11 @@ export default {
             plantName: this.plantsById[planting.plantId]?.friendlyName ?? '',
             plantLifespanType: this.plantsById[planting.plantId]?.lifespanType ?? '',
           }));
+    },
+
+    allSelected() {
+      return this.plantingsToCarryForward.length > 0 &&
+          this.selectedPlantingIds.length === this.plantingsToCarryForward.length;
     },
   },
 
@@ -236,14 +272,42 @@ export default {
       });
     },
 
+    toggleSelectAll() {
+      this.selectedPlantingIds = this.allSelected
+          ? []
+          : this.plantingsToCarryForward.map(planting => planting.plantingId);
+    },
+
+    // Carrying nothing forward from a year that exists is rare, and a perennial
+    // retired by mistake would leave the list empty, so it is confirmed even then
+    onCreate() {
+      if (this.newPlantingYear.previousPlantingYear !== null && this.selectedPlantingIds.length === 0) {
+        this.showNoCarryForwardDialog = true;
+        return;
+      }
+      return this.onSubmit();
+    },
+
+    onCancelNoCarryForward() {
+      this.showNoCarryForwardDialog = false;
+    },
+
+    async onConfirmNoCarryForward() {
+      this.showNoCarryForwardDialog = false;
+      await this.onSubmit();
+    },
+
     async onSubmit() {
-      // with no previous year, the field is left out: nothing is carried
+      // with no previous year, both are left out: nothing is carried
       const { previousPlantingYear, ...newPlantingYear } = this.newPlantingYear;
 
       try {
         await this.addPlantingYear({
           ...newPlantingYear,
-          ...(previousPlantingYear === null ? {} : { previousPlantingYear }),
+          ...(previousPlantingYear === null ? {} : {
+            previousPlantingYear,
+            carryForwardPlantingIds: this.selectedPlantingIds,
+          }),
           lastFrostDate: toLocalDate(this.newPlantingYear.lastFrostDate),
           targetPlantingDate: toLocalDate(this.newPlantingYear.targetPlantingDate),
         });

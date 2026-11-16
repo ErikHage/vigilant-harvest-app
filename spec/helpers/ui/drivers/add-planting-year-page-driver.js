@@ -1,4 +1,6 @@
-import { expectDisabled, expectHidden, expectText, expectValue, expectVisible } from './assertions';
+import {
+    expectChecked, expectDisabled, expectEnabled, expectHidden, expectText, expectValue, expectVisible,
+} from './assertions';
 import { createRoutedPageDriver } from './routed-page-driver';
 
 /** The page that adds a planting year, and its two date pickers, as Playwright sees them. */
@@ -10,6 +12,14 @@ export function createAddPlantingYearPageDriver(page) {
     // date picked, all <h3> but the button
     const dateRow = label => main.locator('h3', { hasText: new RegExp(`^${label}$`) }).locator('xpath=..');
     const carried = main.getByRole('table').getByRole('row');
+    const carryForward = name => main.getByRole('checkbox', { name: `Carry forward ${name}`, exact: true });
+    const selectAll = main.getByRole('button', { name: 'Select all', exact: true });
+    const deselectAll = main.getByRole('button', { name: 'Deselect all', exact: true });
+    // the date pickers are dialogs too, but never open with this one
+    const noCarryForward = page.getByRole('dialog').filter({ hasText: 'Carry nothing forward?' });
+    const confirmation = noCarryForward.getByRole('textbox', { name: 'Confirmation' });
+    const createWithoutPlantings = noCarryForward.getByRole('button', { name: 'Create without plantings' });
+    const PHRASE = 'carry nothing forward';
 
     return {
         ...createRoutedPageDriver(page, {
@@ -34,7 +44,66 @@ export function createAddPlantingYearPageDriver(page) {
             const what = 'the plantings the add page carries forward';
 
             await expectVisible(main.getByText('Plantings to carry forward (planted)', { exact: true }), what);
-            await expectText(carried.locator('td:first-child'), names, what);
+            // the first cell is the checkbox
+            await expectText(carried.locator('td:nth-child(2)'), names, what);
+        },
+
+        /** None of these plantings, by name, is selected, and the count says so. */
+        async selectsNone(names) {
+            const what = 'the plantings the add page selects at first';
+
+            for (const name of names) {
+                await expectChecked(carryForward(name), false, what);
+            }
+            await expectVisible(main.getByText(`0 of ${names.length} selected`, { exact: true }), what);
+            await expectVisible(selectAll, what);
+        },
+
+        /** Selects every planting, with the button that then offers to deselect them all. */
+        async selectAll() {
+            await selectAll.click();
+            await expectVisible(deselectAll, 'selecting every planting to carry forward');
+        },
+
+        async select(name) {
+            await carryForward(name).check();
+            await expectChecked(carryForward(name), true, `selecting "${name}" to carry forward`);
+        },
+
+        async deselect(name) {
+            await carryForward(name).uncheck();
+            await expectChecked(carryForward(name), false, `deselecting "${name}"`);
+        },
+
+        /** After Create with nothing selected: a dialog warns that nothing will be carried into `plantingYear`. */
+        async asksToConfirmCarryingNothing(plantingYear) {
+            const what = 'creating a year with nothing selected to carry forward';
+
+            await expectVisible(noCarryForward, what);
+            await expectVisible(noCarryForward.getByText(
+                `No plantings will be carried into ${plantingYear}. Perennials planted in earlier years won't appear in it.`,
+                { exact: true }
+            ), what);
+            await expectVisible(noCarryForward.getByText(`Type ${PHRASE} to create the year anyway.`, { exact: true }), what);
+        },
+
+        /** Its Create stays off until the phrase is typed exactly: not in another case, nor with a space. */
+        async confirmationNeedsTheExactPhrase() {
+            const what = 'the confirmation to carry nothing forward';
+
+            await expectDisabled(createWithoutPlantings, `${what}, with nothing typed`);
+            for (const typed of ['Carry Nothing Forward', `${PHRASE} `]) {
+                await confirmation.fill(typed);
+                await expectDisabled(createWithoutPlantings, `${what}, with "${typed}" typed`);
+            }
+            await confirmation.fill(PHRASE);
+            await expectEnabled(createWithoutPlantings, `${what}, with the phrase typed`);
+        },
+
+        async confirmCarryingNothing() {
+            await confirmation.fill(PHRASE);
+            await createWithoutPlantings.click();
+            await expectHidden(noCarryForward, 'confirming to carry nothing forward');
         },
 
         /**

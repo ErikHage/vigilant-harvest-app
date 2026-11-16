@@ -28,9 +28,9 @@ test.describe('The planting years pages', () => {
     // The page proposes the year after the latest, passing over any more than
     // a year past the browser's calendar, so the clock is set in a year the
     // test owns: other workers' years are then too far ahead, or behind. Only
-    // planted plantings are carried forward, under a heading that says so; it
-    // said "not retired" (backlog B17 and B18)
-    test('add the year after, carrying forward what was planted', async ({
+    // planted plantings are offered, under a heading that says so; it said
+    // "not retired" (backlog B17 and B18). None is selected at first
+    test('add the year after, carrying forward the planted plantings chosen', async ({
         garden, browserClock, plantingYearsPage, addPlantingYearPage, plantingYearDetailsPage,
     }) => {
         await garden.hasCategory('category: tomatoes');
@@ -38,6 +38,7 @@ test.describe('The planting years pages', () => {
         await garden.hasPlant('plant: sungold', 'subcategory: cherry');
         await garden.hasPlantingYear('year: last');
         await garden.hasPlanting('planting: early', 'plant: sungold', 'year: last', 'status: planted');
+        await garden.hasPlanting('planting: middle', 'plant: sungold', 'year: last', 'status: planted');
         await garden.hasPlanting('planting: late', 'plant: sungold', 'year: last', 'status: started');
         await browserClock.setToNoonIn('year: last', 'on: 04-10');
         await plantingYearsPage.open();
@@ -45,8 +46,11 @@ test.describe('The planting years pages', () => {
         await plantingYearsPage.addYear();
         await addPlantingYearPage.checkIsShown();
         await addPlantingYearPage.checkProposesTheYearAfter('year: last');
-        await addPlantingYearPage.checkCarriesForward('planting: early');
+        await addPlantingYearPage.checkCarriesForward('planting: early, middle');
+        await addPlantingYearPage.checkSelectsNone('planting: early, middle');
 
+        await addPlantingYearPage.selectAll();
+        await addPlantingYearPage.deselect('planting: middle');
         await addPlantingYearPage.addYear('year: next', 'after: last', 'frost: 15', 'target: 20');
 
         await plantingYearsPage.checkIsShown();
@@ -54,6 +58,33 @@ test.describe('The planting years pages', () => {
         await plantingYearsPage.viewYear('year: next');
         await plantingYearDetailsPage.checkIsShownFor('year: next');
         await plantingYearDetailsPage.checkShowsYear('year: next', 'planted: 1');
+    });
+
+    // Carrying nothing forward is rare, and loses the perennials, so it is
+    // confirmed by typing a phrase
+    test('add the year after carrying nothing forward, once confirmed', async ({
+        garden, browserClock, plantingYearsPage, addPlantingYearPage, plantingYearDetailsPage,
+    }) => {
+        await garden.hasCategory('category: tomatoes');
+        await garden.hasSubcategory('subcategory: cherry', 'category: tomatoes');
+        await garden.hasPlant('plant: sungold', 'subcategory: cherry');
+        await garden.hasPlantingYear('year: last');
+        await garden.hasPlanting('planting: early', 'plant: sungold', 'year: last', 'status: planted');
+        await browserClock.setToNoonIn('year: last', 'on: 04-10');
+        await plantingYearsPage.open();
+        await plantingYearsPage.checkIsShown();
+        await plantingYearsPage.addYear();
+        await addPlantingYearPage.checkIsShown();
+
+        await addPlantingYearPage.addYear('year: next', 'after: last', 'frost: 15', 'target: 20');
+        await addPlantingYearPage.checkAsksToConfirmCarryingNothing('year: next');
+        await addPlantingYearPage.checkConfirmationNeedsTheExactPhrase();
+        await addPlantingYearPage.confirmCarryingNothing();
+
+        await plantingYearsPage.checkIsShown();
+        await plantingYearsPage.viewYear('year: next');
+        await plantingYearDetailsPage.checkIsShownFor('year: next');
+        await plantingYearDetailsPage.checkShowsYear('year: next');
     });
 
     // Carrying a planting forward left its current year behind, and the
@@ -74,6 +105,7 @@ test.describe('The planting years pages', () => {
         await plantingYearsPage.checkIsShown();
         await plantingYearsPage.addYear();
         await addPlantingYearPage.checkIsShown();
+        await addPlantingYearPage.select('planting: early');
         await addPlantingYearPage.addYear('year: next', 'after: last', 'frost: 15', 'target: 20');
         await plantingYearsPage.checkIsShown();
         await dashboardPage.open();
