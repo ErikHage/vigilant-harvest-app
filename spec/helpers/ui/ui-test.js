@@ -24,7 +24,7 @@ import { createPlantingYearsPage } from './pages/planting-years-page';
 import { createPlantingsPage } from './pages/plantings-page';
 import { createPlantsPage } from './pages/plants-page';
 import { createPlotsPage } from './pages/plots-page';
-import { createPlantingStatsPage, createPlantStatsPage } from './pages/stats-page';
+import { createStatsPage } from './pages/stats-page';
 import { createUnknownPage } from './pages/unknown-page';
 
 /** A fixture for a page object, over the driver of the same name. */
@@ -76,8 +76,7 @@ export const test = base.extend({
     journalPage: pageFixture('journalPage', createJournalPage),
     activityLogPage: pageFixture('activityLogPage', createActivityLogPage),
     harvestsPage: pageFixture('harvestsPage', createHarvestsPage),
-    plantingStatsPage: pageFixture('plantingStatsPage', createPlantingStatsPage),
-    plantStatsPage: pageFixture('plantStatsPage', createPlantStatsPage),
+    statsPage: pageFixture('statsPage', createStatsPage),
     planningPage: pageFixture('planningPage', createPlanningPage),
     unknownPage: pageFixture('unknownPage', createUnknownPage),
     activitySchedulesPage: pageFixture('activitySchedulesPage', createActivitySchedulesPage),

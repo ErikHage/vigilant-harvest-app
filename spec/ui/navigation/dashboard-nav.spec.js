@@ -31,7 +31,7 @@ test.describe('The dashboard\'s bar', () => {
     });
 
     test('leads to each of the year\'s pages', async ({
-        dashboardPage, planningPage, gardenPage, plantingsPage, harvestsPage, plantStatsPage, plantingStatsPage,
+        dashboardPage, planningPage, gardenPage, plantingsPage, harvestsPage, statsPage,
     }) => {
         await dashboardPage.dashboardNav.goTo('page: planning');
         await planningPage.checkIsShown();
@@ -45,11 +45,8 @@ test.describe('The dashboard\'s bar', () => {
         await plantingsPage.dashboardNav.goTo('page: harvests');
         await harvestsPage.checkIsShown();
 
-        await harvestsPage.dashboardNav.goTo('page: plantStats');
-        await plantStatsPage.checkIsShown();
-
-        await plantStatsPage.dashboardNav.goTo('page: plantingStats');
-        await plantingStatsPage.checkIsShown();
+        await harvestsPage.dashboardNav.goTo('page: stats');
+        await statsPage.checkIsShown();
     });
 });
 
@@ -58,7 +55,7 @@ test.describe('On a phone', () => {
     test.use({ viewport: { width: 390, height: 844 } });
 
     test('the dashboard\'s bar is a menu, and still leads to each page', async ({
-        loginPage, dashboardPage, plotsPage, plantStatsPage,
+        loginPage, dashboardPage, plotsPage, statsPage,
     }) => {
         await loginPage.logIn('user: gardener');
         await dashboardPage.checkIsShown();
@@ -66,8 +63,8 @@ test.describe('On a phone', () => {
         await dashboardPage.dashboardNav.goTo('page: plots');
         await plotsPage.checkIsShown();
 
-        await plotsPage.dashboardNav.goTo('page: plantStats');
-        await plantStatsPage.checkIsShown();
+        await plotsPage.dashboardNav.goTo('page: stats');
+        await statsPage.checkIsShown();
     });
 
     // As the desktop layout does (backlog A12)

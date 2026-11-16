@@ -1,25 +1,20 @@
 import { parseDslArgs } from '@feral-auth/ts-simple-dsl';
 
-import { average, count, on, plant, planting } from '../params';
+import { createStatsTab } from '../components/stats-tab';
+import { count, on, statsTab } from '../params';
 import { dashboardComponents, routedPageSteps } from './routed-page';
 
-// What a card shows, as the test expects it
-const stats = () => ({ first: on(), last: on(), total: count(), average: average() });
-
 /**
- * A stats page, in words: `kind` is `planting` or `plant`, and names what
- * its steps choose. The two pages are copies (backlog B29).
+ * The stats page, in words: the year's totals, then a tab each for plants
+ * and plantings, as `plants` and `plantings`.
  */
-export function createStatsPage(world, driver, kind) {
-    const chosen = {
-        planting: { declaration: planting, named: alias => world.plantingNamed(alias) },
-        plant: { declaration: plant, named: alias => world.plantNamed(alias) },
-    }[kind];
-    const harvestTypeOf = details => details.harvestType ?? details.harvesting.defaultHarvestType;
-
+export function createStatsPage(world, driver) {
     return {
         ...dashboardComponents(world),
         ...routedPageSteps(driver),
+
+        plants: createStatsTab(world, world.drivers.statsPlantsTab, 'plant'),
+        plantings: createStatsTab(world, world.drivers.statsPlantingsTab, 'planting'),
 
         /**
          * The chosen year's totals: its `first` and `last` harvest days,
@@ -32,29 +27,11 @@ export function createStatsPage(world, driver, kind) {
             await driver.showsTotals(params);
         },
 
-        /** Chooses the planting, or the plant, the test named, to see its stats. */
-        async choose(...args) {
-            const params = parseDslArgs(args, { [kind]: chosen.declaration() });
+        /** Shows the `tab`, `plants` or `plantings`. The page opens on plants. */
+        async showTab(...args) {
+            const params = parseDslArgs(args, { tab: statsTab() });
 
-            await driver.choose(chosen.named(params[kind]));
-        },
-
-        /**
-         * One card, for the planting, or plant, chosen: its `first` and `last`
-         * harvest days, `YYYY-MM-DD`, its `total`, and its `average` a day, as
-         * the page writes it.
-         */
-        async checkShowsStats(...args) {
-            const params = parseDslArgs(args, { [kind]: chosen.declaration(), ...stats() });
-
-            const details = chosen.named(params[kind]);
-            await driver.showsStats(details, harvestTypeOf(details), params);
+            await driver.showTab(params.tab);
         },
     };
 }
-
-/** The planting stats page. */
-export const createPlantingStatsPage = (world, driver) => createStatsPage(world, driver, 'planting');
-
-/** The plant stats page. */
-export const createPlantStatsPage = (world, driver) => createStatsPage(world, driver, 'plant');

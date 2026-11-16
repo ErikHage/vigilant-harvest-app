@@ -25,7 +25,7 @@
       </div>
     </v-card-title>
     <v-card-text>
-      <v-table>
+      <v-table density="compact">
         <tbody>
         <tr>
           <th>First Harvest</th>

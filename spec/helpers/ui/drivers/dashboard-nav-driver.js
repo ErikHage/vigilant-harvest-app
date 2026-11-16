@@ -3,7 +3,7 @@
  *
  * It's a Vuetify app bar inside the main area, so it isn't a `banner`, and
  * nothing names it: found by its element, with a class to tell it apart.
- * On a desktop it shows links, with Stats and Admin as menus; on a phone
+ * On a desktop it shows links, with Admin as a menu; on a phone
  * (below Vuetify's md breakpoint, 960px) it's one menu behind an icon button
  * with no name, found by its icon's class.
  */
@@ -18,8 +18,7 @@ const destinations = {
     plantingYears: { link: 'Years', item: 'Years' },
     plantings: { link: 'Plantings', item: 'Plantings' },
     harvests: { link: 'Harvests', item: 'Harvests' },
-    plantStats: { menu: 'Stats', link: 'Plant', item: 'Plant Stats' },
-    plantingStats: { menu: 'Stats', link: 'Planting', item: 'Planting Stats' },
+    stats: { link: 'Stats', item: 'Stats' },
     plantCategories: { menu: 'Admin', link: 'Categories', item: 'Categories' },
     activitySchedules: { menu: 'Admin', link: 'Activity Schedules', item: 'Activity Schedules' },
 };

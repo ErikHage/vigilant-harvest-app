@@ -33,6 +33,7 @@ const desktopLinks = [
     ['Years', '/dashboard/planting-years'],
     ['Plantings', '/dashboard/plantings'],
     ['Harvests', '/dashboard/harvests'],
+    ['Stats', '/dashboard/stats'],
 ];
 
 const phoneLinks = [
@@ -43,8 +44,7 @@ const phoneLinks = [
     ['Plots', '/dashboard/plots'],
     ['Plantings', '/dashboard/plantings'],
     ['Harvests', '/dashboard/harvests'],
-    ['Plant Stats', '/dashboard/stats/plants'],
-    ['Planting Stats', '/dashboard/stats/plantings'],
+    ['Stats', '/dashboard/stats'],
     ['Categories', '/dashboard/categories'],
     ['Activity Schedules', '/dashboard/activity-schedules'],
 ];
@@ -55,24 +55,11 @@ describe('DashboardAppBar', () => {
     });
 
     describe('on a desktop', () => {
-        it('links to each page, with menus for the stats and admin pages', () => {
+        it('links to each page, with a menu for the admin pages', () => {
             const wrapper = mountDashboardAppBar(true);
 
             expect(barLinks(wrapper)).toEqual(desktopLinks);
-            expect(buttonLabelled(wrapper, 'Stats').exists()).toBe(true);
             expect(buttonLabelled(wrapper, 'Admin').exists()).toBe(true);
-        });
-
-        it('opens the stats menu', async () => {
-            const wrapper = mountDashboardAppBar(true);
-
-            await buttonLabelled(wrapper, 'Stats').trigger('click');
-            await flushPromises();
-
-            expect(menuLinks()).toEqual([
-                ['Plant', '/dashboard/stats/plants'],
-                ['Planting', '/dashboard/stats/plantings'],
-            ]);
         });
 
         it('opens the admin menu', async () => {

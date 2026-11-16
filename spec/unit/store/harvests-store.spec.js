@@ -30,7 +30,7 @@ describe('useHarvestsStore', () => {
         expect(store.harvests).toEqual([]);
         expect(store.harvestSummaries).toEqual([]);
         expect(store.harvestQuantitiesByPlanting).toEqual({});
-        expect(store.harvestStats).toEqual({});
+        expect(store.harvestStats).toEqual({ Plant: null, Planting: null });
     });
 
     describe('deleteHarvest', () => {
@@ -160,37 +160,7 @@ describe('useHarvestsStore', () => {
             field: 'harvests',
             failure: 'error searching harvests page',
         },
-        {
-            action: 'fetchHarvestStats',
-            args: [2026, 'Planting'],
-            api: 'fetchHarvestStats',
-            apiArgs: ['a-token', 2026, 'Planting'],
-            result: { stats: [] },
-            field: 'harvestStats',
-            failure: 'error fetching harvest stats',
-        },
     ])('$action', ({ action, args, api, apiArgs, result, field, failure }) => {
-        if (action === 'fetchHarvestStats') {
-            // the service's own statsType always says Planting (B29)
-            it('records which type the stats are', async () => {
-                harvestsApi.fetchHarvestStats.mockResolvedValue({ statsType: 'Planting', stats: [] });
-
-                await store.fetchHarvestStats(2026, 'Plant');
-
-                expect(store.harvestStatsType).toBe('Plant');
-            });
-
-            it('keeps the type it had when the fetch fails', async () => {
-                harvestsApi.fetchHarvestStats.mockResolvedValueOnce({ stats: [] });
-                await store.fetchHarvestStats(2026, 'Plant');
-                harvestsApi.fetchHarvestStats.mockRejectedValueOnce(httpError(500));
-
-                await store.fetchHarvestStats(2026, 'Planting');
-
-                expect(store.harvestStatsType).toBe('Plant');
-            });
-        }
-
         it(`stores what the service returns in ${field}`, async () => {
             harvestsApi[api].mockResolvedValue(result);
 
@@ -210,6 +180,38 @@ describe('useHarvestsStore', () => {
             expect(store.alertMessage).toBe(failure);
             expect(consoleError).toHaveBeenCalledWith(err);
             expect(store[field]).toEqual(before);
+        });
+    });
+
+    // The stats are kept by the type asked for: the service's own statsType
+    // always says Planting (B29)
+    describe('fetchHarvestStats', () => {
+        const plantStats = { statsType: 'Planting', stats: [{ plantId: 'plant-1' }] };
+        const plantingStats = { statsType: 'Planting', stats: [{ plantingId: 'planting-1' }] };
+
+        it("stores each type's stats under that type, leaving the other's", async () => {
+            harvestsApi.fetchHarvestStats.mockResolvedValueOnce(plantStats).mockResolvedValueOnce(plantingStats);
+
+            await store.fetchHarvestStats(2026, 'Plant');
+            await store.fetchHarvestStats(2026, 'Planting');
+
+            expect(harvestsApi.fetchHarvestStats).toHaveBeenCalledWith('a-token', 2026, 'Plant');
+            expect(harvestsApi.fetchHarvestStats).toHaveBeenCalledWith('a-token', 2026, 'Planting');
+            expect(store.harvestStats).toEqual({ Plant: plantStats, Planting: plantingStats });
+        });
+
+        it('shows an alert and logs, keeping what it had for that type, when it fails', async () => {
+            harvestsApi.fetchHarvestStats.mockResolvedValueOnce(plantStats);
+            await store.fetchHarvestStats(2026, 'Plant');
+            const err = httpError(500);
+            harvestsApi.fetchHarvestStats.mockRejectedValue(err);
+
+            await store.fetchHarvestStats(2026, 'Plant');
+            await store.fetchHarvestStats(2026, 'Planting');
+
+            expect(store.alertMessage).toBe('error fetching harvest stats');
+            expect(consoleError).toHaveBeenCalledWith(err);
+            expect(store.harvestStats).toEqual({ Plant: plantStats, Planting: null });
         });
     });
 });

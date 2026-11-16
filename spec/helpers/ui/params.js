@@ -25,7 +25,7 @@ export const path = () => required();
 /** A planting year the test named, by its alias. */
 export const year = () => required();
 
-/** A dashboard page, as the menu leads to it: `plants`, `plantStats`, `activitySchedules`, ... */
+/** A dashboard page, as the menu leads to it: `plants`, `stats`, `activitySchedules`, ... */
 export const destination = () => required().allowedValues(...dashboardDestinations);
 
 /** A plant the test named, by its alias. */
@@ -126,6 +126,9 @@ export const interval = () => required().asInteger();
 
 /** What a filter is given: `name`, the schedule's name, or `both`, the end of its name and the start of its description. */
 export const scheduleFilter = () => optional().allowedValues('name', 'both').withDefault('name');
+
+/** A tab of the stats page. */
+export const statsTab = () => required().allowedValues('plants', 'plantings');
 
 /** An average as the page writes it, word for word: `2.3333333333333335`. */
 export const average = () => required();

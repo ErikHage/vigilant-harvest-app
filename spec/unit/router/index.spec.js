@@ -47,8 +47,7 @@ const dashboardPages = [
     ['/dashboard/plantings', 'PlantingsPage', PlantingsPage],
     ['/dashboard/plantings/planting-1/details', 'PlantingDetailsPage', PlantingDetailsPage],
     ['/dashboard/harvests', 'HarvestsPage', HarvestsPage],
-    ['/dashboard/stats/plantings', 'PlantingStatsPage', HarvestStatsPage],
-    ['/dashboard/stats/plants', 'PlantStatsPage', HarvestStatsPage],
+    ['/dashboard/stats', 'HarvestStatsPage', HarvestStatsPage],
 ];
 const protectedPaths = dashboardPages.map(([path]) => path);
 
@@ -75,12 +74,9 @@ describe('router', () => {
             expect(route.matched.map(record => record.components.default)).toEqual([DashboardPage, component]);
         });
 
-        // One page, told which stats by its route (B29)
-        it.each([
-            ['/dashboard/stats/plantings', 'Planting'],
-            ['/dashboard/stats/plants', 'Plant'],
-        ])('gives %s its stats type, %s', (path, statsType) => {
-            expect(router.resolve(path).matched[1].props.default).toEqual({ statsType });
+        // The plant and planting stats were a page each, now tabs of one
+        it.each(['/dashboard/stats/plants', '/dashboard/stats/plantings'])('no longer has %s', path => {
+            expect(router.resolve(path).name).toBe('DashboardNotFound');
         });
 
         it.each([

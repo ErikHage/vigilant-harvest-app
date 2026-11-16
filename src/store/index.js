@@ -503,10 +503,10 @@ export const useHarvestsStore = defineStore('harvests', {
         },
         async fetchHarvestStats(year, statType) {
             try {
-                this.harvestStats = await harvestsApi
+                // kept by the type asked for: the service's own statsType
+                // always says Planting
+                this.harvestStats[statType] = await harvestsApi
                     .fetchHarvestStats(storageUtils.tryToLoadTokenFromStorage(), year, statType);
-                // which they are: the service's own statsType always says Planting
-                this.harvestStatsType = statType;
             } catch (err) {
                 this.setAlertMessage(err, 'error', 'error fetching harvest stats');
             }
@@ -518,8 +518,8 @@ export const useHarvestsStore = defineStore('harvests', {
             harvests: [],
             harvestSummaries: [],
             harvestQuantitiesByPlanting: {},
-            harvestStats: {},
-            harvestStatsType: null,
+            // the year's stats by each type, each null until it loads
+            harvestStats: { Plant: null, Planting: null },
             alertVisible: false,
             alertType: 'success',
             alertMessage: null,

@@ -6,7 +6,7 @@ import { destination } from '../params';
 export function createDashboardNav(world, driver) {
     return {
         /**
-         * Follows the link to `page` (`plants`, `plantStats`, ...), through its
+         * Follows the link to `page` (`plants`, `stats`, ...), through its
          * menu if it has one. The destination page checks where that led.
          */
         async goTo(...args) {

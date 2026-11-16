@@ -97,14 +97,8 @@ export const views = {
                 path: 'harvests',
             },
             stats: {
-                planting: {
-                    name: 'PlantingStatsPage',
-                    path: 'stats/plantings',
-                },
-                plant: {
-                    name: 'PlantStatsPage',
-                    path: 'stats/plants',
-                },
+                name: 'HarvestStatsPage',
+                path: 'stats',
             },
             // any other path under the dashboard, behind the guard
             notFound: {

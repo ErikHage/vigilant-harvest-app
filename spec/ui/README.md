@@ -64,7 +64,7 @@ helpers/ui/drivers/assertions.js the only importer of expect
 - `helpers/ui/support/service-client.js` is the only place that calls `fetch`: the preflight, signing on, arranging and cleanup use it. `support/sessions.js` wraps a call in a session of its own, and ends it after.
 - Steps are parsed with [`@feral-auth/ts-simple-dsl`](https://github.com/ErikHage/ts-simple-dsl).
 
-**Every page has `open`, `reload`, `checkIsShown` and `checkIsShownAfterReload`.** `pages/routed-page.js` supplies them. Every page has `appBar`. Every dashboard page also has `dashboardNav`, its own bar: `dashboardNav.goTo('page: plantStats')` follows the link through its menu, or through the one menu on a phone. `drivers/routed-page-driver.js` checks a page by its URL and by something only that page shows; for the dashboard's pages, their title.
+**Every page has `open`, `reload`, `checkIsShown` and `checkIsShownAfterReload`.** `pages/routed-page.js` supplies them. Every page has `appBar`. Every dashboard page also has `dashboardNav`, its own bar: `dashboardNav.goTo('page: stats')` follows the link, through its menu if it has one, or through the one menu on a phone. `drivers/routed-page-driver.js` checks a page by its URL and by something only that page shows; for the dashboard's pages, their title.
 
 Every dashboard page has its own page object and driver. Until each had steps of its own, the pages that were only reached and recognised shared one-liners in `pages/dashboard-pages.js` and `drivers/dashboard-pages-drivers.js`; the activity schedules page was the last, in 2.8, and the files went with it.
 
@@ -103,7 +103,7 @@ await dashboardPage.chooseYear('year: spring');
 
 **The garden, the journal and the activity log show the chosen year,** so their tests choose a year of their own, and fix the clock in 2026 (`browserClock.setTo('time: 2026-07-01T12:00:00-04:00')`): their dialogs default to now, and journal and log entries are timestamps, 1971 to 2037, kept apart from their year. `garden.hasPlanting(..., 'status: planted', 'plot: bed')` puts a planting in a plot, for the garden's cards.
 
-**The harvests and stats pages show the chosen year's harvests too.** `garden.hasHarvest('planting: early', 'quantity: 3', 'on: 2026-07-07')` files one at noon in New York on its day, in 2026: harvests are timestamps too. The stats count only plantings in a plot (the service's query joins the plot), so arrange them planted. `drivers/days.js` writes days as these pages do.
+**The harvests and stats pages show the chosen year's harvests too.** `garden.hasHarvest('planting: early', 'quantity: 3', 'on: 2026-07-07')` files one at noon in New York on its day, in 2026: harvests are timestamps too. The stats count only plantings in a plot (the service's query joins the plot), so arrange them planted. `drivers/days.js` writes days as these pages do. The stats page has a tab each for plants and plantings, as component objects: `statsPage.showTab('tab: plantings')`, then `statsPage.plantings.choose('planting: early')`. Both tabs stay on the page, the one not shown hidden, so `drivers/stats-tab-driver.js` looks only in the shown one.
 
 **The planning page counts days from the browser's today,** in New York (the config's `timezoneId`). Its drivers work out what it should read from the real date there. `garden.hasPlantingYear('year: spring', 'leap: no')` picks a year that isn't a leap year, and `'leap: yes'` one that is. Today used to be shown a day early in a leap year (A31), and the leap-year test would show it again.
 

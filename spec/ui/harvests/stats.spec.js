@@ -1,11 +1,11 @@
 import { test } from '../../helpers/ui/ui-test';
 
-// The stats pages total the chosen year's harvests, so each test chooses a
+// The stats page totals the chosen year's harvests, so each test chooses a
 // year of its own. Harvests are filed on their day, in 2026, and their first
 // and last days show as filed: the service sends each as YYYY-MM-DD, read as
 // that local day
 
-test.describe('The stats pages', () => {
+test.describe('The stats page', () => {
     test.beforeEach(async ({ garden, loginPage, dashboardPage }) => {
         await garden.hasCategory('category: tomatoes');
         await garden.hasSubcategory('subcategory: cherry', 'category: tomatoes');
@@ -25,42 +25,43 @@ test.describe('The stats pages', () => {
 
     // The average a day, 7 over 3 days, to a tenth. It was unrounded (backlog
     // B31)
-    test('totals the year, and a planting\'s harvests', async ({ plantingStatsPage }) => {
-        await plantingStatsPage.open();
-        await plantingStatsPage.checkIsShown();
+    test('totals the year, and a planting\'s harvests', async ({ statsPage }) => {
+        await statsPage.open();
+        await statsPage.checkIsShown();
 
-        await plantingStatsPage.checkShowsTotals('first: 2026-07-07', 'last: 2026-07-09', 'days: 3', 'harvestDays: 2');
-        await plantingStatsPage.choose('planting: early');
-        await plantingStatsPage.checkShowsStats('planting: early',
+        await statsPage.checkShowsTotals('first: 2026-07-07', 'last: 2026-07-09', 'days: 3', 'harvestDays: 2');
+        await statsPage.showTab('tab: plantings');
+        await statsPage.plantings.choose('planting: early');
+        await statsPage.plantings.checkShowsStats('planting: early',
             'first: 2026-07-07', 'last: 2026-07-09', 'total: 7', 'average: 2.3');
     });
 
-    test('totals the year, and a plant\'s harvests, from all its plantings', async ({ plantStatsPage }) => {
-        await plantStatsPage.open();
-        await plantStatsPage.checkIsShown();
+    // The page opens on the plants tab
+    test('totals the year, and a plant\'s harvests, from all its plantings', async ({ statsPage }) => {
+        await statsPage.open();
+        await statsPage.checkIsShown();
 
-        await plantStatsPage.checkShowsTotals('first: 2026-07-07', 'last: 2026-07-09', 'days: 3', 'harvestDays: 2');
-        await plantStatsPage.choose('plant: sungold');
-        await plantStatsPage.checkShowsStats('plant: sungold',
+        await statsPage.checkShowsTotals('first: 2026-07-07', 'last: 2026-07-09', 'days: 3', 'harvestDays: 2');
+        await statsPage.plants.choose('plant: sungold');
+        await statsPage.plants.checkShowsStats('plant: sungold',
             'first: 2026-07-07', 'last: 2026-07-09', 'total: 12', 'average: 4');
     });
 
-    // The two are one page, kept as the route changes from one to the other,
-    // so it loads the second's stats in place of the first's (backlog B29)
-    test('show a planting\'s stats after a plant\'s, going from one page to the other', async ({
-        plantStatsPage, plantingStatsPage,
-    }) => {
-        await plantStatsPage.open();
-        await plantStatsPage.checkIsShown();
-        await plantStatsPage.choose('plant: sungold');
-        await plantStatsPage.checkShowsStats('plant: sungold',
-            'first: 2026-07-07', 'last: 2026-07-09', 'total: 12', 'average: 4');
+    // The plant and planting stats were two pages, then one page told which by
+    // its route (backlog B29). Now they are tabs, each with its own choice
+    test('keeps each tab\'s choice while the other is shown', async ({ statsPage }) => {
+        await statsPage.open();
+        await statsPage.checkIsShown();
+        await statsPage.plants.choose('plant: sungold');
 
-        await plantStatsPage.dashboardNav.goTo('page: plantingStats');
-
-        await plantingStatsPage.checkIsShown();
-        await plantingStatsPage.choose('planting: late');
-        await plantingStatsPage.checkShowsStats('planting: late',
+        await statsPage.showTab('tab: plantings');
+        await statsPage.plantings.checkShowsNothingChosen();
+        await statsPage.plantings.choose('planting: late');
+        await statsPage.plantings.checkShowsStats('planting: late',
             'first: 2026-07-09', 'last: 2026-07-09', 'total: 5', 'average: 5');
+
+        await statsPage.showTab('tab: plants');
+        await statsPage.plants.checkShowsStats('plant: sungold',
+            'first: 2026-07-07', 'last: 2026-07-09', 'total: 12', 'average: 4');
     });
 });

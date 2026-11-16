@@ -26,6 +26,7 @@ import { createPlotsPageDriver } from './plots-page-driver';
 import { recordServiceCalls } from './service-calls';
 import { controlServiceCalls } from './service-call-control';
 import { createStatsPageDriver } from './stats-page-driver';
+import { createStatsTabDriver } from './stats-tab-driver';
 import { createUnknownPageDriver } from './unknown-page-driver';
 
 /** Builds each driver once per test, over Playwright's `page`. */
@@ -56,8 +57,9 @@ export function createDrivers(page) {
         journalPage: createJournalPageDriver(page),
         activityLogPage: createActivityLogPageDriver(page),
         harvestsPage: createHarvestsPageDriver(page, serviceCalls),
-        plantingStatsPage: createStatsPageDriver(page, 'planting'),
-        plantStatsPage: createStatsPageDriver(page, 'plant'),
+        statsPage: createStatsPageDriver(page),
+        statsPlantsTab: createStatsTabDriver(page, 'plant'),
+        statsPlantingsTab: createStatsTabDriver(page, 'planting'),
         planningPage: createPlanningPageDriver(page),
         activitySchedulesPage: createActivitySchedulesPageDriver(page),
         activityScheduleDetailsPage: createActivityScheduleDetailsPageDriver(page, serviceCalls),

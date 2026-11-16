@@ -198,19 +198,9 @@ const routes = [
                 },
             },
             {
-                path: views.dashboard.children.stats.planting.path,
-                name: views.dashboard.children.stats.planting.name,
+                path: views.dashboard.children.stats.path,
+                name: views.dashboard.children.stats.name,
                 component: HarvestStatsPage,
-                props: { statsType: 'Planting' },
-                meta: {
-                    requiresAuthenticated: true,
-                },
-            },
-            {
-                path: views.dashboard.children.stats.plant.path,
-                name: views.dashboard.children.stats.plant.name,
-                component: HarvestStatsPage,
-                props: { statsType: 'Plant' },
                 meta: {
                     requiresAuthenticated: true,
                 },
