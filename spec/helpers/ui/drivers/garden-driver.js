@@ -155,16 +155,19 @@ export function createGardenDriver() {
 
         /**
          * Files a harvest of `quantity` from `planting` `on` its day, as
-         * YYYY-MM-DD. The service gives it its plant's default type.
+         * YYYY-MM-DD, of the harvest type named `type`. With no `type`, the
+         * service gives it its plant's default type.
          */
-        async createHarvest(planting, quantity, on) {
-            const what = `arranging a harvest of ${planting.name} on ${on}`;
+        async createHarvest(planting, quantity, on, type) {
+            const what = `arranging a harvest of ${planting.name} on ${on}${type === undefined ? '' : `, of ${type}`}`;
 
             const reply = await asGardener(async token => {
                 const { plantingId } = findIn(await listPlantings(token), each => each.name === planting.name,
                     `the planting ${planting.name}`);
+                const harvestTypeId = type === undefined ? undefined : findIn(await listHarvestTypes(token),
+                    each => each.harvestTypeName === type, `the harvest type ${type}`).harvestTypeId;
                 return upsertHarvests(token, [{
-                    plantingId, quantity, harvestDate: on,
+                    plantingId, quantity, harvestDate: on, harvestTypeId,
                 }]);
             });
             expectThat(reply.error === undefined && reply.status < 300, 'the service to file it', describe(reply), what);

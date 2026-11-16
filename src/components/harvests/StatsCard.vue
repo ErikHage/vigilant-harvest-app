@@ -1,47 +1,47 @@
 <template>
   <v-card>
     <v-card-title>
-      <div v-if="stats.plantingName" class="title-container">
-        <h3 class="text-h5 mb-2 font-weight-medium text-primary">{{ stats.plantingName }}</h3>
+      <div v-if="group.plantingName" class="title-container">
+        <h3 class="text-h5 mb-2 font-weight-medium text-primary">{{ group.plantingName }}</h3>
         <div class="d-flex align-center mb-1">
           <v-icon size="small" class="me-2">mdi-sprout-outline</v-icon>
-          <span class="text-subtitle-1 text-medium-emphasis">{{ stats.plantName }}</span>
+          <span class="text-subtitle-1 text-medium-emphasis">{{ group.plantName }}</span>
         </div>
-        <div class="d-flex align-center" v-if="stats.plotName">
+        <div class="d-flex align-center" v-if="group.plotName">
           <v-icon size="small" class="me-2">mdi-vector-square</v-icon>
-          <span class="text-subtitle-2 text-medium-emphasis">{{ stats.plotName }}</span>
-        </div>
-        <div class="d-flex align-center" v-if="harvestTypeLabel">
-          <v-icon size="small" class="me-2">mdi-basket-outline</v-icon>
-          <span class="text-subtitle-2 text-medium-emphasis">{{ harvestTypeLabel }}</span>
+          <span class="text-subtitle-2 text-medium-emphasis">{{ group.plotName }}</span>
         </div>
       </div>
       <div v-else>
-        <h3 class="text-h5 font-weight-medium text-primary">{{ stats.plantName }}</h3>
-        <div class="d-flex align-center" v-if="harvestTypeLabel">
-          <v-icon size="small" class="me-2">mdi-basket-outline</v-icon>
-          <span class="text-subtitle-2 text-medium-emphasis">{{ harvestTypeLabel }}</span>
-        </div>
+        <h3 class="text-h5 font-weight-medium text-primary">{{ group.plantName }}</h3>
       </div>
     </v-card-title>
     <v-card-text>
       <v-table density="compact">
+        <thead>
+        <tr>
+          <th></th>
+          <th v-for="row in group.rows" :key="row.harvestTypeId">{{ row.harvestType }}</th>
+        </tr>
+        </thead>
         <tbody>
         <tr>
           <th>First Harvest</th>
-          <td>{{ this.formatDate(stats.firstHarvest) }}</td>
+          <td v-for="row in group.rows" :key="row.harvestTypeId">{{ formatDate(row.firstHarvest) }}</td>
         </tr>
         <tr>
           <th>Last Harvest</th>
-          <td>{{ this.formatDate(stats.lastHarvest) }}</td>
+          <td v-for="row in group.rows" :key="row.harvestTypeId">{{ formatDate(row.lastHarvest) }}</td>
         </tr>
         <tr>
           <th>Total Harvested</th>
-          <td>{{ formatQuantity(stats.totalQuantity) }}</td>
+          <td v-for="row in group.rows" :key="row.harvestTypeId">{{ formatQuantity(row.totalQuantity, row) }}</td>
         </tr>
         <tr>
           <th>Average Harvest per Day</th>
-          <td>{{ formatQuantity(toTenths(stats.averageHarvestPerDay)) }}</td>
+          <td v-for="row in group.rows" :key="row.harvestTypeId">
+            {{ formatQuantity(toTenths(row.averageHarvestPerDay), row) }}
+          </td>
         </tr>
         </tbody>
       </v-table>
@@ -53,26 +53,25 @@
 import dayjs from 'dayjs';
 import harvestUtils from "@/utils/harvest-utils";
 
+// One planting's, or plant's, stats: a column for each harvest type, since
+// totalQuantity and averageHarvestPerDay are per harvest type. The header
+// names each column's type, unspecified included, though its quantities
+// stay bare
 export default {
   name: "StatsCard",
 
   props: {
-    stats: {
+    // the planting's, or plant's, names, and its stats rows, a row per
+    // harvest type, in the order the columns go
+    group: {
       type: Object,
       required: true,
     },
   },
 
-  computed: {
-    // totalQuantity and averageHarvestPerDay are per harvest type, not per planting
-    harvestTypeLabel() {
-      return harvestUtils.harvestTypeLabel(this.stats.harvestType);
-    },
-  },
-
   methods: {
-    formatQuantity(quantity) {
-      return harvestUtils.formatQuantity(quantity, this.stats.harvestType);
+    formatQuantity(quantity, row) {
+      return harvestUtils.formatQuantity(quantity, row.harvestType);
     },
 
     // The service divides without rounding: 7 over 3 days is 2.3333333333333335
@@ -86,10 +85,3 @@ export default {
   },
 }
 </script>
-
-<style scoped>
-.subtitle {
-  font-size: small;
-  color: grey;
-}
-</style>

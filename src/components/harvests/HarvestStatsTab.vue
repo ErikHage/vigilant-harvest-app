@@ -11,14 +11,7 @@
         @update:model-value="onSelectedStatChange"
     />
 
-    <div v-if="selectedGroup">
-      <stats-card
-          v-for="row in selectedGroup.rows"
-          :key="row.harvestTypeId"
-          class="stats-card"
-          :stats="row"
-      />
-    </div>
+    <stats-card v-if="selectedGroup" class="stats-card" :group="selectedGroup"/>
     <div v-else class="d-flex justify-center">
       No stats selected.
     </div>
@@ -29,8 +22,9 @@
 import StatsCard from "@/components/harvests/StatsCard.vue";
 
 // One type's stats, plant or planting, on its tab of the stats page: a
-// select of each one with stats, and a card per harvest type for the one
-// chosen. The choice is the tab's own, kept while the other tab is shown
+// select of each one with stats, and a card for the one chosen, with a
+// column per harvest type. The choice is the tab's own, kept while the
+// other tab is shown
 export default {
   name: 'HarvestStatsTab',
 
@@ -56,7 +50,7 @@ export default {
 
   computed: {
     // stats come back one row per planting (or plant) x harvest type, so rows are grouped
-    // back together and each type is rendered as its own card
+    // back together, and each type is a column of the one card, the largest total first
     statGroups() {
       const rows = this.harvestStats?.stats ?? [];
 

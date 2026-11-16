@@ -108,7 +108,7 @@ describe('HarvestStatsPage', () => {
         await showTab(wrapper, 'plants');
 
         expect(tabSelect(wrapper, 'plants').props('modelValue')).toBe('plant-1');
-        expect(tabCards(wrapper, 'plants')).toEqual(['count', 'pounds']);
+        expect(tabCards(wrapper, 'plants')).toEqual([['count', 'pounds']]);
         expect(tabSelect(wrapper, 'plantings').props('modelValue')).toBe('planting-2');
     });
 

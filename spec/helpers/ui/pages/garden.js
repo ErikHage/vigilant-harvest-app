@@ -1,7 +1,7 @@
 import { parseDslArgs } from '@feral-auth/ts-simple-dsl';
 
 import {
-    arrangedStatus, category, entry, item, leap, on, optionalPlot, plant, planting, plot, quantity, schedule, schedules,
+    arrangedStatus, category, entry, harvestType, item, leap, on, optionalPlot, plant, planting, plot, quantity, schedule, schedules,
     subcategory, tags, year,
 } from '../params';
 
@@ -64,19 +64,23 @@ export function createGarden(world, driver) {
 
         /**
          * There is a harvest of `quantity` from the `planting` the test named,
-         * of its plant's default type, filed `on` a day, `YYYY-MM-DD`, in
+         * of the harvest `type` named (`pounds`, `fruit`, ...), or of its
+         * plant's default type if left out, filed `on` a day, `YYYY-MM-DD`, in
          * 2026: the service keeps harvests as timestamps, 1971 to 2037, apart
-         * from their year. One a day for a planting.
+         * from their year. One a day of each type for a planting.
          */
         async hasHarvest(...args) {
-            const params = parseDslArgs(args, { planting: planting(), quantity: quantity(), on: on() });
+            const params = parseDslArgs(args, {
+                planting: planting(), quantity: quantity(), on: on(), type: harvestType(),
+            });
 
-            const { harvests } = world.plantingNamed(params.planting);
-            if (harvests.some(harvest => harvest.on === params.on)) {
-                throw new Error(`hasHarvest: the planting "${params.planting}" has a harvest on ${params.on} already`);
+            const { harvests, harvestType: defaultType } = world.plantingNamed(params.planting);
+            const type = params.type ?? defaultType;
+            if (harvests.some(harvest => harvest.on === params.on && harvest.type === type)) {
+                throw new Error(`hasHarvest: the planting "${params.planting}" has a ${type} harvest on ${params.on} already`);
             }
-            await driver.createHarvest(world.plantingNamed(params.planting), params.quantity, params.on);
-            world.recordHarvest(params.planting, params.quantity, params.on);
+            await driver.createHarvest(world.plantingNamed(params.planting), params.quantity, params.on, params.type);
+            world.recordHarvest(params.planting, params.quantity, params.on, type);
         },
 
         /**

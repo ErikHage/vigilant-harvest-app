@@ -82,6 +82,9 @@ export const entry = () => required();
 /** Entries the test named, by alias, repeated or comma-separated. */
 export const entries = () => optional().multiple({ separator: ', ' });
 
+/** A harvest type, as the service names it: `pounds`, `fruit`, ...; the plant's default if left out. */
+export const harvestType = () => optional();
+
 /** A harvest's quantity, a whole number. */
 export const quantity = () => required().asInteger();
 
@@ -132,3 +135,12 @@ export const statsTab = () => required().allowedValues('plants', 'plantings');
 
 /** An average as the page writes it, word for word: `2.3333333333333335`. */
 export const average = () => required();
+
+/**
+ * A stats card's column, by its harvest `type`, then its `first` and `last`
+ * harvest days, `YYYY-MM-DD`, its `total`, and its `average` a day as the
+ * page writes it. Repeats, a column each, in order.
+ */
+export const statsColumns = () => group({
+    type: required(), first: on(), last: on(), total: count(), average: average(),
+}).identifiedBy('type').atLeastOne();

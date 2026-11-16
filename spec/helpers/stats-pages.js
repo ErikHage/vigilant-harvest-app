@@ -38,8 +38,9 @@ export async function mountStatsPage({ harvestStats = { Plant: null, Planting: n
 const tabs = { plants: 0, plantings: 1 };
 export const statsTab = (wrapper, tab) => wrapper.findAllComponents(HarvestStatsTab)[tabs[tab]];
 export const tabSelect = (wrapper, tab) => statsTab(wrapper, tab).findComponent(VSelect);
+// The tab's cards, each as the harvest types of its columns, in order
 export const tabCards = (wrapper, tab) => statsTab(wrapper, tab).findAllComponents(StatsCard)
-    .map(card => card.props('stats').harvestType);
+    .map(card => card.props('group').rows.map(row => row.harvestType));
 
 export async function showTab(wrapper, tab) {
     await wrapper.findAll('.v-tab').find(button => button.text().toLowerCase() === tab).trigger('click');
@@ -52,7 +53,7 @@ export async function showTab(wrapper, tab) {
 // - `tab`, and the `statsType` it shows, under the select's `label`;
 // - `rows`: the stats rows the service sends for that type, in its order;
 // - `options`: the select's titles, for those rows;
-// - `chosen`: an option's index and the rows its cards show, by type.
+// - `chosen`: an option's index and its card's columns, by type.
 export function describeStatsTab({ tab, statsType, label, rows, options, chosen }) {
     const loaded = { Plant: null, Planting: null, [statsType]: harvestStatsOf(rows) };
 
@@ -88,12 +89,12 @@ export function describeStatsTab({ tab, statsType, label, rows, options, chosen 
             expect(statsTab(wrapper, tab).text()).toContain('No stats selected.');
         });
 
-        it("shows a card for each of the chosen one's harvest types, the largest total first", async () => {
+        it("shows one card for the chosen one, a column for each harvest type, the largest total first", async () => {
             const { wrapper } = await mountTab();
 
             await select(wrapper).setValue(select(wrapper).props('items')[chosen.index].key);
 
-            expect(cards(wrapper)).toEqual(chosen.types);
+            expect(cards(wrapper)).toEqual([chosen.types]);
             expect(statsTab(wrapper, tab).text()).not.toContain('No stats selected.');
         });
 

@@ -33,7 +33,7 @@ test.describe('The stats page', () => {
         await statsPage.showTab('tab: plantings');
         await statsPage.plantings.choose('planting: early');
         await statsPage.plantings.checkShowsStats('planting: early',
-            'first: 2026-07-07', 'last: 2026-07-09', 'total: 7', 'average: 2.3');
+            'type: count', 'first: 2026-07-07', 'last: 2026-07-09', 'total: 7', 'average: 2.3');
     });
 
     // The page opens on the plants tab
@@ -44,7 +44,26 @@ test.describe('The stats page', () => {
         await statsPage.checkShowsTotals('first: 2026-07-07', 'last: 2026-07-09', 'days: 3', 'harvestDays: 2');
         await statsPage.plants.choose('plant: sungold');
         await statsPage.plants.checkShowsStats('plant: sungold',
-            'first: 2026-07-07', 'last: 2026-07-09', 'total: 12', 'average: 4');
+            'type: count', 'first: 2026-07-07', 'last: 2026-07-09', 'total: 12', 'average: 4');
+    });
+
+    // Each harvest type is a column of the one card, the largest total first.
+    // They were a card each. The sungold plant's are its two plantings'
+    test('shows each harvest type as a column', async ({ garden, statsPage }) => {
+        await garden.hasHarvest('planting: early', 'quantity: 2', 'on: 2026-07-08', 'type: pounds');
+
+        await statsPage.open();
+        await statsPage.checkIsShown();
+        await statsPage.plants.choose('plant: sungold');
+        await statsPage.plants.checkShowsStats('plant: sungold',
+            'type: count', 'first: 2026-07-07', 'last: 2026-07-09', 'total: 12', 'average: 4',
+            'type: pounds', 'first: 2026-07-08', 'last: 2026-07-08', 'total: 2', 'average: 2');
+
+        await statsPage.showTab('tab: plantings');
+        await statsPage.plantings.choose('planting: early');
+        await statsPage.plantings.checkShowsStats('planting: early',
+            'type: count', 'first: 2026-07-07', 'last: 2026-07-09', 'total: 7', 'average: 2.3',
+            'type: pounds', 'first: 2026-07-08', 'last: 2026-07-08', 'total: 2', 'average: 2');
     });
 
     // The plant and planting stats were two pages, then one page told which by
@@ -58,10 +77,10 @@ test.describe('The stats page', () => {
         await statsPage.plantings.checkShowsNothingChosen();
         await statsPage.plantings.choose('planting: late');
         await statsPage.plantings.checkShowsStats('planting: late',
-            'first: 2026-07-09', 'last: 2026-07-09', 'total: 5', 'average: 5');
+            'type: count', 'first: 2026-07-09', 'last: 2026-07-09', 'total: 5', 'average: 5');
 
         await statsPage.showTab('tab: plants');
         await statsPage.plants.checkShowsStats('plant: sungold',
-            'first: 2026-07-07', 'last: 2026-07-09', 'total: 12', 'average: 4');
+            'type: count', 'first: 2026-07-07', 'last: 2026-07-09', 'total: 12', 'average: 4');
     });
 });

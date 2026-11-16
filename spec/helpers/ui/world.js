@@ -406,13 +406,14 @@ export function createWorld(page) {
 
         /**
          * Remembers `quantity` more harvested from the planting called `alias`,
-         * of its plant's default harvest type, `on` a day, `YYYY-MM-DD`, or
-         * null if the page chose it. Its harvests go with it.
+         * of the harvest `type`, or of its plant's default type if left out,
+         * `on` a day, `YYYY-MM-DD`, or null if the page chose it. Its harvests
+         * go with it.
          */
-        recordHarvest(alias, quantity, on = null) {
+        recordHarvest(alias, quantity, on = null, type = undefined) {
             known(plantingsByAlias, alias, 'planting', 'garden.hasPlanting');
             const planting = plantingsByAlias.get(alias);
-            planting.harvests.push({ on, quantity });
+            planting.harvests.push({ on, quantity, type: type ?? planting.harvestType });
             planting.harvested += quantity;
             return copyOf(planting);
         },

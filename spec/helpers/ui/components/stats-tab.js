@@ -1,9 +1,6 @@
 import { parseDslArgs } from '@feral-auth/ts-simple-dsl';
 
-import { average, count, on, plant, planting } from '../params';
-
-// What a card shows, as the test expects it
-const stats = () => ({ first: on(), last: on(), total: count(), average: average() });
+import { plant, planting, statsColumns } from '../params';
 
 /**
  * A tab of the stats page, in words: `kind` is `planting` or `plant`, and
@@ -15,7 +12,6 @@ export function createStatsTab(world, driver, kind) {
         planting: { declaration: planting, named: alias => world.plantingNamed(alias) },
         plant: { declaration: plant, named: alias => world.plantNamed(alias) },
     }[kind];
-    const harvestTypeOf = details => details.harvestType ?? details.harvesting.defaultHarvestType;
 
     return {
         /** Chooses the planting, or the plant, the test named, to see its stats. */
@@ -26,15 +22,15 @@ export function createStatsTab(world, driver, kind) {
         },
 
         /**
-         * The planting, or plant, is chosen, with one card: its `first` and
-         * `last` harvest days, `YYYY-MM-DD`, its `total`, and its `average` a
-         * day, as the page writes it.
+         * The planting, or plant, is chosen, with one card, and a column for
+         * each harvest type, in order: its `type`, then its `first` and `last`
+         * harvest days, `YYYY-MM-DD`, its `total`, and its `average` a day, as
+         * the page writes it. The column repeats from `type`.
          */
         async checkShowsStats(...args) {
-            const params = parseDslArgs(args, { [kind]: chosen.declaration(), ...stats() });
+            const params = parseDslArgs(args, { [kind]: chosen.declaration(), columns: statsColumns() });
 
-            const details = chosen.named(params[kind]);
-            await driver.showsStats(details, harvestTypeOf(details), params);
+            await driver.showsStats(chosen.named(params[kind]), params.columns);
         },
 
         /** Nothing is chosen, and the tab says so. No parameters. */
