@@ -8,21 +8,17 @@
         <fade-out-alert :is-visible="alert.isVisible" :alert-type="alert.type" :message="alert.message"/>
       </v-col>
 
-      <v-col cols="2"></v-col>
-      <v-col cols="8">
-
+      <v-col cols="3"></v-col>
+      <v-col cols="6">
         <div v-if="totals">
           <harvest-stats-card :harvest-stats="totals"/>
         </div>
-
       </v-col>
-      <v-col cols="2"></v-col>
+      <v-col cols="3"></v-col>
     </v-row>
 
     <v-row>
-      <v-col cols="2"></v-col>
-      <v-col cols="8">
-
+      <v-col cols="12">
         <v-card>
           <v-tabs
               v-model="tab"
@@ -42,7 +38,6 @@
         </v-card>
 
       </v-col>
-      <v-col cols="2"></v-col>
     </v-row>
 
   </v-container>
@@ -57,14 +52,11 @@ import HarvestStatsCard from "@/components/harvests/HarvestStatsCard.vue";
 import HarvestStatsTab from "@/components/harvests/HarvestStatsTab.vue";
 import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
 
-// Each tab: the type of stats it shows, and its select's label
 const kinds = [
   { tab: 'plants', title: 'Plants', statsType: 'Plant', label: 'Select Plant to View' },
   { tab: 'plantings', title: 'Plantings', statsType: 'Planting', label: 'Select Planting to View' },
 ];
 
-// The year's harvest stats: its totals, then a tab for plants and one for
-// plantings. It was two pages, one for each
 export default {
   name: 'HarvestStatsPage',
 
@@ -92,8 +84,6 @@ export default {
       alertVisible: 'alertVisible',
     }),
 
-    // The year's totals, the same whichever type they came with: none
-    // until one has loaded
     totals() {
       return this.harvestStats.Plant ?? this.harvestStats.Planting ?? null;
     },
