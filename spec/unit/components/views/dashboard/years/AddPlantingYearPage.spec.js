@@ -4,8 +4,8 @@ import AddPlantingYearPage from '@/components/views/dashboard/years/AddPlantingY
 import DatePickerDialogActivator from '@/components/utils/DatePickerDialogActivator.vue';
 import { usePlantingsStore, usePlantingYearsStore, usePlantsStore } from '@/store';
 import { mountWithPlugins } from '../../../../../helpers/mount';
-import { buttonLabelled, inputLabelled, typeInto } from '../../../../../helpers/fields';
-import { tableRows } from '../../../../../helpers/tables';
+import { buttonLabelled, fieldLabelled, inputLabelled, typeInto } from '../../../../../helpers/fields';
+import { tableHeaders, tableRows } from '../../../../../helpers/tables';
 import { dialogTitled, findDialog } from '../../../../../helpers/dialogs';
 
 const plantsById = {
@@ -118,8 +118,8 @@ describe('AddPlantingYearPage', () => {
 
         expect(inputLabelled(wrapper, 'Previous Planting Year').element.value).toBe('2026');
         expect(inputLabelled(wrapper, 'New Planting Year').element.value).toBe('2027');
-        expect(inputLabelled(wrapper, 'Previous Planting Year').attributes('disabled')).toBeDefined();
-        expect(inputLabelled(wrapper, 'New Planting Year').attributes('disabled')).toBeDefined();
+        expect(inputLabelled(wrapper, 'Previous Planting Year').attributes('readonly')).toBeDefined();
+        expect(inputLabelled(wrapper, 'New Planting Year').attributes('readonly')).toBeDefined();
     });
 
     // It went by the calendar: in January 2027, with 2027 never added, it
@@ -153,7 +153,7 @@ describe('AddPlantingYearPage', () => {
         expect(inputLabelled(wrapper, 'Previous Planting Year').element.value).toBe('');
         expect(inputLabelled(wrapper, 'New Planting Year').element.value).toBe('2026');
         expect(plantingsStore.plantingsOfYear).not.toHaveBeenCalled();
-        expect(tableRows(wrapper)).toEqual([]);
+        expect(tableRows(wrapper)).toEqual([['No previous year to carry forward from']]);
 
         await clickCreate(wrapper);
 
@@ -183,6 +183,31 @@ describe('AddPlantingYearPage', () => {
             ['', 'Asparagus bed', 'Asparagus', 'PERENNIAL', 'PLANTED'],
             ['', 'Mystery', '', '', 'PLANTED'],
         ]);
+    });
+
+    it('heads the table of plantings', async () => {
+        const { wrapper } = mounted = await mountPage();
+
+        expect(tableHeaders(wrapper)).toEqual(['', 'Planting', 'Plant', 'Lifespan', 'Status']);
+    });
+
+    it('says when the year before had nothing planted', async () => {
+        const { wrapper } = mounted = await mountPage({ plantings: [] });
+
+        expect(tableRows(wrapper)).toEqual([['Nothing planted in 2026']]);
+        expect(buttonLabelled(wrapper, 'Select all').attributes('disabled')).toBeDefined();
+    });
+
+    // A date is picked from its field, which opens the picker on the date already picked
+    it('opens the date picker from its field', async () => {
+        const { wrapper } = mounted = await mountPage();
+        await pickDate(wrapper, 'Set Last Frost Date', new Date(2027, 4, 10));
+
+        await fieldLabelled(wrapper, 'Last Frost Date').find('.v-field').trigger('click');
+        await flushPromises();
+
+        expect(dialogTitled('Set Last Frost Date')).toBeDefined();
+        expect(findDialog('Set Target Planting Date')).toBeUndefined();
     });
 
     it('selects none of them at first', async () => {
@@ -296,8 +321,10 @@ describe('AddPlantingYearPage', () => {
 
     it('shows each date once it is picked, and -- before', async () => {
         const { wrapper } = mounted = await mountPage();
-        const shown = () => wrapper.findAll('h3.ml-2').map(heading => heading.text());
-        expect(shown()).toEqual(['--', '--']);
+        const shown = () => ['Last Frost Date', 'Target Planting Date']
+            .map(label => inputLabelled(wrapper, label).element.value);
+        expect(shown()).toEqual(['', '']);
+        expect(inputLabelled(wrapper, 'Last Frost Date').attributes('placeholder')).toBe('Not set');
 
         await pickDate(wrapper, 'Set Last Frost Date', new Date(2027, 4, 10));
         await pickDate(wrapper, 'Set Target Planting Date', new Date(2027, 4, 17));

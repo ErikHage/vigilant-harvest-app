@@ -35,6 +35,22 @@ describe('DatePickerDialogActivator', () => {
         expect(findDialog('Sown on')).toBeDefined();
     });
 
+    it("opens from a caller's own activator, in place of the button", async () => {
+        const wrapper = mountWithPlugins(DatePickerDialogActivator, {
+            props: { title: 'Sown on', onSubmit: vi.fn() },
+            slots: { activator: '<template #activator="{ open }"><span class="own" @click="open">Pick</span></template>' },
+            attachTo: document.body,
+        });
+        await flushPromises();
+        expect(wrapper.find('.v-btn').exists()).toBe(false);
+
+        await wrapper.find('.own').trigger('click');
+        await flushPromises();
+
+        expect(findDialog('Sown on')).toBeDefined();
+        wrapper.unmount();
+    });
+
     it('disables the button when told to', () => {
         const wrapper = mountActivator({ disabled: true });
 

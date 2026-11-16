@@ -8,9 +8,8 @@ export function createAddPlantingYearPageDriver(page) {
     const main = page.getByRole('main');
     const dialog = page.getByRole('dialog');
     const create = main.getByRole('button', { name: 'Create New Planting Year' });
-    // Each date is a row: its label, a calendar button with no name, and the
-    // date picked, all <h3> but the button
-    const dateRow = label => main.locator('h3', { hasText: new RegExp(`^${label}$`) }).locator('xpath=..');
+    // read-only fields; a date's field opens its picker
+    const field = label => main.getByRole('textbox', { name: label, exact: true });
     const carried = main.getByRole('table').getByRole('row');
     const carryForward = name => main.getByRole('checkbox', { name: `Carry forward ${name}`, exact: true });
     const selectAll = main.getByRole('button', { name: 'Select all', exact: true });
@@ -32,8 +31,8 @@ export function createAddPlantingYearPageDriver(page) {
         async proposes(previous, next) {
             const what = 'the years the add page proposes';
 
-            await expectValue(main.getByRole('spinbutton', { name: 'Previous Planting Year' }), String(previous), what);
-            await expectValue(main.getByRole('spinbutton', { name: 'New Planting Year' }), String(next), what);
+            await expectValue(field('Previous Planting Year'), String(previous), what);
+            await expectValue(field('New Planting Year'), String(next), what);
         },
 
         /**
@@ -107,7 +106,7 @@ export function createAddPlantingYearPageDriver(page) {
         },
 
         /**
-         * Picks a date in the picker beside `label`, by its day, in the month
+         * Picks a date in the picker the `label` field opens, by its day, in the month
          * the picker opens on. Each day's button is named in full, "Tuesday,
          * April 15, 8228"; the picker shows a few of the months either side
          * too, so pick a day from 8 to 21, which only the month itself shows.
@@ -115,7 +114,7 @@ export function createAddPlantingYearPageDriver(page) {
         async pickDate(label, day) {
             const what = `picking the ${label}`;
 
-            await dateRow(label).getByRole('button').click();
+            await field(label).click();
             await expectVisible(dialog.getByText(`Set ${label}`, { exact: true }), what);
             await dialog.getByRole('button', { name: new RegExp(`^(Today, )?\\w+, \\w+ ${day}, \\d+$`) }).click();
             await dialog.getByRole('button', { name: 'Confirm' }).click();
@@ -124,9 +123,8 @@ export function createAddPlantingYearPageDriver(page) {
 
         /** The date picked beside `label`, as the page shows it, `YYYY-MM-DD`, once one is. */
         async dateShown(label) {
-            const shown = dateRow(label).locator('h3').last();
-            await expectText(shown, /^\d{4}-\d{2}-\d{2}$/, `the ${label} picked`);
-            return (await shown.textContent()).trim();
+            await expectValue(field(label), /^\d{4}-\d{2}-\d{2}$/, `the ${label} picked`);
+            return field(label).inputValue();
         },
 
         /** With no dates picked, the add page withholds Create. */

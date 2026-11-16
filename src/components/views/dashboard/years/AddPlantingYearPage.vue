@@ -13,114 +13,159 @@
         />
       </v-col>
 
-      <v-col cols="12">
-        <v-sheet class="pa-4">
-          <v-row>
-            <v-col cols="12">
-              <v-text-field
-                  v-model.number="newPlantingYear.previousPlantingYear"
-                  label="Previous Planting Year"
-                  variant="solo"
-                  type="number"
-                  density="compact"
-                  :disabled="true"/>
-
-              <v-text-field
-                  v-model.number="newPlantingYear.plantingYear"
-                  class="mb-4"
-                  label="New Planting Year"
-                  variant="solo"
-                  type="number"
-                  density="compact"
-                  :disabled="true"/>
-
-              <div class="d-flex align-center mb-6">
-                <h3 class="mr-2">Last Frost Date</h3>
+      <v-col cols="12" md="3">
+        <v-card class="fill-height">
+          <v-card-title>New year</v-card-title>
+          <v-card-text>
+            <v-row dense>
+              <v-col cols="12">
+                <v-text-field
+                    :model-value="newPlantingYear.previousPlantingYear ?? ''"
+                    label="Previous Planting Year"
+                    variant="solo"
+                    density="compact"
+                    hide-details
+                    readonly/>
+              </v-col>
+              <v-col cols="12">
+                <v-text-field
+                    :model-value="newPlantingYear.plantingYear ?? ''"
+                    label="New Planting Year"
+                    variant="solo"
+                    density="compact"
+                    hide-details
+                    readonly/>
+              </v-col>
+              <v-col cols="12">
                 <date-picker-dialog-activator
                     :on-submit="setLastFrostDateValue"
+                    :date="newPlantingYear.lastFrostDate"
                     title="Set Last Frost Date"
-                />
-                <h3 class="ml-2">{{ formattedLastFrostDate }}</h3>
-              </div>
-
-              <div class="d-flex align-center mb-4">
-                <h3 class="mr-2">Target Planting Date</h3>
+                >
+                  <!-- on a click in the field's control: under a frozen test clock, Vue drops an outer listener's events -->
+                  <template v-slot:activator="{ open }">
+                    <v-text-field
+                        @click:control="open"
+                        @keydown.enter="open"
+                        :model-value="formattedLastFrostDate"
+                        class="date-field"
+                        label="Last Frost Date"
+                        prepend-inner-icon="mdi-calendar"
+                        placeholder="Not set"
+                        persistent-placeholder
+                        variant="solo"
+                        density="compact"
+                        hide-details
+                        readonly/>
+                  </template>
+                </date-picker-dialog-activator>
+              </v-col>
+              <v-col cols="12">
                 <date-picker-dialog-activator
                     :on-submit="setTargetPlantingDateValue"
+                    :date="newPlantingYear.targetPlantingDate"
                     title="Set Target Planting Date"
-                />
-                <h3 class="ml-2">{{ formattedTargetPlantingDate }}</h3>
-              </div>
-            </v-col>
-          </v-row>
-
-          <v-row>
-            <v-col cols="12" lg="6">
-              <h3>Plantings to carry forward (planted)</h3>
-              <div class="d-flex align-center my-2">
-                <v-btn
-                    size="small"
-                    variant="outlined"
-                    :disabled="plantingsToCarryForward.length === 0"
-                    @click="toggleSelectAll"
                 >
-                  {{ allSelected ? 'Deselect all' : 'Select all' }}
-                </v-btn>
-                <span class="ml-3 smaller-text">
-                  {{ selectedPlantingIds.length }} of {{ plantingsToCarryForward.length }} selected
-                </span>
-              </div>
-              <v-table>
-                <tbody>
-                <template v-for="planting in plantingsToCarryForward" :key="planting.plantingId">
-                  <tr>
-                    <td>
-                      <v-checkbox-btn
-                          v-model="selectedPlantingIds"
-                          :value="planting.plantingId"
-                          :aria-label="'Carry forward ' + planting.name"
-                          density="compact"/>
-                    </td>
-                    <td>
-                      <span class="clickable text-primary font-weight-medium"
-                            @click="onClickPlanting(planting.plantingId)">
-                        {{ planting.name }}
-                      </span>
-                    </td>
-                    <td>
-                      <span class="smaller-text">
-                        {{ planting.plantName }}
-                      </span>
-                    </td>
-                    <td>
-                      <span class="smaller-text">
-                        {{ planting.plantLifespanType }}
-                      </span>
-                    </td>
-                    <td>
-                      <v-chip size="small" :color="getStatusColor(planting.currentStatus)">{{ planting.currentStatus }}</v-chip>
-                    </td>
-                  </tr>
-                </template>
-                </tbody>
-              </v-table>
-            </v-col>
-          </v-row>
+                  <!-- on a click in the field's control: under a frozen test clock, Vue drops an outer listener's events -->
+                  <template v-slot:activator="{ open }">
+                    <v-text-field
+                        @click:control="open"
+                        @keydown.enter="open"
+                        :model-value="formattedTargetPlantingDate"
+                        class="date-field"
+                        label="Target Planting Date"
+                        prepend-inner-icon="mdi-calendar"
+                        placeholder="Not set"
+                        persistent-placeholder
+                        variant="solo"
+                        density="compact"
+                        hide-details
+                        readonly/>
+                  </template>
+                </date-picker-dialog-activator>
+              </v-col>
+            </v-row>
+          </v-card-text>
+        </v-card>
+      </v-col>
 
-          <v-row>
-            <v-col cols="12">
-              <div class="d-flex justify-end">
-                <v-btn
-                  color="success"
-                  :disabled="!canCreate"
-                  @click="onCreate"
-                >
-                  Create New Planting Year
-                </v-btn>
-              </div>
-            </v-col>
-          </v-row>
-        </v-sheet>
+      <v-col cols="12" md="9">
+        <v-card class="fill-height">
+          <v-card-title class="text-wrap">Plantings to carry forward (planted)</v-card-title>
+          <v-card-text>
+            <div class="d-flex align-center ga-3 mb-2">
+              <v-btn
+                  size="small"
+                  variant="outlined"
+                  :disabled="plantingsToCarryForward.length === 0"
+                  @click="toggleSelectAll"
+              >
+                {{ allSelected ? 'Deselect all' : 'Select all' }}
+              </v-btn>
+              <span class="smaller-text">
+                {{ selectedPlantingIds.length }} of {{ plantingsToCarryForward.length }} selected
+              </span>
+            </div>
+            <v-table density="compact">
+              <thead>
+              <tr>
+                <th></th>
+                <th>Planting</th>
+                <th>Plant</th>
+                <th>Lifespan</th>
+                <th>Status</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr v-if="plantingsToCarryForward.length === 0">
+                <td colspan="5" class="smaller-text">{{ nothingToCarryForward }}</td>
+              </tr>
+              <template v-for="planting in plantingsToCarryForward" :key="planting.plantingId">
+                <tr>
+                  <td>
+                    <v-checkbox-btn
+                        v-model="selectedPlantingIds"
+                        :value="planting.plantingId"
+                        :aria-label="'Carry forward ' + planting.name"
+                        density="compact"/>
+                  </td>
+                  <td>
+                    <span class="clickable text-primary font-weight-medium"
+                          @click="onClickPlanting(planting.plantingId)">
+                      {{ planting.name }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="smaller-text">
+                      {{ planting.plantName }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="smaller-text">
+                      {{ planting.plantLifespanType }}
+                    </span>
+                  </td>
+                  <td>
+                    <v-chip size="small" :color="getStatusColor(planting.currentStatus)">{{ planting.currentStatus }}</v-chip>
+                  </td>
+                </tr>
+              </template>
+              </tbody>
+            </v-table>
+          </v-card-text>
+        </v-card>
+      </v-col>
+
+      <v-col cols="12">
+        <div class="d-flex justify-end">
+          <v-btn
+            color="success"
+            :disabled="!canCreate"
+            @click="onCreate"
+          >
+            Create New Planting Year
+          </v-btn>
+        </div>
       </v-col>
     </v-row>
 
@@ -189,16 +234,23 @@ export default {
       return [usePlantingYearsStore(), usePlantingsStore(), usePlantsStore()].map(alertOf);
     },
 
+    // empty until picked, so the field shows its "Not set" placeholder
     formattedLastFrostDate() {
       return this.newPlantingYear?.lastFrostDate ?
           dayjs(this.newPlantingYear.lastFrostDate).format('YYYY-MM-DD') :
-          '--';
+          '';
     },
 
     formattedTargetPlantingDate() {
       return this.newPlantingYear?.targetPlantingDate ?
           dayjs(this.newPlantingYear.targetPlantingDate).format('YYYY-MM-DD') :
-          '--';
+          '';
+    },
+
+    nothingToCarryForward() {
+      return this.newPlantingYear.previousPlantingYear === null ?
+          'No previous year to carry forward from' :
+          `Nothing planted in ${this.newPlantingYear.previousPlantingYear}`;
     },
 
     // what may be carried forward: the planted ones
@@ -343,6 +395,10 @@ export default {
 .clickable:hover {
   color: #1976D2; /* Vuetify primary color */
   text-decoration: underline;
+}
+
+.date-field :deep(input) {
+  cursor: pointer;
 }
 
 .smaller-text {

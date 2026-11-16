@@ -1,13 +1,17 @@
 <template>
   <v-dialog v-model="show" max-width="500px" persistent>
     <template v-slot:activator="{ props: activatorProps }">
-      <v-btn
-          v-bind="activatorProps"
-          icon="mdi-calendar"
-          color="default"
-          :disabled="disabled"
-          density="comfortable"
-          @click="show = true"/>
+      <!-- a caller's own activator, such as a date field, which calls `open`; a calendar button
+           without one -->
+      <slot name="activator" :open="open">
+        <v-btn
+            v-bind="activatorProps"
+            icon="mdi-calendar"
+            color="default"
+            :disabled="disabled"
+            density="comfortable"
+            @click="open"/>
+      </slot>
     </template>
 
     <v-card>
@@ -54,6 +58,12 @@ export default {
   },
 
   methods: {
+    open() {
+      if (!this.disabled) {
+        this.show = true;
+      }
+    },
+
     handleOnCancel() {
       this.show = false;
     },
