@@ -1,5 +1,6 @@
 import { parseDslArgs } from '@feral-auth/ts-simple-dsl';
 
+import { createDayTimeline } from '../components/day-timeline';
 import { entry, year } from '../params';
 import { dashboardComponents, routedPageSteps } from './routed-page';
 
@@ -8,6 +9,7 @@ export function createActivityLogPage(world, driver) {
     return {
         ...dashboardComponents(world),
         ...routedPageSteps(driver),
+        timeline: createDayTimeline(world, world.drivers.dayTimeline),
 
         /**
          * Logs a new activity, called `entry`, in the `year` chosen, through Log
@@ -21,11 +23,17 @@ export function createActivityLogPage(world, driver) {
             world.updateEntry(params.entry, { entryDate: await driver.logActivity(logged) });
         },
 
-        /** The `entry` is listed, with its date, type, subtype and comments. */
+        /**
+         * The `entry` is listed: its day, chosen in the timeline, shows it with
+         * its type, subtype and comments.
+         */
         async checkListsEntry(...args) {
             const params = parseDslArgs(args, { entry: entry() });
 
-            await driver.listsEntry(world.entryNamed(params.entry));
+            const listed = world.entryNamed(params.entry);
+            await world.drivers.dayTimeline.chooseDay(listed.entryDate);
+            await world.drivers.dayTimeline.showsDay(listed.entryDate);
+            await driver.showsEntry(listed);
         },
 
         /** Opens Log Activity, choosing nothing. No parameters. */

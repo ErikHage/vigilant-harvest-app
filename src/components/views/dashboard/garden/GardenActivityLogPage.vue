@@ -15,37 +15,43 @@
       </v-col>
     </v-row>
 
-    <v-row>
-      <v-col>
-        <v-card>
-          <v-card-title>
-            <v-select
-                v-model="activityTypeFilter"
-                :items="activityTypes"
-                item-title="name"
-                label="Activity"
-                variant="solo"
-                return-object
-                clearable
-            ></v-select>
-          </v-card-title>
-          <v-card-text>
-            <v-data-table
-                :headers="headers"
-                :items="filteredActivityLogEntries"
-                item-value="entryId"
-                :sort-by="sortBy"
-                class="elevation-1"
-                density="compact"
-            >
-              <template #item.entryDate="{ item }">
-                {{ formatDate(item.entryDate) }}
-              </template>
-            </v-data-table>
-          </v-card-text>
-        </v-card>
-      </v-col>
-    </v-row>
+    <v-select
+        v-model="activityTypeFilter"
+        :items="activityTypes"
+        item-title="name"
+        label="Activity"
+        variant="outlined"
+        density="compact"
+        class="activity-filter mb-4"
+        return-object
+        clearable
+        hide-details
+    ></v-select>
+
+    <day-timeline
+        v-model="selectedDay"
+        :records="filteredActivityLogEntries"
+        :date-of="entry => entry.entryDate"
+    >
+      <template #day="{ records }">
+        <div
+            v-for="(entry, index) in byTime(records)"
+            :key="entry.entryId"
+            class="activity-entry"
+        >
+          <div class="d-flex align-center ga-2">
+            <v-chip class="activity-type" size="small" color="green-darken-2" variant="flat">{{ entry.activityType }}</v-chip>
+            <span v-if="entry.subType" class="activity-subtype">{{ entry.subType }}</span>
+          </div>
+          <div v-if="entry.comments" class="activity-comments">{{ entry.comments }}</div>
+          <v-divider class="my-4" v-if="index < records.length - 1" />
+        </div>
+      </template>
+
+      <template #empty>
+        <p>No activities logged in {{ plantingYear }}.</p>
+      </template>
+    </day-timeline>
   </v-container>
 </template>
 
@@ -56,14 +62,20 @@ import {mapActions, mapState} from "pinia";
 import {useActivityLogStore, useCommonStore} from "@/store";
 import PageTitle from "@/components/layout/PageTitle.vue";
 import AddActivityLogEntryDialog from "@/components/views/dashboard/garden/AddActivityLogEntryDialog.vue";
+import DayTimeline from "@/components/utils/DayTimeline.vue";
 import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
 import { alertOf } from "@/store/alerts";
+
+// An entry's type matches a filter whatever its case: older entries were
+// logged as "Fertilize", newer ones as "FERTILIZE"
+const ofType = (entry, activityType) => entry.activityType.toUpperCase() === activityType.name;
 
 export default {
   name: "GardenActivityLogPage",
 
   components: {
     AddActivityLogEntryDialog,
+    DayTimeline,
     FadeOutAlert,
     PageTitle,
   },
@@ -71,15 +83,7 @@ export default {
   data() {
     return {
       activityTypeFilter: null,
-      sortBy: [
-        { key: 'entryDate', order: 'desc' }
-      ],
-      headers: [
-        {title: 'Date', key: 'entryDate'},
-        {title: 'Type', key: 'activityType'},
-        {title: 'Sub-Type', key: 'subType'},
-        {title: 'Comments', key: 'comments'}
-      ],
+      selectedDay: null,
     };
   },
 
@@ -99,8 +103,7 @@ export default {
 
     filteredActivityLogEntries() {
       if (this.activityTypeFilter) {
-        return this.activityLogEntries
-            .filter(entry => entry.activityType.toUpperCase() === this.activityTypeFilter.name);
+        return this.activityLogEntries.filter(entry => ofType(entry, this.activityTypeFilter));
       }
 
       return this.activityLogEntries;
@@ -117,16 +120,25 @@ export default {
       await this.fetchActivityLogEntriesByYear(this.plantingYear);
     },
 
-    formatDate(date) {
-      return dayjs(date).format('YYYY-MM-DD');
+    // The day's entries by their time, then as recorded: the service sends
+    // them in no set order. entryDate is local, YYYY-MM-DDTHH:mm:ss, so sorts
+    // as text
+    byTime(entries) {
+      return [...entries].sort((a, b) =>
+          a.entryDate.localeCompare(b.entryDate) || a.dateCreated.localeCompare(b.dateCreated));
     },
 
+    // Goes to the new entry's day, clearing a filter that would hide it
     async handleNewEntry(entry) {
       await this.upsertActivityLogEntry({
         plantingYear: this.plantingYear,
         ...entry,
       });
       await this.refreshData();
+      if (this.activityTypeFilter && !ofType(entry, this.activityTypeFilter)) {
+        this.activityTypeFilter = null;
+      }
+      this.selectedDay = dayjs(entry.entryDate).format('YYYY-MM-DD');
     }
   },
 
@@ -137,4 +149,16 @@ export default {
 </script>
 
 <style scoped>
+.activity-filter {
+  max-width: 240px;
+}
+
+.activity-subtype {
+  font-weight: bold;
+}
+
+.activity-comments {
+  margin-top: 6px;
+  white-space: pre-wrap;
+}
 </style>

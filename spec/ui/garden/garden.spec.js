@@ -78,7 +78,7 @@ test.describe('The journal and activity log', () => {
         await journalPage.checkShowsEntry('entry: planted');
     });
 
-    test('logs an activity, listed with its date, type, subtype and comments', async ({ activityLogPage }) => {
+    test('logs an activity, shown on its day with its type, subtype and comments', async ({ activityLogPage }) => {
         await activityLogPage.open();
         await activityLogPage.checkIsShown();
 

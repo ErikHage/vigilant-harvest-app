@@ -2,12 +2,13 @@ import { expectDisabled, expectHidden, expectText, expectVisible } from './asser
 import { createRoutedPageDriver } from './routed-page-driver';
 import { chooseOption } from './select';
 
-/** The activity log, for the chosen year, and its Log Activity dialog. */
+/** The activity log, for the chosen year: a day's entries, and the Log Activity dialog. */
 export function createActivityLogPageDriver(page) {
     const main = page.getByRole('main');
     const dialog = page.getByRole('dialog');
     const confirm = dialog.getByRole('button', { name: 'Confirm' });
-    const rows = main.getByRole('table').getByRole('row').filter({ has: page.getByRole('cell') });
+    // A day's entries have no role: found by class
+    const shownEntries = main.locator('.activity-entry');
 
     async function openDialog(what) {
         await main.getByRole('button', { name: 'Log Activity' }).click();
@@ -35,13 +36,15 @@ export function createActivityLogPageDriver(page) {
             return day;
         },
 
-        /** The entry is listed with its date, type, subtype and comments. */
-        async listsEntry({ entryDate, activityType, subType, comments }) {
-            const what = `listing the activity "${comments}"`;
-            const row = rows.filter({ has: page.getByRole('cell', { name: comments, exact: true }) });
+        /** The day shown has the entry: its type, in a chip, its subtype, then its comments. */
+        async showsEntry({ entryDate, activityType, subType, comments }) {
+            const what = `the activity "${comments}" on ${entryDate}`;
+            const shown = shownEntries.filter({ hasText: comments });
 
-            await expectVisible(row, what);
-            await expectText(row.getByRole('cell'), [entryDate, activityType, subType, comments], what);
+            // The type is a chip, which has no role: found by class
+            await expectText(shown.locator('.v-chip.activity-type'), activityType, what);
+            await expectText(shown.locator('.activity-subtype'), subType, what);
+            await expectText(shown.locator('.activity-comments'), comments, what);
         },
 
         /** Opens Log Activity, choosing nothing. */
