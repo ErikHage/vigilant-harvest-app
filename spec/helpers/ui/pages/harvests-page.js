@@ -1,6 +1,7 @@
 import { parseDslArgs } from '@feral-auth/ts-simple-dsl';
 
-import { days, on, planting, quantity, year } from '../params';
+import { createDayTimeline } from '../components/day-timeline';
+import { on, planting, quantity, year } from '../params';
 import { dashboardComponents, routedPageSteps } from './routed-page';
 
 /** The harvests page, a timeline of the chosen year's harvest days, in words. */
@@ -17,30 +18,7 @@ export function createHarvestsPage(world, driver) {
     return {
         ...dashboardComponents(world),
         ...routedPageSteps(driver),
-
-        /**
-         * The timeline lists these `days`, `YYYY-MM-DD`, comma-separated, in
-         * order, with `...` where it marks a gap.
-         */
-        async checkListsDays(...args) {
-            const params = parseDslArgs(args, { days: days() });
-
-            await driver.listsDays(params.days);
-        },
-
-        /** The day chosen and shown is the one `on`, `YYYY-MM-DD`. */
-        async checkShowsDay(...args) {
-            const params = parseDslArgs(args, { on: on() });
-
-            await driver.showsDay(params.on);
-        },
-
-        /** Chooses the day `on`, `YYYY-MM-DD`, in the timeline. */
-        async chooseDay(...args) {
-            const params = parseDslArgs(args, { on: on() });
-
-            await driver.chooseDay(params.on);
-        },
+        timeline: createDayTimeline(world, world.drivers.dayTimeline),
 
         /** The day shown has the `planting`'s harvest of the day `on`, as the test has it. */
         async checkShowsHarvest(...args) {

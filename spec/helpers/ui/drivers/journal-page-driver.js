@@ -1,4 +1,4 @@
-import { expectDisabled, expectEnabled, expectHidden, expectText, expectVisible } from './assertions';
+import { expectHidden, expectText, expectVisible } from './assertions';
 import { createRoutedPageDriver } from './routed-page-driver';
 
 /** The garden journal, for the chosen year: a timeline of days, and a day's entries. */
@@ -26,29 +26,9 @@ export function createJournalPageDriver(page) {
             return day;
         },
 
-        /** The timeline lists these days, `YYYY-MM-DD`, in order, leaving out the "..." it puts between days apart. */
-        async listsDays(days) {
-            await expectText(main.locator('.timeline-entry:not(.gap)'), days, 'the journal\'s timeline');
-        },
-
-        /** The day shown is `day`, with these entries' texts. */
-        async showsDay(day, texts) {
-            const what = `the journal's entries for ${day}`;
-
-            await expectText(main.getByRole('heading', { level: 2 }), day, what);
-            await expectText(main.locator('.journal-entry p'), texts, what);
-        },
-
-        /** Older and Newer, each offered or not. */
-        async offersOlderAndNewer(older, newer) {
-            const what = 'the journal\'s Older and Newer';
-
-            await (older ? expectEnabled : expectDisabled)(main.getByRole('button', { name: 'Older' }), what);
-            await (newer ? expectEnabled : expectDisabled)(main.getByRole('button', { name: 'Newer' }), what);
-        },
-
-        async older() {
-            await main.getByRole('button', { name: 'Older' }).click();
+        /** The day shown, `day`, has these entries' texts, in order. */
+        async showsEntries(day, texts) {
+            await expectText(main.locator('.journal-entry p'), texts, `the journal's entries for ${day}`);
         },
     };
 }

@@ -6,6 +6,7 @@ import { createAppBarDriver } from './app-bar-driver';
 import { createBrowserClockDriver } from './browser-clock-driver';
 import { createDashboardNavDriver } from './dashboard-nav-driver';
 import { createDashboardPageDriver } from './dashboard-page-driver';
+import { createDayTimelineDriver } from './day-timeline-driver';
 import { createFeralLoginPageDriver } from './feral-login-page-driver';
 import { createGardenDriver } from './garden-driver';
 import { createGardenPageDriver } from './garden-page-driver';
@@ -39,6 +40,7 @@ export function createDrivers(page) {
     return {
         appBar: createAppBarDriver(page, serviceCalls),
         dashboardNav: createDashboardNavDriver(page),
+        dayTimeline: createDayTimelineDriver(page),
 
         loginPage: createLoginPageDriver(page, serviceCalls),
         feralLoginPage: createFeralLoginPageDriver(page),

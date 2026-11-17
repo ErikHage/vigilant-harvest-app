@@ -40,23 +40,6 @@ export function createHarvestsPageDriver(page, serviceCalls) {
             marker: main => main.locator('.page-title', { hasText: /^Review Harvests$/ }),
         }),
 
-        /** The timeline lists these, in order: days, `YYYY-MM-DD`, and `...` where it marks a gap. */
-        async listsDays(days) {
-            await expectText(timeline, days, 'the harvests timeline');
-        },
-
-        /** `day`, `YYYY-MM-DD`, is the one chosen in the timeline, and the one shown. */
-        async showsDay(day) {
-            const what = `the harvests of ${day}`;
-
-            await expectText(main.locator('.timeline-entry.selected'), day, what);
-            await expectText(main.locator('.content-column h3'), day, what);
-        },
-
-        async chooseDay(day) {
-            await timeline.filter({ hasText: exactly(day) }).click();
-        },
-
         /**
          * The day shown has the planting's harvest of `quantity`: under its
          * plant, a total of that, and, opened up, the planting with it.

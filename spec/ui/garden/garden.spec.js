@@ -71,10 +71,10 @@ test.describe('The journal and activity log', () => {
 
         await journalPage.recordEntry('entry: watered', 'year: spring');
 
-        await journalPage.checkListsDaysOf('entry: watered, planted');
+        await journalPage.timeline.checkDaysOf('entry: watered, planted');
         await journalPage.checkShowsEntry('entry: watered');
-        await journalPage.checkOffersOlderAndNewer('older: yes', 'newer: no');
-        await journalPage.older();
+        await journalPage.timeline.checkOffersOlderAndNewer('older: yes', 'newer: no');
+        await journalPage.timeline.older();
         await journalPage.checkShowsEntry('entry: planted');
     });
 

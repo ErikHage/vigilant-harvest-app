@@ -27,22 +27,36 @@ test.describe('The harvests page', () => {
         await harvestsPage.open();
         await harvestsPage.checkIsShown();
 
-        await harvestsPage.checkListsDays('days: 2026-07-09, ..., 2026-07-07');
-        await harvestsPage.checkShowsDay('on: 2026-07-09');
+        await harvestsPage.timeline.checkDays('days: 2026-07-09, ..., 2026-07-07');
+        await harvestsPage.timeline.checkShowsDay('on: 2026-07-09');
         await harvestsPage.checkShowsHarvest('planting: early', 'on: 2026-07-09');
-        await harvestsPage.chooseDay('on: 2026-07-07');
-        await harvestsPage.checkShowsDay('on: 2026-07-07');
+        await harvestsPage.timeline.chooseDay('on: 2026-07-07');
+        await harvestsPage.timeline.checkShowsDay('on: 2026-07-07');
         await harvestsPage.checkShowsHarvest('planting: early', 'on: 2026-07-07');
+    });
+
+    test('steps between harvest days with Older and Newer', async ({ harvestsPage }) => {
+        await harvestsPage.open();
+        await harvestsPage.checkIsShown();
+
+        await harvestsPage.timeline.checkShowsDay('on: 2026-07-09');
+        await harvestsPage.timeline.checkOffersOlderAndNewer('older: yes', 'newer: no');
+        await harvestsPage.timeline.older();
+        await harvestsPage.timeline.checkShowsDay('on: 2026-07-07');
+        await harvestsPage.checkShowsHarvest('planting: early', 'on: 2026-07-07');
+        await harvestsPage.timeline.checkOffersOlderAndNewer('older: no', 'newer: yes');
+        await harvestsPage.timeline.newer();
+        await harvestsPage.timeline.checkShowsDay('on: 2026-07-09');
     });
 
     test('edits a day\'s harvest, and shows it on the same day', async ({ harvestsPage }) => {
         await harvestsPage.open();
         await harvestsPage.checkIsShown();
-        await harvestsPage.checkShowsDay('on: 2026-07-09');
+        await harvestsPage.timeline.checkShowsDay('on: 2026-07-09');
 
         await harvestsPage.editHarvest('planting: early', 'on: 2026-07-09', 'quantity: 8');
 
-        await harvestsPage.checkShowsDay('on: 2026-07-09');
+        await harvestsPage.timeline.checkShowsDay('on: 2026-07-09');
         await harvestsPage.checkShowsHarvest('planting: early', 'on: 2026-07-09');
     });
 
@@ -50,12 +64,12 @@ test.describe('The harvests page', () => {
     test('removes a day\'s harvest, and with it the day', async ({ harvestsPage }) => {
         await harvestsPage.open();
         await harvestsPage.checkIsShown();
-        await harvestsPage.checkShowsDay('on: 2026-07-09');
+        await harvestsPage.timeline.checkShowsDay('on: 2026-07-09');
 
         await harvestsPage.removeHarvest('planting: early', 'on: 2026-07-09');
 
-        await harvestsPage.checkListsDays('days: 2026-07-07');
-        await harvestsPage.checkShowsDay('on: 2026-07-07');
+        await harvestsPage.timeline.checkDays('days: 2026-07-07');
+        await harvestsPage.timeline.checkShowsDay('on: 2026-07-07');
         await harvestsPage.checkShowsHarvest('planting: early', 'on: 2026-07-07');
     });
 
@@ -63,7 +77,7 @@ test.describe('The harvests page', () => {
     test('offers Update only for a harvest of something', async ({ harvestsPage }) => {
         await harvestsPage.open();
         await harvestsPage.checkIsShown();
-        await harvestsPage.checkShowsDay('on: 2026-07-09');
+        await harvestsPage.timeline.checkShowsDay('on: 2026-07-09');
 
         await harvestsPage.startEditingHarvest('planting: early', 'quantity: 0');
 

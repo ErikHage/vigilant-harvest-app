@@ -109,25 +109,38 @@ describe('HarvestsPage', () => {
             const { wrapper } = await mountPage({ state: { harvests: { harvests: [aHarvest({ harvestDate: filedOn('2026-07-10') })] } } });
 
             expect(timeline(wrapper)).toEqual(['2026-07-10']);
-            expect(wrapper.find('h3').text()).toBe('2026-07-10');
+            expect(wrapper.find('h2').text()).toBe('2026-07-10');
         });
 
         it('opens on the newest day', async () => {
             const { wrapper } = await mountPage();
 
             expect(selected(wrapper)).toBe('2026-07-10');
-            expect(wrapper.find('h3').text()).toBe('2026-07-10');
+            expect(wrapper.find('h2').text()).toBe('2026-07-10');
         });
 
         it('shows the day clicked, and ignores a click on a gap', async () => {
             const { wrapper } = await mountPage();
 
             await clickDay(wrapper, '2026-07-01');
-            expect(wrapper.find('h3').text()).toBe('2026-07-01');
+            expect(wrapper.find('h2').text()).toBe('2026-07-01');
             expect(plantGroups(wrapper)).toEqual([['Sungold tomato', ['4']]]);
 
             await clickDay(wrapper, '...');
             expect(selected(wrapper)).toBe('2026-07-01');
+        });
+
+        it('moves between days with Older and Newer', async () => {
+            const { wrapper } = await mountPage();
+
+            await press(wrapper, 'Older');
+            expect(selected(wrapper)).toBe('2026-07-09');
+            await press(wrapper, 'Older');
+            expect(wrapper.find('h2').text()).toBe('2026-07-01');
+            expect(plantGroups(wrapper)).toEqual([['Sungold tomato', ['4']]]);
+
+            await press(wrapper, 'Newer');
+            expect(selected(wrapper)).toBe('2026-07-09');
         });
 
         // It asked for a day to be selected from an empty timeline (backlog

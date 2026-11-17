@@ -1,6 +1,7 @@
 import { parseDslArgs } from '@feral-auth/ts-simple-dsl';
 
-import { entries, entry, offered, year } from '../params';
+import { createDayTimeline } from '../components/day-timeline';
+import { entry, year } from '../params';
 import { dashboardComponents, routedPageSteps } from './routed-page';
 
 /** The garden journal, for the chosen year, in words. */
@@ -8,6 +9,7 @@ export function createJournalPage(world, driver) {
     return {
         ...dashboardComponents(world),
         ...routedPageSteps(driver),
+        timeline: createDayTimeline(world, world.drivers.dayTimeline),
 
         /**
          * Records a new entry, called `entry`, with made-up text, in the `year`
@@ -21,33 +23,13 @@ export function createJournalPage(world, driver) {
             world.updateEntry(params.entry, { entryDate: await driver.recordEntry(recorded.entry) });
         },
 
-        /** The timeline lists the days of these `entry`s, comma-separated, in order. */
-        async checkListsDaysOf(...args) {
-            const params = parseDslArgs(args, { entry: entries() });
-
-            await driver.listsDays(params.entry.map(alias => world.entryNamed(alias).entryDate));
-        },
-
         /** The day shown is the `entry`'s, with its text. */
         async checkShowsEntry(...args) {
             const params = parseDslArgs(args, { entry: entry() });
 
             const shown = world.entryNamed(params.entry);
-            await driver.showsDay(shown.entryDate, [shown.entry]);
-        },
-
-        /** Older and Newer are offered, or not: `older: yes | no`, `newer: yes | no`. */
-        async checkOffersOlderAndNewer(...args) {
-            const params = parseDslArgs(args, { older: offered(), newer: offered() });
-
-            await driver.offersOlderAndNewer(params.older === 'yes', params.newer === 'yes');
-        },
-
-        /** Clicks Older, for the day before. No parameters. */
-        async older(...args) {
-            parseDslArgs(args, {});
-
-            await driver.older();
+            await world.drivers.dayTimeline.showsDay(shown.entryDate);
+            await driver.showsEntries(shown.entryDate, [shown.entry]);
         },
     };
 }
