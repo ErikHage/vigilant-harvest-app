@@ -14,60 +14,26 @@
       </v-col>
     </v-row>
 
-    <v-row>
-      <v-col cols="2" class="timeline-column d-flex flex-column">
-        <div class="timeline flex-grow-1 overflow-y-auto">
-          <div
-              v-for="(item, index) in timelineItems"
-              :key="index"
-              class="timeline-entry"
-              :class="{ selected: selectedDate === item.date, gap: item.gap }"
-              @click="selectDate(item.date)"
-          >
-            <span v-if="item.gap">...</span>
-            <span v-else>{{ formatDate(item.date) }}</span>
-          </div>
+    <day-timeline
+        v-model="selectedDay"
+        :records="journalEntries"
+        :date-of="entry => entry.entryDate"
+    >
+      <template #day="{ records }">
+        <div
+            v-for="(entry, index) in byTime(records)"
+            :key="index"
+            class="journal-entry respect-formatting"
+        >
+          <p>{{ entry.entry }}</p>
+          <v-divider class="my-4" v-if="index < records.length - 1" />
         </div>
-      </v-col>
+      </template>
 
-      <v-col cols="10" class="content-column">
-        <div class="content-area" v-if="selectedEntries.length">
-          <div class="navigation-buttons d-flex justify-space-between mb-4">
-            <v-btn
-                variant="tonal"
-                :disabled="!olderDate"
-                @click="selectDate(olderDate)"
-                prepend-icon="mdi-chevron-left"
-            >
-              Older
-            </v-btn>
-            <h2>{{ formatDate(selectedDate) }}</h2>
-            <v-btn
-                variant="tonal"
-                :disabled="!newerDate"
-                @click="selectDate(newerDate)"
-                append-icon="mdi-chevron-right"
-            >
-              Newer
-            </v-btn>
-          </div>
-          <v-divider class="my-4" />
-
-          <div
-              v-for="(entry, index) in selectedEntries"
-              :key="index"
-              class="journal-entry respect-formatting"
-          >
-            <p>{{ entry.entry }}</p>
-            <v-divider class="my-4" v-if="index < selectedEntries.length - 1" />
-          </div>
-        </div>
-
-        <div class="content-area" v-else>
-          <p>No entry selected.</p>
-        </div>
-      </v-col>
-    </v-row>
+      <template #empty>
+        <p>No entry selected.</p>
+      </template>
+    </day-timeline>
   </v-container>
 </template>
 
@@ -78,6 +44,7 @@ import {mapActions, mapState} from "pinia";
 import {useCommonStore, useJournalStore} from "@/store";
 import PageTitle from "@/components/layout/PageTitle.vue";
 import AddJournalEntryDialog from "@/components/views/dashboard/garden/AddJournalEntryDialog.vue";
+import DayTimeline from "@/components/utils/DayTimeline.vue";
 import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
 import { alertOf } from "@/store/alerts";
 
@@ -86,13 +53,14 @@ export default {
 
   components: {
     AddJournalEntryDialog,
+    DayTimeline,
     FadeOutAlert,
     PageTitle,
   },
 
   data() {
     return {
-      selectedDate: null,
+      selectedDay: null,
     };
   },
 
@@ -108,60 +76,6 @@ export default {
     alert() {
       return alertOf(useJournalStore());
     },
-
-    groupedEntries() {
-      return this.journalEntries.reduce((groups, entry) => {
-        const dateOnly = this.formatDate(entry.entryDate);
-        if (!groups[dateOnly]) groups[dateOnly] = [];
-        groups[dateOnly].push(entry);
-        return groups;
-      }, {});
-    },
-
-    sortedDates() {
-      return Object.keys(this.groupedEntries).sort(
-          (a, b) => dayjs(b).unix() - dayjs(a).unix()
-      );
-    },
-
-    timelineItems() {
-      const items = [];
-      const dates = this.sortedDates;
-
-      for (let i = 0; i < dates.length; i++) {
-        items.push({ date: dates[i], gap: false });
-
-        if (i < dates.length - 1) {
-          const current = dayjs(dates[i]);
-          const next = dayjs(dates[i + 1]);
-          const diffDays = current.diff(next, 'day');
-          if (diffDays > 1) {
-            items.push({ gap: true });
-          }
-        }
-      }
-
-      return items;
-    },
-
-    // The day's entries by their time, then as recorded: the service sends
-    // them in no set order. entryDate is local, YYYY-MM-DDTHH:mm:ss, so sorts
-    // as text
-    selectedEntries() {
-      return [...(this.groupedEntries[this.selectedDate] || [])].sort((a, b) =>
-          a.entryDate.localeCompare(b.entryDate) || a.dateCreated.localeCompare(b.dateCreated));
-    },
-
-    // sortedDates runs newest first, as the timeline does
-    olderDate() {
-      const index = this.sortedDates.indexOf(this.selectedDate);
-      return index < this.sortedDates.length - 1 ? this.sortedDates[index + 1] : null;
-    },
-
-    newerDate() {
-      const index = this.sortedDates.indexOf(this.selectedDate);
-      return index > 0 ? this.sortedDates[index - 1] : null;
-    }
   },
 
   methods: {
@@ -172,16 +86,14 @@ export default {
 
     async refreshData() {
       await this.fetchJournalEntriesByYear(this.plantingYear);
-      const firstDate = this.sortedDates[0];
-      if (firstDate) this.selectedDate = firstDate;
     },
 
-    selectDate(date) {
-      if (date) this.selectedDate = date;
-    },
-
-    formatDate(date) {
-      return dayjs(date).format('YYYY-MM-DD');
+    // The day's entries by their time, then as recorded: the service sends
+    // them in no set order. entryDate is local, YYYY-MM-DDTHH:mm:ss, so sorts
+    // as text
+    byTime(entries) {
+      return [...entries].sort((a, b) =>
+          a.entryDate.localeCompare(b.entryDate) || a.dateCreated.localeCompare(b.dateCreated));
     },
 
     async handleNewEntry(entry) {
@@ -190,7 +102,7 @@ export default {
         ...entry,
       });
       await this.refreshData();
-      this.selectedDate = this.formatDate(entry.entryDate);
+      this.selectedDay = dayjs(entry.entryDate).format('YYYY-MM-DD');
     }
   },
 
@@ -201,50 +113,6 @@ export default {
 </script>
 
 <style scoped>
-.timeline-column {
-  max-height: 70vh;
-  overflow: hidden; /* stop outer scroll */
-  border-right: 1px solid #ccc;
-}
-
-.timeline {
-  overflow-y: auto;
-  flex-grow: 1;
-  padding: 10px;
-}
-
-.timeline-entry {
-  cursor: pointer;
-  padding: 8px 12px;
-  margin: 0;
-  border-radius: 6px;
-  transition: all 0.2s ease;
-  font-size: 14px;
-}
-
-.timeline-entry.selected {
-  background-color: darkgreen;
-  color: white;
-  font-weight: bold;
-  transform: scale(1.05);
-}
-
-.timeline-entry.gap {
-  color: #888;
-  text-align: center;
-  cursor: default;padding: 0;
-}
-
-.content-column {
-  max-height: 75vh;
-  overflow-y: auto;
-  padding: 20px;
-}
-
-.content-area {
-  white-space: pre-wrap;
-}
-
 .journal-entry {
   margin-bottom: 20px;
 }
