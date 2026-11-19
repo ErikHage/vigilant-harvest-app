@@ -85,6 +85,7 @@
             <v-card class="mt-4">
               <v-tabs
                   v-model="tab"
+                  bg-color="surface-light"
                   align-tabs="start"
                   fixed-tabs>
                 <v-tab value="details">Details</v-tab>

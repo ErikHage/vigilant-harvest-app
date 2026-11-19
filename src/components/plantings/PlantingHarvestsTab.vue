@@ -1,44 +1,53 @@
 <template>
   <div>
-    <v-select
-        :model-value="year"
-        @update:model-value="year => $emit('update:year', year)"
-        :items="years"
-        label="Planting Year"
-        variant="solo"
-        density="compact"
-        class="year-select"
-    />
+    <div class="d-flex align-center flex-wrap ga-2 mb-2">
+      <v-select
+          :model-value="year"
+          @update:model-value="year => $emit('update:year', year)"
+          :items="years"
+          label="Planting Year"
+          variant="solo"
+          density="compact"
+          hide-details
+          class="year-select"
+      />
 
-    <template v-if="sortedHarvests.length > 0">
-      <div class="d-flex flex-wrap ga-1 mb-2 totals">
-        <v-chip
-            v-for="total in totalsByType"
-            :key="total.harvestTypeId"
-            size="small"
-        >
-          {{ formatQuantity(total.quantity, total.harvestType) }}
-        </v-chip>
-      </div>
-
-      <v-table density="compact">
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Quantity</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-              v-for="harvest in sortedHarvests"
-              :key="harvest.harvestId"
+      <v-card
+          v-if="sortedHarvests.length > 0"
+          variant="tonal"
+          density="compact"
+          class="ml-auto totals"
+      >
+        <v-card-text class="d-flex flex-wrap align-center ga-1 pa-2">
+          <span class="mr-1 totals-label">Totals</span>
+          <v-chip
+              v-for="total in totalsByType"
+              :key="total.harvestTypeId"
+              size="small"
           >
-            <td>{{ harvest.harvestDate }}</td>
-            <td>{{ formatQuantity(harvest.quantity, harvest.harvestType) }}</td>
-          </tr>
-        </tbody>
-      </v-table>
-    </template>
+            {{ formatQuantity(total.quantity, total.harvestType) }}
+          </v-chip>
+        </v-card-text>
+      </v-card>
+    </div>
+
+    <v-table v-if="sortedHarvests.length > 0" density="compact">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Quantity</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+            v-for="harvest in sortedHarvests"
+            :key="harvest.harvestId"
+        >
+          <td>{{ harvest.harvestDate }}</td>
+          <td>{{ formatQuantity(harvest.quantity, harvest.harvestType) }}</td>
+        </tr>
+      </tbody>
+    </v-table>
 
     <div v-else-if="loaded" class="pa-4">No harvests in {{ year }}.</div>
   </div>
@@ -95,5 +104,9 @@ export default {
 <style scoped>
 .year-select {
   max-width: 200px;
+}
+
+.totals-label {
+  font-weight: 500;
 }
 </style>
