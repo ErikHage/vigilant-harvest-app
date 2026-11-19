@@ -62,10 +62,24 @@ export function createGardenDriver() {
             expectThat(answered(reply, status.created), 'the service to create it (201)', describe(reply), what);
         },
 
-        async createPlantingYear(year) {
-            const what = `arranging the planting year ${year.plantingYear}`;
+        /**
+         * Adds `year`. With a `previousPlantingYear`, it carries forward the
+         * plantings named in `carrying`, found by name; the service needs the
+         * list, even empty, whenever it's sent the previous year.
+         */
+        async createPlantingYear(year, previousPlantingYear = undefined, carrying = []) {
+            const what = `arranging the planting year ${year.plantingYear}`
+                + (carrying.length > 0 ? `, carrying forward ${carrying.join(', ')}` : '');
 
-            const reply = await asGardener(token => insertPlantingYear(token, year));
+            const reply = await asGardener(async token => {
+                if (previousPlantingYear === undefined) {
+                    return insertPlantingYear(token, year);
+                }
+                const listed = await listPlantings(token);
+                const carryForwardPlantingIds = carrying.map(name =>
+                    findIn(listed, each => each.name === name, `the planting ${name}`).plantingId);
+                return insertPlantingYear(token, { ...year, previousPlantingYear, carryForwardPlantingIds });
+            });
             expectThat(answered(reply, status.created), 'the service to create it (201)', describe(reply), what);
         },
 

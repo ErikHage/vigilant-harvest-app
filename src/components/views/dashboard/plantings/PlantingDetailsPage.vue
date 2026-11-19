@@ -89,6 +89,7 @@
                   fixed-tabs>
                 <v-tab value="details">Details</v-tab>
                 <v-tab value="history">History</v-tab>
+                <v-tab value="harvests">Harvests</v-tab>
               </v-tabs>
 
               <v-card-text>
@@ -107,6 +108,15 @@
                         :history="sortedHistory"/>
                   </v-tabs-window-item>
 
+                  <v-tabs-window-item value="harvests">
+                    <planting-harvests-tab
+                        :harvests="harvestsLoaded ? harvests : []"
+                        :years="harvestYears"
+                        :year="harvestYear"
+                        :loaded="harvestsLoaded"
+                        @update:year="chooseHarvestYear"/>
+                  </v-tabs-window-item>
+
                 </v-tabs-window>
               </v-card-text>
             </v-card>
@@ -120,7 +130,7 @@
 
 <script>
 import { mapActions, mapState } from "pinia";
-import { usePlantingsStore, usePlantsStore, usePlotsStore } from "@/store";
+import { useHarvestsStore, usePlantingsStore, usePlantsStore, usePlotsStore } from "@/store";
 import plantingUtils from '@/utils/plantings';
 import sorting from '@/utils/sorting';
 import { toLocalDate } from '@/utils/dates';
@@ -135,6 +145,7 @@ import DeletePlantingActionDialog from "@/components/plantings/DeletePlantingAct
 import CommentPlantingActionDialog from "@/components/plantings/CommentPlantingActionDialog.vue";
 import PlantingDetailsTab from "@/components/plantings/PlantingDetailsTab.vue";
 import PlantingHistoryTab from "@/components/plantings/PlantingHistoryTab.vue";
+import PlantingHarvestsTab from "@/components/plantings/PlantingHarvestsTab.vue";
 
 const { plantingActions, plantingStatuses } = plantingUtils;
 
@@ -152,6 +163,7 @@ export default {
   name: "PlantingDetailsPage",
 
   components: {
+    PlantingHarvestsTab,
     PlantingHistoryTab,
     PlantingDetailsTab,
     CommentPlantingActionDialog,
@@ -168,6 +180,8 @@ export default {
     return {
       tab: null,
       enableEdit: false,
+      harvestYear: null,
+      harvestsLoaded: false,
       actionMapping: {
         'CREATED': ['Start', 'Plant', 'Delete'],
         'STARTED': ['Plant', 'Split', 'Retire'],
@@ -211,6 +225,13 @@ export default {
       plantsAlertVisible: 'alertVisible',
     }),
 
+    ...mapState(useHarvestsStore, {
+      harvests: 'harvests',
+      harvestsAlertType: 'alertType',
+      harvestsAlertMessage: 'alertMessage',
+      harvestsAlertVisible: 'alertVisible',
+    }),
+
     ...mapState(usePlantingsStore, {
       plantingsById: 'plantingsById',
       plantingsAlertType: 'alertType',
@@ -240,6 +261,17 @@ export default {
       return plantingUtils.mapPlantingStatusToColor(this.plantingCopy?.currentStatus);
     },
 
+    // the service can send plantingYears empty, so the current year is one too
+    harvestYears() {
+      const planting = this.planting;
+      if (!planting) {
+        return [];
+      }
+      return [...new Set([planting.currentPlantingYear, ...(planting.plantingYears ?? [])])]
+          .filter(year => year != null)
+          .sort((a, b) => b - a);
+    },
+
     sortedHistory() {
       // a copy: the history is the store's own array
       return [...(this.plantingCopy?.statusHistory ?? [])].sort(sorting.sortPlantingHistoryByDateCreated);
@@ -261,7 +293,12 @@ export default {
           isVisible: this.plotsAlertVisible,
           type: this.plotsAlertType,
           message: this.plotsAlertMessage,
-        }
+        },
+        {
+          isVisible: this.harvestsAlertVisible,
+          type: this.harvestsAlertType,
+          message: this.harvestsAlertMessage,
+        },
       ];
     },
   },
@@ -269,6 +306,10 @@ export default {
   methods: {
     ...mapActions(usePlotsStore, [
       'fetchPlots',
+    ]),
+
+    ...mapActions(useHarvestsStore, [
+      'searchHarvests',
     ]),
 
     ...mapActions(usePlantingsStore, [
@@ -311,6 +352,28 @@ export default {
         dateCreated: planting.dateCreated,
         dateModified: planting.dateModified,
       };
+
+      // the year chosen stays chosen, while the planting is still in it
+      if (!this.harvestYears.includes(this.harvestYear)) {
+        this.harvestYear = planting.currentPlantingYear;
+      }
+      await this.loadHarvests();
+    },
+
+    async chooseHarvestYear(year) {
+      this.harvestYear = year;
+      await this.loadHarvests();
+    },
+
+    // The harvests field is shared with the Review Harvests page, which
+    // searches again whenever it opens. It's emptied first, so a failed search
+    // shows nothing, and the store's alert says why, rather than whatever was
+    // there before
+    async loadHarvests() {
+      this.harvestsLoaded = false;
+      useHarvestsStore().$patch({ harvests: [] });
+      await this.searchHarvests(this.harvestYear, { plantingId: this.plantingId });
+      this.harvestsLoaded = true;
     },
 
     showAction(actionName) {

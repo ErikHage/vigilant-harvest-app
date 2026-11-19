@@ -493,10 +493,11 @@ export const useHarvestsStore = defineStore('harvests', {
                 this.setAlertMessage(err, 'error', 'error fetching harvest summaries by year');
             }
         },
-        async searchHarvests(year) {
+        // filters narrow the year's harvests: { plantingId }
+        async searchHarvests(year, filters = {}) {
             try {
                 this.harvests = await harvestsApi
-                    .searchHarvests(storageUtils.tryToLoadTokenFromStorage(), year);
+                    .searchHarvests(storageUtils.tryToLoadTokenFromStorage(), year, filters);
             } catch (err) {
                 this.setAlertMessage(err, 'error', 'error searching harvests page');
             }

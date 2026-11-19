@@ -25,6 +25,9 @@ export const path = () => required();
 /** A planting year the test named, by its alias. */
 export const year = () => required();
 
+/** As `year`, where one may be left out. */
+export const optionalYear = () => optional();
+
 /** A dashboard page, as the menu leads to it: `plants`, `stats`, `activitySchedules`, ... */
 export const destination = () => required().allowedValues(...dashboardDestinations);
 

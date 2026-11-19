@@ -161,6 +161,36 @@ test.describe('A planting\'s details page', () => {
         await plantingDetailsPage.checkTargetDateKeptByItsPicker('planting: early');
     });
 
+    // A harvest is filed under the planting's current year, so a harvest
+    // before and after carrying the planting forward lands in each year. The
+    // other planting's harvest, in the same year, shows the search is for
+    // this planting alone
+    test('shows a planting\'s harvests a year at a time, its current year first', async ({
+        garden, plantingsPage, plantingDetailsPage,
+    }) => {
+        await garden.hasPlanting('planting: early', 'plant: sungold', 'year: spring', 'status: planted');
+        await garden.hasPlanting('planting: late', 'plant: sungold', 'year: spring', 'status: planted');
+        await garden.hasHarvest('planting: early', 'quantity: 3', 'on: 2026-07-10');
+        await garden.hasHarvest('planting: early', 'quantity: 4', 'on: 2026-07-24');
+        await garden.hasHarvest('planting: late', 'quantity: 9', 'on: 2026-07-10');
+        await garden.hasPlantingYear('year: autumn', 'after: spring', 'carrying: early, late');
+        await garden.hasHarvest('planting: early', 'quantity: 5', 'on: 2026-09-20');
+
+        await view(plantingsPage, plantingDetailsPage, 'early');
+
+        await plantingDetailsPage.checkShowsHarvests('planting: early', 'year: autumn');
+        await plantingDetailsPage.chooseHarvestYear('year: spring');
+        await plantingDetailsPage.checkShowsHarvests('planting: early', 'year: spring');
+    });
+
+    test('says when a planting has no harvests in its year', async ({ garden, plantingsPage, plantingDetailsPage }) => {
+        await garden.hasPlanting('planting: early', 'plant: sungold', 'year: spring');
+
+        await view(plantingsPage, plantingDetailsPage, 'early');
+
+        await plantingDetailsPage.checkShowsHarvests('planting: early', 'year: spring');
+    });
+
     // It used to throw after saying so, copying the planting it didn't get
     // (backlog A25)
     test('says when a planting doesn\'t exist', async ({ plantingDetailsPage }) => {

@@ -165,6 +165,7 @@ const newPlantingDetails = (alias, plant, plantingYear) => ({
     harvests: [],
     harvested: 0,
     plantingYear,
+    plantingYears: [plantingYear],
     seedSource: 'Seed Savers',
     lotNumber: 'LOT-7',
     leadTimeWeeks: 6,
@@ -382,6 +383,18 @@ export function createWorld(page) {
             return copyOf(plantingsByAlias.get(alias));
         },
 
+        /**
+         * Remembers the planting called `alias` as carried forward into
+         * `plantingYear`: in that year too, and its current one.
+         */
+        carryForward(alias, plantingYear) {
+            known(plantingsByAlias, alias, 'planting', 'garden.hasPlanting');
+            const planting = plantingsByAlias.get(alias);
+            planting.plantingYear = plantingYear;
+            planting.plantingYears = [...planting.plantingYears, plantingYear];
+            return copyOf(planting);
+        },
+
         /** As `editPlot`, a new name for the planting called `alias`. */
         renamePlanting(alias) {
             known(plantingsByAlias, alias, 'planting', 'garden.hasPlanting');
@@ -408,12 +421,12 @@ export function createWorld(page) {
          * Remembers `quantity` more harvested from the planting called `alias`,
          * of the harvest `type`, or of its plant's default type if left out,
          * `on` a day, `YYYY-MM-DD`, or null if the page chose it. Its harvests
-         * go with it.
+         * go with it, each filed under the planting's current year.
          */
         recordHarvest(alias, quantity, on = null, type = undefined) {
             known(plantingsByAlias, alias, 'planting', 'garden.hasPlanting');
             const planting = plantingsByAlias.get(alias);
-            planting.harvests.push({ on, quantity, type: type ?? planting.harvestType });
+            planting.harvests.push({ on, quantity, type: type ?? planting.harvestType, plantingYear: planting.plantingYear });
             planting.harvested += quantity;
             return copyOf(planting);
         },

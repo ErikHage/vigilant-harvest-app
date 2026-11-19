@@ -24,9 +24,10 @@ async function fetchHarvestSummary(actorToken, plantingYear) {
     return response.data;
 }
 
-async function searchHarvests(actorToken, year) {
+// filters narrow the year's harvests, as the service names them: { plantingId }
+async function searchHarvests(actorToken, year, filters = {}) {
     const response = await axios.get(`${vigilantHarvestServiceUrl.v0}/harvests/search`, {
-        params: { year },
+        params: { year, ...filters },
         headers: {
             'x-feral-auth-token': actorToken,
         },

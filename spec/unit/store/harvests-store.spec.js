@@ -155,12 +155,21 @@ describe('useHarvestsStore', () => {
             action: 'searchHarvests',
             args: [2026],
             api: 'searchHarvests',
-            apiArgs: ['a-token', 2026],
+            apiArgs: ['a-token', 2026, {}],
             result: [harvest],
             field: 'harvests',
             failure: 'error searching harvests page',
         },
-    ])('$action', ({ action, args, api, apiArgs, result, field, failure }) => {
+        {
+            action: 'searchHarvests',
+            args: [2026, { plantingId: 'p-1' }],
+            api: 'searchHarvests',
+            apiArgs: ['a-token', 2026, { plantingId: 'p-1' }],
+            result: [harvest],
+            field: 'harvests',
+            failure: 'error searching harvests page',
+        },
+    ])('$action with $args', ({ action, args, api, apiArgs, result, field, failure }) => {
         it(`stores what the service returns in ${field}`, async () => {
             harvestsApi[api].mockResolvedValue(result);
 

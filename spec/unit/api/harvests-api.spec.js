@@ -43,6 +43,13 @@ describe('harvestsApi', () => {
             config: withToken({ params: { year: 2026 } }),
         },
         {
+            name: 'searchHarvests, for a planting',
+            call: () => harvestsApi.searchHarvests('a-token', 2026, { plantingId: 'p-1' }),
+            verb: 'get',
+            url: `${serviceUrl}/harvests/search`,
+            config: withToken({ params: { year: 2026, plantingId: 'p-1' } }),
+        },
+        {
             name: 'fetchHarvestStats',
             call: () => harvestsApi.fetchHarvestStats('a-token', 2026, 'Planting'),
             verb: 'get',

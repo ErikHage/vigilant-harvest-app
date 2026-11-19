@@ -1,8 +1,8 @@
 import { parseDslArgs } from '@feral-auth/ts-simple-dsl';
 
 import {
-    arrangedStatus, category, entry, harvestType, item, leap, on, optionalPlot, plant, planting, plot, quantity, schedule, schedules,
-    subcategory, tags, year,
+    arrangedStatus, category, entry, harvestType, item, leap, on, optionalPlot, optionalYear, plant, planting, plantings, plot,
+    quantity, schedule, schedules, subcategory, tags, year,
 } from '../params';
 
 /**
@@ -87,11 +87,45 @@ export function createGarden(world, driver) {
          * There is a planting year called `year`: a year from 8000 to 8999,
          * with its frost and planting dates in it. Steps name it by its alias.
          * `leap: yes` makes it a leap year, and `leap: no` any other.
+         *
+         * With `after`, it's the year after the one the test named there,
+         * `carrying` forward the plantings the test named, each planted in
+         * that year: the same plantings, now in both years, with this one
+         * their current year, under which their next harvests are filed. The
+         * service carries forward only when a year is added, so the two go
+         * together.
          */
         async hasPlantingYear(...args) {
-            const params = parseDslArgs(args, { year: year(), leap: leap() });
+            const params = parseDslArgs(args, {
+                year: year(), leap: leap(), after: optionalYear(), carrying: plantings(),
+            });
+            if (params.after === undefined) {
+                if (params.carrying.length > 0) {
+                    throw new Error('hasPlantingYear: `carrying` needs `after`, the year they are carried from');
+                }
+                await driver.createPlantingYear(world.newPlantingYear(params.year, params.leap));
+                return;
+            }
+            if (params.leap !== undefined) {
+                throw new Error('hasPlantingYear: with `after`, the year is fixed, so `leap` can\'t choose it');
+            }
 
-            await driver.createPlantingYear(world.newPlantingYear(params.year, params.leap));
+            const previous = world.plantingYearNamed(params.after).plantingYear;
+            const carried = params.carrying.map(alias => {
+                const planting = world.plantingNamed(alias);
+                if (planting.status !== 'PLANTED' || planting.plantingYear !== previous) {
+                    throw new Error(`hasPlantingYear: only a planting planted in "${params.after}" is carried forward -- `
+                        + `arrange "${alias}" with garden.hasPlanting(..., 'year: ${params.after}', 'status: planted')`);
+                }
+                return planting;
+            });
+            const next = world.newNextPlantingYear(params.year, params.after, {
+                lastFrostDate: `${previous + 1}-04-15`, targetPlantingDate: `${previous + 1}-05-01`,
+            });
+            for (const alias of params.carrying) {
+                world.carryForward(alias, next.plantingYear);
+            }
+            await driver.createPlantingYear(next, previous, carried.map(planting => planting.name));
         },
 
         /** There is a plant category called `category`, with no subcategories yet. */

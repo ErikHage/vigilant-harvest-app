@@ -1,6 +1,6 @@
 import { parseDslArgs } from '@feral-auth/ts-simple-dsl';
 
-import { actions, count, planting, plot, splitInto } from '../params';
+import { actions, count, planting, plot, splitInto, year } from '../params';
 import { dashboardComponents } from './routed-page';
 
 /**
@@ -150,6 +150,28 @@ export function createPlantingDetailsPage(world, driver) {
             const params = parseDslArgs(args, { planting: planting() });
 
             await driver.historyShowsRename(world.plantingNamed(params.planting));
+        },
+
+        /**
+         * The Harvests tab, on the planting `year` the test named, shows the
+         * `planting`'s harvests filed in that year and nothing else: each day
+         * and quantity, newest first, and a total for each harvest type; or,
+         * with none, says so.
+         */
+        async checkShowsHarvests(...args) {
+            const params = parseDslArgs(args, { planting: planting(), year: year() });
+
+            const { plantingYear } = world.plantingYearNamed(params.year);
+            const harvests = world.plantingNamed(params.planting).harvests
+                .filter(harvest => harvest.plantingYear === plantingYear);
+            await driver.harvestsShow(plantingYear, harvests);
+        },
+
+        /** On the Harvests tab, chooses the planting `year` the test named. */
+        async chooseHarvestYear(...args) {
+            const params = parseDslArgs(args, { year: year() });
+
+            await driver.chooseHarvestYear(world.plantingYearNamed(params.year).plantingYear);
         },
 
         /** The History tab shows the `planting`'s current status, and each comment the test made. */

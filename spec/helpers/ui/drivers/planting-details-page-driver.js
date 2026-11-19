@@ -1,4 +1,4 @@
-import { expectDisabled, expectHidden, expectText, expectThat, expectUrl, expectValue, expectVisible } from './assertions';
+import { expectCount, expectDisabled, expectHidden, expectText, expectThat, expectUrl, expectValue, expectVisible } from './assertions';
 import { pageAlertSays } from './page-alert';
 import { chooseOption } from './select';
 import { escaped, openPath, urlOf } from './urls';
@@ -30,6 +30,13 @@ export function createPlantingDetailsPageDriver(page, pageErrors) {
     const dateAfter = label => main.locator('p', { hasText: new RegExp(`^${label}$`) }).locator('xpath=..').locator('h3');
     const calendarAfter = label => main.locator('p', { hasText: new RegExp(`^${label}$`) }).locator('xpath=..')
         .getByRole('button');
+
+    const harvestsTab = main.locator('.v-window-item--active');
+
+    async function openHarvestsTab() {
+        await main.getByRole('tab', { name: 'Harvests', exact: true }).click();
+        await expectVisible(harvestsTab.getByRole('combobox', { name: 'Planting Year', exact: true }), 'opening the Harvests tab');
+    }
 
     async function openAction(button, title) {
         await actionsCard.getByRole('button', { name: button, exact: true }).click();
@@ -67,7 +74,10 @@ export function createPlantingDetailsPageDriver(page, pageErrors) {
             await expectValue(field('source'), planting.seedSource, what);
             await expectValue(field('Lot#'), planting.lotNumber, what);
             await expectValue(field('Current Planting Year'), String(planting.plantingYear), what);
-            await expectValue(field('Planting Years'), String(planting.plantingYear), what);
+            // as the tab shows them: one year, or the first and last
+            const years = planting.plantingYears;
+            await expectValue(field('Planting Years'),
+                years.length > 1 ? `${years[0]} - ${years[years.length - 1]}` : String(years[0]), what);
             await expectText(chosenIn('Select Plant'), planting.plantName, what);
             await expectValue(numberField('Transplant Lead Time (weeks)'), shown(planting.leadTimeWeeks), what);
             await expectText(dateAfter('Target Planting Date'), planting.targetPlantingDate ?? '--', what);
@@ -158,6 +168,49 @@ export function createPlantingDetailsPageDriver(page, pageErrors) {
             await field('Name').fill(name);
             await actionsCard.getByRole('button', { name: 'Update', exact: true }).click();
             await pageAlertSays(page, 'planting updated successfully', 'updating the planting');
+        },
+
+        /** Chooses `plantingYear` in the Harvests tab's year select. */
+        async chooseHarvestYear(plantingYear) {
+            await openHarvestsTab();
+            await chooseOption(page, harvestsTab.getByRole('combobox', { name: 'Planting Year', exact: true }),
+                String(plantingYear));
+        },
+
+        /**
+         * The Harvests tab has `plantingYear` chosen and shows exactly
+         * `harvests`, each `{ on, quantity, type }`: a row a day, newest
+         * first, and a chip a type, its total, largest first. With none, it
+         * says so. As the app writes a quantity: with its type, but for the
+         * unspecified type, which it leaves bare.
+         */
+        async harvestsShow(plantingYear, harvests) {
+            const what = `the Harvests tab, on ${plantingYear}`;
+            const quantityOf = (quantity, type) => (type && type !== 'unspecified' ? `${quantity} ${type}` : `${quantity}`);
+
+            await openHarvestsTab();
+            await expectText(harvestsTab.locator('[class*="__selection-text"]'), String(plantingYear), what);
+            if (harvests.length === 0) {
+                // the message shows only once the year's search is back
+                await expectVisible(harvestsTab.getByText(`No harvests in ${plantingYear}.`, { exact: true }), what);
+                await expectCount(harvestsTab.getByRole('table'), 0, what);
+                return;
+            }
+
+            const totals = {};
+            for (const { quantity, type } of harvests) {
+                totals[type] = (totals[type] ?? 0) + quantity;
+            }
+            // YYYY-MM-DD days sort as the days do
+            const byDay = harvests.map(harvest => harvest.on).sort().reverse();
+            const rows = byDay.flatMap(day => {
+                const { quantity, type } = harvests.find(harvest => harvest.on === day);
+                return [day, quantityOf(quantity, type)];
+            });
+            await expectText(harvestsTab.locator('tbody td'), rows, what);
+            await expectText(harvestsTab.locator('.v-chip'), Object.entries(totals)
+                .sort(([, a], [, b]) => b - a)
+                .map(([type, total]) => quantityOf(total, type)), what);
         },
 
         /**

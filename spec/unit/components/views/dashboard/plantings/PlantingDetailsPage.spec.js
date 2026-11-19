@@ -3,16 +3,18 @@ import { createTestingPinia } from '@pinia/testing';
 import PlantingDetailsPage from '@/components/views/dashboard/plantings/PlantingDetailsPage.vue';
 import PlantingDetailsTab from '@/components/plantings/PlantingDetailsTab.vue';
 import PlantingHistoryTab from '@/components/plantings/PlantingHistoryTab.vue';
+import PlantingHarvestsTab from '@/components/plantings/PlantingHarvestsTab.vue';
 import CommentPlantingActionDialog from '@/components/plantings/CommentPlantingActionDialog.vue';
 import StartPlantingActionDialog from '@/components/plantings/StartPlantingActionDialog.vue';
 import SplitPlantingActionDialog from '@/components/plantings/SplitPlantingActionDialog.vue';
 import PlantPlantingActionDialog from '@/components/plantings/PlantPlantingActionDialog.vue';
 import DeletePlantingActionDialog from '@/components/plantings/DeletePlantingActionDialog.vue';
 import RetirePlantingActionDialog from '@/components/plantings/RetirePlantingActionDialog.vue';
-import { usePlantingsStore } from '@/store';
+import { useHarvestsStore, usePlantingsStore } from '@/store';
 import { mountWithPlugins } from '../../../../../helpers/mount';
 import { buttonLabelled } from '../../../../../helpers/fields';
 import { aPlanting } from '../../../../../helpers/plantings';
+import { aHarvest } from '../../../../../helpers/harvests';
 import { httpError } from '../../../../../helpers/http-errors';
 
 const plants = [{ plantId: 'plant-1', friendlyName: 'Provider bush bean' }];
@@ -26,10 +28,12 @@ async function mountPage({ planting = aPlanting(), state = {}, beforeMount = () 
             plantings: { plantingsById: planting ? { 'planting-1': planting } : {}, ...state.plantings },
             plants: { plants, plantsById: { 'plant-1': plants[0] }, ...state.plants },
             plots: { plots, plotsById: { 'plot-1': plots[0] }, ...state.plots },
+            harvests: { harvests: [], ...state.harvests },
         },
     });
     const store = usePlantingsStore(pinia);
-    beforeMount(store);
+    const harvestsStore = useHarvestsStore(pinia);
+    beforeMount(store, harvestsStore);
     const $router = { push: vi.fn() };
     const wrapper = mountWithPlugins(PlantingDetailsPage, {
         global: {
@@ -47,7 +51,7 @@ async function mountPage({ planting = aPlanting(), state = {}, beforeMount = () 
         },
     });
     await flushPromises();
-    return { wrapper, store, $router, pinia };
+    return { wrapper, store, harvestsStore, $router, pinia };
 }
 
 const actionDialogs = [
@@ -135,6 +139,7 @@ describe('PlantingDetailsPage', () => {
             ['plantings', 'error performing planting action PLANT'],
             ['plants', 'error fetching plants'],
             ['plots', 'error fetching plots'],
+            ['harvests', 'error searching harvests page'],
         ])("shows the %s store's alert", async (store, message) => {
             const { wrapper } = await mountPage({ state: { [store]: { alertVisible: true, alertType: 'error', alertMessage: message } } });
 
@@ -159,6 +164,79 @@ describe('PlantingDetailsPage', () => {
             });
 
             expect(shownActions(wrapper)).toEqual([]);
+        });
+    });
+
+    describe('harvests', () => {
+        const openHarvests = async wrapper => {
+            await wrapper.findAll('.v-tab').find(tab => tab.text() === 'Harvests').trigger('click');
+            await flushPromises();
+            return wrapper.findComponent(PlantingHarvestsTab);
+        };
+
+        it("searches the planting's current year for its harvests", async () => {
+            const { harvestsStore } = await mountPage();
+
+            expect(harvestsStore.searchHarvests).toHaveBeenCalledWith(2026, { plantingId: 'planting-1' });
+        });
+
+        it("shows what the search found, offering the planting's years, newest first", async () => {
+            const found = [aHarvest()];
+            const { wrapper } = await mountPage({
+                beforeMount: (_, harvestsStore) => harvestsStore.searchHarvests.mockImplementation(async () => {
+                    harvestsStore.harvests = found;
+                }),
+            });
+
+            const tab = await openHarvests(wrapper);
+
+            expect(tab.props()).toMatchObject({ harvests: found, years: [2026, 2025], year: 2026, loaded: true });
+        });
+
+        // the service can send plantingYears empty
+        it('offers the current year when the planting lists no years', async () => {
+            const { wrapper } = await mountPage({ planting: aPlanting({ plantingYears: [] }) });
+
+            expect((await openHarvests(wrapper)).props('years')).toEqual([2026]);
+        });
+
+        it('searches again when another year is chosen', async () => {
+            const { wrapper, harvestsStore } = await mountPage();
+            const tab = await openHarvests(wrapper);
+
+            await tab.vm.$emit('update:year', 2025);
+            await flushPromises();
+
+            expect(harvestsStore.searchHarvests).toHaveBeenLastCalledWith(2025, { plantingId: 'planting-1' });
+            expect(tab.props('year')).toBe(2025);
+        });
+
+        it('keeps the year chosen when the page reloads after an action', async () => {
+            const { wrapper, harvestsStore } = await mountPage();
+            await (await openHarvests(wrapper)).vm.$emit('update:year', 2025);
+            await flushPromises();
+
+            await wrapper.findComponent(CommentPlantingActionDialog).props('onSubmit')('COMMENT', { comment: 'note' });
+            await flushPromises();
+
+            expect(harvestsStore.searchHarvests).toHaveBeenLastCalledWith(2025, { plantingId: 'planting-1' });
+        });
+
+        // The field is shared with the Review Harvests page: a failed search
+        // shows none of what it held, and the store's alert says why
+        it('shows no harvests left in the store when the search fails', async () => {
+            const { wrapper } = await mountPage({ state: { harvests: { harvests: [aHarvest({ plantingId: 'another' })] } } });
+
+            expect((await openHarvests(wrapper)).props('harvests')).toEqual([]);
+        });
+
+        it('shows nothing while the search is on its way', async () => {
+            const { wrapper } = await mountPage({
+                state: { harvests: { harvests: [aHarvest()] } },
+                beforeMount: (_, harvestsStore) => harvestsStore.searchHarvests.mockReturnValue(new Promise(() => {})),
+            });
+
+            expect((await openHarvests(wrapper)).props()).toMatchObject({ harvests: [], loaded: false });
         });
     });
 
