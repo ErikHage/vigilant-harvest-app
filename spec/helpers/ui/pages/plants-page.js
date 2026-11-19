@@ -61,8 +61,8 @@ export function createPlantsPage(world, driver) {
 
         /**
          * Searching by the plant's name (`by: name`, the default), or its
-         * category's or subcategory's, finds that plant, with its category and
-         * subcategory, and no other.
+         * category's or subcategory's, finds that plant, with its category,
+         * subcategory and default harvest type, and no other.
          */
         async checkPlantFound(...args) {
             const params = parseDslArgs(args, { plant: plant(), by: by() });

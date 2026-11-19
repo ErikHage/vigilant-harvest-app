@@ -32,13 +32,16 @@ function sortPlantingHistoryByDateCreated(a, b) {
     return 0;
 }
 
-// By a text `property`, ignoring case: `-property` sorts it descending. For
-// the tables whose column headers choose the sort
+// By a text `property`, ignoring case: `-property` sorts it descending, and
+// a dotted path (`harvesting.defaultHarvestType`) reaches into the item, a
+// missing step as a missing value. For the tables whose column headers choose
+// the sort
 function byProperty(property) {
     const descending = property.startsWith('-');
-    const field = descending ? property.substring(1) : property;
+    const path = (descending ? property.substring(1) : property).split('.');
+    const valueOf = item => path.reduce((value, key) => value?.[key], item);
 
-    return (a, b) => compareText(a[field], b[field]) * (descending ? -1 : 1);
+    return (a, b) => compareText(valueOf(a), valueOf(b)) * (descending ? -1 : 1);
 }
 
 export default {

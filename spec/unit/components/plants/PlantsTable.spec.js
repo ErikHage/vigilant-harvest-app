@@ -3,9 +3,18 @@ import { tableRows } from '../../../helpers/tables';
 import PlantsTable from '@/components/plants/PlantsTable.vue';
 
 const plants = () => [
-    { plantId: 'plant-1', friendlyName: 'Provider bush bean', category: 'Legumes', subcategory: 'Beans' },
-    { plantId: 'plant-2', friendlyName: 'Cherokee Purple', category: 'Nightshades', subcategory: 'Tomatoes' },
-    { plantId: 'plant-3', friendlyName: 'Asparagus', category: 'Perennials', subcategory: 'Stalks' },
+    {
+        plantId: 'plant-1', friendlyName: 'Provider bush bean', category: 'Legumes', subcategory: 'Beans',
+        harvesting: { defaultHarvestType: 'weight (lb)' },
+    },
+    {
+        plantId: 'plant-2', friendlyName: 'Cherokee Purple', category: 'Nightshades', subcategory: 'Tomatoes',
+        harvesting: { defaultHarvestType: 'bunch' },
+    },
+    {
+        plantId: 'plant-3', friendlyName: 'Asparagus', category: 'Perennials', subcategory: 'Stalks',
+        harvesting: { defaultHarvestType: 'count' },
+    },
 ];
 
 function mountTable(props) {
@@ -25,19 +34,20 @@ function sortIcons(wrapper) {
 }
 
 async function clickSort(wrapper, column) {
-    const index = { name: 0, category: 1, subcategory: 2 }[column];
+    const index = { name: 0, category: 1, subcategory: 2, 'harvest type': 3 }[column];
     await wrapper.findAll('thead th .v-icon')[index].trigger('click');
 }
 
 describe('PlantsTable', () => {
-    it('lists each plant with its category and subcategory, sorted by name', () => {
+    it('lists each plant with its category, subcategory and default harvest type, sorted by name', () => {
         const wrapper = mountTable();
 
-        expect(wrapper.findAll('thead th').map(th => th.text().trim())).toEqual(['Name', 'Category', 'Subcategory', '']);
+        expect(wrapper.findAll('thead th').map(th => th.text().trim()))
+            .toEqual(['Name', 'Category', 'Subcategory', 'Default Harvest Type', '']);
         expect(tableRows(wrapper)).toEqual([
-            ['Asparagus', 'Perennials', 'Stalks', ''],
-            ['Cherokee Purple', 'Nightshades', 'Tomatoes', ''],
-            ['Provider bush bean', 'Legumes', 'Beans', ''],
+            ['Asparagus', 'Perennials', 'Stalks', 'count', ''],
+            ['Cherokee Purple', 'Nightshades', 'Tomatoes', 'bunch', ''],
+            ['Provider bush bean', 'Legumes', 'Beans', 'weight (lb)', ''],
         ]);
     });
 
@@ -46,6 +56,7 @@ describe('PlantsTable', () => {
 
         expect(sortIcons(wrapper)).toEqual([
             ['mdi-sort-ascending', 'primary'],
+            ['mdi-sort', 'default'],
             ['mdi-sort', 'default'],
             ['mdi-sort', 'default'],
         ]);
@@ -67,13 +78,15 @@ describe('PlantsTable', () => {
     it.each([
         ['category', ['Provider bush bean', 'Cherokee Purple', 'Asparagus']],
         ['subcategory', ['Provider bush bean', 'Asparagus', 'Cherokee Purple']],
+        ['harvest type', ['Cherokee Purple', 'Asparagus', 'Provider bush bean']],
     ])('sorts by %s when its column is clicked', async (column, expected) => {
         const wrapper = mountTable();
 
         await clickSort(wrapper, column);
 
         expect(names(wrapper)).toEqual(expected);
-        expect(sortIcons(wrapper)[{ category: 1, subcategory: 2 }[column]]).toEqual(['mdi-sort-ascending', 'primary']);
+        expect(sortIcons(wrapper)[{ category: 1, subcategory: 2, 'harvest type': 3 }[column]])
+            .toEqual(['mdi-sort-ascending', 'primary']);
         expect(sortIcons(wrapper)[0]).toEqual(['mdi-sort', 'default']);
     });
 

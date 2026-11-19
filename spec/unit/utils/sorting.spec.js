@@ -38,6 +38,13 @@ describe('sorting', () => {
             expect(list().sort(sorting.byProperty('-name')).map(item => item.name))
                 .toEqual(['zucchini', 'Zinnia', 'arugula', null]);
         });
+
+        it('follows a dotted path, a missing step first', () => {
+            const nested = [{ id: 'a', inner: { name: 'zucchini' } }, { id: 'b' }, { id: 'c', inner: { name: 'Arugula' } }];
+
+            expect(nested.sort(sorting.byProperty('inner.name')).map(item => item.id)).toEqual(['b', 'c', 'a']);
+            expect(nested.sort(sorting.byProperty('-inner.name')).map(item => item.id)).toEqual(['a', 'c', 'b']);
+        });
     });
 
     describe('sortPlantingHistoryByDateCreated', () => {

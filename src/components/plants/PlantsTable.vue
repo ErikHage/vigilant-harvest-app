@@ -25,6 +25,13 @@
                 @click="sortByProperty('subcategory')">{{ subcategorySortIcon }}
             </v-icon>
           </th>
+          <th>
+            Default Harvest Type&nbsp;
+            <v-icon
+                :color="getSortIconColor('harvesting.defaultHarvestType')"
+                @click="sortByProperty('harvesting.defaultHarvestType')">{{ harvestTypeSortIcon }}
+            </v-icon>
+          </th>
           <th></th>
         </tr>
         </thead>
@@ -33,6 +40,7 @@
           <td>{{ item.friendlyName }}</td>
           <td>{{ item.category }}</td>
           <td>{{ item.subcategory }}</td>
+          <td>{{ item.harvesting?.defaultHarvestType }}</td>
           <td>
             <v-icon small @click="onViewClicked(item)">mdi-magnify</v-icon>
             <v-icon class="pl-2" small @click="onEditClicked(item)">mdi-pencil</v-icon>
@@ -114,7 +122,17 @@ export default {
         return 'mdi-sort-ascending';
       }
       return 'mdi-sort';
-    }
+    },
+
+    harvestTypeSortIcon() {
+      if (this.sortingField === '-harvesting.defaultHarvestType') {
+        return 'mdi-sort-descending';
+      }
+      if (this.sortingField === 'harvesting.defaultHarvestType') {
+        return 'mdi-sort-ascending';
+      }
+      return 'mdi-sort';
+    },
   },
 
   methods: {

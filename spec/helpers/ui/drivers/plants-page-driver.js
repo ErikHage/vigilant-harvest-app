@@ -72,14 +72,15 @@ export function createPlantsPageDriver(page) {
         },
 
         /**
-         * Searching for `text` shows the plant, with its category and
-         * subcategory, and nothing else.
+         * Searching for `text` shows the plant, with its category, subcategory
+         * and default harvest type, and nothing else.
          */
-        async findsPlantBy({ friendlyName, categoryName, subcategoryName }, text) {
+        async findsPlantBy({ friendlyName, categoryName, subcategoryName, harvesting }, text) {
             const what = `searching the plants for "${text}"`;
 
             await search.fill(text);
-            await expectText(rows.getByRole('cell'), [friendlyName, categoryName, subcategoryName, /.*/], what);
+            await expectText(rows.getByRole('cell'),
+                [friendlyName, categoryName, subcategoryName, harvesting.defaultHarvestType, /.*/], what);
             await expectText(count, /^1 of \d+ plants$/, what);
         },
 
