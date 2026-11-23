@@ -1,5 +1,5 @@
 <template>
-  <v-container v-if="categories != null">
+  <v-container fluid v-if="categories != null">
     <v-row>
       <v-col cols="12">
 

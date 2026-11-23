@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container fluid>
     <!-- outside the v-if, so a schedule that fails to load says so -->
     <v-row v-if="alertVisible">
       <fade-out-alert :is-visible="alertVisible" :alert-type="alertType" :message="alertMessage"/>

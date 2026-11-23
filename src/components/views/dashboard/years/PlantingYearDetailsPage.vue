@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container fluid>
     <fade-out-alert
         v-for="(alert, i) in alerts"
         :key="'alert' + i"

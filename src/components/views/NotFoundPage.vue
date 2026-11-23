@@ -1,5 +1,5 @@
 <template>
-  <v-container class="text-center">
+  <v-container fluid class="text-center">
     <h2 class="headline">Page not found</h2>
     <p class="my-3">There's no page at {{ $route.fullPath }}.</p>
     <v-btn color="primary" :to="dashboardPath">Go to the dashboard</v-btn>

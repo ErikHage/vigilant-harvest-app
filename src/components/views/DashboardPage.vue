@@ -3,7 +3,8 @@
   <dashboard-nav-drawer
       :is-planting-year-selected="plantingYear != null"
   />
-  <v-container>
+  <!-- fluid: the pages take the main area's full width, rather than Vuetify's cap for the breakpoint -->
+  <v-container fluid>
     <!-- the common store's: the planting years, loaded here for every dashboard page -->
     <fade-out-alert :is-visible="alert.isVisible" :alert-type="alert.type" :message="alert.message"/>
     <v-row>

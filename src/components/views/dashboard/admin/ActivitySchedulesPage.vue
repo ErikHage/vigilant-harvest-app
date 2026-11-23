@@ -1,5 +1,5 @@
 <template>
-  <v-container v-if="schedules != null">
+  <v-container fluid v-if="schedules != null">
     <v-row>
       <v-col cols="12">
 
