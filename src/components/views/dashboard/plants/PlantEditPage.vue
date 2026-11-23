@@ -186,7 +186,7 @@
                     density="compact"
                     variant="solo"
                 ></v-select>
-                <div class="text-caption text-medium-emphasis mx-2 mb-4">
+                <div class="text-body-small text-medium-emphasis mx-2 mb-4">
                   Applies to future harvests. Existing harvests keep the type they were recorded with.
                 </div>
                 <v-text-field v-model="plantCopy.harvesting.fruitSize" label="Fruit Size" variant="solo" density="compact"/>

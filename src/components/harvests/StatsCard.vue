@@ -2,18 +2,18 @@
   <v-card>
     <v-card-title>
       <div v-if="group.plantingName" class="title-container">
-        <h3 class="text-h5 mb-2 font-weight-medium text-primary">{{ group.plantingName }}</h3>
+        <h3 class="text-headline-small mb-2 font-weight-medium text-primary">{{ group.plantingName }}</h3>
         <div class="d-flex align-center mb-1">
           <v-icon size="small" class="me-2">mdi-sprout-outline</v-icon>
-          <span class="text-subtitle-1 text-medium-emphasis">{{ group.plantName }}</span>
+          <span class="text-body-large text-medium-emphasis">{{ group.plantName }}</span>
         </div>
         <div class="d-flex align-center" v-if="group.plotName">
           <v-icon size="small" class="me-2">mdi-vector-square</v-icon>
-          <span class="text-subtitle-2 text-medium-emphasis">{{ group.plotName }}</span>
+          <span class="text-title-small text-medium-emphasis">{{ group.plotName }}</span>
         </div>
       </div>
       <div v-else>
-        <h3 class="text-h5 font-weight-medium text-primary">{{ group.plantName }}</h3>
+        <h3 class="text-headline-small font-weight-medium text-primary">{{ group.plantName }}</h3>
       </div>
     </v-card-title>
     <v-card-text>

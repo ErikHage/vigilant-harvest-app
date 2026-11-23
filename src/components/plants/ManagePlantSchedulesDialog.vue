@@ -10,17 +10,17 @@
       <v-card>
         <v-card-title>
           <span class="headline">Manage Schedules</span>
-          <div class="text-body-2 text-medium-emphasis mt-1">{{ plantName }}</div>
+          <div class="text-body-medium text-medium-emphasis mt-1">{{ plantName }}</div>
         </v-card-title>
 
         <v-card-text>
           <v-alert v-if="saveError" type="error" density="compact" class="mb-4">{{ saveError }}</v-alert>
           <!-- Current schedules -->
-          <div class="text-caption text-disabled text-uppercase mb-2" style="letter-spacing:.05em">
+          <div class="text-body-small text-disabled text-uppercase mb-2" style="letter-spacing:.05em">
             Assigned schedules
           </div>
 
-          <div v-if="workingSchedules.length === 0" class="text-body-2 text-disabled py-2">
+          <div v-if="workingSchedules.length === 0" class="text-body-medium text-disabled py-2">
             No schedules currently assigned
           </div>
 
@@ -67,7 +67,7 @@
           <v-divider class="mb-4" />
 
           <!-- Add a schedule -->
-          <div class="text-caption text-disabled text-uppercase mb-2" style="letter-spacing:.05em">
+          <div class="text-body-small text-disabled text-uppercase mb-2" style="letter-spacing:.05em">
             Add a schedule
           </div>
 
@@ -96,7 +96,7 @@
 
           <!-- Schedules pending add -->
           <div v-if="schedulesToAdd.length > 0">
-            <div class="text-caption text-disabled text-uppercase mt-3 mb-1" style="letter-spacing:.05em">
+            <div class="text-body-small text-disabled text-uppercase mt-3 mb-1" style="letter-spacing:.05em">
               Pending addition
             </div>
             <v-list density="compact" lines="two" class="pa-0">

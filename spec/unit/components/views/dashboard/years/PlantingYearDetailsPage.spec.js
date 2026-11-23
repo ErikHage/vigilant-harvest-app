@@ -41,7 +41,7 @@ async function mountPage({ year = '2026', plantingYear = year2026, yearPlantings
 function statusRows(wrapper) {
     return wrapper.findAll('.v-list-item').map(item => [
         item.find('.v-list-item-title').text(),
-        item.find('.text-h5').text(),
+        item.find('.text-headline-small').text(),
     ]);
 }
 
@@ -65,10 +65,10 @@ describe('PlantingYearDetailsPage', () => {
     it('shows the year and its dates, as UTC days', async () => {
         const { wrapper } = await mountPage();
 
-        expect(wrapper.find('.text-h4').text()).toBe('Planting Year 2026');
+        expect(wrapper.find('.text-headline-large').text()).toBe('Planting Year 2026');
         expect(wrapper.findAll('.v-card-subtitle').map(subtitle => subtitle.text()))
             .toEqual(['Last Frost Date', 'Target Planting Date']);
-        expect(wrapper.findAll('.v-card-text > .text-h5').map(date => date.text())).toEqual(['May 1', 'May 17']);
+        expect(wrapper.findAll('.v-card-text > .text-headline-small').map(date => date.text())).toEqual(['May 1', 'May 17']);
     });
 
     // Not the store's list, nor the year's details, which the service fills
@@ -95,7 +95,7 @@ describe('PlantingYearDetailsPage', () => {
     it("shows no other year under a year's address", async () => {
         const { wrapper } = await mountPage({ year: '2030', plantingYear: year2026 });
 
-        expect(wrapper.find('.text-h4').exists()).toBe(false);
+        expect(wrapper.find('.text-headline-large').exists()).toBe(false);
         expect(wrapper.text()).not.toContain('2026');
     });
 

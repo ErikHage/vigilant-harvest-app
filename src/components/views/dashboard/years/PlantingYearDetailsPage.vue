@@ -14,7 +14,7 @@
           <v-row>
             <v-col cols="12">
               <v-card>
-                <v-card-title class="text-h4 text-primary">
+                <v-card-title class="text-headline-large text-primary">
                   Planting Year {{ plantingYear.plantingYear }}
                 </v-card-title>
               </v-card>
@@ -26,7 +26,7 @@
               <v-card>
                 <v-card-subtitle class="text-uppercase">Last Frost Date</v-card-subtitle>
                 <v-card-text>
-                  <div class="text-h5">{{ formatDateString(plantingYear.lastFrostDate) }}</div>
+                  <div class="text-headline-small">{{ formatDateString(plantingYear.lastFrostDate) }}</div>
                 </v-card-text>
               </v-card>
             </v-col>
@@ -35,7 +35,7 @@
               <v-card>
                 <v-card-subtitle class="text-uppercase">Target Planting Date</v-card-subtitle>
                 <v-card-text>
-                  <div class="text-h5">{{ formatDateString(plantingYear.targetPlantingDate) }}</div>
+                  <div class="text-headline-small">{{ formatDateString(plantingYear.targetPlantingDate) }}</div>
                 </v-card-text>
               </v-card>
             </v-col>
@@ -44,7 +44,7 @@
           <v-row>
             <v-col cols="12">
               <v-card>
-                <v-card-title class="text-h6">Planting Status</v-card-title>
+                <v-card-title class="text-title-large">Planting Status</v-card-title>
                 <v-card-text>
                   <v-list>
                     <v-list-item
@@ -56,7 +56,7 @@
                       </template>
                       <v-list-item-title>{{ item.label }}</v-list-item-title>
                       <template v-slot:append>
-                  <span class="text-h5" :style="{ color: item.color }">
+                  <span class="text-headline-small" :style="{ color: item.color }">
                     {{ item.value }}
                   </span>
                       </template>

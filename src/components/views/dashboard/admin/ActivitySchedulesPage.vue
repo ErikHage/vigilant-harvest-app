@@ -11,7 +11,7 @@
           <v-col>
             <page-title title="Activity Schedules"/>
             <v-spacer></v-spacer>
-            <span class="text-medium-emphasis text-body-2">
+            <span class="text-medium-emphasis text-body-medium">
                {{ filteredSchedules.length }} of {{ schedules.length }} activity schedules
             </span>
           </v-col>

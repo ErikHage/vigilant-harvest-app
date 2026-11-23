@@ -19,7 +19,7 @@
           </v-btn>
         </div>
         <template v-for="(split, index) in form.splits" :key="index">
-          <v-row dense class="mt-1">
+          <v-row density="compact" class="mt-1">
             <v-col cols="9">
               <v-text-field
                   v-model="split.name"

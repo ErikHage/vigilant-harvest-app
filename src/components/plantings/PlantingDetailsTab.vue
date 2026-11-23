@@ -90,7 +90,7 @@
 
     <div class="d-flex align-center my-2">
       <v-divider class="flex-grow-1"></v-divider>
-      <span class="mx-2 text-caption">Sowing</span>
+      <span class="mx-2 text-body-small">Sowing</span>
       <v-divider class="flex-grow-1"></v-divider>
     </div>
 
@@ -116,7 +116,7 @@
 
     <div class="d-flex align-center my-2">
       <v-divider class="flex-grow-1"></v-divider>
-      <span class="mx-2 text-caption">Planting</span>
+      <span class="mx-2 text-body-small">Planting</span>
       <v-divider class="flex-grow-1"></v-divider>
     </div>
 

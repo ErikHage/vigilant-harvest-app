@@ -11,7 +11,7 @@
           <v-col>
             <page-title title="Plant Categories"/>
             <v-spacer></v-spacer>
-            <span class="text-medium-emphasis text-body-2">
+            <span class="text-medium-emphasis text-body-medium">
                {{ filteredCategories.length }} of {{ categories.length }} categories
             </span>
           </v-col>

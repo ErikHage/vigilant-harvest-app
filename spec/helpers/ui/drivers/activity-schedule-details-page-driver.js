@@ -29,7 +29,7 @@ export function createActivityScheduleDetailsPageDriver(page, serviceCalls) {
     const scheduleCard = main.locator('.v-card').first();
     const itemRow = notes => main.locator('tbody tr').filter({ hasText: notes });
     // The Items count, under its label
-    const itemCount = scheduleCard.locator('.text-caption', { hasText: /^Items$/ }).locator('xpath=following-sibling::div[1]');
+    const itemCount = scheduleCard.locator('.text-body-small', { hasText: /^Items$/ }).locator('xpath=following-sibling::div[1]');
 
     // Fills an item dialog with `item`; each month-and-day pair is start, then end
     async function fillItem(item) {
@@ -64,7 +64,7 @@ export function createActivityScheduleDetailsPageDriver(page, serviceCalls) {
             const what = `the details of the schedule ${name}`;
 
             await expectText(main.locator('.page-title'), name, what);
-            await expectText(scheduleCard.locator('.text-body-2').first(), description, what);
+            await expectText(scheduleCard.locator('.text-body-medium').first(), description, what);
             await expectText(itemCount, String(items), what);
         },
 

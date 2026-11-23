@@ -5,6 +5,7 @@ import { VSelect } from 'vuetify/components';
 import { mountWithPlugins } from '../../../helpers/mount';
 import { buttonLabelled } from '../../../helpers/fields';
 import { dialogTitled } from '../../../helpers/dialogs';
+import { waitOutReopenLock } from '../../../helpers/action-dialogs';
 import ManagePlantSchedulesDialog from '@/components/plants/ManagePlantSchedulesDialog.vue';
 import { useActivitySchedulesStore } from '@/store';
 
@@ -62,7 +63,7 @@ describe('ManagePlantSchedulesDialog', () => {
         const dialog = await open(wrapper);
 
         expect(dialog.find('.v-card-title .headline').text()).toBe('Manage Schedules');
-        expect(dialog.find('.v-card-title .text-body-2').text()).toBe('Provider bush bean');
+        expect(dialog.find('.v-card-title .text-body-medium').text()).toBe('Provider bush bean');
         expect(listed(dialog, 0)).toEqual([['Beans', 'Feed every two weeks']]);
     });
 
@@ -165,6 +166,7 @@ describe('ManagePlantSchedulesDialog', () => {
         expect(wrapper.props('onSubmit')).not.toHaveBeenCalled();
         expect(document.querySelector('.v-overlay--active')).toBeNull();
 
+        await waitOutReopenLock();
         dialog = await open(wrapper);
         expect(dialog.text()).not.toContain('Pending addition');
         expect(dialog.find('.text-decoration-line-through').exists()).toBe(false);

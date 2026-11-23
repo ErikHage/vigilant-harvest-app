@@ -41,7 +41,7 @@ export function createActivitySchedulesPageDriver(page) {
             for (const [index, { name, description }] of schedules.entries()) {
                 await expectText(rows.nth(index).locator('td'), [name, description], what);
             }
-            await expectText(main.locator('.text-body-2', { hasText: 'activity schedules' }),
+            await expectText(main.locator('.text-body-medium', { hasText: 'activity schedules' }),
                 new RegExp(`^\\s*${schedules.length} of \\d+ activity schedules\\s*$`), what);
         },
 
@@ -50,7 +50,7 @@ export function createActivitySchedulesPageDriver(page) {
             const what = 'the activity schedules listed';
 
             await expectText(rows, [/No schedules found/], what);
-            await expectText(main.locator('.text-body-2', { hasText: 'activity schedules' }),
+            await expectText(main.locator('.text-body-medium', { hasText: 'activity schedules' }),
                 /^\s*0 of \d+ activity schedules\s*$/, what);
         },
 

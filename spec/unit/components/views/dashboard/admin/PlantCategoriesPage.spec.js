@@ -36,7 +36,7 @@ const rows = wrapper => wrapper.findAll('tbody tr').filter(row => row.findAll('t
     row.find('td').text(),
     row.findAll('.v-chip').map(chip => chip.text()),
 ]);
-const count = wrapper => wrapper.find('.text-body-2').text();
+const count = wrapper => wrapper.find('.text-body-medium').text();
 
 async function filterBy(wrapper, text) {
     await inputLabelled(wrapper, 'Filter categories').setValue(text);

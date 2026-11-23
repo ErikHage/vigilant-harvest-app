@@ -17,7 +17,7 @@
         <v-card class="fill-height">
           <v-card-title>New year</v-card-title>
           <v-card-text>
-            <v-row dense>
+            <v-row density="compact">
               <v-col cols="12">
                 <v-text-field
                     :model-value="newPlantingYear.previousPlantingYear ?? ''"

@@ -11,6 +11,9 @@
  * renders again once it has: its height grows and rows are replaced. So each
  * step waits for the list to settle before reading it. A select that has a
  * value also opens scrolled to it now, so the search starts from the top.
+ *
+ * From Vuetify 4 that scroll comes when the menu's opening transition ends,
+ * so the list isn't settled while the menu is still animating.
  */
 export async function chooseOption(page, select, option) {
     await select.locator('xpath=..').click();
@@ -37,10 +40,13 @@ export async function chooseOption(page, select, option) {
     await wanted.click();
 }
 
-// Waits until the list's height and the options it renders have stayed the
-// same for five frames, or two seconds have passed
+// Waits until the menu has stopped animating, and the list's height and the
+// options it renders have stayed the same for five frames, or two seconds
+// have passed
 async function settled(list) {
     await list.evaluate(element => new Promise(done => {
+        const content = element.closest('.v-overlay__content') ?? element;
+        const animating = () => content.getAnimations({ subtree: true }).length > 0;
         const shape = () => `${element.scrollHeight}|${element.querySelectorAll('[role="option"]').length}|`
             + (element.querySelector('[role="option"]')?.textContent ?? '');
         const giveUp = performance.now() + 2000;
@@ -48,7 +54,7 @@ async function settled(list) {
         let still = 0;
         const check = () => {
             const now = shape();
-            still = now === last ? still + 1 : 0;
+            still = now === last && !animating() ? still + 1 : 0;
             last = now;
             if (still >= 5 || performance.now() > giveUp) {
                 done();

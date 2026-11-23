@@ -29,7 +29,7 @@ async function mountPage({ state = {}, errorHandler } = {}) {
 
 const rows = wrapper => wrapper.findAll('tbody tr').filter(row => row.findAll('td').length === 2)
     .map(row => row.findAll('td').map(cell => cell.text()));
-const count = wrapper => wrapper.find('.text-body-2').text();
+const count = wrapper => wrapper.find('.text-body-medium').text();
 
 async function filterBy(wrapper, text) {
     await inputLabelled(wrapper, 'Filter schedules').setValue(text);

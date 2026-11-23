@@ -16,7 +16,7 @@ export function createPlantingYearDetailsPageDriver(page, serviceCalls, callCont
     const main = page.getByRole('main');
     const title = main.locator('.v-card-title').first();
     const dateUnder = label => main.locator('.v-card', { has: page.locator('.v-card-subtitle', { hasText: label }) })
-        .locator('.text-h5');
+        .locator('.text-headline-small');
     const counts = main.locator('.v-list-item');
 
     return {
@@ -37,7 +37,7 @@ export function createPlantingYearDetailsPageDriver(page, serviceCalls, callCont
 
             await expectText(dateUnder('Last Frost Date'), shortDate(lastFrostDate), what);
             await expectText(dateUnder('Target Planting Date'), shortDate(targetPlantingDate), what);
-            await expectText(counts.locator('.text-h5'), statuses.map(each => String(byStatus[each] ?? 0)), what);
+            await expectText(counts.locator('.text-headline-small'), statuses.map(each => String(byStatus[each] ?? 0)), what);
         },
 
         /**

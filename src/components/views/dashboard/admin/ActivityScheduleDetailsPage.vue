@@ -18,8 +18,8 @@
           <v-card-text>
             <div class="d-flex align-start justify-space-between ga-4">
               <div>
-                <div class="text-caption text-disabled text-uppercase" style="letter-spacing:.05em">Description</div>
-                <div class="text-body-2 text-medium-emphasis">{{ activitySchedule.description }}</div>
+                <div class="text-body-small text-disabled text-uppercase" style="letter-spacing:.05em">Description</div>
+                <div class="text-body-medium text-medium-emphasis">{{ activitySchedule.description }}</div>
               </div>
               <edit-schedule-dialog
                   :activity-schedule="activitySchedule"
@@ -30,8 +30,8 @@
 
             <div class="d-flex ga-6">
               <div>
-                <div class="text-caption text-disabled text-uppercase" style="letter-spacing:.05em">Items</div>
-                <div class="text-body-2 text-medium-emphasis">{{ activitySchedule.items.length }}</div>
+                <div class="text-body-small text-disabled text-uppercase" style="letter-spacing:.05em">Items</div>
+                <div class="text-body-medium text-medium-emphasis">{{ activitySchedule.items.length }}</div>
               </div>
             </div>
           </v-card-text>
@@ -40,7 +40,7 @@
         <v-card variant="tonal">
           <v-card-text>
             <div class="d-flex align-center justify-space-between mb-4">
-              <span class="text-subtitle-1 font-weight-medium">Schedule items</span>
+              <span class="text-body-large font-weight-medium">Schedule items</span>
               <AddScheduleItemDialog
                   :activity-types="activityTypes"
                   :on-submit="onAddScheduleItem"/>
@@ -58,19 +58,19 @@
               </thead>
               <tbody>
               <tr v-if="activitySchedule.items.length === 0">
-                <td colspan="5" class="text-center text-medium-emphasis text-body-2 py-8">
+                <td colspan="5" class="text-center text-medium-emphasis text-body-medium py-8">
                   No items yet — add one to get started
                 </td>
               </tr>
               <tr v-for="item in activitySchedule.items" :key="item.entryId">
                 <td>
                   <div class="font-weight-medium">{{ item.activityType }}</div>
-                  <div v-if="item.subType" class="text-caption text-disabled">{{ item.subType }}</div>
+                  <div v-if="item.subType" class="text-body-small text-disabled">{{ item.subType }}</div>
                 </td>
                 <td>
                   <div v-if="item.recurrenceRule">
                     <div>{{ toRRuleString(item.recurrenceRule) }}</div>
-                    <code class="text-caption text-disabled">{{ item.recurrenceRule }}</code>
+                    <code class="text-body-small text-disabled">{{ item.recurrenceRule }}</code>
                   </div>
                   <span v-else class="text-disabled">—</span>
                 </td>
