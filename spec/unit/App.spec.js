@@ -5,6 +5,7 @@ import * as components from 'vuetify/components';
 import * as directives from 'vuetify/directives';
 import { createFeralVuetifyOptions } from '@feral-auth/vue-components';
 import { RouterView, createMemoryHistory, createRouter } from 'vue-router';
+import { onADesktop, onAPhone } from '../helpers/display';
 import App from '@/App.vue';
 import { useAuthenticationStore, useCommonStore } from '@/store';
 
@@ -36,12 +37,12 @@ function pagesRouter() {
 }
 
 // The app as main.js makes it: the feral themes, which FrAppShell switches between
-async function mountApp({ showAppBar = true, plantingYear = 2026, path = '/dashboard/plants' } = {}) {
+async function mountApp({ showAppBar = true, plantingYear = 2026, path = '/dashboard/plants', plants = {} } = {}) {
     mounts = 0;
     const router = pagesRouter();
     await router.push(path);
     const pinia = createTestingPinia({
-        initialState: { authentication: { showAppBar }, common: { plantingYear } },
+        initialState: { authentication: { showAppBar }, common: { plantingYear }, plants },
     });
     const vuetify = createVuetify(createFeralVuetifyOptions({ components, directives }));
     const wrapper = mount(App, { global: { plugins: [router, pinia, vuetify] }, attachTo: document.body });
@@ -66,6 +67,7 @@ describe('App', () => {
             expect(wrapper.findComponent({ name: 'FrAppShell' }).exists()).toBe(false);
             expect(wrapper.find('nav').exists()).toBe(false);
             expect(wrapper.find('.v-app-bar').findAll('button')).toHaveLength(0);
+            expect(wrapper.find('.fr-breadcrumbs').exists()).toBe(false);
         });
 
         it('shows no planting year', async () => {
@@ -130,6 +132,31 @@ describe('App', () => {
 
         // Every page is under the dashboard's route, which Vue Router counts
         // as active on all of them unless the link is exact (library 0.6.3)
+        it("shows the page's breadcrumbs in the toolbar: Garden and Plants, linked, then the plant", async () => {
+            const plantsById = { 'p-1': { plantId: 'p-1', friendlyName: 'Big Thai Hot Pepper' } };
+            const { wrapper } = await mountApp({ path: '/dashboard/plants/p-1/details', plants: { plantsById } });
+            const crumbs = wrapper.find('.v-app-bar .fr-breadcrumbs');
+
+            expect(crumbs.findAll('.v-breadcrumbs-item').map(item => item.text()))
+                .toEqual(['Garden', 'Plants', 'Big Thai Hot Pepper']);
+            expect(crumbs.findAll('a.v-breadcrumbs-item--link').map(link => link.attributes('href')))
+                .toEqual(['/dashboard/garden', '/dashboard/plants']);
+        });
+
+        // The planting year, centred over the toolbar, leaves no room for them
+        it('shows no breadcrumbs on a phone, where the planting year has the toolbar', async () => {
+            onAPhone();
+            try {
+                const plantsById = { 'p-1': { plantId: 'p-1', friendlyName: 'Big Thai Hot Pepper' } };
+                const { wrapper } = await mountApp({ path: '/dashboard/plants/p-1/details', plants: { plantsById } });
+
+                expect(wrapper.find('.fr-breadcrumbs').exists()).toBe(false);
+                expect(wrapper.find('.v-app-bar .planting-year').text()).toBe('2026');
+            } finally {
+                onADesktop();
+            }
+        });
+
         it("highlights only the page's link, not Dashboard as well", async () => {
             const { wrapper } = await mountApp({ path: '/dashboard/plants/p-1/details' });
             const highlighted = wrapper.findAll('nav#app-nav .v-list-item--active').map(link => link.attributes('aria-label'));

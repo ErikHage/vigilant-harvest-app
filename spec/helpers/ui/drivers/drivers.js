@@ -3,6 +3,7 @@ import { createActivityScheduleDetailsPageDriver } from './activity-schedule-det
 import { createActivitySchedulesPageDriver } from './activity-schedules-page-driver';
 import { createAddPlantingYearPageDriver } from './add-planting-year-page-driver';
 import { createAppBarDriver } from './app-bar-driver';
+import { createBreadcrumbsDriver } from './breadcrumbs-driver';
 import { createBrowserClockDriver } from './browser-clock-driver';
 import { createDashboardPageDriver } from './dashboard-page-driver';
 import { createDayTimelineDriver } from './day-timeline-driver';
@@ -39,6 +40,7 @@ export function createDrivers(page) {
 
     return {
         appBar: createAppBarDriver(page, serviceCalls),
+        breadcrumbs: createBreadcrumbsDriver(page),
         nav: createNavDriver(page),
         dayTimeline: createDayTimelineDriver(page),
 

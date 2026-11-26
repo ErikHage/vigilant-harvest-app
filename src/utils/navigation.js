@@ -73,3 +73,89 @@ export function activeViewFor(path) {
         .sort((a, b) => b.to.length - a.to.length)[0];
     return link?.value ?? '';
 }
+
+// The pages under a link, and the crumbs after the link's own for each: the
+// record the page shows, named once the store holds this page's, and any
+// page beyond it. `records` is what App passes; each returns no crumbs while
+// its record isn't this page's, so the trail stops at the link
+const pagesUnder = [
+    {
+        pattern: /^\/dashboard\/plants\/([^/]+)\/details$/,
+        crumbs: ([plantId], records) => {
+            const plant = records.plantsById?.[plantId];
+            return plant ? [{ title: plant.friendlyName }] : [];
+        },
+    },
+    {
+        pattern: /^\/dashboard\/plants\/([^/]+)\/edit$/,
+        crumbs: ([plantId], records) => {
+            const plant = records.plantsById?.[plantId];
+            return plant
+                ? [{ title: plant.friendlyName, to: `${pathTo('plants')}/${plantId}/details` }, { title: 'Edit' }]
+                : [];
+        },
+    },
+    {
+        pattern: /^\/dashboard\/plantings\/([^/]+)\/details$/,
+        crumbs: ([plantingId], records) => {
+            const planting = records.plantingsById?.[plantingId];
+            return planting ? [{ title: planting.name }] : [];
+        },
+    },
+    {
+        pattern: /^\/dashboard\/planting-years\/add$/,
+        crumbs: () => [{ title: 'Add' }],
+    },
+    {
+        pattern: /^\/dashboard\/planting-years\/([^/]+)$/,
+        crumbs: ([year], records) =>
+            String(records.plantingYear?.plantingYear) === year ? [{ title: year }] : [],
+    },
+    {
+        pattern: /^\/dashboard\/activity-schedules\/([^/]+)$/,
+        crumbs: ([activityScheduleId], records) => {
+            const schedule = records.activitySchedule;
+            return schedule?.activityScheduleId === activityScheduleId ? [{ title: schedule.name }] : [];
+        },
+    },
+];
+
+/**
+ * The breadcrumbs for the path, as FrBreadcrumbs takes them, as the
+ * component playground draws them: the page's section, a link to its first
+ * link shown in the drawer, then the page itself. On a page under a link (a
+ * plant's details), the link goes back to the list, and the record follows
+ * it once `records` holds this page's: until then, or for one that isn't
+ * found, the trail stops at the list. Dashboard's section has no heading, so
+ * the dashboard is its own crumb alone. Empty for a path under no link.
+ *
+ * `records`: the plants store's `plantsById`, the plantings store's
+ * `plantingsById`, the planting years store's `plantingYear` (the year last
+ * fetched) and the activity schedules store's `activitySchedule` (the one
+ * last fetched)
+ */
+export function crumbsFor(path, { isPlantingYearSelected, records = {} }) {
+    const value = activeViewFor(path);
+    const section = sectionsFor(isPlantingYearSelected)
+        .find(each => each.items.some(item => item.value === value));
+    if (!section) {
+        return [];
+    }
+
+    const link = section.items.find(item => item.value === value);
+    const crumbs = section.label ? [{ title: section.label, to: section.items[0].to }] : [];
+    if (path === link.to) {
+        crumbs.push({ title: link.title });
+    } else {
+        crumbs.push({ title: link.title, to: link.to });
+        for (const page of pagesUnder) {
+            const match = path.match(page.pattern);
+            if (match) {
+                crumbs.push(...page.crumbs(match.slice(1), records));
+                break;
+            }
+        }
+    }
+
+    return crumbs;
+}

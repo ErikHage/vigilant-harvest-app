@@ -12,6 +12,18 @@
       :sections="sections"
       :active-view="activeView"
   >
+    <!-- The page's place, as the component playground shows it: its
+         section, then the page, then the record on a page under it. None on
+         a small screen, where the planting year, centred over the toolbar,
+         leaves no room for even the last crumb -->
+    <template v-if="!$vuetify.display.smAndDown" #toolbar-start>
+      <fr-breadcrumbs
+          :items="crumbs"
+          density="compact"
+          class="pa-0 text-no-wrap overflow-hidden"
+          style="min-width: 0"
+      />
+    </template>
     <template v-if="plantingYear !== null" #toolbar-center>
       <v-toolbar-title class="planting-year">{{ plantingYear }}</v-toolbar-title>
     </template>
@@ -37,15 +49,22 @@
 
 <script>
 import { mapActions, mapState } from "pinia";
-import { FrAppShell, FrAppUserMenu, FrListItem } from "@feral-auth/vue-components";
-import { useAuthenticationStore, useCommonStore } from "@/store";
+import { FrAppShell, FrAppUserMenu, FrBreadcrumbs, FrListItem } from "@feral-auth/vue-components";
+import {
+  useActivitySchedulesStore,
+  useAuthenticationStore,
+  useCommonStore,
+  usePlantingsStore,
+  usePlantingYearsStore,
+  usePlantsStore,
+} from "@/store";
 import { views } from "@/utils/constants";
-import { activeViewFor, sectionsFor } from "@/utils/navigation";
+import { activeViewFor, crumbsFor, sectionsFor } from "@/utils/navigation";
 
 export default {
   name: 'App',
 
-  components: { FrAppShell, FrAppUserMenu, FrListItem },
+  components: { FrAppShell, FrAppUserMenu, FrBreadcrumbs, FrListItem },
 
   computed: {
     // The frame follows the route, not the store: the guard lets only
@@ -68,6 +87,35 @@ export default {
 
     activeView() {
       return activeViewFor(this.$route.path);
+    },
+
+    ...mapState(usePlantsStore, [
+      'plantsById',
+    ]),
+
+    ...mapState(usePlantingsStore, [
+      'plantingsById',
+    ]),
+
+    ...mapState(usePlantingYearsStore, {
+      // the year last fetched, a record: not the common store's year number
+      storedPlantingYear: 'plantingYear',
+    }),
+
+    ...mapState(useActivitySchedulesStore, [
+      'selectedActivitySchedule',
+    ]),
+
+    crumbs() {
+      return crumbsFor(this.$route.path, {
+        isPlantingYearSelected: this.plantingYear != null,
+        records: {
+          plantsById: this.plantsById,
+          plantingsById: this.plantingsById,
+          plantingYear: this.storedPlantingYear,
+          activitySchedule: this.selectedActivitySchedule,
+        },
+      });
     },
   },
 
