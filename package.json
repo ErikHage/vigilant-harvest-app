@@ -13,7 +13,8 @@
     "test:ui": "playwright test"
   },
   "dependencies": {
-    "@mdi/font": "5.9.55",
+    "@feral-auth/vue-components": "0.6.2",
+    "@mdi/font": "7.4.47",
     "axios": "^1.7.2",
     "dayjs": "^1.11.13",
     "pinia": "^3.0.4",
