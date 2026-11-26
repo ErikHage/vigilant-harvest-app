@@ -2,7 +2,7 @@ import { parseDslArgs } from '@feral-auth/ts-simple-dsl';
 
 import { createStatsTab } from '../components/stats-tab';
 import { count, on, statsTab } from '../params';
-import { dashboardComponents, routedPageSteps } from './routed-page';
+import { routedPageSteps, shellComponents } from './routed-page';
 
 /**
  * The stats page, in words: the year's totals, then a tab each for plants
@@ -10,7 +10,7 @@ import { dashboardComponents, routedPageSteps } from './routed-page';
  */
 export function createStatsPage(world, driver) {
     return {
-        ...dashboardComponents(world),
+        ...shellComponents(world),
         ...routedPageSteps(driver),
 
         plants: createStatsTab(world, world.drivers.statsPlantsTab, 'plant'),

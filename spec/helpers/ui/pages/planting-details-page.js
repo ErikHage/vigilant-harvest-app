@@ -1,7 +1,7 @@
 import { parseDslArgs } from '@feral-auth/ts-simple-dsl';
 
 import { actions, count, planting, plot, splitInto, year } from '../params';
-import { dashboardComponents } from './routed-page';
+import { shellComponents } from './routed-page';
 
 /**
  * A planting's details page, in words. It's reached from the plantings page,
@@ -22,7 +22,7 @@ export function createPlantingDetailsPage(world, driver) {
     }
 
     return {
-        ...dashboardComponents(world),
+        ...shellComponents(world),
 
         /** The browser is on the details page of the `planting` the test named, with its status. */
         async checkIsShownFor(...args) {

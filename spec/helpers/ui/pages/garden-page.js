@@ -1,12 +1,12 @@
 import { parseDslArgs } from '@feral-auth/ts-simple-dsl';
 
 import { planting, quantity } from '../params';
-import { dashboardComponents, routedPageSteps } from './routed-page';
+import { routedPageSteps, shellComponents } from './routed-page';
 
 /** The garden page, which shows the chosen year's planted plantings by plot, in words. */
 export function createGardenPage(world, driver) {
     return {
-        ...dashboardComponents(world),
+        ...shellComponents(world),
         ...routedPageSteps(driver),
 
         /**

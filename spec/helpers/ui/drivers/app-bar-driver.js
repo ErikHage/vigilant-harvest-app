@@ -1,22 +1,27 @@
-import { expectCount, expectEventually, expectText, expectThat, expectVisible } from './assertions';
+import { expectEventually, expectText, expectThat, expectVisible } from './assertions';
 import { status } from '../support/status-codes';
 
 const logout = /\/logout$/;
 
 /**
- * The bar across the top of every page, as Playwright sees it. On a desktop
- * it reads "Vigilant Harvest", then the chosen year; on a phone it has a home
- * link (an icon, with no name) in place of the title.
+ * The bar across the top of every page, as Playwright sees it: FrAppShell's
+ * toolbar once someone is signed on, the app's name alone otherwise. Signed
+ * on, it shows the chosen year in its middle, and Logout is in the user's
+ * menu, behind their initials. The Menu button that `nav` presses on a phone
+ * is here too.
  */
 export function createAppBarDriver(page, serviceCalls) {
     const bar = page.getByRole('banner');
-    const logoutButton = bar.getByRole('button', { name: 'Logout' });
+    const userMenuButton = bar.getByRole('button', { name: /^Account: / });
+    const logoutItem = page.locator('.fr-app-user-menu').getByText('Logout', { exact: true });
     // Vuetify's toolbar titles have no role; the year's has its own class
     const year = bar.locator('.planting-year');
+    const anyControl = bar.getByRole('link').or(bar.getByRole('button'));
 
     return {
         async logOut() {
-            await logoutButton.click();
+            await userMenuButton.click();
+            await logoutItem.click();
         },
 
         /**
@@ -43,26 +48,17 @@ export function createAppBarDriver(page, serviceCalls) {
         },
 
         /**
-         * Signed out, on a desktop: the title alone, with no year, no Dashboard
-         * link and no Logout. Read once the page under it shows.
+         * Signed out: the app's name, and no links or buttons. Reads the
+         * controls once, without retrying: a retrying check would pass while
+         * the page is still rendering. Call it after a step that proves the
+         * page has settled.
          */
         async offersOnlyTheTitle() {
-            const what = 'the app bar, signed out, on a desktop';
+            const what = `the app bar, signed out, ${page.viewportSize()?.width}px wide`;
 
             await expectText(bar, 'Vigilant Harvest', what);
-            await expectCount(bar.getByRole('link'), 0, what);
-            await expectCount(logoutButton, 0, what);
-        },
-
-        /**
-         * Signed out, on a phone: no home link and no Logout, as on a desktop.
-         * Read once the page under it shows.
-         */
-        async offersNothingOnAPhone() {
-            const what = 'the app bar, signed out, on a phone';
-
-            await expectCount(bar.getByRole('link'), 0, what);
-            await expectCount(logoutButton, 0, what);
+            const count = await anyControl.count();
+            expectThat(count === 0, 'no links or buttons', `${count}`, what);
         },
     };
 }

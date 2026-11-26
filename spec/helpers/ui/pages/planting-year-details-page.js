@@ -1,7 +1,7 @@
 import { parseDslArgs } from '@feral-auth/ts-simple-dsl';
 
 import { tally, year } from '../params';
-import { dashboardComponents } from './routed-page';
+import { shellComponents } from './routed-page';
 
 /**
  * A planting year's details page, in words. It's reached from the planting
@@ -9,7 +9,7 @@ import { dashboardComponents } from './routed-page';
  */
 export function createPlantingYearDetailsPage(world, driver) {
     return {
-        ...dashboardComponents(world),
+        ...shellComponents(world),
 
         /** The browser is on the details page of the `year` the test named. */
         async checkIsShownFor(...args) {

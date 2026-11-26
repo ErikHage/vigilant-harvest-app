@@ -1,27 +1,28 @@
 import { expectEventually, expectThat, expectVisible } from './assertions';
 
 /**
- * The dashboard's side drawer, with a link to each page, as Playwright sees it.
+ * The side drawer, with a link to each page, as Playwright sees it.
  *
- * It's a Vuetify navigation drawer, so a `navigation`, and the app's only
- * one. On a desktop it's always there, either expanded or a rail of icons;
- * the banner's Menu button switches between them. A rail's links keep their
- * names, so they're found the same way in both. Its links are grouped under
- * headings (Planning, Garden, Recordkeeping, Config). Vuetify marks the rail
- * only by a class, so a rail is recognised by what it shows: separators in
- * place of the headings, and a drawer narrow enough for icons alone. The
- * Config heading stands for them all: it shows with or without a year.
+ * It's FrAppShell's navigation drawer, a `navigation` named "Main", there
+ * only once someone is signed on. On a desktop it's always there, either
+ * expanded or a rail of icons; its own Collapse navigation button (by the
+ * app's name) makes it a rail, and the rail's Expand navigation button (the
+ * logo) expands it again. A rail's links keep their names, so they're found
+ * the same way in both. Dashboard comes first, with no heading; the rest are
+ * grouped under headings (Planning, Garden, Recordkeeping, Config). A rail is
+ * recognised by what it shows: separators in place of the headings, and a
+ * drawer narrow enough for icons alone. The Config heading stands for them
+ * all: it shows with or without a year.
  *
- * On a phone (below Vuetify's md breakpoint, 960px) it's hidden, and Menu
- * slides it in over the page. Hidden, it's off screen and `inert`: out of the
- * tab order and the browser's accessibility tree. Playwright's role locators
- * and ariaSnapshot don't honour `inert`, though: they still find its links,
- * and call them visible. So `goTo` opens it first, and the unit suite checks
- * the `inert`.
+ * On a phone (below Vuetify's md breakpoint, 960px) it's hidden, and the
+ * banner's Menu button slides it in over the page. Hidden, it's off screen,
+ * but Playwright's role locators still find its links, and call them
+ * visible. So `goTo` opens it first.
  */
 
 // Each page's link
 const destinations = {
+    dashboard: 'Dashboard',
     planning: 'Plan',
     garden: 'Overview',
     journal: 'Journal',
@@ -36,15 +37,17 @@ const destinations = {
     activitySchedules: 'Activity Schedules',
 };
 
-export const dashboardDestinations = Object.keys(destinations);
+export const navDestinations = Object.keys(destinations);
 
 const phoneWidth = 960;
 
-// Vuetify's rail is 56px wide, and the expanded drawer 256px
+// FrAppShell's rail is 64px wide, and the expanded drawer 240px
 const railWidth = 100;
 
-export function createDashboardNavDriver(page) {
-    const drawer = page.getByRole('navigation');
+export function createNavDriver(page) {
+    const drawer = page.getByRole('navigation', { name: 'Main', exact: true });
+    const collapseButton = drawer.getByRole('button', { name: 'Collapse navigation' });
+    const expandButton = drawer.getByRole('button', { name: 'Expand navigation' });
     const menuButton = page.getByRole('banner').getByRole('button', { name: 'Menu' });
     const configHeading = drawer.getByText('Config', { exact: true });
     const separators = drawer.getByRole('separator');
@@ -60,23 +63,23 @@ export function createDashboardNavDriver(page) {
             await drawer.getByRole('link', { name: destinations[destination], exact: true }).click();
         },
 
-        /** On a desktop, from expanded: Menu turns the drawer into a rail. */
+        /** On a desktop, from expanded: Collapse navigation turns the drawer into a rail. */
         async collapseToRail() {
             await this.isExpanded();
-            await menuButton.click();
+            await collapseButton.click();
             await this.isRail();
         },
 
-        /** On a desktop, from a rail: Menu expands the drawer again. */
+        /** On a desktop, from a rail: Expand navigation expands the drawer again. */
         async expand() {
             await this.isRail();
-            await menuButton.click();
+            await expandButton.click();
             await this.isExpanded();
         },
 
         /** Icons only: separators where the headings were, in a narrow drawer. */
         async isRail() {
-            const what = 'the dashboard\'s drawer, as a rail';
+            const what = 'the side drawer, as a rail';
 
             await expectVisible(separators.first(), what);
             await expectEventually(async () => (await drawerWidth()) < railWidth,
@@ -87,13 +90,24 @@ export function createDashboardNavDriver(page) {
 
         /** Expanded: the headings, and no separators in their place. */
         async isExpanded() {
-            const what = 'the dashboard\'s drawer, expanded';
+            const what = 'the side drawer, expanded';
 
             await expectVisible(configHeading, what);
             await expectEventually(async () => (await drawerWidth()) >= railWidth,
                 `the drawer at least ${railWidth}px wide`, what);
             const shown = await separators.count();
             expectThat(shown === 0, 'no separator', `${shown} shown`, what);
+        },
+
+        /**
+         * Reads the page once, without retrying: a retrying check would pass
+         * while the page is still rendering. Call it after a step that proves
+         * the page has settled.
+         */
+        async isAbsent() {
+            const count = await drawer.count();
+
+            expectThat(count === 0, 'no side drawer', `${count}`, 'checking the side drawer');
         },
     };
 }

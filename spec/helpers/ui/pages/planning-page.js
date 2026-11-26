@@ -1,7 +1,7 @@
 import { parseDslArgs } from '@feral-auth/ts-simple-dsl';
 
 import { planting, plantings, year } from '../params';
-import { dashboardComponents, routedPageSteps } from './routed-page';
+import { routedPageSteps, shellComponents } from './routed-page';
 
 /**
  * The planning page, for the chosen year, in words. It counts its days from
@@ -9,7 +9,7 @@ import { dashboardComponents, routedPageSteps } from './routed-page';
  */
 export function createPlanningPage(world, driver) {
     return {
-        ...dashboardComponents(world),
+        ...shellComponents(world),
         ...routedPageSteps(driver),
 
         /** The plan is the `year`'s, with its planting day, and the days until it. */

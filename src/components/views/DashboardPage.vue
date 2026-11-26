@@ -1,36 +1,24 @@
 <template>
-  <!-- the drawer joins the app's layout, beside the main area rather than in its container -->
-  <dashboard-nav-drawer
-      :is-planting-year-selected="plantingYear != null"
-  />
-  <!-- fluid: the pages take the main area's full width, rather than Vuetify's cap for the breakpoint -->
-  <v-container fluid>
-    <!-- the common store's: the planting years, loaded here for every dashboard page -->
-    <fade-out-alert :is-visible="alert.isVisible" :alert-type="alert.type" :message="alert.message"/>
-    <v-row>
-      <router-view/>
-    </v-row>
-  </v-container>
+  <!-- Only a parent for the dashboard pages: their links are in the shell's
+       drawer, and each page has its own container inside the shell's -->
+  <!-- the common store's: the planting years, loaded here for every dashboard page -->
+  <fade-out-alert :is-visible="alert.isVisible" :alert-type="alert.type" :message="alert.message"/>
+  <router-view/>
 </template>
 
 <script>
 
-import DashboardNavDrawer from "@/components/layout/DashboardNavDrawer.vue";
 import FadeOutAlert from "@/components/utils/FadeOutAlert.vue";
-import {mapActions, mapState} from "pinia";
+import {mapActions} from "pinia";
 import {useCommonStore} from "@/store";
 import { alertOf } from "@/store/alerts";
 
 export default {
   name: 'DashboardPage',
 
-  components: {DashboardNavDrawer, FadeOutAlert},
+  components: {FadeOutAlert},
 
   computed: {
-    ...mapState(useCommonStore, {
-      plantingYear: 'plantingYear',
-    }),
-
     alert() {
       return alertOf(useCommonStore());
     },

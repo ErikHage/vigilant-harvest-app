@@ -1,7 +1,7 @@
 import { parseDslArgs } from '@feral-auth/ts-simple-dsl';
 
 import { day, planting, plantings, year } from '../params';
-import { dashboardComponents, routedPageSteps } from './routed-page';
+import { routedPageSteps, shellComponents } from './routed-page';
 
 /**
  * The page that adds a planting year, in words. It proposes the year after
@@ -10,7 +10,7 @@ import { dashboardComponents, routedPageSteps } from './routed-page';
  */
 export function createAddPlantingYearPage(world, driver) {
     return {
-        ...dashboardComponents(world),
+        ...shellComponents(world),
         ...routedPageSteps(driver),
 
         /** It proposes to add the year after the `year` the test named, carrying forward from it. */

@@ -1,6 +1,6 @@
 import { group, optional, required } from '@feral-auth/ts-simple-dsl';
 
-import { dashboardDestinations } from './drivers/dashboard-nav-driver';
+import { navDestinations } from './drivers/nav-driver';
 
 /**
  * Parameter declarations shared across the page and component objects, so
@@ -29,7 +29,7 @@ export const year = () => required();
 export const optionalYear = () => optional();
 
 /** A dashboard page, as the menu leads to it: `plants`, `stats`, `activitySchedules`, ... */
-export const destination = () => required().allowedValues(...dashboardDestinations);
+export const destination = () => required().allowedValues(...navDestinations);
 
 /** A plant the test named, by its alias. */
 export const plant = () => required();

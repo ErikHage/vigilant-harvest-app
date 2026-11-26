@@ -1,7 +1,7 @@
 import { parseDslArgs } from '@feral-auth/ts-simple-dsl';
 
 import { by, message, plant, subcategory } from '../params';
-import { dashboardComponents, routedPageSteps } from './routed-page';
+import { routedPageSteps, shellComponents } from './routed-page';
 
 // What `by: name | category | subcategory` searches for
 const searchText = (plant, by) => ({
@@ -11,7 +11,7 @@ const searchText = (plant, by) => ({
 /** The plants page, in words. */
 export function createPlantsPage(world, driver) {
     return {
-        ...dashboardComponents(world),
+        ...shellComponents(world),
         ...routedPageSteps(driver),
 
         /**

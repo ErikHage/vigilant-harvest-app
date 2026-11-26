@@ -1,7 +1,7 @@
 import { parseDslArgs } from '@feral-auth/ts-simple-dsl';
 
 import { offered, plant, schedule, schedules, tag, tags } from '../params';
-import { dashboardComponents } from './routed-page';
+import { shellComponents } from './routed-page';
 
 /**
  * A plant's edit page, in words. It's reached from the plants page, which
@@ -9,7 +9,7 @@ import { dashboardComponents } from './routed-page';
  */
 export function createPlantEditPage(world, driver) {
     return {
-        ...dashboardComponents(world),
+        ...shellComponents(world),
 
         /** The browser is on the edit page of the `plant` the test named, its form filled in. */
         async checkIsShownFor(...args) {

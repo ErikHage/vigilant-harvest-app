@@ -1,12 +1,12 @@
 import { parseDslArgs } from '@feral-auth/ts-simple-dsl';
 
 import { schedule, scheduleFilter, schedules } from '../params';
-import { dashboardComponents, routedPageSteps } from './routed-page';
+import { routedPageSteps, shellComponents } from './routed-page';
 
 /** The activity schedules page, every schedule, in words. */
 export function createActivitySchedulesPage(world, driver) {
     return {
-        ...dashboardComponents(world),
+        ...shellComponents(world),
         ...routedPageSteps(driver),
 
         /** Creates a schedule called `schedule`, with a made-up description, through its dialog. */

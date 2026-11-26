@@ -1,7 +1,7 @@
 import { parseDslArgs } from '@feral-auth/ts-simple-dsl';
 
 import { category, filterBy, name, subcategories, subcategory } from '../params';
-import { dashboardComponents, routedPageSteps } from './routed-page';
+import { routedPageSteps, shellComponents } from './routed-page';
 
 // What a name of `spaces` is typed as
 const typed = { spaces: '   ' };
@@ -9,7 +9,7 @@ const typed = { spaces: '   ' };
 /** The plant categories page, in words. */
 export function createPlantCategoriesPage(world, driver) {
     return {
-        ...dashboardComponents(world),
+        ...shellComponents(world),
         ...routedPageSteps(driver),
 
         /** Adds a new category, called `category`, with a made-up name, through its dialog. */

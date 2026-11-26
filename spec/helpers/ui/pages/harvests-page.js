@@ -2,7 +2,7 @@ import { parseDslArgs } from '@feral-auth/ts-simple-dsl';
 
 import { createDayTimeline } from '../components/day-timeline';
 import { on, planting, quantity, year } from '../params';
-import { dashboardComponents, routedPageSteps } from './routed-page';
+import { routedPageSteps, shellComponents } from './routed-page';
 
 /** The harvests page, a timeline of the chosen year's harvest days, in words. */
 export function createHarvestsPage(world, driver) {
@@ -16,7 +16,7 @@ export function createHarvestsPage(world, driver) {
     }
 
     return {
-        ...dashboardComponents(world),
+        ...shellComponents(world),
         ...routedPageSteps(driver),
         timeline: createDayTimeline(world, world.drivers.dayTimeline),
 

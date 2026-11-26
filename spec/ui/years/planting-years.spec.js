@@ -146,7 +146,7 @@ test.describe('The planting years pages', () => {
         await plantingYearsPage.checkIsShown();
         await plantingYearsPage.viewYear('year: spring');
         await plantingYearDetailsPage.checkIsShownFor('year: spring');
-        await plantingYearDetailsPage.dashboardNav.goTo('page: plantingYears');
+        await plantingYearDetailsPage.nav.goTo('page: plantingYears');
         await plantingYearsPage.checkIsShown();
 
         await plantingYearsPage.viewYearWhileItLoads('year: autumn');

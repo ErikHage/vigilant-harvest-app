@@ -4,7 +4,6 @@ import { createActivitySchedulesPageDriver } from './activity-schedules-page-dri
 import { createAddPlantingYearPageDriver } from './add-planting-year-page-driver';
 import { createAppBarDriver } from './app-bar-driver';
 import { createBrowserClockDriver } from './browser-clock-driver';
-import { createDashboardNavDriver } from './dashboard-nav-driver';
 import { createDashboardPageDriver } from './dashboard-page-driver';
 import { createDayTimelineDriver } from './day-timeline-driver';
 import { createFeralLoginPageDriver } from './feral-login-page-driver';
@@ -22,6 +21,7 @@ import { createPlantingYearsPageDriver } from './planting-years-page-driver';
 import { createPlanningPageDriver } from './planning-page-driver';
 import { createPlantingsPageDriver } from './plantings-page-driver';
 import { createPlantsPageDriver } from './plants-page-driver';
+import { createNavDriver } from './nav-driver';
 import { recordPageErrors } from './page-errors';
 import { createPlotsPageDriver } from './plots-page-driver';
 import { recordServiceCalls } from './service-calls';
@@ -39,7 +39,7 @@ export function createDrivers(page) {
 
     return {
         appBar: createAppBarDriver(page, serviceCalls),
-        dashboardNav: createDashboardNavDriver(page),
+        nav: createNavDriver(page),
         dayTimeline: createDayTimelineDriver(page),
 
         loginPage: createLoginPageDriver(page, serviceCalls),

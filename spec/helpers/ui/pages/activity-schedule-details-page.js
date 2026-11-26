@@ -1,12 +1,12 @@
 import { parseDslArgs } from '@feral-auth/ts-simple-dsl';
 
 import { count, interval, item, schedule } from '../params';
-import { dashboardComponents } from './routed-page';
+import { shellComponents } from './routed-page';
 
 /** An activity schedule's details page, its items and their dialogs, in words. */
 export function createActivityScheduleDetailsPage(world, driver) {
     return {
-        ...dashboardComponents(world),
+        ...shellComponents(world),
 
         /** The browser is on the `schedule`'s details page. */
         async checkIsShownFor(...args) {

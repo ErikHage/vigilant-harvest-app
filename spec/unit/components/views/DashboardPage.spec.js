@@ -1,18 +1,24 @@
+import { h } from 'vue';
 import { flushPromises } from '@vue/test-utils';
+import { RouterView } from 'vue-router';
 import { createTestingPinia } from '@pinia/testing';
 import DashboardPage from '@/components/views/DashboardPage.vue';
-import DashboardNavDrawer from '@/components/layout/DashboardNavDrawer.vue';
+import { createMemoryHistory, createRouter } from 'vue-router';
 import { useCommonStore } from '@/store';
-import { mountInLayout } from '../../../helpers/layout';
-import { linkRouter } from '../../../helpers/routers';
+import { mountWithPlugins } from '../../../helpers/mount';
 
 const year2026 = { plantingYear: 2026, lastFrostDate: '2026-05-10', firstFrostDate: '2026-10-12' };
 
+// The dashboard with one child page that says what it is
 async function mountDashboard(common) {
-    const router = linkRouter();
+    const router = createRouter({
+        history: createMemoryHistory(),
+        routes: [{ path: '/', component: DashboardPage, children: [{ path: '', component: { render: () => 'the page' } }] }],
+    });
+    await router.push('/');
     const pinia = createTestingPinia({ initialState: { common } });
 
-    const wrapper = mountInLayout(DashboardPage, { global: { plugins: [router, pinia] } });
+    const wrapper = mountWithPlugins({ render: () => h(RouterView) }, { global: { plugins: [router, pinia] } });
     await flushPromises();
     return { wrapper, store: useCommonStore(pinia) };
 }
@@ -24,18 +30,12 @@ describe('DashboardPage', () => {
         expect(store.fetchPlantingYears).toHaveBeenCalledTimes(1);
     });
 
-    // Not which: the app bar before the drawer had a prop for it that it never read (backlog B12)
-    it('tells the drawer a year is selected', async () => {
+    it('shows the page, with no drawer or container of its own: the shell has them', async () => {
         const { wrapper } = await mountDashboard({ plantingYear: 2026, selectedPlantingYear: year2026 });
 
-        const drawer = wrapper.findComponent(DashboardNavDrawer);
-        expect(drawer.props()).toEqual({ isPlantingYearSelected: true });
-    });
-
-    it('tells the drawer when no year is selected', async () => {
-        const { wrapper } = await mountDashboard({ plantingYear: null });
-
-        expect(wrapper.findComponent(DashboardNavDrawer).props('isPlantingYearSelected')).toBe(false);
+        expect(wrapper.text()).toContain('the page');
+        expect(wrapper.find('.v-navigation-drawer').exists()).toBe(false);
+        expect(wrapper.find('.v-container').exists()).toBe(false);
     });
 
     it("shows the common store's alert", async () => {

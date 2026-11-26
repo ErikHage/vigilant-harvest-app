@@ -2,12 +2,12 @@ import { parseDslArgs } from '@feral-auth/ts-simple-dsl';
 
 import { createDayTimeline } from '../components/day-timeline';
 import { entry, year } from '../params';
-import { dashboardComponents, routedPageSteps } from './routed-page';
+import { routedPageSteps, shellComponents } from './routed-page';
 
 /** The garden journal, for the chosen year, in words. */
 export function createJournalPage(world, driver) {
     return {
-        ...dashboardComponents(world),
+        ...shellComponents(world),
         ...routedPageSteps(driver),
         timeline: createDayTimeline(world, world.drivers.dayTimeline),
 

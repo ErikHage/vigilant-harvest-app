@@ -2,10 +2,13 @@ import { parseDslArgs } from '@feral-auth/ts-simple-dsl';
 
 import { year } from '../params';
 
-/** The bar across the top of every page, in words. */
+/**
+ * The bar across the top of every page, in words. Every page object exposes
+ * it as `appBar`. Signed on, Logout is in the user's menu.
+ */
 export function createAppBar(world, driver) {
     return {
-        /** Clicks Logout. Check `loginPage.checkIsShown()` before the next step. No parameters. */
+        /** Opens the user's menu and presses Logout. Check `loginPage.checkIsShown()` before the next step. No parameters. */
         async logOut(...args) {
             parseDslArgs(args, {});
 
@@ -26,18 +29,15 @@ export function createAppBar(world, driver) {
             await driver.showsYear(world.plantingYearNamed(params.year).plantingYear);
         },
 
-        /** Signed out, on a desktop, the bar offers nothing but the title. No parameters. */
+        /**
+         * Signed out, the bar offers nothing but the app's name, on a desktop
+         * or a phone. Check where the browser is first, so the page has
+         * settled. No parameters.
+         */
         async checkOffersNothingSignedOut(...args) {
             parseDslArgs(args, {});
 
             await driver.offersOnlyTheTitle();
-        },
-
-        /** Signed out, on a phone, the bar offers nothing to someone signed out. No parameters. */
-        async checkOffersNothingSignedOutOnAPhone(...args) {
-            parseDslArgs(args, {});
-
-            await driver.offersNothingOnAPhone();
         },
     };
 }

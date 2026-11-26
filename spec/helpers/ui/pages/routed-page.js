@@ -1,7 +1,7 @@
 import { parseDslArgs } from '@feral-auth/ts-simple-dsl';
 
 import { createAppBar } from '../components/app-bar';
-import { createDashboardNav } from '../components/dashboard-nav';
+import { createNav } from '../components/nav';
 
 /** The steps every page the app routes to has, to spread into its page object. */
 export function routedPageSteps(driver) {
@@ -49,13 +49,8 @@ export function routedPageSteps(driver) {
     };
 }
 
-/** The app bar, which every page has. */
+/** The app bar and the side drawer, which every page has. The drawer is there only once someone is signed on. */
 export const shellComponents = world => ({
     appBar: createAppBar(world, world.drivers.appBar),
-});
-
-/** The app bar and the dashboard's side drawer, which every dashboard page has. */
-export const dashboardComponents = world => ({
-    ...shellComponents(world),
-    dashboardNav: createDashboardNav(world, world.drivers.dashboardNav),
+    nav: createNav(world, world.drivers.nav),
 });

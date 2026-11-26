@@ -1,7 +1,7 @@
 import { parseDslArgs } from '@feral-auth/ts-simple-dsl';
 
 import { plant, schedules } from '../params';
-import { dashboardComponents } from './routed-page';
+import { shellComponents } from './routed-page';
 
 /**
  * A plant's details page, in words. It's reached from the plants page, which
@@ -9,7 +9,7 @@ import { dashboardComponents } from './routed-page';
  */
 export function createPlantDetailsPage(world, driver) {
     return {
-        ...dashboardComponents(world),
+        ...shellComponents(world),
 
         /** The browser is on the details page of the `plant` the test named. */
         async checkIsShownFor(...args) {

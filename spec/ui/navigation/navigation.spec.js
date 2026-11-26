@@ -1,7 +1,7 @@
 import { test } from '../../helpers/ui/ui-test';
 
-// The dashboard's side drawer. Its year pages show only with a year chosen, and
-// since the store falls back to the current year and nothing can clear it,
+// The side drawer, FrAppShell's. Its year pages show only with a year chosen,
+// and since the store falls back to the current year and nothing can clear it,
 // one always is: so the unit suite's A11 (they'd show with none) can't arise
 // in the app as it is.
 
@@ -14,64 +14,67 @@ test.describe('The dashboard\'s drawer', () => {
     test('leads to each page that doesn\'t depend on the year', async ({
         dashboardPage, plantsPage, plotsPage, plantingYearsPage, plantCategoriesPage, activitySchedulesPage,
     }) => {
-        await dashboardPage.dashboardNav.goTo('page: plants');
+        await dashboardPage.nav.goTo('page: plants');
         await plantsPage.checkIsShown();
 
-        await plantsPage.dashboardNav.goTo('page: plots');
+        await plantsPage.nav.goTo('page: plots');
         await plotsPage.checkIsShown();
 
-        await plotsPage.dashboardNav.goTo('page: plantingYears');
+        await plotsPage.nav.goTo('page: plantingYears');
         await plantingYearsPage.checkIsShown();
 
-        await plantingYearsPage.dashboardNav.goTo('page: plantCategories');
+        await plantingYearsPage.nav.goTo('page: plantCategories');
         await plantCategoriesPage.checkIsShown();
 
-        await plantCategoriesPage.dashboardNav.goTo('page: activitySchedules');
+        await plantCategoriesPage.nav.goTo('page: activitySchedules');
         await activitySchedulesPage.checkIsShown();
+
+        await activitySchedulesPage.nav.goTo('page: dashboard');
+        await dashboardPage.checkIsShown();
     });
 
     test('leads to each of the year\'s pages', async ({
         dashboardPage, planningPage, gardenPage, journalPage, activityLogPage, plantingsPage, harvestsPage, statsPage,
     }) => {
-        await dashboardPage.dashboardNav.goTo('page: planning');
+        await dashboardPage.nav.goTo('page: planning');
         await planningPage.checkIsShown();
 
-        await planningPage.dashboardNav.goTo('page: garden');
+        await planningPage.nav.goTo('page: garden');
         await gardenPage.checkIsShown();
 
-        await gardenPage.dashboardNav.goTo('page: journal');
+        await gardenPage.nav.goTo('page: journal');
         await journalPage.checkIsShown();
 
-        await journalPage.dashboardNav.goTo('page: activityLog');
+        await journalPage.nav.goTo('page: activityLog');
         await activityLogPage.checkIsShown();
 
-        await activityLogPage.dashboardNav.goTo('page: plantings');
+        await activityLogPage.nav.goTo('page: plantings');
         await plantingsPage.checkIsShown();
 
-        await plantingsPage.dashboardNav.goTo('page: harvests');
+        await plantingsPage.nav.goTo('page: harvests');
         await harvestsPage.checkIsShown();
 
-        await harvestsPage.dashboardNav.goTo('page: stats');
+        await harvestsPage.nav.goTo('page: stats');
         await statsPage.checkIsShown();
     });
 
     test('collapses to a rail that still leads to each page, and is remembered', async ({
         dashboardPage, plotsPage,
     }) => {
-        await dashboardPage.dashboardNav.checkIsExpanded();
+        await dashboardPage.nav.checkIsExpanded();
 
-        await dashboardPage.dashboardNav.collapseToRail();
-        await dashboardPage.dashboardNav.goTo('page: plots');
+        await dashboardPage.nav.collapseToRail();
+        await dashboardPage.nav.goTo('page: plots');
         await plotsPage.checkIsShown();
 
         await plotsPage.reload();
         await plotsPage.checkIsShownAfterReload();
-        await plotsPage.dashboardNav.checkIsRail();
+        await plotsPage.nav.checkIsRail();
 
-        await plotsPage.dashboardNav.expand();
+        await plotsPage.nav.expand();
         await plotsPage.reload();
         await plotsPage.checkIsShownAfterReload();
-        await plotsPage.dashboardNav.checkIsExpanded();
+        await plotsPage.nav.checkIsExpanded();
     });
 });
 
@@ -85,10 +88,10 @@ test.describe('On a phone', () => {
         await loginPage.logIn('user: gardener');
         await dashboardPage.checkIsShown();
 
-        await dashboardPage.dashboardNav.goTo('page: plots');
+        await dashboardPage.nav.goTo('page: plots');
         await plotsPage.checkIsShown();
 
-        await plotsPage.dashboardNav.goTo('page: stats');
+        await plotsPage.nav.goTo('page: stats');
         await statsPage.checkIsShown();
     });
 
@@ -106,7 +109,8 @@ test.describe('On a phone', () => {
         await loginPage.open();
         await loginPage.checkIsShown();
 
-        await loginPage.appBar.checkOffersNothingSignedOutOnAPhone();
+        await loginPage.appBar.checkOffersNothingSignedOut();
+        await loginPage.nav.checkIsAbsent();
     });
 });
 
@@ -116,5 +120,6 @@ test.describe('On a desktop', () => {
         await loginPage.checkIsShown();
 
         await loginPage.appBar.checkOffersNothingSignedOut();
+        await loginPage.nav.checkIsAbsent();
     });
 });
