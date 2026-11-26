@@ -5,6 +5,10 @@ name: Docker image
 # ehage/vigilant-harvest-app:latest and :sha-<commit>.
 #
 # Repository secrets:
+#   NPM_TOKEN        npm granular token, read-only, for the private
+#                    @feral-auth packages. The checks job's npm ci reads it
+#                    from the environment; it reaches the image build only
+#                    as a BuildKit secret, so it's in no layer of the image.
 #   DOCKERHUB_TOKEN  Docker Hub access token for ehage, Read & Write.
 
 on:
@@ -31,12 +35,16 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      # registry-url writes an .npmrc that reads the token from NODE_AUTH_TOKEN
       - uses: actions/setup-node@v7
         with:
           node-version: lts/*
+          registry-url: https://registry.npmjs.org
           cache: npm
 
       - run: npm ci
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - run: npm run lint
 
@@ -64,5 +72,8 @@ jobs:
           tags: |
             ${{ env.IMAGE }}:latest
             ${{ env.IMAGE }}:sha-${{ github.sha }}
+          # The Dockerfile mounts this as .npmrc while npm ci runs
+          secrets: |
+            npmrc=//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
