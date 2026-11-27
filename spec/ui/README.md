@@ -184,7 +184,7 @@ Known-wrong behaviour is pinned, not skipped. A `// DocumentsCurrentBehavior:` c
 
 ## The DSL dependency
 
-`@feral-auth/ts-simple-dsl` is pinned to an exact version (`0.0.1`). It's pre-1.0, and ships breaking changes in patch releases, so upgrade it on purpose, and run the suite.
+`@feral-auth/ts-simple-dsl` is in `devDependencies` with a `^1` range. It follows semver from 1.0.0, so the range takes its fixes, and a breaking change waits for a major version that has to be chosen.
 
 ## Adding a test
 
